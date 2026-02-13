@@ -20,7 +20,7 @@ import {
   FaGift,
   FaBullhorn
 } from 'react-icons/fa';
-import siteLogo from '../../../assets/scraptologo-removebg-preview.png';
+const siteLogo = '/junker.png';
 
 const AdminLayout = () => {
   const navigate = useNavigate();

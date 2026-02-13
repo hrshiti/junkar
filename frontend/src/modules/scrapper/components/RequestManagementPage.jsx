@@ -338,8 +338,8 @@ const RequestManagementPage = () => {
                     <button
                         onClick={() => handleTabChange('incoming')}
                         className={`flex-1 py-3 px-4 rounded-xl font-semibold text-sm md:text-base transition-all ${activeTab === 'incoming'
-                                ? 'bg-white text-emerald-700 shadow-md'
-                                : 'bg-white/50 text-slate-600 hover:bg-white/70'
+                            ? 'bg-white text-emerald-700 shadow-md'
+                            : 'bg-white/50 text-slate-600 hover:bg-white/70'
                             }`}
                     >
                         {getTranslatedText("Incoming")}
@@ -352,8 +352,8 @@ const RequestManagementPage = () => {
                     <button
                         onClick={() => handleTabChange('forwarded')}
                         className={`flex-1 py-3 px-4 rounded-xl font-semibold text-sm md:text-base transition-all ${activeTab === 'forwarded'
-                                ? 'bg-white text-emerald-700 shadow-md'
-                                : 'bg-white/50 text-slate-600 hover:bg-white/70'
+                            ? 'bg-white text-emerald-700 shadow-md'
+                            : 'bg-white/50 text-slate-600 hover:bg-white/70'
                             }`}
                     >
                         {getTranslatedText("Forwarded")}

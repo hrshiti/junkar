@@ -6,7 +6,7 @@ import { usePageTranslation } from "../../../hooks/usePageTranslation";
 import { useAuth } from "../../shared/context/AuthContext";
 import { IoLanguageOutline, IoChevronDownOutline, IoNotificationsOutline } from "react-icons/io5";
 import LanguageSelector from "../../shared/components/LanguageSelector";
-import siteLogo from "../../../assets/scraptologo-removebg-preview.png";
+const siteLogo = '/junker.png';
 import notificationService from "../../../services/notificationService";
 
 const Header = () => {
@@ -48,7 +48,7 @@ const Header = () => {
           <img
             src={siteLogo}
             alt="Scrapto Logo"
-            className="h-14 w-56 object-contain object-left -ml-3"
+            className="h-16 w-auto object-contain object-left -ml-3"
           />
         </div>
 

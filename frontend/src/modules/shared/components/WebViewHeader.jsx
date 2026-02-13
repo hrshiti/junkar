@@ -6,7 +6,7 @@ import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import { useAuth } from '../../../modules/shared/context/AuthContext';
 import { IoLanguageOutline, IoChevronDownOutline, IoNotificationsOutline } from 'react-icons/io5';
 import LanguageSelector from './LanguageSelector';
-import siteLogo from '../../../assets/scraptologo-removebg-preview.png';
+const siteLogo = '/junker.png';
 import notificationService from '../../../services/notificationService';
 
 const WebViewHeader = ({ navItems, userRole = 'user' }) => {
@@ -46,7 +46,7 @@ const WebViewHeader = ({ navItems, userRole = 'user' }) => {
                 <img
                     src={siteLogo}
                     alt="Scrapto"
-                    className="h-14 w-48 object-contain object-left -ml-2"
+                    className="h-16 w-auto object-contain object-left -ml-2"
                 />
             </div>
 

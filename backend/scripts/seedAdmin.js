@@ -17,13 +17,13 @@ const seedAdmin = async () => {
     console.log('✅ Connected to MongoDB');
 
     // Admin credentials
-    const adminEmail = 'scrapto@scrapto.com';
+    const adminEmail = 'junkar@gmail.com';
     const adminPhone = '9999999999';
-    const adminPassword = 'scrapto@123';
-    const adminName = 'Scrapto Admin';
+    const adminPassword = 'junkar@123';
+    const adminName = 'Junkar Admin';
 
     // Check if admin already exists
-    const existingAdmin = await User.findOne({ 
+    const existingAdmin = await User.findOne({
       $or: [
         { email: adminEmail },
         { phone: adminPhone },
@@ -37,7 +37,7 @@ const seedAdmin = async () => {
       console.log('   Phone:', existingAdmin.phone);
       console.log('   Role:', existingAdmin.role);
       console.log('\n🔄 Updating existing admin with new credentials...');
-      
+
       // Update existing admin
       existingAdmin.name = adminName;
       existingAdmin.email = adminEmail;
@@ -47,9 +47,9 @@ const seedAdmin = async () => {
       existingAdmin.isActive = true;
       existingAdmin.isVerified = true;
       existingAdmin.isPhoneVerified = true;
-      
+
       await existingAdmin.save();
-      
+
       console.log('✅ Admin user updated successfully!');
       console.log('   Email:', adminEmail);
       console.log('   Phone:', adminPhone);
@@ -61,7 +61,7 @@ const seedAdmin = async () => {
       console.log('\n🔐 Admin uses PASSWORD-BASED login (not OTP)');
       console.log('   Login endpoint: POST /api/auth/login');
       console.log('   Body: { "email": "' + adminEmail + '", "password": "' + adminPassword + '" }');
-      
+
       process.exit(0);
       return;
     }
@@ -89,7 +89,7 @@ const seedAdmin = async () => {
     console.log('\n🔐 Admin uses PASSWORD-BASED login (not OTP)');
     console.log('   Login endpoint: POST /api/auth/login');
     console.log('   Body: { "email": "' + adminEmail + '", "password": "' + adminPassword + '" }');
-    
+
     process.exit(0);
   } catch (error) {
     console.error('❌ Error seeding admin user:', error.message);

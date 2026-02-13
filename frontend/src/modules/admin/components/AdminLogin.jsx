@@ -105,13 +105,7 @@ const AdminLogin = () => {
           transition={{ delay: 0.1, duration: 0.4 }}
           className="text-center mb-8"
         >
-          <div className="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center shadow-lg" style={{ backgroundColor: '#64946e' }}>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="white" fillOpacity="0.2" />
-              <path d="M2 17L12 22L22 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="white" fillOpacity="0.2" />
-              <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="white" fillOpacity="0.2" />
-            </svg>
-          </div>
+          <img src="/junker.png" alt="Admin Portal" className="h-32 w-auto mx-auto mb-4 object-contain" />
           <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: '#2d3748' }}>
             {getTranslatedText("Admin Portal")}
           </h1>
