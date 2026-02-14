@@ -1,6 +1,6 @@
-# Scrapto Backend API
+# Junkar Backend API
 
-Professional backend API for Scrapto - A scrap management platform connecting users with scrappers.
+Professional backend API for Junkar - A scrap management platform connecting users with scrappers.
 
 ## 🚀 Features
 

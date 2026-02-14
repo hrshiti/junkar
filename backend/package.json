@@ -1,7 +1,7 @@
 {
-  "name": "scrapto-backend",
+  "name": "junkar-backend",
   "version": "1.0.0",
-  "description": "Backend API for Scrapto - Scrap Management Platform",
+  "description": "Backend API for Junkar - Scrap Management Platform",
   "main": "server.js",
   "type": "module",
   "scripts": {

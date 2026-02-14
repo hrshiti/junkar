@@ -66,7 +66,7 @@ router.post('/save', protect, async (req, res) => {
         // Send Test Notification
         try {
             await sendPushNotification([token], {
-                title: 'Welcome to Scrapto!',
+                title: 'Welcome to Junkar!',
                 body: `Hello ${user.name}, you are now ready to receive notifications.`,
                 data: {
                     type: 'welcome',
@@ -133,7 +133,7 @@ router.post('/test-notification', async (req, res) => {
 
         const response = await sendPushNotification([token], {
             title: title || 'Test Notification',
-            body: body || 'This is a test notification from Scrapto',
+            body: body || 'This is a test notification from Junkar',
             data: {
                 type: 'test',
                 timestamp: new Date().toISOString()

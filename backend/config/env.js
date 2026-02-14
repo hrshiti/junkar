@@ -61,7 +61,7 @@ export const validateEnv = () => {
 
   // Validate JWT_SECRET in production
   if (process.env.NODE_ENV === 'production') {
-    const defaultSecret = 'scrapto-dev-secret-key-change-in-production-2024';
+    const defaultSecret = 'junkar-dev-secret-key-change-in-production-2024';
     if (process.env.JWT_SECRET === defaultSecret || !process.env.JWT_SECRET) {
       throw new Error('JWT_SECRET must be set to a secure value in production');
     }

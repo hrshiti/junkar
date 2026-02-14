@@ -113,7 +113,7 @@ export const verifyOTPFromRedis = async (phone, otp) => {
  */
 export const sendWelcomeSMS = async (phone, name) => {
   try {
-    const message = `Welcome to Scrapto, ${name}! Your account has been successfully created. Start managing your scrap orders and connect with verified scrappers.`;
+    const message = `Welcome to Junkar, ${name}! Your account has been successfully created. Start managing your scrap orders and connect with verified scrappers.`;
     return await smsIndiaHubService.sendCustomSMS(phone, message);
   } catch (error) {
     logger.error('Error sending welcome SMS:', error);
@@ -146,7 +146,7 @@ export const sendOrderConfirmationSMS = async (phone, orderId, amount) => {
  */
 export const sendPasswordResetOTP = async (phone, otp) => {
   try {
-    const message = `Your Scrapto password reset OTP is ${otp}. This OTP is valid for 10 minutes. Do not share it with anyone.`;
+    const message = `Your Junkar password reset OTP is ${otp}. This OTP is valid for 10 minutes. Do not share it with anyone.`;
     return await smsIndiaHubService.sendCustomSMS(phone, message);
   } catch (error) {
     logger.error('Error sending password reset OTP SMS:', error);

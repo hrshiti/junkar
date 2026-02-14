@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 /**
- * SMSIndia Hub SMS Service for Scrapto
+ * SMSIndia Hub SMS Service for Junkar
  * Handles OTP sending via SMSIndia Hub API
  */
 class SMSIndiaHubService {
@@ -9,7 +9,7 @@ class SMSIndiaHubService {
     this.apiKey = process.env.SMSINDIAHUB_API_KEY;
     this.senderId = process.env.SMSINDIAHUB_SENDER_ID;
     this.baseUrl = 'http://cloud.smsindiahub.in/vendorsms/pushsms.aspx';
-    
+
     if (!this.apiKey || !this.senderId) {
       console.warn('SMSIndia Hub credentials not configured. SMS functionality will be disabled.');
     }
@@ -23,7 +23,7 @@ class SMSIndiaHubService {
     // Load credentials dynamically in case they weren't available during construction
     const apiKey = this.apiKey || process.env.SMSINDIAHUB_API_KEY;
     const senderId = this.senderId || process.env.SMSINDIAHUB_SENDER_ID;
-    
+
     return !!(apiKey && senderId);
   }
 
@@ -35,22 +35,22 @@ class SMSIndiaHubService {
   normalizePhoneNumber(phone) {
     // Remove all non-digit characters
     const digits = phone.replace(/[^0-9]/g, '');
-    
+
     // If it already has country code 91 and is 12 digits, return as is
     if (digits.startsWith('91') && digits.length === 12) {
       return digits;
     }
-    
+
     // If it's 10 digits, add country code 91
     if (digits.length === 10) {
       return '91' + digits;
     }
-    
+
     // If it's 11 digits and starts with 0, remove the 0 and add country code
     if (digits.length === 11 && digits.startsWith('0')) {
       return '91' + digits.substring(1);
     }
-    
+
     // Return with country code as fallback
     return '91' + digits.slice(-10);
   }
@@ -66,21 +66,21 @@ class SMSIndiaHubService {
       // Load credentials dynamically
       const apiKey = this.apiKey || process.env.SMSINDIAHUB_API_KEY;
       const senderId = this.senderId || process.env.SMSINDIAHUB_SENDER_ID;
-      
+
       if (!apiKey || !senderId) {
         throw new Error('SMSIndia Hub not configured. Please check your environment variables.');
       }
 
       const normalizedPhone = this.normalizePhoneNumber(phone);
-      
+
       // Validate phone number (should be 12 digits with country code)
       if (normalizedPhone.length !== 12 || !normalizedPhone.startsWith('91')) {
         throw new Error(`Invalid phone number format: ${phone}. Expected 10-digit Indian mobile number.`);
       }
 
       // Use the exact template that works with SMSIndiaHub
-      const message = `Welcome to the Scrapto powered by SMSINDIAHUB. Your OTP for registration is ${otp}`;
-      
+      const message = `Welcome to the Junkar powered by SMSINDIAHUB. Your OTP for registration is ${otp}`;
+
       // Build the API URL with query parameters
       const params = new URLSearchParams({
         APIKey: apiKey,
@@ -97,7 +97,7 @@ class SMSIndiaHubService {
       // Make GET request to SMSIndia Hub API
       const response = await axios.get(apiUrl, {
         headers: {
-          'User-Agent': 'Scrapto/1.0',
+          'User-Agent': 'Junkar/1.0',
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
         },
         timeout: 15000 // 15 second timeout
@@ -108,13 +108,13 @@ class SMSIndiaHubService {
 
       // SMSIndia Hub returns JSON response
       const responseData = response.data;
-      
+
       // Check for success indicators in the response
       if (responseData.ErrorCode === '000' && responseData.ErrorMessage === 'Done') {
-        const messageId = responseData.MessageData && responseData.MessageData[0] 
-          ? responseData.MessageData[0].MessageId 
+        const messageId = responseData.MessageData && responseData.MessageData[0]
+          ? responseData.MessageData[0].MessageId
           : `sms_${Date.now()}`;
-          
+
         return {
           success: true,
           messageId: messageId,
@@ -144,7 +144,7 @@ class SMSIndiaHubService {
       // Handle specific error cases
       if (error.response) {
         const errorData = error.response.data;
-        
+
         if (error.response.status === 401) {
           throw new Error('SMSIndia Hub authentication failed. Please check your API key.');
         } else if (error.response.status === 400) {
@@ -163,7 +163,7 @@ class SMSIndiaHubService {
       } else if (error.code === 'ECONNRESET') {
         throw new Error('SMSIndia Hub connection was reset. Please try again.');
       }
-      
+
       throw error;
     }
   }
@@ -179,13 +179,13 @@ class SMSIndiaHubService {
       // Load credentials dynamically
       const apiKey = this.apiKey || process.env.SMSINDIAHUB_API_KEY;
       const senderId = this.senderId || process.env.SMSINDIAHUB_SENDER_ID;
-      
+
       if (!apiKey || !senderId) {
         throw new Error('SMSIndia Hub not configured. Please check your environment variables.');
       }
 
       const normalizedPhone = this.normalizePhoneNumber(phone);
-      
+
       // Validate phone number (should be 12 digits with country code)
       if (normalizedPhone.length !== 12 || !normalizedPhone.startsWith('91')) {
         throw new Error(`Invalid phone number format: ${phone}. Expected 10-digit Indian mobile number.`);
@@ -207,14 +207,14 @@ class SMSIndiaHubService {
       // Make GET request to SMSIndia Hub API
       const response = await axios.get(apiUrl, {
         headers: {
-          'User-Agent': 'Scrapto/1.0',
+          'User-Agent': 'Junkar/1.0',
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
         },
         timeout: 15000 // 15 second timeout
       });
 
       const responseText = response.data.toString();
-      
+
       // Check for success indicators in the response
       if (responseText.includes('success') || responseText.includes('sent') || responseText.includes('accepted')) {
         return {
@@ -254,15 +254,15 @@ class SMSIndiaHubService {
       // Load credentials dynamically
       const apiKey = this.apiKey || process.env.SMSINDIAHUB_API_KEY;
       const senderId = this.senderId || process.env.SMSINDIAHUB_SENDER_ID;
-      
+
       if (!apiKey || !senderId) {
         throw new Error('SMSIndia Hub not configured.');
       }
 
       // Test with a simple SMS to verify connection
       const testPhone = '919109992290'; // Use a test phone number
-      const testMessage = 'Test message from Scrapto. SMS service is working correctly.';
-      
+      const testMessage = 'Test message from Junkar. SMS service is working correctly.';
+
       const params = new URLSearchParams({
         APIKey: apiKey,
         msisdn: testPhone,
@@ -277,7 +277,7 @@ class SMSIndiaHubService {
 
       const response = await axios.get(testUrl, {
         headers: {
-          'User-Agent': 'Scrapto/1.0',
+          'User-Agent': 'Junkar/1.0',
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
         },
         timeout: 10000
@@ -305,17 +305,17 @@ class SMSIndiaHubService {
     try {
       // Load credentials dynamically
       const apiKey = this.apiKey || process.env.SMSINDIAHUB_API_KEY;
-      
+
       if (!apiKey) {
         throw new Error('SMSIndia Hub not configured.');
       }
 
       // SMSIndia Hub balance API endpoint
       const balanceUrl = `http://cloud.smsindiahub.in/vendorsms/checkbalance.aspx?APIKey=${apiKey}`;
-      
+
       const response = await axios.get(balanceUrl, {
         headers: {
-          'User-Agent': 'Scrapto/1.0',
+          'User-Agent': 'Junkar/1.0',
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
         },
         timeout: 10000

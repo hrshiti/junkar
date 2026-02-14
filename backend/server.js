@@ -48,7 +48,7 @@ app.use(helmet());
 // CORS Configuration
 const allowedOrigins = process.env.FRONTEND_URL
   ? process.env.FRONTEND_URL.split(',').map(url => url.trim().replace(/\/$/, "")) // Remove trailing slash
-  : ['http://localhost:5173', 'https://www.scrapto.com', 'https://scrapto.com'];
+  : ['http://localhost:5173', 'https://www.junkar.com', 'https://junkar.com'];
 
 app.use(
   cors({
@@ -127,7 +127,7 @@ app.get("/health", (req, res) => {
 // API documentation endpoint
 app.get("/", (req, res) => {
   res.json({
-    message: "Scrapto API Server",
+    message: "Junkar API Server",
     version: "1.0.0",
     endpoints: {
       health: "/health",

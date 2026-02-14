@@ -20,11 +20,11 @@ export const getRazorpayClient = () => {
   }
 
   try {
-    const razorpay = new Razorpay({ 
-      key_id: key_id.trim(), 
-      key_secret: key_secret.trim() 
+    const razorpay = new Razorpay({
+      key_id: key_id.trim(),
+      key_secret: key_secret.trim()
     });
-    
+
     return razorpay;
   } catch (initError) {
     logger.error('[Razorpay] Client initialization error:', initError);
@@ -36,10 +36,10 @@ export const getRazorpayClient = () => {
 export const createOrder = async (amount, currency = 'INR', receipt = null, notes = {}) => {
   try {
     const razorpay = getRazorpayClient();
-    
+
     // Generate receipt if not provided (max 40 characters for Razorpay)
-    const receiptId = receipt || `scrapto_${Date.now()}`.slice(0, 40);
-    
+    const receiptId = receipt || `junkar_${Date.now()}`.slice(0, 40);
+
     const options = {
       amount: Math.round(amount * 100), // Convert to paise
       currency,
@@ -49,9 +49,9 @@ export const createOrder = async (amount, currency = 'INR', receipt = null, note
     };
 
     logger.info('[Razorpay] Creating order:', { amount, currency, receipt: receiptId });
-    
+
     const order = await razorpay.orders.create(options);
-    
+
     logger.info('[Razorpay] Order created successfully:', order.id);
     return order;
   } catch (error) {
@@ -69,11 +69,11 @@ export const verifyPaymentSignature = (razorpay_order_id, razorpay_payment_id, r
     .digest('hex');
 
   const isAuthentic = expectedSignature === razorpay_signature;
-  
+
   if (!isAuthentic) {
     logger.warn('[Razorpay] Payment signature verification failed');
   }
-  
+
   return isAuthentic;
 };
 
@@ -105,10 +105,10 @@ export const fetchOrder = async (orderId) => {
 export const verifyPayment = async (orderId) => {
   try {
     const razorpay = getRazorpayClient();
-    
+
     // Fetch order from Razorpay
     const order = await razorpay.orders.fetch(orderId);
-    
+
     let payment = null;
     let paymentId = null;
 
@@ -122,9 +122,9 @@ export const verifyPayment = async (orderId) => {
         const payments = await razorpay.payments.all({
           'order_id': orderId
         });
-        
+
         if (payments && payments.items && payments.items.length > 0) {
-          payment = payments.items.find(p => 
+          payment = payments.items.find(p =>
             p.status === 'captured' || p.status === 'authorized'
           ) || payments.items[0];
           paymentId = payment.id;
@@ -136,11 +136,11 @@ export const verifyPayment = async (orderId) => {
 
     if (payment && paymentId) {
       // Check if payment is actually captured/authorized
-      const isCaptured = payment.status === 'captured' || 
-                        payment.status === 'authorized' || 
-                        payment.captured === true ||
-                        (payment.amount_captured && payment.amount_captured > 0);
-      
+      const isCaptured = payment.status === 'captured' ||
+        payment.status === 'authorized' ||
+        payment.captured === true ||
+        (payment.amount_captured && payment.amount_captured > 0);
+
       return {
         success: isCaptured,
         payment,
@@ -181,20 +181,20 @@ export const refundPayment = async (paymentId, amount = null) => {
 export const createPaymentLink = async (amount, currency = 'INR', description, callbackUrl, notes = {}) => {
   try {
     const razorpay = getRazorpayClient();
-    
+
     const paymentLinkOptions = {
       amount: Math.round(amount * 100),
       currency,
-      description: description || 'Scrapto Payment',
+      description: description || 'Junkar Payment',
       callback_url: callbackUrl,
       callback_method: 'get',
       notes: notes
     };
 
     logger.info('[Razorpay] Creating payment link:', { amount, currency, description });
-    
+
     const paymentLink = await razorpay.paymentLink.create(paymentLinkOptions);
-    
+
     if (!paymentLink || !paymentLink.id || !paymentLink.short_url) {
       throw new Error('Invalid payment link response from Razorpay');
     }

@@ -128,7 +128,7 @@ const UserWallet = () => {
                 key: keyId,
                 amount: orderAmount,
                 currency: currency,
-                name: "Scrapto Wallet",
+                name: "Junkar Wallet",
                 description: "Add Money to Wallet",
                 order_id: orderId,
                 prefill: {

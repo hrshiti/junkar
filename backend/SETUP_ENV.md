@@ -20,12 +20,12 @@ PORT=7000
 FRONTEND_URL=http://localhost:5173
 
 # Database Configuration
-MONGODB_URI=mongodb://localhost:27017/scrapto
+MONGODB_URI=mongodb://localhost:27017/junkar
 
 # JWT Configuration (REQUIRED)
-JWT_SECRET=scrapto-super-secret-jwt-key-change-this-in-production-2024
+JWT_SECRET=junkar-super-secret-jwt-key-change-this-in-production-2024
 JWT_EXPIRE=7d
-JWT_REFRESH_SECRET=scrapto-refresh-token-secret-change-this-in-production-2024
+JWT_REFRESH_SECRET=junkar-refresh-token-secret-change-this-in-production-2024
 JWT_REFRESH_EXPIRE=30d
 
 # SMSIndia Hub Configuration (Copy from createbharat/Backend/.env)

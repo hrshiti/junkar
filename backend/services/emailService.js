@@ -42,17 +42,17 @@ export const sendEmail = async (options) => {
 
 export const sendWelcomeEmail = async (user) => {
   const html = `
-    <h1>Welcome to Scrapto!</h1>
+    <h1>Welcome to Junkar!</h1>
     <p>Hi ${user.name},</p>
-    <p>Thank you for joining Scrapto. We're excited to have you on board!</p>
+    <p>Thank you for joining Junkar. We're excited to have you on board!</p>
     <p>Start by creating your first scrap order and we'll handle the rest.</p>
   `;
 
   return sendEmail({
     email: user.email,
-    subject: 'Welcome to Scrapto',
+    subject: 'Welcome to Junkar',
     html,
-    text: `Welcome to Scrapto, ${user.name}!`
+    text: `Welcome to Junkar, ${user.name}!`
   });
 };
 
@@ -67,7 +67,7 @@ export const sendOrderConfirmationEmail = async (user, order) => {
 
   return sendEmail({
     email: user.email,
-    subject: 'Order Confirmed - Scrapto',
+    subject: 'Order Confirmed - Junkar',
     html,
     text: `Your order #${order._id} has been confirmed.`
   });

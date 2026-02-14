@@ -17,7 +17,7 @@ const Header = () => {
 
   const staticTexts = [
     "Hi, User!",
-    "Welcome back to Scrapto",
+    "Welcome back to Junkar",
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
@@ -47,7 +47,7 @@ const Header = () => {
         <div className="flex items-center">
           <img
             src={siteLogo}
-            alt="Scrapto Logo"
+            alt="Junkar Logo"
             className="h-16 w-auto object-contain object-left -ml-3"
           />
         </div>
