@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { publicAPI } from "../../shared/utils/api";
 import { getEffectivePriceFeed } from "../../shared/utils/priceFeedUtils";
 import { usePageTranslation } from "../../../hooks/usePageTranslation";
@@ -55,58 +54,66 @@ const PriceTicker = () => {
   }, [translate]);
 
   return (
-    <motion.div
-      initial={{ y: 20 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.6, delay: 0.7 }}
-      className="mb-8 md:mb-12">
-      <div
-        className="rounded-xl shadow-md p-4 md:p-6 overflow-hidden"
-        style={{ backgroundColor: "#ffffff" }}>
-        <div className="flex items-center justify-between mb-3 md:mb-4">
+    <div className="mb-6 md:mb-8">
+      {/* Header with gradient background */}
+      <div className="flex items-center justify-between mb-5 md:mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-8 rounded-full bg-gradient-to-b from-sky-400 to-blue-500"></div>
           <h3
-            className="text-lg md:text-xl font-bold"
-            style={{ color: "#2d3748" }}>
+            className="text-xl md:text-2xl font-bold"
+            style={{ color: "#0f172a" }}>
             {getTranslatedText("Price")}
           </h3>
-          <span className="text-xs md:text-sm" style={{ color: "#718096" }}>
-            {getTranslatedText("Source: Admin price feed")}
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border" 
+          style={{ 
+            backgroundColor: "#ffffff",
+            borderColor: "#e0f2fe",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.05)"
+          }}>
+          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+          <span 
+            className="text-xs font-medium" 
+            style={{ color: "#64748b" }}>
+            Live Rates
           </span>
         </div>
-        <div className="flex gap-4 md:gap-6 overflow-x-auto scrollbar-hide pb-2">
+      </div>
+
+      {/* Horizontal Scrolling Price Cards */}
+      <div className="relative -mx-4 md:mx-0">
+        <div
+          className="flex gap-3 md:gap-4 overflow-x-auto scrollbar-hide pb-3 px-4 md:px-0"
+          style={{
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+            WebkitOverflowScrolling: "touch",
+          }}>
           {prices.map((item, index) => (
-            <motion.div
+            <div
               key={index}
-              initial={{ x: -20 }}
-              animate={{ x: 0 }}
-              transition={{ duration: 0.4, delay: 0.8 + index * 0.1 }}
-              className="flex-shrink-0 rounded-lg p-3 md:p-4 min-w-[120px] md:min-w-[140px]"
-              style={{ backgroundColor: "rgba(100, 148, 110, 0.1)" }}>
+              className="flex-shrink-0 w-[30%] md:w-48 rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-md transition-shadow duration-300"
+              style={{ backgroundColor: "#f0f9ff" }}>
+              {/* Category Name */}
               <p
-                className="text-xs md:text-sm mb-1"
-                style={{ color: "#718096" }}>
+                className="text-sm md:text-base mb-2 font-semibold"
+                style={{ color: "#94a3b8" }}>
                 {item.type}
               </p>
+              
+              {/* Price */}
               <p
-                className="text-base md:text-lg font-bold"
-                style={{ color: "#64946e" }}>
+                className="text-sm md:text-base font-bold"
+                style={{ color: "#1e293b" }}>
                 ₹{item.price.toFixed(0)}/{item.unit}
               </p>
-              {item.change !== undefined && item.change !== null && (
-                <p
-                  className="text-xs"
-                  style={{
-                    color: item.change.startsWith("+") ? "#64946e" : "#e53e3e",
-                  }}>
-                  {item.change}
-                </p>
-              )}
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
 export default PriceTicker;
+

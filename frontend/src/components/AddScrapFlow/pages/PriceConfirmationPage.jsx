@@ -342,7 +342,7 @@ const PriceConfirmationPage = () => {
               animate={{ width: '100%' }}
               transition={{ duration: 0.5 }}
               className="h-full rounded-full"
-              style={{ backgroundColor: '#64946e' }}
+              style={{ backgroundColor: '#38bdf8' }}
             />
           </div>
           <span className="text-xs md:text-sm" style={{ color: '#718096' }}>{getTranslatedText("Step 5 of 5")}</span>
@@ -372,7 +372,7 @@ const PriceConfirmationPage = () => {
                 <span
                   key={cat.id}
                   className="px-3 py-1.5 rounded-full text-xs md:text-sm font-medium"
-                  style={{ backgroundColor: 'rgba(100, 148, 110, 0.1)', color: '#64946e' }}
+                  style={{ backgroundColor: 'rgba(100, 148, 110, 0.1)', color: '#38bdf8' }}
                 >
                   {getTranslatedText(cat.name)}
                 </span>
@@ -447,7 +447,7 @@ const PriceConfirmationPage = () => {
                 <span className="text-xs md:text-sm" style={{ color: '#2d3748' }}>
                   {getTranslatedText(cat.name)}
                 </span>
-                <span className="text-xs md:text-sm font-medium" style={{ color: '#64946e' }}>
+                <span className="text-xs md:text-sm font-medium" style={{ color: '#38bdf8' }}>
                   ₹{marketPrices[cat.name] || 0}/{getTranslatedText("kg")}
                 </span>
               </div>
@@ -460,7 +460,7 @@ const PriceConfirmationPage = () => {
               {getTranslatedText("Estimated Payout:")}
             </p>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl md:text-4xl font-bold" style={{ color: '#64946e' }}>
+              <span className="text-3xl md:text-4xl font-bold" style={{ color: '#38bdf8' }}>
                 ₹{estimatedPayout.toFixed(0)}
               </span>
               <span className="text-sm md:text-base" style={{ color: '#718096' }}>
@@ -490,7 +490,7 @@ const PriceConfirmationPage = () => {
               rows={4}
               className="w-full py-2 px-3 md:py-3 md:px-4 rounded-lg border-2 focus:outline-none focus:ring-2 transition-all resize-none text-sm md:text-base"
               style={{
-                borderColor: notes ? '#64946e' : 'rgba(100, 148, 110, 0.3)',
+                borderColor: notes ? '#38bdf8' : 'rgba(100, 148, 110, 0.3)',
                 color: '#2d3748',
                 backgroundColor: '#f9f9f9'
               }}
@@ -515,11 +515,11 @@ const PriceConfirmationPage = () => {
                 type="button"
                 onClick={() => setPickupMode('immediate')}
                 className={`flex-1 flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${pickupMode === 'immediate'
-                  ? 'border-green-600 bg-green-50 text-green-700 shadow-md'
-                  : 'border-gray-200 text-gray-500 hover:border-green-200 hover:bg-green-50/50'
+                  ? 'border-sky-600 bg-sky-50 text-sky-700 shadow-md'
+                  : 'border-gray-200 text-gray-500 hover:border-sky-200 hover:bg-sky-50/50'
                   }`}
               >
-                <FaBolt className={`text-2xl mb-2 ${pickupMode === 'immediate' ? 'text-green-600' : 'text-gray-400'}`} />
+                <FaBolt className={`text-2xl mb-2 ${pickupMode === 'immediate' ? 'text-sky-600' : 'text-gray-400'}`} />
                 <span className="font-bold text-sm">{getTranslatedText("Right Now")}</span>
               </button>
 
@@ -527,11 +527,11 @@ const PriceConfirmationPage = () => {
                 type="button"
                 onClick={() => setPickupMode('scheduled')}
                 className={`flex-1 flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${pickupMode === 'scheduled'
-                  ? 'border-green-600 bg-green-50 text-green-700 shadow-md'
-                  : 'border-gray-200 text-gray-500 hover:border-green-200 hover:bg-green-50/50'
+                  ? 'border-sky-600 bg-sky-50 text-sky-700 shadow-md'
+                  : 'border-gray-200 text-gray-500 hover:border-sky-200 hover:bg-sky-50/50'
                   }`}
               >
-                <FaRegCalendarAlt className={`text-2xl mb-2 ${pickupMode === 'scheduled' ? 'text-green-600' : 'text-gray-400'}`} />
+                <FaRegCalendarAlt className={`text-2xl mb-2 ${pickupMode === 'scheduled' ? 'text-sky-600' : 'text-gray-400'}`} />
                 <span className="font-bold text-sm">{getTranslatedText("Schedule")}</span>
               </button>
             </div>
@@ -548,7 +548,7 @@ const PriceConfirmationPage = () => {
                 {/* Date selection */}
                 <div className="mb-6">
                   <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-                    <FaCalendarAlt className="text-green-600" />
+                    <FaCalendarAlt className="text-sky-600" />
                     {getTranslatedText("Select Date")}
                   </h4>
                   <div className="flex justify-center">
@@ -581,7 +581,7 @@ const PriceConfirmationPage = () => {
                 {/* Time selection */}
                 <div>
                   <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-                    <FaClock className="text-green-600" />
+                    <FaClock className="text-sky-600" />
                     {getTranslatedText("Select Time")}
                   </h4>
                   <div className="flex flex-col gap-2">
@@ -604,7 +604,7 @@ const PriceConfirmationPage = () => {
                       value={selectedSlot}
                       className="w-full"
                       clearIcon={null}
-                      clockIcon={<FaClock className="text-green-600" />}
+                      clockIcon={<FaClock className="text-sky-600" />}
                       disableClock={false}
                       format="h:mm a"
                     />
@@ -651,9 +651,9 @@ const PriceConfirmationPage = () => {
               animate={{ rotate: 360 }}
               transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
               className="w-6 h-6 md:w-8 md:h-8 rounded-full border-4"
-              style={{ borderTopColor: '#64946e', borderRightColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: 'transparent' }}
+              style={{ borderTopColor: '#38bdf8', borderRightColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: 'transparent' }}
             />
-            <span className="ml-3 text-sm md:text-base font-semibold" style={{ color: '#64946e' }}>
+            <span className="ml-3 text-sm md:text-base font-semibold" style={{ color: '#38bdf8' }}>
               {getTranslatedText("Submitting Request...")}
             </span>
           </div>
@@ -677,7 +677,7 @@ const PriceConfirmationPage = () => {
             disabled={isSubmitting}
             className="w-full py-4 md:py-5 rounded-full text-white font-bold text-base md:text-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
-              backgroundColor: '#64946e',
+              backgroundColor: '#38bdf8',
               cursor: isSubmitting ? 'not-allowed' : 'pointer',
               WebkitTapHighlightColor: 'transparent',
               touchAction: 'manipulation',
@@ -695,7 +695,7 @@ const PriceConfirmationPage = () => {
             }}
             onMouseLeave={(e) => {
               if (!isSubmitting) {
-                e.currentTarget.style.backgroundColor = '#64946e';
+                e.currentTarget.style.backgroundColor = '#38bdf8';
               }
             }}
           >
@@ -711,3 +711,4 @@ const PriceConfirmationPage = () => {
 };
 
 export default PriceConfirmationPage;
+

@@ -146,7 +146,7 @@ const ServiceConfirmationPage = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="min-h-screen w-full flex flex-col"
-      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+      style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
       <div className="flex items-center gap-4 p-4 border-b border-white/20 bg-white/20 backdrop-blur-sm sticky top-0 z-10">
         <button
           onClick={() => navigate(-1)}
@@ -228,7 +228,7 @@ const ServiceConfirmationPage = () => {
           onClick={handleConfirm}
           disabled={isSubmitting}
           className="w-full py-4 rounded-xl font-bold text-white shadow-lg text-lg flex items-center justify-center gap-2"
-          style={{ backgroundColor: "#22c55e" }}>
+          style={{ backgroundColor: "#0ea5e9" }}>
           {isSubmitting ? (
             getTranslatedText("Processing...")
           ) : (
@@ -248,3 +248,5 @@ const ServiceConfirmationPage = () => {
 };
 
 export default ServiceConfirmationPage;
+
+

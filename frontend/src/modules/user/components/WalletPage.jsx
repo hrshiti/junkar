@@ -89,7 +89,7 @@ const WalletPage = () => {
                     contact: user?.phone
                 },
                 theme: {
-                    color: "#22c55e"
+                    color: "#0ea5e9"
                 }
             };
 
@@ -137,7 +137,7 @@ const WalletPage = () => {
     };
 
     return (
-        <div className="min-h-screen pb-20 md:pb-0" style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+        <div className="min-h-screen pb-20 md:pb-0" style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
             {/* Header */}
             <div className="sticky top-0 z-10" style={{ background: 'transparent' }}>
                 <div className="flex items-center px-4 py-4 gap-3">
@@ -156,7 +156,7 @@ const WalletPage = () => {
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     className="rounded-2xl p-6 text-white shadow-lg relative overflow-hidden"
-                    style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
+                    style={{ background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)' }}
                 >
                     <div className="relative z-10">
                         <p className="text-emerald-100 text-sm font-medium mb-1">Total Balance</p>
@@ -272,7 +272,7 @@ const WalletPage = () => {
                                     className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${trx.category === 'COUPON_CREDIT' ? 'bg-purple-100 text-purple-600' : trx.type === 'CREDIT' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${trx.category === 'COUPON_CREDIT' ? 'bg-purple-100 text-purple-600' : trx.type === 'CREDIT' ? 'bg-cyan-100 text-cyan-600' : 'bg-red-100 text-red-600'}`}>
                                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 {trx.category === 'COUPON_CREDIT' ? (
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
@@ -296,8 +296,8 @@ const WalletPage = () => {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className={`font-bold ${trx.type === 'CREDIT' ? 'text-green-600' : 'text-red-500'}`}>
-                                            {trx.type === 'CREDIT' ? '+' : '-'} ₹{Math.abs(trx.amount)}
+                                        <p className={`font-bold text-sm ${trx.type === 'CREDIT' ? 'text-cyan-600' : 'text-red-500'}`}>
+                                            {trx.type === 'CREDIT' ? '+' : '-'}₹{Math.abs(trx.amount)}
                                         </p>
                                         {trx.status === 'FAILED' && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded">Failed</span>}
                                     </div>
@@ -382,3 +382,4 @@ const WalletPage = () => {
 };
 
 export default WalletPage;
+

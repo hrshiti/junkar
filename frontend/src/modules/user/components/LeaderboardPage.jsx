@@ -30,7 +30,7 @@ const LeaderboardPage = () => {
           <div
             className="w-16 h-16 rounded-full flex items-center justify-center"
             style={{ backgroundColor: "rgba(100, 148, 110, 0.1)" }}>
-            <FaTrophy className="text-3xl" style={{ color: "#64946e" }} />
+            <FaTrophy className="text-3xl" style={{ color: "#38bdf8" }} />
           </div>
           <div>
             <h1
@@ -51,7 +51,7 @@ const LeaderboardPage = () => {
             className={`px-4 py-2 rounded-xl font-semibold text-sm transition-all ${period === "all" ? "shadow-md" : ""
               }`}
             style={{
-              backgroundColor: period === "all" ? "#64946e" : "#f7fafc",
+              backgroundColor: period === "all" ? "#38bdf8" : "#f7fafc",
               color: period === "all" ? "#ffffff" : "#2d3748",
             }}>
             {getTranslatedText("All Time")}
@@ -61,7 +61,7 @@ const LeaderboardPage = () => {
             className={`px-4 py-2 rounded-xl font-semibold text-sm transition-all ${period === "monthly" ? "shadow-md" : ""
               }`}
             style={{
-              backgroundColor: period === "monthly" ? "#64946e" : "#f7fafc",
+              backgroundColor: period === "monthly" ? "#38bdf8" : "#f7fafc",
               color: period === "monthly" ? "#ffffff" : "#2d3748",
             }}>
             {getTranslatedText("This Month")}
@@ -76,7 +76,7 @@ const LeaderboardPage = () => {
         transition={{ delay: 0.1 }}
         className="rounded-2xl shadow-lg p-4 md:p-6 backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
         <div className="flex items-center gap-3 mb-4">
-          <FaUsers className="text-xl" style={{ color: "#64946e" }} />
+          <FaUsers className="text-xl" style={{ color: "#38bdf8" }} />
           <h2
             className="text-lg md:text-xl font-bold"
             style={{ color: "#2d3748" }}>
@@ -90,3 +90,4 @@ const LeaderboardPage = () => {
 };
 
 export default LeaderboardPage;
+

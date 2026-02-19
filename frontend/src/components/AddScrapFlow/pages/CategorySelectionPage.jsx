@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import plasticImage from '../../../assets/plastic.jpg';
@@ -124,69 +123,58 @@ const CategorySelectionPage = () => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+    <div
       className="min-h-screen w-full flex flex-col"
-      style={{ backgroundColor: '#f4ebe2' }}
+      style={{ backgroundColor: '#f0f9ff' }}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 md:p-6 border-b" style={{ borderColor: 'rgba(100, 148, 110, 0.2)' }}>
+      {/* Compact Header */}
+      <div className="flex items-center justify-between p-3 md:p-4 border-b shadow-sm" style={{ borderColor: '#e0f2fe', backgroundColor: '#ffffff' }}>
         <button
           onClick={() => navigate('/')}
-          className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white transition-colors"
-          style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}
+          className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-50 transition-colors shadow-sm"
+          style={{ backgroundColor: '#ffffff', border: '1.5px solid #e0f2fe' }}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: '#2d3748' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ color: '#000000' }}>
             <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </button>
         <h2
-          className="text-xl md:text-2xl font-bold"
-          style={{ color: '#2d3748' }}
+          className="text-lg md:text-xl font-bold"
+          style={{ color: '#1e293b' }}
         >
           {getTranslatedText("Select Scrap Category")}
         </h2>
-        <div className="w-10"></div> {/* Spacer for centering */}
+        <div className="w-9"></div>
       </div>
 
-      {/* Progress Indicator */}
-      <div className="px-4 md:px-6 pt-4">
+      {/* Compact Progress Indicator */}
+      <div className="px-3 md:px-4 pt-3 bg-white">
         <div className="flex items-center gap-2">
-          <div className="flex-1 h-2 rounded-full" style={{ backgroundColor: 'rgba(100, 148, 110, 0.2)' }}>
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: '25%' }}
-              transition={{ duration: 0.5 }}
-              className="h-full rounded-full"
-              style={{ backgroundColor: '#64946e' }}
+          <div className="flex-1 h-1.5 rounded-full" style={{ backgroundColor: '#e0f2fe' }}>
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ backgroundColor: '#0ea5e9', width: '25%' }}
             />
           </div>
-          <span className="text-xs md:text-sm" style={{ color: '#718096' }}>{getTranslatedText("Step 1 of 4")}</span>
+          <span className="text-xs font-bold" style={{ color: '#1e293b' }}>{getTranslatedText("Step 1 of 4")}</span>
         </div>
       </div>
 
-      {/* Categories Grid - Circular Cards */}
-      <div className="flex-1 overflow-y-auto p-3 md:p-6 pb-24 md:pb-6">
-        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4 lg:gap-6">
+      {/* Optimized Categories Grid */}
+      <div className="flex-1 overflow-y-auto p-3 md:p-4 pb-24 md:pb-6">
+        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
           {categories.map((category, index) => (
-            <motion.div
+            <div
               key={category.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
               onClick={() => handleCategoryClick(category)}
               className="cursor-pointer flex flex-col items-center"
             >
-              {/* Circular Image Container */}
+              {/* Compact Circular Image */}
               <div
-                className="relative w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-full overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
+                className="relative w-16 h-16 md:w-18 md:h-18 lg:w-20 lg:h-20 rounded-full overflow-hidden shadow-md hover:shadow-lg transition-all duration-200"
                 style={{
-                  border: isCategorySelected(category.id) ? '3px solid #64946e' : '3px solid transparent'
+                  border: isCategorySelected(category.id) ? '2.5px solid #0ea5e9' : '1.5px solid #e0f2fe',
+                  backgroundColor: 'white'
                 }}
               >
                 <img
@@ -196,88 +184,82 @@ const CategorySelectionPage = () => {
                   loading="lazy"
                 />
                 {isCategorySelected(category.id) && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
+                  <div
                     className="absolute inset-0 flex items-center justify-center"
-                    style={{ backgroundColor: 'rgba(100, 148, 110, 0.4)' }}
+                    style={{ backgroundColor: 'rgba(14, 165, 233, 0.25)' }}
                   >
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: 'spring', stiffness: 200 }}
-                      className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: '#64946e' }}
+                    <div
+                      className="w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center shadow-md"
+                      style={{ backgroundColor: '#0ea5e9' }}
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-white md:w-5 md:h-5">
-                        <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
-                    </motion.div>
-                  </motion.div>
+                    </div>
+                  </div>
                 )}
               </div>
 
-              {/* Category Info Below Circle */}
-              <div className="mt-2 md:mt-3 text-center">
+              {/* Compact Category Info */}
+              <div className="mt-1.5 md:mt-2 text-center">
                 <p
-                  className="text-xs md:text-sm font-semibold mb-0.5 md:mb-1"
-                  style={{ color: '#2d3748' }}
+                  className="text-xs md:text-sm font-bold mb-0.5 truncate max-w-full"
+                  style={{ color: '#1e293b' }}
                 >
                   {getTranslatedText(category.name)}
                 </p>
                 <p
-                  className="text-[10px] md:text-xs font-medium"
-                  style={{ color: '#64946e' }}
+                  className="text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded-md inline-block"
+                  style={{ 
+                    color: '#000000',
+                    backgroundColor: '#f1f5f9'
+                  }}
                 >
                   ₹{category.price}/{getTranslatedText("kg")}
                 </p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Footer with Continue Button - Fixed on Mobile */}
+      {/* Compact Footer */}
       <div
-        className="fixed md:relative bottom-0 left-0 right-0 p-4 md:p-6 border-t z-50"
+        className="fixed md:relative bottom-0 left-0 right-0 p-3 md:p-4 border-t z-50 shadow-lg"
         style={{
-          borderColor: 'rgba(100, 148, 110, 0.2)',
-          backgroundColor: '#f4ebe2'
+          borderColor: '#e0f2fe',
+          backgroundColor: '#ffffff'
         }}
       >
         {selectedCategories.length > 0 ? (
           <div>
-            <motion.button
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
+            <button
               onClick={handleContinue}
-              className="w-full py-3 md:py-4 rounded-full text-white font-semibold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-              style={{ backgroundColor: '#64946e' }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#5a8263'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = '#64946e'}
+              className="w-full py-2.5 md:py-3 rounded-full text-white font-bold text-sm md:text-base shadow-lg hover:shadow-xl transition-shadow duration-200"
+              style={{ backgroundColor: '#0ea5e9' }}
             >
               {getTranslatedText("Continue with")} {selectedCategories.length} {selectedCategories.length === 1 ? getTranslatedText("Category") : getTranslatedText("Categories")}
-            </motion.button>
+            </button>
             <p
-              className="text-xs md:text-sm text-center mt-2"
-              style={{ color: '#718096' }}
+              className="text-xs text-center mt-1.5 font-semibold truncate"
+              style={{ color: '#1e293b' }}
             >
               {getTranslatedText("Selected:")} {selectedCategories.map(cat => getTranslatedText(cat.name)).join(', ')}
             </p>
           </div>
         ) : (
           <p
-            className="text-xs md:text-sm text-center"
-            style={{ color: '#718096' }}
+            className="text-xs text-center font-semibold"
+            style={{ color: '#64748b' }}
           >
             {getTranslatedText("Select one or more categories to continue")}
           </p>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 };
 
 export default CategorySelectionPage;
+
 

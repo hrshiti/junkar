@@ -64,58 +64,39 @@ const TrustSignals = () => {
   const { getTranslatedText } = usePageTranslation(signals.map((s) => s.text));
 
   return (
-    <motion.div
-      initial={{ y: 10 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.6, delay: 1 }}
-      className="mb-8 md:mb-12">
-      <div className="grid grid-cols-2 md:flex md:flex-wrap gap-2 sm:gap-3 md:gap-4 justify-center max-w-2xl mx-auto md:max-w-none">
+    <div className="mb-6 md:mb-8">
+      <div className="grid grid-cols-2 gap-2.5 md:gap-3 max-w-3xl mx-auto">
         {signals.map((signal, index) => (
-          <motion.div
+          <div
             key={index}
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.4, delay: 1.1 + index * 0.1 }}
-            className="group flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 md:py-3 lg:px-6 lg:py-4 rounded-lg md:rounded-xl transition-all duration-300 cursor-default"
+            className="flex items-center gap-2.5 px-3.5 py-2.5 md:px-4 md:py-3 rounded-xl transition-all duration-300 hover:shadow-md"
             style={{
-              backgroundColor: "#ffffff",
-              border: "1px solid rgba(100, 148, 110, 0.2)",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "#64946e";
-              e.currentTarget.style.boxShadow =
-                "0 4px 12px rgba(100, 148, 110, 0.15)";
-              e.currentTarget.style.transform = "translateY(-2px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "rgba(100, 148, 110, 0.2)";
-              e.currentTarget.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.05)";
-              e.currentTarget.style.transform = "translateY(0)";
+              backgroundColor: "#f0f9ff",
+              border: "1.5px solid #e0f2fe",
+              boxShadow: "0 2px 8px rgba(14, 165, 233, 0.06)",
             }}>
-            {/* Icon Container */}
             <div
-              className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-md md:rounded-lg transition-all duration-300 flex-shrink-0"
+              className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-lg flex-shrink-0"
               style={{
-                backgroundColor: "rgba(100, 148, 110, 0.1)",
-                color: "#64946e",
+                backgroundColor: "#f0f9ff",
+                color: "#0ea5e9",
               }}>
-              <div className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5">
+              <div className="w-4.5 h-4.5 md:w-5 md:h-5">
                 {signal.icon}
               </div>
             </div>
 
-            {/* Text */}
             <span
-              className="text-xs sm:text-sm md:text-base font-semibold whitespace-nowrap truncate"
-              style={{ color: "#2d3748" }}>
+              className="text-xs md:text-sm font-bold truncate"
+              style={{ color: "#1e293b" }}>
               {getTranslatedText(signal.text)}
             </span>
-          </motion.div>
+          </div>
         ))}
       </div>
-    </motion.div>
+    </div>
   );
 };
 
 export default TrustSignals;
+

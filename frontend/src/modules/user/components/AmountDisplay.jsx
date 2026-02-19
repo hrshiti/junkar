@@ -12,10 +12,11 @@ const AmountDisplay = () => {
     return (
         <p
             className="text-2xl md:text-3xl font-bold"
-            style={{ color: '#64946e' }}
+            style={{ color: '#38bdf8' }}
         >
             ₹{balance.toFixed(2)}
         </p>
     );
 };
 export default AmountDisplay;
+

@@ -20,42 +20,42 @@ const CustomerSolutions = () => {
       title: "Free Pickup",
       description:
         "No charges for pickup service. We come to your doorstep at no extra cost.",
-      color: "#64946e",
+      color: "#38bdf8",
     },
     {
       icon: FaRupeeSign,
       title: "Best Rates",
       description:
         "Get the highest market rates for your scrap. Real-time pricing ensures fair deals.",
-      color: "#64946e",
+      color: "#38bdf8",
     },
     {
       icon: FaMobileAlt,
       title: "Instant UPI Payments",
       description:
         "Receive payment instantly via UPI. No cash handling, secure and quick transactions.",
-      color: "#64946e",
+      color: "#38bdf8",
     },
     {
       icon: FaEye,
       title: "Price Transparency",
       description:
         "See live market prices before booking. No hidden charges, complete transparency.",
-      color: "#64946e",
+      color: "#38bdf8",
     },
     {
       icon: FaWeight,
       title: "Proper Weight",
       description:
         "Accurate weight measurement with certified scales. Fair pricing based on actual weight.",
-      color: "#64946e",
+      color: "#38bdf8",
     },
     {
       icon: FaBolt,
       title: "Fast Service",
       description:
         "Quick pickup and processing. Same-day service available for urgent requests.",
-      color: "#64946e",
+      color: "#38bdf8",
     },
   ];
 
@@ -125,7 +125,7 @@ const CustomerSolutions = () => {
                       className="absolute top-full left-1/2 transform -translate-x-1/2 w-0.5 origin-top"
                       style={{
                         height: "calc(100% + 1rem)",
-                        backgroundColor: "#64946e",
+                        backgroundColor: "#38bdf8",
                         zIndex: 1,
                       }}
                     />
@@ -155,3 +155,4 @@ const CustomerSolutions = () => {
 };
 
 export default CustomerSolutions;
+

@@ -212,7 +212,7 @@ const AddressInputPage = () => {
                             animate={{ width: '87.5%' }}
                             transition={{ duration: 0.5 }}
                             className="h-full rounded-full"
-                            style={{ backgroundColor: '#64946e' }}
+                            style={{ backgroundColor: '#38bdf8' }}
                         />
                     </div>
                     <span className="text-xs md:text-sm" style={{ color: '#718096' }}>{getTranslatedText("Step 4 of 5")}</span>
@@ -231,7 +231,7 @@ const AddressInputPage = () => {
                         onClick={getCurrentLocation}
                         disabled={isGettingLocation}
                         className="w-full py-4 rounded-xl font-semibold text-base shadow-lg flex items-center justify-center gap-3 transition-all disabled:opacity-50"
-                        style={{ backgroundColor: '#64946e', color: '#ffffff' }}
+                        style={{ backgroundColor: '#38bdf8', color: '#ffffff' }}
                     >
                         {isGettingLocation ? (
                             <>
@@ -274,7 +274,7 @@ const AddressInputPage = () => {
                         style={{ backgroundColor: 'rgba(100, 148, 110, 0.1)' }}
                     >
                         <div className="flex items-center gap-2 mb-2">
-                            <FaMapMarkerAlt style={{ color: '#64946e' }} />
+                            <FaMapMarkerAlt style={{ color: '#38bdf8' }} />
                             <p className="text-sm font-semibold" style={{ color: '#2d3748' }}>
                                 {getTranslatedText("Location Detected")}
                             </p>
@@ -306,7 +306,7 @@ const AddressInputPage = () => {
                         rows={5}
                         className="w-full py-3 px-4 rounded-lg border-2 focus:outline-none focus:ring-2 transition-all resize-none text-sm md:text-base"
                         style={{
-                            borderColor: address ? '#64946e' : 'rgba(100, 148, 110, 0.3)',
+                            borderColor: address ? '#38bdf8' : 'rgba(100, 148, 110, 0.3)',
                             color: '#2d3748',
                             backgroundColor: '#f9f9f9'
                         }}
@@ -365,9 +365,9 @@ const AddressInputPage = () => {
                         transition={{ duration: 0.3 }}
                         onClick={handleContinue}
                         className="w-full py-3 md:py-4 rounded-full text-white font-semibold text-sm md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                        style={{ backgroundColor: '#64946e' }}
+                        style={{ backgroundColor: '#38bdf8' }}
                         onMouseEnter={(e) => e.target.style.backgroundColor = '#5a8263'}
-                        onMouseLeave={(e) => e.target.style.backgroundColor = '#64946e'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = '#38bdf8'}
                     >
                         {getTranslatedText("Continue to Confirmation")}
                     </motion.button>
@@ -387,3 +387,4 @@ const AddressInputPage = () => {
 };
 
 export default AddressInputPage;
+

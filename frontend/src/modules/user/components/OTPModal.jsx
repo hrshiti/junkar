@@ -109,7 +109,7 @@ const OTPModal = ({ onClose }) => {
                     color: "#2d3748",
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = "#64946e";
+                    e.target.style.borderColor = "#38bdf8";
                     e.target.style.boxShadow =
                       "0 0 0 2px rgba(100, 148, 110, 0.2)";
                   }}
@@ -125,7 +125,7 @@ const OTPModal = ({ onClose }) => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="text-sm"
-                  style={{ color: "#64946e" }}>
+                  style={{ color: "#38bdf8" }}>
                   {getTranslatedText("OTP sent to")} {phone}
                 </motion.p>
               )}
@@ -135,7 +135,7 @@ const OTPModal = ({ onClose }) => {
                 className="w-full text-white font-semibold py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 style={{
                   backgroundColor:
-                    phone.length === 10 && !otpSent ? "#64946e" : "#cbd5e0",
+                    phone.length === 10 && !otpSent ? "#38bdf8" : "#cbd5e0",
                 }}
                 onMouseEnter={(e) => {
                   if (phone.length === 10 && !otpSent)
@@ -143,7 +143,7 @@ const OTPModal = ({ onClose }) => {
                 }}
                 onMouseLeave={(e) => {
                   if (phone.length === 10 && !otpSent)
-                    e.target.style.backgroundColor = "#64946e";
+                    e.target.style.backgroundColor = "#38bdf8";
                 }}>
                 {otpSent ? "..." : getTranslatedText("Send OTP")}
               </button>
@@ -171,7 +171,7 @@ const OTPModal = ({ onClose }) => {
                         color: "#2d3748",
                       }}
                       onFocus={(e) => {
-                        e.target.style.borderColor = "#64946e";
+                        e.target.style.borderColor = "#38bdf8";
                       }}
                       onBlur={(e) => {
                         e.target.style.borderColor = "#e5ddd4";
@@ -186,7 +186,7 @@ const OTPModal = ({ onClose }) => {
                 className="w-full text-white font-semibold py-3 rounded-lg disabled:cursor-not-allowed transition-all"
                 style={{
                   backgroundColor: otp.every((digit) => digit !== "")
-                    ? "#64946e"
+                    ? "#38bdf8"
                     : "#cbd5e0",
                 }}
                 onMouseEnter={(e) => {
@@ -195,7 +195,7 @@ const OTPModal = ({ onClose }) => {
                 }}
                 onMouseLeave={(e) => {
                   if (otp.every((digit) => digit !== ""))
-                    e.target.style.backgroundColor = "#64946e";
+                    e.target.style.backgroundColor = "#38bdf8";
                 }}>
                 {getTranslatedText("Verify OTP")}
               </button>
@@ -204,7 +204,7 @@ const OTPModal = ({ onClose }) => {
                 <button
                   type="button"
                   className="font-bold hover:underline"
-                  style={{ color: "#64946e" }}
+                  style={{ color: "#38bdf8" }}
                   onClick={() => {
                     setOtpSent(false);
                     setShowOtp(false);
@@ -222,3 +222,4 @@ const OTPModal = ({ onClose }) => {
 };
 
 export default OTPModal;
+

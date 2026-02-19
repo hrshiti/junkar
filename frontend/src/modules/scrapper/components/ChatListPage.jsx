@@ -183,15 +183,17 @@ const ChatListPage = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setFilter('active')}
-              className={`px-4 py-2 rounded-xl font-semibold transition-all ${filter === 'active' ? 'bg-emerald-600 text-white' : 'bg-zinc-900 text-gray-400 hover:bg-zinc-800'
+              className={`px-4 py-2 rounded-xl font-semibold transition-all ${filter === 'active' ? 'text-white' : 'bg-zinc-900 text-gray-400 hover:bg-zinc-800'
                 }`}
+              style={filter === 'active' ? { background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)" } : {}}
             >
               {getTranslatedText("Active")}
             </button>
             <button
               onClick={() => setFilter('archived')}
-              className={`px-4 py-2 rounded-xl font-semibold transition-all ${filter === 'archived' ? 'bg-emerald-600 text-white' : 'bg-zinc-900 text-gray-400 hover:bg-zinc-800'
+              className={`px-4 py-2 rounded-xl font-semibold transition-all ${filter === 'archived' ? 'text-white' : 'bg-zinc-900 text-gray-400 hover:bg-zinc-800'
                 }`}
+              style={filter === 'archived' ? { background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)" } : {}}
             >
               {getTranslatedText("Archived")}
             </button>

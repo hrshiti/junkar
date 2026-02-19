@@ -62,7 +62,7 @@ const TrustSignals = () => {
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#64946e';
+              e.currentTarget.style.borderColor = '#38bdf8';
               e.currentTarget.style.boxShadow = '0 4px 12px rgba(100, 148, 110, 0.15)';
               e.currentTarget.style.transform = 'translateY(-2px)';
             }}
@@ -77,7 +77,7 @@ const TrustSignals = () => {
               className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-md md:rounded-lg transition-all duration-300 flex-shrink-0"
               style={{ 
                 backgroundColor: 'rgba(100, 148, 110, 0.1)',
-                color: '#64946e'
+                color: '#38bdf8'
               }}
             >
               <div className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5">
@@ -100,4 +100,5 @@ const TrustSignals = () => {
 };
 
 export default TrustSignals;
+
 

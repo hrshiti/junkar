@@ -152,29 +152,29 @@ const ReferAndEarn = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-2xl shadow-lg p-4 md:p-6"
+        className="bg-white rounded-2xl shadow-lg p-4"
       >
-        <div className="flex items-center gap-4 mb-4">
+        <div className="flex items-center gap-3">
           <div
-            className="w-16 h-16 rounded-full flex items-center justify-center bg-emerald-500/10"
+            className="w-12 h-12 rounded-full flex items-center justify-center bg-emerald-500/10"
           >
-            <FaGift className="text-3xl text-emerald-600" />
+            <FaGift className="text-2xl text-emerald-600" />
           </div>
-          <div className="flex-1">
-            <h1 className="text-2xl md:text-3xl font-bold mb-1 text-slate-800">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl md:text-2xl font-bold leading-tight text-slate-800">
               {getTranslatedText("Refer & Earn")}
             </h1>
-            <p className="text-sm md:text-base text-slate-500">
+            <p className="text-xs md:text-sm text-slate-500 leading-tight mt-0.5">
               {getTranslatedText("Invite other scrappers and earn rewards")}
             </p>
           </div>
           {tierInfo && (
             <div
-              className="px-4 py-2 rounded-xl flex items-center gap-2"
+              className="px-3 py-1.5 rounded-xl flex items-center gap-1.5 flex-shrink-0"
               style={{ backgroundColor: `${tierInfo.color}20`, border: `2px solid ${tierInfo.color}` }}
             >
-              <FaTrophy style={{ color: tierInfo.color }} />
-              <span className="font-bold text-sm" style={{ color: tierInfo.color }}>
+              <FaTrophy className="text-sm" style={{ color: tierInfo.color }} />
+              <span className="font-bold text-xs" style={{ color: tierInfo.color }}>
                 {tierInfo.name}
               </span>
             </div>
@@ -183,8 +183,8 @@ const ReferAndEarn = () => {
 
         {/* Tier Progress */}
         {tierInfo && tierInfo.nextTier && (
-          <div className="mt-4">
-            <div className="flex items-center justify-between text-xs mb-2">
+          <div className="mt-3">
+            <div className="flex items-center justify-between text-xs mb-1.5">
               <span className="text-slate-500">
                 {getTranslatedText("{count} more referrals to reach {tierName}", { count: tierInfo.nextTier.referralsNeeded, tierName: tierInfo.nextTier.name })}
               </span>
@@ -209,20 +209,20 @@ const ReferAndEarn = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-white rounded-2xl shadow-lg p-4 md:p-6"
+        className="bg-white rounded-2xl shadow-lg p-4"
       >
-        <h2 className="text-lg md:text-xl font-bold mb-4 text-slate-800">
+        <h2 className="text-base md:text-lg font-bold mb-3 text-slate-800">
           {getTranslatedText("Your Referral Code")}
         </h2>
 
         {/* Code Display */}
-        <div className="mb-4">
+        <div className="mb-3">
           <div
-            className="flex items-center justify-between p-4 rounded-xl border-2 bg-emerald-500/5 border-emerald-500"
+            className="flex items-center justify-between p-3 rounded-xl border-2 bg-emerald-500/5 border-emerald-500"
           >
-            <div className="flex-1">
-              <p className="text-xs mb-1 text-slate-500">{getTranslatedText("Referral Code")}</p>
-              <p className="text-2xl md:text-3xl font-bold text-emerald-600">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-slate-500 leading-tight">{getTranslatedText("Referral Code")}</p>
+              <p className="text-xl md:text-2xl font-bold text-emerald-600 leading-tight mt-0.5">
                 {referralCode}
               </p>
             </div>
@@ -230,7 +230,7 @@ const ReferAndEarn = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleCopyCode}
-              className="px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all bg-emerald-600 text-white"
+              className="px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all bg-emerald-600 text-white flex-shrink-0"
             >
               {copied ? (
                 <>
@@ -248,8 +248,8 @@ const ReferAndEarn = () => {
         </div>
 
         {/* Share Link */}
-        <div className="mb-4">
-          <label className="block text-sm font-semibold mb-2 text-slate-800">
+        <div className="mb-3">
+          <label className="block text-sm font-semibold mb-1.5 text-slate-800">
             {getTranslatedText("Share Link")}
           </label>
           <div className="flex gap-2">
@@ -257,53 +257,53 @@ const ReferAndEarn = () => {
               type="text"
               value={shareLink}
               readOnly
-              className="flex-1 px-4 py-2 rounded-xl border-2 text-sm border-slate-200 bg-slate-50 text-slate-800"
+              className="flex-1 px-3 py-2 rounded-xl border-2 text-sm border-slate-200 bg-slate-50 text-slate-800"
             />
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleCopyLink}
-              className="px-4 py-2 rounded-xl font-semibold text-sm transition-all bg-slate-50 text-slate-800"
+              className="px-3 py-2 rounded-xl font-semibold text-sm transition-all bg-slate-50 text-slate-800 flex-shrink-0"
             >
               <FaCopy />
             </motion.button>
           </div>
         </div>
 
-        {/* QR Code Section */}
-        <div className="mb-4">
-          <button
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 gap-2">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setShowQR(!showQR)}
-            className="w-full px-4 py-2 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all mb-3 bg-slate-50 text-slate-800"
+            className="px-3 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all bg-slate-50 text-slate-800"
           >
-            <FaQrcode />
-            {showQR ? getTranslatedText('Hide') : getTranslatedText('Show')} {getTranslatedText('QR Code')}
-          </button>
-          {showQR && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="flex justify-center"
-            >
-              <QRCodeGenerator value={shareLink} size={200} />
-            </motion.div>
-          )}
-        </div>
-
-        {/* Share Buttons */}
-        <div className="mt-4">
+            <FaQrcode className="text-base" />
+            <span>{showQR ? getTranslatedText('Hide') : getTranslatedText('Show')} QR</span>
+          </motion.button>
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => handleShare('whatsapp')}
-            className="w-full py-3.5 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg text-white"
+            className="px-3 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg text-white"
             style={{ backgroundColor: '#25D366' }}
           >
-            <FaWhatsapp className="text-2xl" />
+            <FaWhatsapp className="text-lg" />
             <span>{getTranslatedText("WhatsApp")}</span>
           </motion.button>
         </div>
+
+        {/* QR Code Display */}
+        {showQR && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="flex justify-center p-3 bg-white rounded-xl shadow-inner mt-3"
+          >
+            <QRCodeGenerator value={shareLink} size={180} />
+          </motion.div>
+        )}
       </motion.div>
 
       {/* Monthly Tier Bonus */}
@@ -352,22 +352,22 @@ const ReferAndEarn = () => {
       }
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white rounded-2xl shadow-lg p-4 md:p-6"
+          className="bg-white rounded-2xl shadow-lg p-3"
         >
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-2">
             <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center bg-emerald-500/10"
+              className="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-500/10 flex-shrink-0"
             >
-              <FaUsers className="text-xl text-emerald-600" />
+              <FaUsers className="text-lg text-emerald-600" />
             </div>
-            <div>
-              <p className="text-sm text-slate-500">{getTranslatedText("Total Referrals")}</p>
-              <p className="text-2xl font-bold text-slate-800">
+            <div className="min-w-0">
+              <p className="text-xs text-slate-500 leading-tight">{getTranslatedText("Total Referrals")}</p>
+              <p className="text-2xl font-bold text-slate-800 leading-tight">
                 {stats.totalReferrals}
               </p>
             </div>
@@ -378,17 +378,17 @@ const ReferAndEarn = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-white rounded-2xl shadow-lg p-4 md:p-6"
+          className="bg-white rounded-2xl shadow-lg p-3"
         >
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-2">
             <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center bg-emerald-500/10"
+              className="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-500/10 flex-shrink-0"
             >
-              <FaRupeeSign className="text-xl text-emerald-600" />
+              <FaRupeeSign className="text-lg text-emerald-600" />
             </div>
-            <div>
-              <p className="text-sm text-slate-500">{getTranslatedText("Total Earnings")}</p>
-              <p className="text-2xl font-bold text-slate-800">
+            <div className="min-w-0">
+              <p className="text-xs text-slate-500 leading-tight">{getTranslatedText("Total Earnings")}</p>
+              <p className="text-2xl font-bold text-slate-800 leading-tight">
                 ₹{stats.totalEarnings}
               </p>
             </div>
@@ -436,53 +436,60 @@ const ReferAndEarn = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="bg-white rounded-2xl shadow-lg p-4 md:p-6"
+        className="bg-white rounded-2xl shadow-lg p-4"
       >
-        <h2 className="text-lg md:text-xl font-bold mb-4 text-slate-800">
+        <h2 className="text-lg font-bold mb-4 text-slate-800">
           {getTranslatedText("How It Works")}
         </h2>
         <div className="space-y-4">
-          <div className="flex gap-4">
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-500/10"
-            >
-              <span className="font-bold text-emerald-600">1</span>
+          {/* Step 1 */}
+          <div className="flex items-start gap-3">
+            <div className="relative flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-md">
+                <span className="font-bold text-sm text-white">1</span>
+              </div>
+              <div className="absolute top-8 left-1/2 -translate-x-1/2 w-0.5 h-6 bg-gradient-to-b from-emerald-300 to-transparent"></div>
             </div>
-            <div>
-              <h3 className="font-semibold mb-1 text-slate-800">
+            <div className="flex-1 pt-0.5">
+              <h3 className="font-bold text-sm text-slate-800 mb-1">
                 {getTranslatedText("Share Your Code")}
               </h3>
-              <p className="text-sm text-slate-500">
+              <p className="text-xs text-slate-500 leading-relaxed">
                 {getTranslatedText("Share your referral code or link with other scrappers")}
               </p>
             </div>
           </div>
-          <div className="flex gap-4">
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-500/10"
-            >
-              <span className="font-bold text-emerald-600">2</span>
+
+          {/* Step 2 */}
+          <div className="flex items-start gap-3">
+            <div className="relative flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-md">
+                <span className="font-bold text-sm text-white">2</span>
+              </div>
+              <div className="absolute top-8 left-1/2 -translate-x-1/2 w-0.5 h-6 bg-gradient-to-b from-blue-300 to-transparent"></div>
             </div>
-            <div>
-              <h3 className="font-semibold mb-1 text-slate-800">
+            <div className="flex-1 pt-0.5">
+              <h3 className="font-bold text-sm text-slate-800 mb-1">
                 {getTranslatedText("They Join & Complete KYC")}
               </h3>
-              <p className="text-sm text-slate-500">
+              <p className="text-xs text-slate-500 leading-relaxed">
                 {getTranslatedText("Your referral signs up and completes KYC verification")}
               </p>
             </div>
           </div>
-          <div className="flex gap-4">
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-500/10"
-            >
-              <span className="font-bold text-emerald-600">3</span>
+
+          {/* Step 3 */}
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-md">
+                <span className="font-bold text-sm text-white">3</span>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold mb-1 text-slate-800">
+            <div className="flex-1 pt-0.5">
+              <h3 className="font-bold text-sm text-slate-800 mb-1">
                 {getTranslatedText("You Both Earn")}
               </h3>
-              <p className="text-sm text-slate-500">
+              <p className="text-xs text-slate-500 leading-relaxed">
                 {getTranslatedText("You get ₹{signupBonus} when they sign up, ₹{kycBonus} when KYC verified, and more when they subscribe!", { signupBonus: settings.scrapperRewards.signupBonus, kycBonus: settings.scrapperRewards.refereeWelcomeBonus })}
               </p>
             </div>

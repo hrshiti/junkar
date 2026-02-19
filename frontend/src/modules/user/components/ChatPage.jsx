@@ -439,7 +439,7 @@ const ChatPage = () => {
         <div className="text-center">
           <FaSpinner
             className="animate-spin mx-auto mb-4"
-            style={{ color: "#64946e", fontSize: "2rem" }}
+            style={{ color: "#38bdf8", fontSize: "2rem" }}
           />
           <p style={{ color: "#2d3748" }}>Loading chat...</p>
         </div>
@@ -463,7 +463,7 @@ const ChatPage = () => {
           <button
             onClick={() => navigate(-1)}
             className="px-6 py-2 rounded-xl font-semibold text-white shadow-md transition-transform active:scale-95"
-            style={{ backgroundColor: "#64946e" }}>
+            style={{ backgroundColor: "#38bdf8" }}>
             {getTranslatedText("Go Back")}
           </button>
         </div>
@@ -494,7 +494,7 @@ const ChatPage = () => {
       transition={{ duration: 0.3 }}
       className="fixed inset-0 w-full flex flex-col"
       style={{
-        background: "linear-gradient(to bottom, #72c688ff, #dcfce7)",
+        background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)",
         height: "calc(var(--vh, 1vh) * 100)",
         width: "100vw",
         overflow: "hidden",
@@ -538,8 +538,8 @@ const ChatPage = () => {
             <div
               className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold relative shadow-sm"
               style={{
-                backgroundColor: "#ecfdf5",
-                color: "#059669",
+                backgroundColor: "#f0f9ff",
+                color: "#0284c7",
               }}>
               {otherUser.name
                 ?.split(" ")
@@ -549,7 +549,7 @@ const ChatPage = () => {
               <div
                 className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2"
                 style={{
-                  backgroundColor: "#10b981",
+                  backgroundColor: "#0ea5e9",
                   borderColor: "#ffffff",
                 }}
               />
@@ -568,7 +568,7 @@ const ChatPage = () => {
                   </span>
                 )}
                 {!otherUserTyping && (
-                  <span className="text-xs" style={{ color: "#059669" }}>
+                  <span className="text-xs" style={{ color: "#0284c7" }}>
                     {getTranslatedText("• Online")}
                   </span>
                 )}
@@ -590,7 +590,7 @@ const ChatPage = () => {
             height="20"
             viewBox="0 0 24 24"
             fill="none"
-            style={{ color: "#059669" }}>
+            style={{ color: "#0284c7" }}>
             <path
               d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
               stroke="currentColor"
@@ -652,9 +652,9 @@ const ChatPage = () => {
                     className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 shadow-sm"
                     style={{
                       backgroundColor: isUserMessage
-                        ? "#ecfdf5"
+                        ? "#f0f9ff"
                         : "#ffffff",
-                      color: isUserMessage ? "#059669" : "#64748b",
+                      color: isUserMessage ? "#0284c7" : "#64748b",
                     }}>
                     {senderInitials}
                   </div>
@@ -665,7 +665,7 @@ const ChatPage = () => {
                       className={`rounded-2xl px-4 py-2.5 shadow-sm ${isUserMessage ? "rounded-tr-md" : "rounded-tl-md"
                         }`}
                       style={{
-                        backgroundColor: isUserMessage ? "#059669" : "#ffffff",
+                        backgroundColor: isUserMessage ? "#0284c7" : "#ffffff",
                         color: isUserMessage ? "#ffffff" : "#1e293b",
                         boxShadow: isUserMessage
                           ? "0 4px 6px rgba(5, 150, 105, 0.2)"
@@ -726,7 +726,7 @@ const ChatPage = () => {
               className="w-full py-2.5 px-4 rounded-2xl border-2 focus:outline-none resize-none text-sm disabled:opacity-50"
               style={{
                 borderColor: inputMessage
-                  ? "#059669"
+                  ? "#0284c7"
                   : "transparent",
                 color: "#1e293b",
                 backgroundColor: "#ffffff",
@@ -753,7 +753,7 @@ const ChatPage = () => {
             style={{
               backgroundColor:
                 inputMessage.trim() && !sending
-                  ? "#059669"
+                  ? "#0284c7"
                   : "#e2e8f0",
               color: "#ffffff",
               boxShadow:
@@ -793,3 +793,4 @@ const ChatPage = () => {
 };
 
 export default ChatPage;
+

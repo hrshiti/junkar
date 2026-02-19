@@ -116,7 +116,7 @@ const Profile = ({ onClose }) => {
           <button
             onClick={onClose}
             className="p-2 rounded-full hover:opacity-70 transition-opacity"
-            style={{ color: '#64946e' }}
+            style={{ color: '#38bdf8' }}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -149,7 +149,7 @@ const Profile = ({ onClose }) => {
               >
                 <span 
                   className="text-2xl md:text-3xl font-bold"
-                  style={{ color: '#64946e' }}
+                  style={{ color: '#38bdf8' }}
                 >
                   U
                 </span>
@@ -174,7 +174,7 @@ const Profile = ({ onClose }) => {
                     className="text-xs px-2 py-0.5 rounded-full"
                     style={{ 
                       backgroundColor: 'rgba(100, 148, 110, 0.1)',
-                      color: '#64946e'
+                      color: '#38bdf8'
                     }}
                   >
                     Verified
@@ -187,7 +187,7 @@ const Profile = ({ onClose }) => {
                 className="p-2 rounded-lg hover:opacity-70 transition-opacity"
                 style={{ 
                   backgroundColor: 'rgba(100, 148, 110, 0.1)',
-                  color: '#64946e'
+                  color: '#38bdf8'
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -214,7 +214,7 @@ const Profile = ({ onClose }) => {
                 border: '1px solid rgba(100, 148, 110, 0.15)'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#64946e';
+                e.currentTarget.style.borderColor = '#38bdf8';
                 e.currentTarget.style.transform = 'translateY(-2px)';
               }}
               onMouseLeave={(e) => {
@@ -227,7 +227,7 @@ const Profile = ({ onClose }) => {
                   className="w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{ 
                     backgroundColor: 'rgba(100, 148, 110, 0.1)',
-                    color: '#64946e'
+                    color: '#38bdf8'
                   }}
                 >
                   {option.icon}
@@ -254,7 +254,7 @@ const Profile = ({ onClose }) => {
                   stroke="currentColor" 
                   strokeWidth="2"
                   className="flex-shrink-0"
-                  style={{ color: '#64946e' }}
+                  style={{ color: '#38bdf8' }}
                 >
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
@@ -289,7 +289,7 @@ const Profile = ({ onClose }) => {
                 <div key={index} className="text-center">
                   <p 
                     className="text-xl md:text-2xl font-bold mb-1"
-                    style={{ color: '#64946e' }}
+                    style={{ color: '#38bdf8' }}
                   >
                     {stat.value}
                   </p>
@@ -331,4 +331,5 @@ const Profile = ({ onClose }) => {
 };
 
 export default Profile;
+
 

@@ -91,7 +91,7 @@ const ServiceSchedulePage = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="min-h-screen w-full flex flex-col"
-      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+      style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
       <div className="flex items-center gap-4 p-4 border-b border-white/20 bg-white/20 backdrop-blur-sm sticky top-0 z-10">
         <button
           onClick={() => navigate(-1)}
@@ -152,7 +152,7 @@ const ServiceSchedulePage = () => {
           onClick={handleContinue}
           disabled={!selectedDate || !selectedTime}
           className="w-full py-3 rounded-xl font-bold text-white shadow-lg disabled:opacity-50"
-          style={{ backgroundColor: "#22c55e" }}>
+          style={{ backgroundColor: "#0ea5e9" }}>
           {getTranslatedText("Continue to Summary")}
         </button>
       </div>
@@ -161,3 +161,5 @@ const ServiceSchedulePage = () => {
 };
 
 export default ServiceSchedulePage;
+
+

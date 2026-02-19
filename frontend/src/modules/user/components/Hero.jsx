@@ -9,12 +9,14 @@ import OTPModal from "./OTPModal";
 
 import { usePageTranslation } from "../../../hooks/usePageTranslation";
 import { useDynamicTranslation } from "../../../hooks/useDynamicTranslation";
-import scrapImage from "../assets/scrap3-Photoroom.png";
+import scrapImage from "../assets/truck.png";
 import scrapImage2 from "../assets/scrab.png";
 import scrapImage3 from "../assets/scrap5.png";
 import plasticImage from "../assets/plastic.jpg";
-import metalImage from "../assets/metal.jpg";
+import metalImage from "../assets/metal2.jpg";
+import copperImage from "../assets/metal.jpg";
 import electronicImage from "../assets/electronicbg.png";
+import aluminiumImage from "../assets/Aluminium.jpg";
 
 import BannerSlider from "../../shared/components/BannerSlider";
 import { publicAPI } from "../../shared/utils/api";
@@ -75,13 +77,13 @@ const Hero = () => {
   const getCategoryImage = (name) => {
     const lowerName = name.toLowerCase();
     if (lowerName.includes("plastic")) return plasticImage;
+    if (lowerName.includes("aluminium")) return aluminiumImage;
+    if (lowerName.includes("copper")) return copperImage;
     if (
       lowerName.includes("metal") ||
       lowerName.includes("iron") ||
       lowerName.includes("steel") ||
-      lowerName.includes("copper") ||
-      lowerName.includes("brass") ||
-      lowerName.includes("aluminium")
+      lowerName.includes("brass")
     )
       return metalImage;
     if (
@@ -428,7 +430,7 @@ const Hero = () => {
         <div
           ref={heroRef}
           className="min-h-screen relative z-0 pb-20 md:pb-0 overflow-x-hidden md:-mt-[1px]"
-          style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+          style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
 
           {/* Header */}
           <Header />
@@ -441,10 +443,10 @@ const Hero = () => {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="relative">
               <div
-                className={`flex items-center rounded-full px-4 py-3 md:py-4 border transition-all ${isEditingLocation ? "" : "cursor-pointer"}`}
+                className={`flex items-center rounded-2xl px-5 py-4 md:py-5 border-2 transition-all shadow-lg hover:shadow-xl ${isEditingLocation ? "" : "cursor-pointer"}`}
                 style={{
                   backgroundColor: "#ffffff",
-                  borderColor: isEditingLocation ? "#64946e" : "#e5ddd4",
+                  borderColor: isEditingLocation ? "#0ea5e9" : "#e0f2fe",
                 }}
                 onClick={
                   !isEditingLocation ? handleLocationClick : undefined
@@ -455,7 +457,7 @@ const Hero = () => {
                   viewBox="0 0 24 24"
                   fill="none"
                   className="mr-3 flex-shrink-0"
-                  style={{ color: "#64946e" }}>
+                  style={{ color: "#38bdf8" }}>
                   <path
                     d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
                     fill="currentColor"
@@ -506,9 +508,9 @@ const Hero = () => {
                           e.stopPropagation();
                           getLiveLocation();
                         }}
-                        className="ml-2 px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-1.5 transition-all flex-shrink-0"
+                        className="ml-2 px-4 py-2 rounded-xl text-xs md:text-sm font-bold flex items-center gap-2 transition-all shadow-md hover:shadow-lg flex-shrink-0"
                         style={{
-                          backgroundColor: "#64946e",
+                          backgroundColor: "#0ea5e9",
                           color: "#ffffff",
                         }}
                         title="Get current location">
@@ -533,7 +535,7 @@ const Hero = () => {
                         className="ml-2 p-1.5 rounded-lg transition-all flex-shrink-0"
                         style={{
                           backgroundColor: "transparent",
-                          color: "#64946e",
+                          color: "#38bdf8",
                         }}
                         title="Get current location">
                         <svg
@@ -583,7 +585,7 @@ const Hero = () => {
                             viewBox="0 0 24 24"
                             fill="none"
                             className="mt-0.5 flex-shrink-0"
-                            style={{ color: "#64946e" }}>
+                            style={{ color: "#38bdf8" }}>
                             <path
                               d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
                               fill="currentColor"
@@ -620,28 +622,17 @@ const Hero = () => {
 
           {/* Main Hero Content */}
           <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
-            {/* Value Proposition Section with Image */}
+            {/* Value Proposition Section - Hidden on mobile, shown on desktop */}
             <motion.div
               initial={{ y: 20 }}
               animate={{ y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="mt-3 md:mt-6 lg:mt-12 xl:mt-16">
+              className="mt-3 md:mt-6 lg:mt-12 xl:mt-16 hidden md:block">
               <div className="flex flex-row items-center md:items-start gap-3 md:gap-6 lg:gap-8">
-                {/* Left Side - Text and Button */}
+                {/* Left Side - Text Only */}
                 <div className="flex-1 text-left">
-                  <h1
-                    className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-2 md:mb-4 lg:mb-6 leading-tight text-left"
-                    style={{
-                      color: "#2d3748",
-                    }}>
-                    {getTranslatedText("Sell Your Scrap")}
-                    <br />
-                    <span style={{ color: "#64946e" }}>
-                      {getTranslatedText("We'll Pick It Up")}
-                    </span>
-                  </h1>
                   <p
-                    className="hidden md:block text-base md:text-lg lg:text-xl xl:text-2xl mb-4 md:mb-6 lg:mb-8 max-w-2xl"
+                    className="text-base md:text-lg lg:text-xl xl:text-2xl mb-4 md:mb-6 lg:mb-8 max-w-2xl"
                     style={{ color: "#4a5568" }}>
                     {getTranslatedText(
                       "Real-time market prices. Verified scrappers. Cash on pickup."
@@ -655,51 +646,73 @@ const Hero = () => {
                       )}
                     </span>
                   </p>
+                </div>
+              </div>
+            </motion.div>
 
-                  {/* Primary CTA */}
-                  <motion.div
-                    initial={{ scale: 0.95 }}
-                    animate={{ scale: 1 }}
-                    transition={{ duration: 0.5, delay: 0.4 }}
-                    className="flex mb-4 md:mb-8 lg:mb-12 justify-start">
+            {/* Banner Section - "Turn Your Trash into Cash!" */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="mt-4 md:mt-8 mb-6 md:mb-8">
+              <div
+                className="rounded-3xl p-5 md:p-6 relative overflow-hidden"
+                style={{
+                  background: "linear-gradient(to right, #3b82f6 0%, #7dd3fc 60%, #bae6fd 100%)",
+                  boxShadow: "0 8px 24px rgba(59, 130, 246, 0.4), 0 4px 12px rgba(125, 211, 252, 0.3)"
+                }}>
+                {/* Enhanced Geometric Pattern Background - More Prominent */}
+                <div className="absolute inset-0">
+                  {/* Large circles - highly visible with darker opacity */}
+                  <div className="absolute top-0 left-0 w-48 h-48 bg-white opacity-40 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+                  <div className="absolute bottom-0 right-0 w-56 h-56 bg-white opacity-40 rounded-full translate-x-1/3 translate-y-1/3"></div>
+                  <div className="absolute top-1/2 right-1/4 w-40 h-40 bg-white opacity-35 rounded-full"></div>
+                  <div className="absolute bottom-1/3 left-1/3 w-36 h-36 bg-white opacity-35 rounded-full"></div>
+                  
+                  {/* Recycling symbols pattern - much darker and prominent */}
+                  <div className="absolute top-1/4 left-1/4 text-white text-7xl opacity-60 font-bold">♻</div>
+                  <div className="absolute bottom-1/4 right-1/3 text-white text-6xl opacity-60 font-bold">♻</div>
+                  <div className="absolute top-1/2 left-1/2 text-white text-5xl opacity-50 font-bold">♻</div>
+                  
+                  {/* Geometric shapes - highly prominent */}
+                  <div className="absolute top-1/3 right-1/2 w-32 h-32 bg-white opacity-50 rotate-45"></div>
+                  <div className="absolute bottom-1/2 left-1/4 w-28 h-28 bg-white opacity-45 rotate-12"></div>
+                </div>
+
+                <div className="relative z-10">
+                  {/* Banner Text */}
+                  <div className="mb-4 text-center md:text-left">
+                    <h2 
+                      className="text-xl md:text-2xl lg:text-3xl font-bold mb-2 flex items-center justify-center md:justify-start gap-2"
+                      style={{ 
+                        color: "#1e3a8a",
+                        textShadow: "1px 1px 2px rgba(255, 255, 255, 0.5)" 
+                      }}>
+                      Turn Your Trash into Cash!
+                    </h2>
+                    <p 
+                      className="text-sm md:text-base lg:text-lg"
+                      style={{ 
+                        color: "#1e40af",
+                        textShadow: "1px 1px 2px rgba(255, 255, 255, 0.3)" 
+                      }}>
+                      Get the best rates for your scrap at your doorstep
+                    </p>
+                  </div>
+
+                  {/* Request Pickup Button - Inside Banner, Centered */}
+                  <div className="flex justify-center">
                     <button
                       onClick={() => navigate("/add-scrap/category")}
-                      className="relative inline-flex items-center justify-center text-white font-semibold py-2 px-6 md:py-4 md:px-8 lg:py-5 lg:px-12 xl:py-6 xl:px-16 rounded-full text-sm md:text-lg lg:text-xl xl:text-2xl border-2 transform hover:-translate-y-0.5 hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4"
+                      className="relative inline-flex items-center justify-center text-white font-bold py-2.5 px-6 md:py-3 md:px-10 rounded-full text-sm md:text-base shadow-2xl transform hover:-translate-y-1 hover:shadow-3xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-white/30"
                       style={{
                         backgroundColor: "#000000",
-                        borderColor: "#22c55e",
-                        boxShadow: "0 10px 25px rgba(0,0,0,0.6)",
                       }}>
                       {getTranslatedText("Request Pickup Now")}
                     </button>
-                  </motion.div>
+                  </div>
                 </div>
-
-                {/* Image - No Container Div with Circular Rotation */}
-                <motion.img
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{
-                    opacity: 1,
-                    x: 0,
-                    rotate: 360,
-                  }}
-                  transition={{
-                    opacity: { duration: 0.6, delay: 0.4 },
-                    x: { duration: 0.6, delay: 0.4 },
-                    rotate: {
-                      duration: 20,
-                      repeat: Infinity,
-                      ease: "linear",
-                    },
-                  }}
-                  src={scrapImage}
-                  alt="Scrap collection"
-                  className="flex-shrink-0 w-32 sm:w-40 md:w-48 lg:w-56 xl:w-64 h-auto object-cover"
-                  style={{
-                    background: "transparent",
-                    transformOrigin: "center center",
-                  }}
-                />
               </div>
             </motion.div>
           </div>
@@ -710,67 +723,55 @@ const Hero = () => {
               initial={{ y: 10 }}
               animate={{ y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className="mt-2 md:mt-4 mb-6 md:mb-8">
-              <div className="flex justify-between items-center mb-3 md:mb-4">
+              className="mt-2 md:mt-4 mb-4 md:mb-6">
+              <div className="flex justify-between items-center mb-3">
                 <h3
-                  className="text-xl md:text-2xl font-bold"
+                  className="text-lg md:text-xl font-bold"
                   style={{ color: "#2d3748" }}>
                   {getTranslatedText("Scrap Categories")}
                 </h3>
                 <button
                   onClick={() => navigate("/categories")}
-                  className="text-sm md:text-base font-medium hover:opacity-80 transition-opacity"
-                  style={{ color: "#64946e" }}>
+                  className="text-xs md:text-sm font-semibold hover:opacity-80 transition-opacity"
+                  style={{ color: "#2d3748" }}>
                   {getTranslatedText("See all")}
                 </button>
               </div>
-              <div className="overflow-x-auto pb-4 scrollbar-hide">
+              {/* Horizontal Scrolling Container */}
+              <div className="relative -mx-4 md:mx-0">
                 <div
-                  className="flex flex-col gap-3 md:gap-4"
-                  style={{ width: "max-content" }}>
-                  {/* Display dynamic categories in rows of 3 */}
-                  {Array.from({ length: Math.ceil(activeCategories.length / 3) }).map((_, rowIndex) => (
-                    <div key={rowIndex} className="flex gap-3 md:gap-4">
-                      {activeCategories.slice(rowIndex * 3, (rowIndex + 1) * 3).map((category, index) => (
-                        <motion.div
-                          key={category.name}
-                          initial={{ x: -20 }}
-                          animate={{ x: 0 }}
-                          transition={{
-                            duration: 0.5,
-                            delay: 0.7 + (rowIndex * 3 + index) * 0.1,
-                          }}
-                          className="flex-shrink-0 w-24 md:w-28 lg:w-32 cursor-pointer"
-                          onClick={() =>
-                            navigate("/add-scrap/category", {
-                              state: { preSelectedCategory: category.name },
-                            })
-                          }
-                          whileTap={{ scale: 0.95 }}>
-                          <div
-                            className="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
-                            style={{ backgroundColor: "#ffffff" }}>
-                            <div
-                              className="aspect-square relative overflow-hidden bg-gray-100"
-                              style={{ width: "100%" }}>
-                              <img
-                                src={category.image}
-                                alt={category.name}
-                                className="w-full h-full object-cover"
-                                style={{ display: "block" }}
-                                loading="lazy"
-                              />
-                            </div>
-                            <div className="p-2 md:p-2.5">
-                              <p
-                                className="text-xs md:text-sm font-semibold text-center truncate"
-                                style={{ color: "#2d3748" }}>
-                                {category.name}
-                              </p>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
+                  className="flex gap-4 md:gap-6 overflow-x-auto scrollbar-hide pb-3 px-4 md:px-0"
+                  style={{
+                    scrollbarWidth: "none",
+                    msOverflowStyle: "none",
+                    WebkitOverflowScrolling: "touch",
+                  }}>
+                  {activeCategories.map((category, index) => (
+                    <div
+                      key={category.name}
+                      className="cursor-pointer flex flex-col items-center flex-shrink-0 w-[30%] md:w-32"
+                      onClick={() =>
+                        navigate("/add-scrap/category", {
+                          state: { preSelectedCategory: category.name },
+                        })
+                      }>
+                      {/* Circular Image Container */}
+                      <div
+                        className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 mb-2 bg-white"
+                        style={{ border: "2px solid #e0f2fe" }}>
+                        <img
+                          src={category.image}
+                          alt={category.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      {/* Category Name Below Circle */}
+                      <p
+                        className="text-xs md:text-sm font-bold text-center"
+                        style={{ color: "#1e293b" }}>
+                        {category.name}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -805,23 +806,23 @@ const Hero = () => {
               whileInView={{ y: 0, opacity: 1 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.6, ease: "easeOut" }}
-              className="mt-8 md:mt-12 mb-8 md:mb-12">
+              className="mt-6 md:mt-8 mb-6 md:mb-8">
               <h3
-                className="text-lg md:text-2xl font-bold mb-4 md:mb-8 text-center"
-                style={{ color: "#2d3748" }}>
+                className="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-center"
+                style={{ color: "#1e293b" }}>
                 Why Junkar?
               </h3>
-              <div className="flex flex-col gap-3 md:grid md:grid-cols-3 md:gap-6">
+              <div className="flex flex-col gap-3 md:grid md:grid-cols-3 md:gap-4">
                 {[
                   {
                     icon: (
                       <svg
-                        width="18"
-                        height="18"
+                        width="20"
+                        height="20"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="2">
+                        strokeWidth="2.5">
                         <polyline points="22 2 11 13 6 8"></polyline>
                       </svg>
                     ),
@@ -831,12 +832,12 @@ const Hero = () => {
                   {
                     icon: (
                       <svg
-                        width="18"
-                        height="18"
+                        width="20"
+                        height="20"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="2">
+                        strokeWidth="2.5">
                         <line x1="12" y1="1" x2="12" y2="23"></line>
                         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                       </svg>
@@ -847,12 +848,12 @@ const Hero = () => {
                   {
                     icon: (
                       <svg
-                        width="18"
-                        height="18"
+                        width="20"
+                        height="20"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="2">
+                        strokeWidth="2.5">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                       </svg>
                     ),
@@ -860,50 +861,41 @@ const Hero = () => {
                     desc: "KYC-verified partners with reliable pickups for a worry-free experience.",
                   },
                 ].map((item, index) => (
-                  <motion.div
+                  <div
                     key={index}
-                    initial={{ y: 12, opacity: 0 }}
-                    whileInView={{ y: 0, opacity: 1 }}
-                    viewport={{ once: true, margin: "-40px" }}
-                    transition={{
-                      duration: 0.45,
-                      delay: index * 0.12,
-                      ease: "easeOut",
-                    }}
                     className="w-full">
                     <div
-                      className="rounded-xl md:rounded-2xl p-4 md:p-6 h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+                      className="rounded-xl md:rounded-2xl p-4 md:p-5 h-full transition-all duration-300 border hover:shadow-md"
                       style={{
-                        backgroundColor: "#ffffff",
-                        border: "1px solid rgba(100, 148, 110, 0.15)",
+                        backgroundColor: "#f0f9ff",
+                        borderColor: "#e0f2fe",
+                        boxShadow: "0 2px 8px rgba(14, 165, 233, 0.06)",
                       }}>
                       <div className="flex items-start gap-3">
-                        {/* Icon Container */}
                         <div
-                          className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0"
+                          className="w-11 h-11 md:w-12 md:h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                           style={{
-                            backgroundColor: "rgba(100, 148, 110, 0.1)",
-                            color: "#64946e",
+                            backgroundColor: "#f0f9ff",
+                            color: "#0ea5e9",
                           }}>
                           {item.icon}
                         </div>
 
-                        {/* Content */}
                         <div className="flex-1 min-w-0">
                           <h4
-                            className="font-bold text-sm md:text-xl mb-1 md:mb-2"
-                            style={{ color: "#2d3748" }}>
+                            className="font-bold text-base md:text-lg mb-1"
+                            style={{ color: "#1e293b" }}>
                             {getTranslatedText(item.title)}
                           </h4>
                           <p
-                            className="text-xs md:text-base leading-tight md:leading-relaxed"
-                            style={{ color: "#718096" }}>
+                            className="text-xs md:text-sm leading-relaxed"
+                            style={{ color: "#64748b" }}>
                             {getTranslatedText(item.desc)}
                           </p>
                         </div>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </motion.div>
@@ -934,13 +926,13 @@ const Hero = () => {
             className="flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer active:scale-95 transition-transform duration-200 py-2"
             onClick={() => navigate('/')}
           >
-            <div className="p-1.5 rounded-xl transition-colors duration-300 bg-gray-800 text-emerald-400">
+            <div className="p-1.5 rounded-xl transition-colors duration-300 bg-gray-800 text-sky-300">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
               </svg>
             </div>
-            <span className="text-[10px] font-semibold tracking-wide text-emerald-400">Home</span>
+            <span className="text-[10px] font-semibold tracking-wide text-sky-300">Home</span>
           </div>
 
           {/* Price Tab */}
@@ -948,7 +940,7 @@ const Hero = () => {
             className="flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer active:scale-95 transition-transform duration-200 py-2"
             onClick={() => navigate('/prices')}
           >
-            <div className="p-1.5 rounded-xl text-gray-400 hover:text-emerald-400 transition-colors duration-300">
+            <div className="p-1.5 rounded-xl text-gray-400 hover:text-sky-300 transition-colors duration-300">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
                 <line x1="7" y1="7" x2="7.01" y2="7"></line>
@@ -960,12 +952,12 @@ const Hero = () => {
           {/* Center Action Button (Floating) - SELL */}
           <div className="flex-1 flex flex-col items-center justify-end relative z-10 -top-5 group"
             onClick={() => navigate('/add-scrap/category')}>
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 transform group-active:scale-95 transition-all duration-300 border-4 border-black">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-sky-500 to-sky-600 flex items-center justify-center shadow-lg shadow-sky-500/30 transform group-active:scale-95 transition-all duration-300 border-4 border-black">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-white transform group-hover:rotate-180 transition-transform duration-500">
                 <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <span className="text-[10px] font-bold text-emerald-400 mt-1 tracking-wide">Sell</span>
+            <span className="text-[10px] font-bold text-sky-300 mt-1 tracking-wide">Sell</span>
           </div>
 
           {/* Refer Tab */}
@@ -973,7 +965,7 @@ const Hero = () => {
             className="flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer active:scale-95 transition-transform duration-200 py-2"
             onClick={() => navigate('/refer-earn')}
           >
-            <div className="p-1.5 rounded-xl text-gray-400 hover:text-emerald-400 transition-colors duration-300">
+            <div className="p-1.5 rounded-xl text-gray-400 hover:text-sky-300 transition-colors duration-300">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="20 12 20 22 4 22 4 12"></polyline>
                 <rect x="2" y="7" width="20" height="5"></rect>
@@ -990,7 +982,7 @@ const Hero = () => {
             className="flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer active:scale-95 transition-transform duration-200 py-2"
             onClick={() => navigate('/my-profile')}
           >
-            <div className="p-1.5 rounded-xl text-gray-400 hover:text-emerald-400 transition-colors duration-300">
+            <div className="p-1.5 rounded-xl text-gray-400 hover:text-sky-300 transition-colors duration-300">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
@@ -1005,3 +997,4 @@ const Hero = () => {
 };
 
 export default Hero;
+

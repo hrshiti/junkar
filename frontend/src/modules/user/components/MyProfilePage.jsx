@@ -185,7 +185,7 @@ const MyProfilePage = () => {
             timestamp: new Date(tx.createdAt),
             displayTime: new Date(tx.createdAt).toLocaleDateString(),
             icon: tx.type === 'CREDIT' ? FaWallet : FaCheckCircle,
-            color: tx.type === 'CREDIT' ? "#10b981" : "#ef4444"
+            color: tx.type === 'CREDIT' ? "#0ea5e9" : "#ef4444"
           }));
 
           const mappedOrders = orders.map(order => ({
@@ -252,7 +252,7 @@ const MyProfilePage = () => {
           const catDist = [];
           const totalItems = Object.values(categoryCount).reduce((a, b) => a + b, 0);
 
-          const colors = ["#64946e", "#5a8263", "#4a7c5a", "#3a6c4a", "#2d5a3f"];
+          const colors = ["#38bdf8", "#5a8263", "#4a7c5a", "#3a6c4a", "#2d5a3f"];
           let colorIndex = 0;
 
           Object.entries(categoryCount).forEach(([cat, count]) => {
@@ -308,53 +308,49 @@ const MyProfilePage = () => {
       title: getTranslatedText("Saved Addresses"),
       desc: getTranslatedText("Manage pickup locations"),
       action: () => navigate("/saved-addresses"),
-      color: "#10b981"
+      color: "#0ea5e9"
     },
     {
       icon: <MdAssignment />,
       title: getTranslatedText("My Requests"),
       desc: getTranslatedText("View pickup history & status"),
       action: () => navigate("/my-requests"),
-      color: "#10b981"
+      color: "#0ea5e9"
     },
     {
       icon: <FaCommentAlt />,
       title: getTranslatedText("Chat"),
       desc: getTranslatedText("Messages with scrappers"),
       action: () => navigate("/chats"),
-      color: "#10b981"
+      color: "#0ea5e9"
     },
     {
       icon: <FaBell />,
       title: getTranslatedText("Notifications"),
       desc: getTranslatedText("Manage notification settings"),
       action: () => navigate("/notifications"),
-      color: "#10b981"
+      color: "#0ea5e9"
     },
     {
       icon: <FaQuestionCircle />,
       title: getTranslatedText("Help & Support"),
       desc: getTranslatedText("FAQ, contact support"),
       action: () => navigate("/help"),
-      color: "#10b981"
+      color: "#0ea5e9"
     },
     {
       icon: <FaCog />,
       title: getTranslatedText("Terms & Conditions"),
       desc: getTranslatedText("Read platform terms & conditions"),
       action: () => navigate("/terms"),
-      color: "#10b981"
+      color: "#0ea5e9"
     }
   ];
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+    <div
       className="min-h-screen pb-20 md:pb-0"
-      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+      style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
       {/* Header */}
       <div
         className="sticky top-0 z-40 px-3 md:px-6 lg:px-8 py-3 md:py-6"
@@ -371,29 +367,21 @@ const MyProfilePage = () => {
 
       <div className="px-3 md:px-6 lg:px-8 max-w-7xl mx-auto">
         {/* Profile Header Card */}
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="mb-3 md:mb-6"
-        >
+        <div className="mb-3 md:mb-6">
           <div
             className="rounded-xl md:rounded-2xl p-3 md:p-6 shadow-lg backdrop-blur-sm"
             style={{ backgroundColor: "rgba(255, 255, 255, 0.9)" }}>
             <AnimatePresence mode="wait">
               {!isEditMode ? (
-                <motion.div
+                <div
                   key="view"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
                   className="flex items-center gap-3 md:gap-4">
                   {/* Profile Picture */}
                   <div
                     className="w-12 h-12 md:w-20 md:h-20 rounded-full flex items-center justify-center flex-shrink-0 relative shadow-inner"
                     style={{
-                      backgroundColor: '#ecfdf5',
-                      border: '2px solid #10b981'
+                      backgroundColor: '#f0f9ff',
+                      border: '2px solid #0ea5e9'
                     }}
                   >
                     {formData.profilePicture ? (
@@ -405,7 +393,7 @@ const MyProfilePage = () => {
                     ) : (
                       <span
                         className="text-lg md:text-3xl font-bold"
-                        style={{ color: "#059669" }}>
+                        style={{ color: "#0284c7" }}>
                         {formData.name.charAt(0).toUpperCase()}
                       </span>
                     )}
@@ -427,8 +415,8 @@ const MyProfilePage = () => {
                       <span
                         className="text-[10px] md:text-xs px-2 py-0.5 rounded-full font-medium"
                         style={{
-                          backgroundColor: '#ecfdf5',
-                          color: '#059669'
+                          backgroundColor: '#f0f9ff',
+                          color: '#0284c7'
                         }}
                       >
                         {getTranslatedText("Verified")}
@@ -436,8 +424,8 @@ const MyProfilePage = () => {
                       <span
                         className="text-[10px] md:text-xs px-2 py-0.5 rounded-full flex items-center gap-1 font-medium"
                         style={{
-                          backgroundColor: '#ecfdf5',
-                          color: '#059669'
+                          backgroundColor: '#f0f9ff',
+                          color: '#0284c7'
                         }}
                       >
                         {stats.averageRating} <FaStar size={8} />
@@ -451,18 +439,15 @@ const MyProfilePage = () => {
                     onClick={() => setIsEditMode(true)}
                     className="p-1.5 md:p-2 rounded-lg hover:bg-emerald-50 transition-colors flex-shrink-0"
                     style={{
-                      color: '#059669'
+                      color: '#0284c7'
                     }}
                   >
                     <FaEdit size={14} className="md:w-5 md:h-5" />
                   </button>
-                </motion.div>
+                </div>
               ) : (
-                <motion.div
+                <div
                   key="edit"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
                   className="space-y-3 md:space-y-4">
                   {/* Profile Picture Upload */}
                   <div className="flex flex-col items-center gap-3">
@@ -470,8 +455,8 @@ const MyProfilePage = () => {
                       <div
                         className="w-16 h-16 md:w-24 md:h-24 rounded-full flex items-center justify-center relative overflow-hidden shadow-inner"
                         style={{
-                          backgroundColor: '#ecfdf5',
-                          border: '2px solid #10b981'
+                          backgroundColor: '#f0f9ff',
+                          border: '2px solid #0ea5e9'
                         }}
                       >
                         {formData.profilePicture ? (
@@ -483,7 +468,7 @@ const MyProfilePage = () => {
                         ) : (
                           <span
                             className="text-xl md:text-4xl font-bold"
-                            style={{ color: "#059669" }}>
+                            style={{ color: "#0284c7" }}>
                             {formData.name.charAt(0).toUpperCase()}
                           </span>
                         )}
@@ -492,7 +477,7 @@ const MyProfilePage = () => {
                         htmlFor="profile-picture"
                         className="absolute bottom-0 right-0 w-6 h-6 md:w-10 md:h-10 rounded-full flex items-center justify-center cursor-pointer shadow-lg transition-transform hover:scale-110"
                         style={{
-                          backgroundColor: '#10b981',
+                          backgroundColor: '#0ea5e9',
                           color: '#ffffff'
                         }}
                       >
@@ -575,22 +560,21 @@ const MyProfilePage = () => {
                     <button
                       onClick={handleSave}
                       className="flex-1 py-1.5 md:py-2.5 px-3 rounded-lg font-semibold text-xs md:text-base text-white transition-all shadow-md hover:shadow-lg"
-                      style={{ backgroundColor: "#10b981" }}>
+                      style={{ backgroundColor: "#0ea5e9" }}>
                       {getTranslatedText("Save Changes")}
                     </button>
                   </div>
-                </motion.div>
+                </div>
               )}
             </AnimatePresence>
           </div>
-        </motion.div>
+        </div>
 
         {/* Tabs */}
         <div className="flex gap-2 mb-3 md:mb-6 overflow-x-auto scrollbar-hide pb-1">
           {[
             { id: "overview", label: getTranslatedText("Overview") },
             { id: "activity", label: getTranslatedText("Activity") },
-
             {
               id: "refer",
               label: getTranslatedText("Refer & Earn"),
@@ -600,14 +584,14 @@ const MyProfilePage = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-3 py-1.5 md:px-6 md:py-3 rounded-full md:rounded-lg font-semibold text-xs md:text-base whitespace-nowrap transition-all flex items-center gap-1.5 shadow-sm ${activeTab === tab.id ? 'text-white' : 'text-slate-600'
+              className={`flex-1 px-4 py-2 rounded-full font-semibold text-sm whitespace-nowrap transition-all flex items-center justify-center gap-1.5 shadow-sm ${activeTab === tab.id ? 'text-white' : 'text-slate-600'
                 }`}
               style={{
-                backgroundColor: activeTab === tab.id ? "#10b981" : "#ffffff",
+                backgroundColor: activeTab === tab.id ? "#0ea5e9" : "#ffffff",
                 border: "none",
                 boxShadow: activeTab === tab.id ? "0 4px 6px -1px rgba(16, 185, 129, 0.3)" : "0 1px 2px 0 rgba(0, 0, 0, 0.05)"
               }}>
-              {tab.icon && <tab.icon className="text-xs md:text-sm" />}
+              {tab.icon && <tab.icon className="text-sm" />}
               {tab.label}
             </button>
           ))}
@@ -616,202 +600,205 @@ const MyProfilePage = () => {
         {/* Tab Content */}
         <AnimatePresence mode="wait">
           {activeTab === "overview" && (
-            <motion.div
+            <div
               key="overview"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
               className="space-y-3 md:space-y-6">
 
               {/* Wallet Balance */}
               <div
-                className="rounded-xl md:rounded-2xl p-3 md:p-6 shadow-sm bg-gradient-to-r from-emerald-500 to-emerald-600 text-white"
+                className="rounded-2xl p-4 shadow-xl border-2 border-slate-100 transition-shadow hover:shadow-2xl relative overflow-hidden"
+                style={{ backgroundColor: "#ffffff" }}
               >
-                <div className="flex items-center justify-between mb-3">
-                  <h3
-                    className="font-bold text-sm md:text-lg"
-                    style={{ color: "#ffffff" }}>
-                    {getTranslatedText("Wallet Balance")}
-                  </h3>
-                  <button
-                    onClick={() => navigate('/wallet')}
-                    className="text-xs md:text-sm font-medium hover:underline text-white/90"
-                  >
-                    {getTranslatedText("View All")}
-                  </button>
+                {/* Subtle background pattern */}
+                <div className="absolute inset-0 opacity-5">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-500 rounded-full translate-y-1/2 -translate-x-1/2"></div>
                 </div>
-                <div className="flex items-center gap-3 md:gap-4">
-                  <div
-                    className="w-12 h-12 md:w-20 md:h-20 rounded-full flex items-center justify-center bg-white/20 backdrop-blur-sm"
-                  >
-                    <HiCash
-                      className="text-xl md:text-3xl text-white"
-                    />
+                
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-bold text-base text-slate-800">
+                      {getTranslatedText("Wallet Balance")}
+                    </h3>
+                    <button
+                      onClick={() => navigate('/wallet')}
+                      className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
+                      style={{ 
+                        backgroundColor: "#f0f9ff",
+                        color: "#0ea5e9"
+                      }}
+                    >
+                      {getTranslatedText("View All")}
+                    </button>
                   </div>
-                  <div>
-                    <p
-                      className="text-xl md:text-3xl font-bold text-white shadow-sm"
+                  
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center shadow-md"
+                      style={{ 
+                        background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)"
+                      }}
                     >
-                      ₹{walletBalance.toFixed(2)}
-                    </p>
-                    <p
-                      className="text-xs md:text-base text-emerald-100"
-                    >
-                      {getTranslatedText("Available balance")}
-                    </p>
+                      <HiCash className="text-2xl text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-2xl font-bold text-slate-800">
+                        ₹{walletBalance.toFixed(2)}
+                      </p>
+                      <p className="text-xs text-slate-500 font-medium">
+                        {getTranslatedText("Available balance")}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Quick Actions - Merged from old Profile.jsx */}
               <div
-                className="rounded-xl md:rounded-2xl p-3 md:p-6 shadow-sm"
+                className="rounded-2xl p-4 shadow-xl border-2 border-slate-100 transition-shadow hover:shadow-2xl"
                 style={{ backgroundColor: '#ffffff' }}
               >
                 <h3
-                  className="font-bold text-sm md:text-lg mb-3"
+                  className="font-bold text-base mb-3"
                   style={{ color: "#1e293b" }}>
                   {getTranslatedText("Quick Actions")}
                 </h3>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   {quickActions.map((action, index) => (
-                    <motion.button
+                    <button
                       key={index}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.05 }}
                       onClick={action.action}
-                      className="p-3 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all hover:shadow-md hover:border-emerald-200"
+                      className="p-3 rounded-xl flex flex-col items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 shadow-md hover:shadow-lg"
                       style={{
-                        backgroundColor: "#f8fafc",
-                        borderColor: "#f1f5f9"
+                        backgroundColor: "#ffffff",
+                        border: "2px solid #cbd5e1"
                       }}
                     >
                       <div
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-xl"
-                        style={{ backgroundColor: "#ecfdf5", color: "#10b981" }}
+                        className="w-11 h-11 rounded-xl flex items-center justify-center shadow-sm"
+                        style={{ 
+                          background: "linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)",
+                          color: "#0284c7"
+                        }}
                       >
-                        {action.icon}
+                        <span className="text-lg">{action.icon}</span>
                       </div>
-                      <div className="text-center">
-                        <p className="text-xs font-bold text-slate-700">{action.title}</p>
-                        <p className="text-[10px] text-slate-400 hidden md:block">{action.desc}</p>
-                      </div>
-                    </motion.button>
+                      <p className="text-xs font-bold text-slate-700 text-center leading-tight">{action.title}</p>
+                    </button>
                   ))}
                 </div>
               </div>
-            </motion.div>
+            </div>
           )}
 
           {activeTab === "activity" && (
-            <motion.div
-              key="activity"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}>
+            <div key="activity">
               {loadingActivity ? (
                 <div className="text-center py-10">
                   <p className="text-slate-500">{getTranslatedText("Loading activity...")}</p>
                 </div>
               ) : activities.length > 0 ? (
-                <div className="space-y-3 md:space-y-4">
+                <div className="space-y-3">
                   {activities.map((item, index) => (
-                    <motion.div
+                    <div
                       key={item.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: index * 0.05 }}
-                      className="rounded-xl md:rounded-2xl p-3 md:p-4 shadow-sm border border-slate-100"
+                      className="rounded-2xl p-4 shadow-lg border-2 border-slate-100 transition-shadow hover:shadow-xl"
                       style={{ backgroundColor: "#ffffff" }}>
-                      <div className="flex items-start gap-3 md:gap-4">
+                      <div className="flex items-center gap-3">
                         <div
-                          className="w-8 h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center flex-shrink-0"
+                          className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md"
                           style={{
-                            backgroundColor: "#ecfdf5",
+                            backgroundColor: "#f0f9ff",
+                            border: "2px solid #e0f2fe"
                           }}>
                           <item.icon
-                            className="text-sm md:text-xl"
-                            style={{ color: "#10b981" }}
+                            className="text-xl"
+                            style={{ color: "#0ea5e9" }}
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-start">
+                          <div className="flex justify-between items-start mb-1">
                             <h4
-                              className="font-bold text-xs md:text-base mr-2"
+                              className="font-bold text-sm leading-tight"
                               style={{ color: "#1e293b" }}>
                               {item.title}
                             </h4>
                             <span
-                              className="text-[10px] md:text-xs whitespace-nowrap"
+                              className="text-xs whitespace-nowrap font-medium ml-2"
                               style={{ color: "#94a3b8" }}>
                               {item.displayTime}
                             </span>
                           </div>
                           <p
-                            className="text-[10px] md:text-sm mt-0.5 line-clamp-1 md:line-clamp-none"
+                            className="text-xs leading-tight font-medium"
                             style={{ color: "#64748b" }}>
                             {item.description}
                           </p>
-                          {item.amount && (
-                            <p
-                              className="text-xs md:text-sm font-bold mt-1"
-                              style={{ color: "#059669" }}>
-                              {item.amount}
-                            </p>
-                          )}
                         </div>
                       </div>
-                    </motion.div>
+                      {item.amount && (
+                        <div className="mt-3">
+                          <div
+                            className="w-full px-4 py-3 rounded-xl flex items-center justify-center gap-2 shadow-md"
+                            style={{ 
+                              background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)"
+                            }}>
+                            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p className="text-xl font-bold text-white">
+                              {item.amount}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-10">
+                <div className="text-center py-12 px-4">
                   <div
-                    className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
-                    style={{ backgroundColor: "#ecfdf5" }}>
+                    className="w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg"
+                    style={{ 
+                      backgroundColor: "#f0f9ff",
+                      border: "3px solid #e0f2fe"
+                    }}>
                     <FaChartLine
-                      className="text-3xl"
-                      style={{ color: "#10b981" }}
+                      className="text-4xl"
+                      style={{ color: "#0ea5e9" }}
                     />
                   </div>
                   <h3
-                    className="text-lg font-bold mb-2"
+                    className="text-xl font-bold mb-2"
                     style={{ color: "#1e293b" }}>
                     {getTranslatedText("No activity yet.")}
                   </h3>
-                  <p className="text-sm" style={{ color: "#64748b" }}>
+                  <p className="text-base font-medium" style={{ color: "#64748b" }}>
                     {getTranslatedText("Start by creating a new pickup request!")}
                   </p>
                 </div>
               )}
-            </motion.div>
+            </div>
           )}
 
 
           {activeTab === "refer" && (
-            <motion.div
+            <div
               key="refer"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
             >
               <ReferAndEarn getTranslatedText={getTranslatedText} />
-            </motion.div>
+            </div>
           )}
         </AnimatePresence>
 
         {/* Logout Button */}
-        <div className="mt-8 mb-8 text-center">
+        <div className="mt-6 mb-8 text-center">
           <button
             onClick={logout}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all hover:bg-opacity-90"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg active:scale-95"
             style={{
-              backgroundColor: "#feb2b2",
-              color: "#c53030",
+              background: "linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%)",
+              color: "#ffffff",
             }}>
             <FaSignOutAlt />
             {getTranslatedText("Logout")}
@@ -819,8 +806,9 @@ const MyProfilePage = () => {
         </div>
       </div>
       <UserBottomNav />
-    </motion.div>
+    </div>
   );
 };
 
 export default MyProfilePage;
+

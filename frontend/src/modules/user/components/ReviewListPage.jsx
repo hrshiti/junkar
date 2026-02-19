@@ -65,14 +65,14 @@ const ReviewListPage = () => {
         style={{ backgroundColor: "#f4ebe2" }}>
         <FaSpinner
           className="animate-spin text-4xl"
-          style={{ color: "#64946e" }}
+          style={{ color: "#38bdf8" }}
         />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pb-10" style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+    <div className="min-h-screen pb-10" style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
       <div
         className="sticky top-0 z-40 px-4 py-4 shadow-sm backdrop-blur-sm"
         style={{ backgroundColor: "rgba(255, 255, 255, 0.2)" }}>
@@ -119,3 +119,4 @@ const ReviewListPage = () => {
 };
 
 export default ReviewListPage;
+

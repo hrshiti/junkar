@@ -170,7 +170,7 @@ const SavedAddressesPage = () => {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
       className="min-h-screen pb-20 md:pb-0"
-      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+      style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
       <div
         className="sticky top-0 z-40 px-4 md:px-6 lg:px-8 py-4 md:py-6"
         style={{ background: "transparent" }}>
@@ -196,10 +196,10 @@ const SavedAddressesPage = () => {
               whileTap={{ scale: 0.95 }}
               onClick={handleAddNew}
               className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm md:text-base text-white transition-all shadow-md hover:shadow-lg hover:bg-emerald-600"
-              style={{ backgroundColor: "#059669" }}
+              style={{ backgroundColor: "#0284c7" }}
               onMouseEnter={(e) => (e.target.style.backgroundColor = "#047857")}
               onMouseLeave={(e) =>
-                (e.target.style.backgroundColor = "#059669")
+                (e.target.style.backgroundColor = "#0284c7")
               }>
               <FaPlus size={16} />
               <span className="hidden md:inline">
@@ -255,7 +255,7 @@ const SavedAddressesPage = () => {
                             style={{
                               backgroundColor:
                                 formData.type === type.value
-                                  ? "#ecfdf5"
+                                  ? "#f0f9ff"
                                   : "#ffffff",
                             }}>
                             <IconComponent
@@ -263,7 +263,7 @@ const SavedAddressesPage = () => {
                               style={{
                                 color:
                                   formData.type === type.value
-                                    ? "#059669"
+                                    ? "#0284c7"
                                     : "#64748b",
                               }}
                             />
@@ -272,7 +272,7 @@ const SavedAddressesPage = () => {
                               style={{
                                 color:
                                   formData.type === type.value
-                                    ? "#059669"
+                                    ? "#0284c7"
                                     : "#64748b",
                               }}>
                               {type.label}
@@ -448,8 +448,8 @@ const SavedAddressesPage = () => {
                       }
                       className="w-4 h-4 rounded border-2"
                       style={{
-                        accentColor: "#059669",
-                        borderColor: formData.isDefault ? "#059669" : "#e2e8f0",
+                        accentColor: "#0284c7",
+                        borderColor: formData.isDefault ? "#0284c7" : "#e2e8f0",
                       }}
                     />
                     <label
@@ -476,7 +476,7 @@ const SavedAddressesPage = () => {
                     <button
                       onClick={handleSave}
                       className="flex-1 py-2.5 md:py-3 px-4 rounded-lg font-semibold text-sm md:text-base text-white transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg hover:bg-emerald-600"
-                      style={{ backgroundColor: "#059669" }}
+                      style={{ backgroundColor: "#0284c7" }}
                     >
                       <FaCheck size={14} />
                       {getTranslatedText("Save Address")}
@@ -514,7 +514,7 @@ const SavedAddressesPage = () => {
               <button
                 onClick={handleAddNew}
                 className="px-6 py-3 rounded-lg font-semibold text-white transition-all shadow-md hover:shadow-lg hover:bg-emerald-600"
-                style={{ backgroundColor: "#059669" }}>
+                style={{ backgroundColor: "#0284c7" }}>
                 <FaPlus className="inline mr-2" />
                 Add Address
               </button>
@@ -534,7 +534,7 @@ const SavedAddressesPage = () => {
                   style={{
                     backgroundColor: "rgba(255, 255, 255, 0.9)",
                     border: address.isDefault
-                      ? "2px solid #10b981"
+                      ? "2px solid #0ea5e9"
                       : "1px solid #e2e8f0",
                   }}>
                   <div className="flex items-start gap-3 md:gap-4">
@@ -542,8 +542,8 @@ const SavedAddressesPage = () => {
                     <div
                       className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center flex-shrink-0"
                       style={{
-                        backgroundColor: "#ecfdf5",
-                        color: "#059669",
+                        backgroundColor: "#f0f9ff",
+                        color: "#0284c7",
                       }}>
                       <TypeIcon size={20} />
                     </div>
@@ -562,7 +562,7 @@ const SavedAddressesPage = () => {
                               <span
                                 className="text-xs px-2 py-0.5 rounded-full font-medium"
                                 style={{
-                                  backgroundColor: "#d1fae5",
+                                  backgroundColor: "#e0f2fe",
                                   color: "#047857",
                                 }}>
                                 Default
@@ -597,8 +597,8 @@ const SavedAddressesPage = () => {
                             className="px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all hover:bg-emerald-50"
                             style={{
                               backgroundColor: "transparent",
-                              border: "1px solid #10b981",
-                              color: "#059669",
+                              border: "1px solid #0ea5e9",
+                              color: "#0284c7",
                             }}
                           >
                             Set as Default
@@ -642,3 +642,4 @@ const SavedAddressesPage = () => {
 };
 
 export default SavedAddressesPage;
+

@@ -2,7 +2,9 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import plasticImage from "../assets/plastic.jpg";
-import metalImage from "../assets/metal.jpg";
+import metalImage from "../assets/metal2.jpg";
+import copperImage from "../assets/metal.jpg";
+import aluminiumImage from "../assets/Aluminium.jpg";
 import scrapImage2 from "../assets/scrab.png";
 import electronicImage from "../assets/electronicbg.png";
 
@@ -31,13 +33,13 @@ const AllCategoriesPage = () => {
   const getCategoryImage = (name) => {
     const lowerName = name.toLowerCase();
     if (lowerName.includes("plastic")) return plasticImage;
+    if (lowerName.includes("aluminium")) return aluminiumImage;
+    if (lowerName.includes("copper")) return copperImage;
     if (
       lowerName.includes("metal") ||
       lowerName.includes("iron") ||
       lowerName.includes("steel") ||
-      lowerName.includes("copper") ||
-      lowerName.includes("brass") ||
-      lowerName.includes("aluminium")
+      lowerName.includes("brass")
     )
       return metalImage;
     if (
@@ -110,20 +112,21 @@ const AllCategoriesPage = () => {
   return (
     <div
       className="min-h-screen w-full relative z-0 pb-20 md:pb-0 overflow-x-hidden"
-      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+      style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
       {/* Sticky Header with Back Button */}
       <div
-        className="sticky top-0 z-40 px-4 md:px-6 lg:px-8 py-4 md:py-6"
-        style={{ background: "transparent" }}>
+        className="sticky top-0 z-40 px-4 md:px-6 lg:px-8 py-5 md:py-6 backdrop-blur-md"
+        style={{ backgroundColor: "rgba(125, 211, 252, 0.9)" }}>
         <div className="max-w-7xl mx-auto flex items-center gap-4">
           <button
             onClick={() => navigate("/")}
-            className="p-2 rounded-full hover:opacity-70 transition-opacity flex-shrink-0 bg-white/20 backdrop-blur-sm shadow-sm"
+            className="p-3 rounded-xl hover:opacity-80 transition-all flex-shrink-0 shadow-lg"
             style={{
-              color: "#ffffff",
+              backgroundColor: "#ffffff",
+              color: "#0ea5e9",
             }}
             aria-label={getTranslatedText("Go back")}>
-            <FaArrowLeft size={18} />
+            <FaArrowLeft size={20} />
           </button>
           <div>
             <h1
@@ -145,42 +148,40 @@ const AllCategoriesPage = () => {
         {/* Scrap Materials Section */}
         <div className="mb-8">
           <h2
-            className="text-xl font-bold mb-4 ml-1"
-            style={{ color: "#2d3748" }}>
+            className="text-2xl md:text-3xl font-bold mb-5 ml-1"
+            style={{ color: "#1e293b" }}>
             {getTranslatedText("Scrap Materials")}
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
             {categories.map((category, index) => (
               <motion.div
                 key={`cat-${index}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
-                whileHover={{ y: -5, scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={() => handleCategoryClick(category)}
                 className="cursor-pointer">
                 <div
-                  className="rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
+                  className="rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-sky-100"
                   style={{ backgroundColor: "#ffffff" }}>
-                  <div className="aspect-square relative overflow-hidden bg-gray-100">
+                  <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-sky-50 to-blue-50">
                     <img
                       src={category.image}
                       alt={category.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                       style={{ display: "block" }}
                       loading="lazy"
                     />
                   </div>
-                  <div className="p-4">
+                  <div className="p-3 md:p-4">
                     <p
-                      className="text-base md:text-lg font-semibold text-center mb-1"
-                      style={{ color: "#2d3748" }}>
+                      className="text-sm md:text-base font-bold text-center mb-1"
+                      style={{ color: "#1e293b" }}>
                       {category.name}
                     </p>
                     <p
-                      className="text-xs md:text-sm text-center"
-                      style={{ color: "#718096" }}>
+                      className="text-xs text-center font-medium"
+                      style={{ color: "#64748b" }}>
                       {getTranslatedText("Sell your {category} scrap", {
                         category: category.name,
                       })}
@@ -197,3 +198,4 @@ const AllCategoriesPage = () => {
 };
 
 export default AllCategoriesPage;
+

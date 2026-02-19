@@ -550,7 +550,7 @@ const LoginSignup = () => {
                     borderColor: "#e5ddd4",
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = "#64946e";
+                    e.currentTarget.style.borderColor = "#38bdf8";
                     e.currentTarget.style.boxShadow =
                       "0 0 0 2px rgba(100, 148, 110, 0.2)";
                   }}
@@ -566,7 +566,7 @@ const LoginSignup = () => {
                     stroke="currentColor"
                     strokeWidth="2"
                     className="mr-3"
-                    style={{ color: "#64946e" }}>
+                    style={{ color: "#38bdf8" }}>
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                     <circle cx="12" cy="7" r="4" />
                   </svg>
@@ -595,7 +595,7 @@ const LoginSignup = () => {
                     borderColor: "#e5ddd4",
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = "#64946e";
+                    e.currentTarget.style.borderColor = "#38bdf8";
                     e.currentTarget.style.boxShadow =
                       "0 0 0 2px rgba(100, 148, 110, 0.2)";
                   }}
@@ -611,7 +611,7 @@ const LoginSignup = () => {
                     stroke="currentColor"
                     strokeWidth="2"
                     className="mr-3"
-                    style={{ color: "#64946e" }}>
+                    style={{ color: "#38bdf8" }}>
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                     <polyline points="22,6 12,13 2,6" />
                   </svg>
@@ -690,7 +690,7 @@ const LoginSignup = () => {
                     type="button"
                     onClick={() => setShowReferralCode(!showReferralCode)}
                     className="text-sm font-medium flex items-center gap-1"
-                    style={{ color: "#64946e" }}>
+                    style={{ color: "#38bdf8" }}>
                     {showReferralCode ? getTranslatedText("Hide") : getTranslatedText("Have a referral code?")}
                     <svg
                       width="14"
@@ -722,12 +722,12 @@ const LoginSignup = () => {
                       borderColor: referralCodeError
                         ? "#ef4444"
                         : referrerName
-                          ? "#10b981"
+                          ? "#0ea5e9"
                           : "#e5ddd4",
                     }}
                     onFocus={(e) => {
                       if (!referralCodeError && !referrerName) {
-                        e.currentTarget.style.borderColor = "#64946e";
+                        e.currentTarget.style.borderColor = "#38bdf8";
                         e.currentTarget.style.boxShadow =
                           "0 0 0 2px rgba(100, 148, 110, 0.2)";
                       }
@@ -750,8 +750,8 @@ const LoginSignup = () => {
                         color: referralCodeError
                           ? "#ef4444"
                           : referrerName
-                            ? "#10b981"
-                            : "#64946e",
+                            ? "#0ea5e9"
+                            : "#38bdf8",
                       }}>
                       <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                       <circle cx="8.5" cy="7" r="4" />
@@ -772,7 +772,7 @@ const LoginSignup = () => {
                         height="18"
                         viewBox="0 0 24 24"
                         fill="none"
-                        stroke="#10b981"
+                        stroke="#0ea5e9"
                         strokeWidth="2"
                         className="ml-2">
                         <polyline points="20 6 9 17 4 12" />
@@ -786,7 +786,7 @@ const LoginSignup = () => {
                   </p>
                 )}
                 {referrerName && !referralCodeError && (
-                  <p className="text-xs mt-1 ml-1" style={{ color: "#10b981" }}>
+                  <p className="text-xs mt-1 ml-1" style={{ color: "#0ea5e9" }}>
                     ✓ {getTranslatedText("You were referred by {referrerName}", { referrerName })}
                   </p>
                 )}
@@ -803,7 +803,7 @@ const LoginSignup = () => {
                     borderColor: "#e5ddd4",
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = "#64946e";
+                    e.currentTarget.style.borderColor = "#38bdf8";
                     e.currentTarget.style.boxShadow =
                       "0 0 0 2px rgba(100, 148, 110, 0.2)";
                   }}
@@ -819,7 +819,7 @@ const LoginSignup = () => {
                     stroke="currentColor"
                     strokeWidth="2"
                     className="mr-3"
-                    style={{ color: "#64946e" }}>
+                    style={{ color: "#38bdf8" }}>
                     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
                   </svg>
                   <input
@@ -857,7 +857,7 @@ const LoginSignup = () => {
                     stroke="currentColor"
                     strokeWidth="2"
                     className="mr-3"
-                    style={{ color: "#64946e" }}>
+                    style={{ color: "#38bdf8" }}>
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                   </svg>
@@ -875,17 +875,17 @@ const LoginSignup = () => {
                         onPaste={handlePaste}
                         className="w-8 h-10 md:w-11 md:h-11 text-center text-lg md:text-2xl font-bold border-2 rounded-lg focus:outline-none transition-all bg-white"
                         style={{
-                          borderColor: digit ? "#64946e" : "#e5ddd4",
+                          borderColor: digit ? "#38bdf8" : "#e5ddd4",
                           color: "#2d3748",
                         }}
                         onFocus={(e) => {
-                          e.target.style.borderColor = "#64946e";
+                          e.target.style.borderColor = "#38bdf8";
                           e.target.style.boxShadow =
                             "0 0 0 2px rgba(100, 148, 110, 0.2)";
                         }}
                         onBlur={(e) => {
                           e.target.style.borderColor = digit
-                            ? "#64946e"
+                            ? "#38bdf8"
                             : "#e5ddd4";
                           e.target.style.boxShadow = "none";
                         }}
@@ -909,7 +909,7 @@ const LoginSignup = () => {
                   className={`w-5 h-5 rounded border-2 flex items-center justify-center mr-2 transition-all ${rememberMe ? "border-green-600" : "border-gray-300"
                     }`}
                   style={{
-                    backgroundColor: rememberMe ? "#64946e" : "transparent",
+                    backgroundColor: rememberMe ? "#38bdf8" : "transparent",
                   }}>
                   {rememberMe && (
                     <svg
@@ -952,7 +952,7 @@ const LoginSignup = () => {
                   }}
                   disabled={loading || resendTimer > 0}
                   className="text-sm font-medium hover:opacity-80 transition-opacity disabled:opacity-50"
-                  style={{ color: "#64946e" }}>
+                  style={{ color: "#38bdf8" }}>
                   {loading ? getTranslatedText("Sending...") : resendTimer > 0 ? getTranslatedText("Resend in {seconds}s", { seconds: resendTimer }) : getTranslatedText("Resend OTP?")}
                 </button>
               )}
@@ -1007,7 +1007,7 @@ const LoginSignup = () => {
                     phone.length === 10 &&
                     (isLogin || (name.trim() && email.trim() && termsAccepted))) ||
                     (otpSent && otp.every((d) => d !== ""))
-                    ? "#64946e"
+                    ? "#38bdf8"
                     : "#cbd5e0",
               }}
               onMouseEnter={(e) => {
@@ -1027,7 +1027,7 @@ const LoginSignup = () => {
                     (isLogin || (name.trim() && email.trim() && termsAccepted))) ||
                   (otpSent && otp.every((d) => d !== ""))
                 ) {
-                  e.target.style.backgroundColor = "#64946e";
+                  e.target.style.backgroundColor = "#38bdf8";
                 }
               }}>
               {loading
@@ -1056,7 +1056,7 @@ const LoginSignup = () => {
                   setOtpSent(false);
                 }}
                 className="font-semibold hover:opacity-80 transition-opacity"
-                style={{ color: "#64946e" }}>
+                style={{ color: "#38bdf8" }}>
                 {isLogin ? getTranslatedText("Sign Up") : getTranslatedText("Login")}
               </button>
             </p>
@@ -1068,3 +1068,4 @@ const LoginSignup = () => {
 };
 
 export default LoginSignup;
+

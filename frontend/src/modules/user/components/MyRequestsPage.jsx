@@ -245,7 +245,7 @@ const MyRequestsPage = () => {
     },
     completed: {
       label: getTranslatedText("Completed"),
-      color: "#64946e",
+      color: "#38bdf8",
       bgColor: "rgba(100, 148, 110, 0.1)",
       icon: FaCheckCircle,
     },
@@ -304,7 +304,7 @@ const MyRequestsPage = () => {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
       className="min-h-screen pb-20 md:pb-0"
-      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+      style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
       {/* Header */}
       <div
         className="sticky top-0 z-40 px-4 md:px-6 lg:px-8 py-4 md:py-6"
@@ -358,7 +358,7 @@ const MyRequestsPage = () => {
                   label: getTranslatedText("Completed"),
                   value: requests.filter((r) => r.status === "completed")
                     .length,
-                  color: "#059669",
+                  color: "#0284c7",
                 },
               ].map((stat, index) => (
                 <motion.div
@@ -400,7 +400,7 @@ const MyRequestsPage = () => {
                   }`}
                 style={{
                   backgroundColor:
-                    selectedFilter === filter.id ? "#059669" : "#ffffff",
+                    selectedFilter === filter.id ? "#0284c7" : "#ffffff",
                 }}>
                 {filter.label}
               </button>
@@ -418,7 +418,7 @@ const MyRequestsPage = () => {
             <FaSpinner
               className="animate-spin mx-auto mb-4"
               size={32}
-              style={{ color: "#64946e" }}
+              style={{ color: "#38bdf8" }}
             />
             <p style={{ color: "#718096" }}>
               {getTranslatedText("Loading your requests...")}
@@ -451,7 +451,7 @@ const MyRequestsPage = () => {
             <button
               onClick={fetchOrders}
               className="px-6 py-2 rounded-lg text-white font-semibold"
-              style={{ backgroundColor: "#64946e" }}>
+              style={{ backgroundColor: "#38bdf8" }}>
               {getTranslatedText("Retry")}
             </button>
           </motion.div>
@@ -545,8 +545,8 @@ const MyRequestsPage = () => {
                             key={catIndex}
                             className="px-2 py-1 rounded-full text-xs font-medium"
                             style={{
-                              backgroundColor: "#ecfdf5",
-                              color: "#059669",
+                              backgroundColor: "#f0f9ff",
+                              color: "#0284c7",
                             }}>
                             {category}
                           </span>
@@ -576,11 +576,11 @@ const MyRequestsPage = () => {
                           <div
                             className="w-16 h-16 md:w-20 md:h-20 rounded-lg flex items-center justify-center flex-shrink-0"
                             style={{
-                              backgroundColor: "#ecfdf5",
+                              backgroundColor: "#f0f9ff",
                             }}>
                             <span
                               className="text-xs font-bold"
-                              style={{ color: "#059669" }}>
+                              style={{ color: "#0284c7" }}>
                               +{request.images.length - 3}
                             </span>
                           </div>
@@ -591,7 +591,7 @@ const MyRequestsPage = () => {
                     {/* Details Grid */}
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-3">
                       <div className="flex items-center gap-2">
-                        <FaWeight size={14} style={{ color: "#059669" }} />
+                        <FaWeight size={14} style={{ color: "#0284c7" }} />
                         <div>
                           <p className="text-xs" style={{ color: "#64748b" }}>
                             {getTranslatedText("Weight")}
@@ -605,7 +605,7 @@ const MyRequestsPage = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <FaRupeeSign size={14} style={{ color: "#059669" }} />
+                        <FaRupeeSign size={14} style={{ color: "#0284c7" }} />
                         <div>
                           <p className="text-xs" style={{ color: "#64748b" }}>
                             {getTranslatedText("Est. Price")}
@@ -619,7 +619,7 @@ const MyRequestsPage = () => {
                       </div>
                       {request.scrapperName && (
                         <div className="flex items-center gap-2 min-w-0">
-                          <FaTruck size={14} className="flex-shrink-0" style={{ color: "#64946e" }} />
+                          <FaTruck size={14} className="flex-shrink-0" style={{ color: "#38bdf8" }} />
                           <div className="min-w-0 flex-1">
                             <p className="text-xs" style={{ color: "#718096" }}>
                               {getTranslatedText("Scrapper")}
@@ -644,7 +644,7 @@ const MyRequestsPage = () => {
                         <FaMapMarkerAlt
                           size={14}
                           className="mt-0.5 flex-shrink-0"
-                          style={{ color: "#64946e" }}
+                          style={{ color: "#38bdf8" }}
                         />
                         <p
                           className="text-xs md:text-sm flex-1"
@@ -761,12 +761,12 @@ const MyRequestsPage = () => {
                               })
                             }
                             className="flex-1 py-2 px-4 rounded-lg text-sm font-semibold text-white text-center transition-all flex items-center justify-center gap-2"
-                            style={{ backgroundColor: "#64946e" }}
+                            style={{ backgroundColor: "#38bdf8" }}
                             onMouseEnter={(e) => {
                               e.target.style.backgroundColor = "#5a8263";
                             }}
                             onMouseLeave={(e) => {
-                              e.target.style.backgroundColor = "#64946e";
+                              e.target.style.backgroundColor = "#38bdf8";
                             }}>
                             <FaComments size={14} />
                             {getTranslatedText("Chat")}
@@ -832,12 +832,12 @@ const MyRequestsPage = () => {
                             })
                           }
                           className="flex-1 py-2 px-4 rounded-lg text-sm font-semibold text-white text-center transition-all flex items-center justify-center gap-2"
-                          style={{ backgroundColor: "#64946e" }}
+                          style={{ backgroundColor: "#38bdf8" }}
                           onMouseEnter={(e) => {
                             e.target.style.backgroundColor = "#5a8263";
                           }}
                           onMouseLeave={(e) => {
-                            e.target.style.backgroundColor = "#64946e";
+                            e.target.style.backgroundColor = "#38bdf8";
                           }}>
                           <FaComments size={14} />
                           {getTranslatedText("Chat")}
@@ -856,3 +856,4 @@ const MyRequestsPage = () => {
 };
 
 export default MyRequestsPage;
+

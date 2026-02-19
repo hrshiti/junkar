@@ -225,7 +225,7 @@ const RequestStatusPage = () => {
           ondismiss: () => setIsPaying(false)
         },
         theme: {
-          color: '#64946e'
+          color: '#38bdf8'
         }
       };
 
@@ -288,7 +288,7 @@ const RequestStatusPage = () => {
     },
     accepted: {
       label: 'Accepted',
-      color: '#64946e',
+      color: '#38bdf8',
       description: 'Scrapper has accepted your request',
       progress: 40
     },
@@ -306,7 +306,7 @@ const RequestStatusPage = () => {
     },
     completed: {
       label: 'Completed',
-      color: '#10b981',
+      color: '#0ea5e9',
       description: 'Pickup completed successfully',
       progress: 100
     }
@@ -443,7 +443,7 @@ const RequestStatusPage = () => {
                 onClick={handlePay}
                 disabled={isPaying || !['confirmed', 'in_progress'].includes(requestData.status)}
                 className="px-4 py-2 rounded-full text-sm font-semibold shadow-md transition-all duration-300 disabled:opacity-50"
-                style={{ backgroundColor: '#64946e', color: '#ffffff', display: requestData?.orderType === 'cleaning_service' ? 'block' : 'none' }}
+                style={{ backgroundColor: '#38bdf8', color: '#ffffff', display: requestData?.orderType === 'cleaning_service' ? 'block' : 'none' }}
               >
                 {isPaying ? getTranslatedText('Processing...') : getTranslatedText('Pay Now')}
               </button>
@@ -484,7 +484,7 @@ const RequestStatusPage = () => {
                     className={`w-3 h-3 md:w-4 md:h-4 rounded-full ${step.completed ? 'shadow-md' : ''
                       }`}
                     style={{
-                      backgroundColor: step.completed ? '#64946e' : 'rgba(100, 148, 110, 0.2)',
+                      backgroundColor: step.completed ? '#38bdf8' : 'rgba(100, 148, 110, 0.2)',
                       border: step.completed ? '2px solid #ffffff' : '2px solid transparent'
                     }}
                   />
@@ -493,7 +493,7 @@ const RequestStatusPage = () => {
                       className={`w-0.5 flex-1 mt-1 ${step.completed ? '' : 'opacity-30'
                         }`}
                       style={{
-                        backgroundColor: step.completed ? '#64946e' : 'rgba(100, 148, 110, 0.2)',
+                        backgroundColor: step.completed ? '#38bdf8' : 'rgba(100, 148, 110, 0.2)',
                         minHeight: '40px'
                       }}
                     />
@@ -514,7 +514,7 @@ const RequestStatusPage = () => {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       className="text-xs md:text-sm"
-                      style={{ color: '#64946e' }}
+                      style={{ color: '#38bdf8' }}
                     >
                       {getTranslatedText("In progress...")}
                     </motion.p>
@@ -539,7 +539,7 @@ const RequestStatusPage = () => {
             </h3>
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-xl md:text-2xl font-bold"
-                style={{ backgroundColor: 'rgba(100, 148, 110, 0.1)', color: '#64946e' }}
+                style={{ backgroundColor: 'rgba(100, 148, 110, 0.1)', color: '#38bdf8' }}
               >
                 {scrapperInfo.name.split(' ').map(n => n[0]).join('')}
               </div>
@@ -552,7 +552,7 @@ const RequestStatusPage = () => {
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#fbbf24" stroke="#fbbf24" strokeWidth="1" />
                     </svg>
-                    <span className="text-xs md:text-sm font-semibold" style={{ color: '#64946e' }}>
+                    <span className="text-xs md:text-sm font-semibold" style={{ color: '#38bdf8' }}>
                       {scrapperInfo.rating}
                     </span>
                   </div>
@@ -576,10 +576,10 @@ const RequestStatusPage = () => {
                     className="flex items-center gap-1.5 mt-2"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="12" cy="12" r="10" stroke="#64946e" strokeWidth="2" fill="none" />
-                      <path d="M12 6v6l4 2" stroke="#64946e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <circle cx="12" cy="12" r="10" stroke="#38bdf8" strokeWidth="2" fill="none" />
+                      <path d="M12 6v6l4 2" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                    <p className="text-xs md:text-sm font-semibold" style={{ color: '#64946e' }}>
+                    <p className="text-xs md:text-sm font-semibold" style={{ color: '#38bdf8' }}>
                       {getTranslatedText("ETA:")} {eta}
                     </p>
                   </motion.div>
@@ -649,7 +649,7 @@ const RequestStatusPage = () => {
                   <span className="text-base md:text-lg font-bold" style={{ color: '#2d3748' }}>
                     {requestData.orderType === 'cleaning_service' ? getTranslatedText('Service Fee:') : getTranslatedText('Estimated Payout:')}
                   </span>
-                  <span className="text-xl md:text-2xl font-bold" style={{ color: '#64946e' }}>
+                  <span className="text-xl md:text-2xl font-bold" style={{ color: '#38bdf8' }}>
                     {requestData.orderType === 'cleaning_service'
                       ? `₹${requestData.serviceFee || 0}`
                       : `₹${requestData.totalAmount?.toFixed(0) || 0}`
@@ -670,9 +670,9 @@ const RequestStatusPage = () => {
               transition={{ delay: 0.4 }}
               onClick={() => navigate('/chat', { state: { scrapperInfo } })}
               className="w-full py-3 md:py-4 rounded-xl flex items-center justify-center gap-2 font-semibold text-sm md:text-base shadow-md hover:shadow-lg transition-all duration-300"
-              style={{ backgroundColor: '#64946e', color: '#ffffff' }}
+              style={{ backgroundColor: '#38bdf8', color: '#ffffff' }}
               onMouseEnter={(e) => e.target.style.backgroundColor = '#5a8263'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = '#64946e'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = '#38bdf8'}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: '#ffffff' }}>
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -713,7 +713,7 @@ const RequestStatusPage = () => {
             transition={{ delay: 0.5 }}
             onClick={() => navigate('/')}
             className="w-full py-3 md:py-4 rounded-xl border-2 font-semibold text-sm md:text-base transition-all duration-300"
-            style={{ borderColor: '#64946e', color: '#64946e', backgroundColor: 'transparent' }}
+            style={{ borderColor: '#38bdf8', color: '#38bdf8', backgroundColor: 'transparent' }}
             onMouseEnter={(e) => {
               e.target.style.backgroundColor = 'rgba(100, 148, 110, 0.1)';
             }}
@@ -735,10 +735,10 @@ const RequestStatusPage = () => {
             className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center relative overflow-hidden"
           >
             {/* Background Decoration */}
-            <div className="absolute top-0 left-0 w-full h-2" style={{ backgroundColor: '#64946e' }} />
+            <div className="absolute top-0 left-0 w-full h-2" style={{ backgroundColor: '#38bdf8' }} />
 
             <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm" style={{ backgroundColor: 'rgba(100, 148, 110, 0.1)' }}>
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#64946e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
             </div>
@@ -757,7 +757,7 @@ const RequestStatusPage = () => {
                   navigate(`/track-order/${requestData._id}`);
                 }}
                 className="w-full py-3.5 rounded-xl font-bold text-white shadow-lg flex items-center justify-center gap-2 transition-transform active:scale-95"
-                style={{ backgroundColor: '#64946e' }}
+                style={{ backgroundColor: '#38bdf8' }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
@@ -783,4 +783,5 @@ const RequestStatusPage = () => {
 };
 
 export default RequestStatusPage;
+
 

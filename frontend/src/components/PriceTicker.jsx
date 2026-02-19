@@ -82,14 +82,14 @@ const PriceTicker = () => {
               </p>
               <p
                 className="text-base md:text-lg font-bold"
-                style={{ color: "#64946e" }}>
+                style={{ color: "#38bdf8" }}>
                 ₹{item.price.toFixed(0)}/{item.unit}
               </p>
               {item.change !== undefined && item.change !== null && (
                 <p
                   className="text-xs"
                   style={{
-                    color: item.change.startsWith("+") ? "#64946e" : "#e53e3e",
+                    color: item.change.startsWith("+") ? "#38bdf8" : "#e53e3e",
                   }}>
                   {item.change}
                 </p>
@@ -103,3 +103,4 @@ const PriceTicker = () => {
 };
 
 export default PriceTicker;
+

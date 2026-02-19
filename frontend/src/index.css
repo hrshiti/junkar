@@ -30,7 +30,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(to bottom, #72c688ff, #dcfce7) fixed;
+  background: linear-gradient(to bottom, #7dd3fc, #e0f2fe) fixed;
   color: #2d3748;
   /* Prevent zoom on mobile - allow panning but prevent pinch zoom */
   touch-action: pan-x pan-y;
@@ -89,41 +89,41 @@ svg {
 
 .react-calendar__tile:enabled:hover,
 .react-calendar__tile:enabled:focus {
-  background-color: #f0fdf4 !important;
-  /* green-50 */
-  color: #16a34a !important;
-  /* green-600 */
+  background-color: #f0f9ff !important;
+  /* sky-50 */
+  color: #0284c7 !important;
+  /* sky-600 */
 }
 
 .react-calendar__tile--now {
-  background: #dcfce7 !important;
-  /* green-100 */
-  color: #15803d !important;
-  /* green-700 */
+  background: #e0f2fe !important;
+  /* sky-100 */
+  color: #0369a1 !important;
+  /* sky-700 */
 }
 
 .react-calendar__tile--active {
-  background: #16a34a !important;
-  /* green-600 */
+  background: #0284c7 !important;
+  /* sky-600 */
   color: white !important;
 }
 
 .react-calendar__tile--active:enabled:hover,
 .react-calendar__tile--active:enabled:focus {
-  background: #15803d !important;
-  /* green-700 */
+  background: #0369a1 !important;
+  /* sky-700 */
 }
 
 .react-calendar__navigation button {
-  color: #166534 !important;
-  /* green-800 */
+  color: #075985 !important;
+  /* sky-800 */
   font-size: 1.1rem !important;
   font-weight: 600 !important;
 }
 
 .react-calendar__navigation button:enabled:hover,
 .react-calendar__navigation button:enabled:focus {
-  background-color: #f0fdf4 !important;
+  background-color: #f0f9ff !important;
 }
 
 /* React Time Picker Customization */
@@ -140,8 +140,8 @@ svg {
 }
 
 .react-time-picker__wrapper:focus-within {
-  border-color: #16a34a !important;
-  box-shadow: 0 0 0 2px #dcfce7 !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 0 2px #e0f2fe !important;
 }
 
 .react-time-picker__inputGroup__input {
@@ -152,7 +152,7 @@ svg {
 .react-clock {
   background-color: white !important;
   border-radius: 50% !important;
-  border: 4px solid #16a34a !important;
+  border: 4px solid #0284c7 !important;
 }
 
 .react-clock__face {
@@ -160,7 +160,7 @@ svg {
 }
 
 .react-clock__hand__body {
-  background-color: #16a34a !important;
+  background-color: #0284c7 !important;
 }
 
 .react-clock__mark__body {

@@ -120,7 +120,7 @@ const UserHelpSupport = () => {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
       className="min-h-screen w-full flex flex-col"
-      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+      style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
       {/* Content */}
       <div className="w-full p-3 md:p-6 space-y-4 md:space-y-6">
         {/* Header - Now inside scrollable flow */}
@@ -170,7 +170,7 @@ const UserHelpSupport = () => {
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm md:text-base cursor-pointer hover:bg-slate-50"
                 style={{
-                  borderColor: category ? '#10b981' : '#e2e8f0',
+                  borderColor: category ? '#0ea5e9' : '#e2e8f0',
                   color: '#334155',
                   backgroundColor: '#ffffff'
                 }}
@@ -196,7 +196,7 @@ const UserHelpSupport = () => {
                 className="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm md:text-base resize-none"
                 style={{
                   borderColor: message.trim()
-                    ? "#10b981"
+                    ? "#0ea5e9"
                     : "#e2e8f0",
                   color: "#334155",
                   backgroundColor: "#ffffff",
@@ -210,7 +210,7 @@ const UserHelpSupport = () => {
               whileTap={{ scale: 0.98 }}
               disabled={submitting || !category || !message.trim()}
               className="w-full py-3 md:py-4 rounded-full text-white font-semibold text-sm md:text-lg shadow-lg hover:shadow-xl hover:bg-emerald-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ backgroundColor: "#059669" }}>
+              style={{ backgroundColor: "#0284c7" }}>
               {submitting ? getTranslatedText('Submitting...') : getTranslatedText('Submit Request')}
             </motion.button>
           </form>
@@ -221,3 +221,4 @@ const UserHelpSupport = () => {
 };
 
 export default UserHelpSupport;
+

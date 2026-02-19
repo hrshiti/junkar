@@ -10,7 +10,9 @@ import {
 import { usePageTranslation } from "../../../hooks/usePageTranslation";
 import { useDynamicTranslation } from "../../../hooks/useDynamicTranslation";
 import plasticImage from "../assets/plastic.jpg";
-import metalImage from "../assets/metal.jpg";
+import metalImage from "../assets/metal2.jpg";
+import copperImage from "../assets/metal.jpg";
+import aluminiumImage from "../assets/Aluminium.jpg";
 import scrapImage2 from "../assets/scrab.png";
 import electronicImage from "../assets/electronicbg.png";
 import UserBottomNav from "./UserBottomNav";
@@ -42,13 +44,13 @@ const PriceListPage = () => {
     const getCategoryImage = (name) => {
         const lowerName = name.toLowerCase();
         if (lowerName.includes("plastic")) return plasticImage;
+        if (lowerName.includes("aluminium")) return aluminiumImage;
+        if (lowerName.includes("copper")) return copperImage;
         if (
             lowerName.includes("metal") ||
             lowerName.includes("iron") ||
             lowerName.includes("steel") ||
-            lowerName.includes("copper") ||
-            lowerName.includes("brass") ||
-            lowerName.includes("aluminium")
+            lowerName.includes("brass")
         )
             return metalImage;
         if (
@@ -120,72 +122,81 @@ const PriceListPage = () => {
     return (
         <div
             className="min-h-screen w-full relative z-0 pb-20 md:pb-0 overflow-x-hidden"
-            style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
-            {/* Sticky Header */}
+            style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
+            {/* Compact Sticky Header */}
             <div
-                className="sticky top-0 z-40 px-4 md:px-6 lg:px-8 py-4 md:py-6"
-                style={{ backgroundColor: "transparent" }}>
-                <div className="max-w-7xl mx-auto flex items-center gap-4 mb-4">
-
-                    <div>
-                        <h1
-                            className="text-xl md:text-2xl font-bold"
-                            style={{ color: "#ffffff" }}>
-                            {getTranslatedText("Scrap Prices")}
-                        </h1>
-                        <p
-                            className="text-sm md:text-base mt-0.5"
-                            style={{ color: "#ecfdf5" }}>
-                            {getTranslatedText("Current market rates for scrap materials")}
-                        </p>
-                    </div>
+                className="sticky top-0 z-40 px-4 md:px-6 py-3 md:py-4 backdrop-blur-sm"
+                style={{ backgroundColor: "rgba(125, 211, 252, 0.95)" }}>
+                <div className="max-w-7xl mx-auto mb-3">
+                    <h1
+                        className="text-lg md:text-xl font-bold mb-1"
+                        style={{ color: "#ffffff" }}>
+                        {getTranslatedText("Scrap Prices")}
+                    </h1>
+                    <p
+                        className="text-xs md:text-sm"
+                        style={{ color: "#f0f9ff" }}>
+                        {getTranslatedText("Current market rates for scrap materials")}
+                    </p>
                 </div>
 
-                {/* Search Bar */}
+                {/* Compact Search Bar */}
                 <div className="max-w-7xl mx-auto relative">
-                    <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                    <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-sm" />
                     <input
                         type="text"
                         placeholder={getTranslatedText("Search") + "..."}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 rounded-xl border-none shadow-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                        className="w-full pl-9 pr-3 py-2.5 rounded-lg border-none shadow-sm focus:ring-2 focus:ring-sky-400 outline-none text-sm"
                         style={{ backgroundColor: "white" }}
                     />
                 </div>
             </div>
 
-            {/* Price List */}
-            <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto pb-8">
+            {/* Optimized Price List */}
+            <div className="px-4 md:px-6 max-w-7xl mx-auto pb-6">
                 {loading ? (
-                    <div className="text-center py-10 text-white font-medium">Loading...</div>
+                    <div className="text-center py-8 text-slate-600 font-medium text-sm">Loading...</div>
                 ) : filteredPrices.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 gap-2.5">
                         {filteredPrices.map((item, index) => (
-                            <motion.div
+                            <div
                                 key={item.id || index}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3, delay: index * 0.05 }}
-                                className="bg-white rounded-xl p-4 shadow-md flex items-center gap-4 border border-slate-100 hover:shadow-lg transition-shadow"
+                                className="bg-white rounded-lg p-2.5 shadow-md hover:shadow-lg flex items-center gap-2.5 border border-slate-200 transition-all duration-200"
                             >
-                                <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-200">
-                                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                <div 
+                                    className="w-14 h-14 rounded-lg overflow-hidden bg-gradient-to-br from-sky-50 to-blue-50 flex-shrink-0 border border-sky-100"
+                                >
+                                    <img 
+                                        src={item.image} 
+                                        alt={item.name} 
+                                        className="w-full h-full object-cover"
+                                    />
                                 </div>
-                                <div className="flex-1">
-                                    <h3 className="font-bold text-lg" style={{ color: "#1e293b" }}>{item.name}</h3>
-                                    <p className="text-sm text-slate-500">Per {item.unit}</p>
+                                
+                                <div className="flex-1 min-w-0">
+                                    <h3 
+                                        className="font-bold text-sm mb-0.5 truncate" 
+                                        style={{ color: "#1e293b" }}
+                                    >
+                                        {item.name}
+                                    </h3>
+                                    <p className="text-xs text-slate-500">Per {item.unit}</p>
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-xl font-bold" style={{ color: "#059669" }}>₹{item.price}</p>
+                                
+                                <div 
+                                    className="text-right bg-slate-50 px-2.5 py-1.5 rounded-md border border-slate-200"
+                                >
+                                    <p className="text-sm font-bold" style={{ color: "#000000" }}>₹{item.price}</p>
                                 </div>
-                            </motion.div>
+                            </div>
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-10 opacity-60">
-                        <p className="text-lg font-bold">{getTranslatedText("No prices found")}</p>
-                        <p className="text-sm">{getTranslatedText("Try a different search term")}</p>
+                    <div className="text-center py-8">
+                        <p className="text-base font-bold text-slate-700">{getTranslatedText("No prices found")}</p>
+                        <p className="text-xs text-slate-500 mt-1">{getTranslatedText("Try a different search term")}</p>
                     </div>
                 )}
             </div>
@@ -195,3 +206,4 @@ const PriceListPage = () => {
 };
 
 export default PriceListPage;
+

@@ -207,7 +207,7 @@ const ImageUploadPage = () => {
               animate={{ width: '50%' }}
               transition={{ duration: 0.5 }}
               className="h-full rounded-full"
-              style={{ backgroundColor: '#64946e' }}
+              style={{ backgroundColor: '#38bdf8' }}
             />
           </div>
           <span className="text-xs md:text-sm" style={{ color: '#718096' }}>{getTranslatedText("Step 2 of 4")}</span>
@@ -225,7 +225,7 @@ const ImageUploadPage = () => {
               <span
                 key={cat.id}
                 className="px-2 py-1 rounded-full text-xs md:text-sm font-medium"
-                style={{ backgroundColor: '#64946e', color: '#ffffff' }}
+                style={{ backgroundColor: '#38bdf8', color: '#ffffff' }}
               >
                 {getTranslatedText(cat.name)}
               </span>
@@ -245,7 +245,7 @@ const ImageUploadPage = () => {
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`border-2 border-dashed rounded-2xl p-6 md:p-12 text-center transition-all duration-300 ${isDragging ? 'border-[#64946e] bg-[rgba(100,148,110,0.1)]' : 'border-[rgba(100,148,110,0.3)]'
+            className={`border-2 border-dashed rounded-2xl p-6 md:p-12 text-center transition-all duration-300 ${isDragging ? 'border-[#38bdf8] bg-[rgba(100,148,110,0.1)]' : 'border-[rgba(100,148,110,0.3)]'
               }`}
             style={{ backgroundColor: isDragging ? 'rgba(100, 148, 110, 0.1)' : '#ffffff' }}
           >
@@ -259,7 +259,7 @@ const ImageUploadPage = () => {
                 className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mb-4"
                 style={{ backgroundColor: 'rgba(100, 148, 110, 0.1)' }}
               >
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" style={{ color: '#64946e' }} className="md:w-10 md:h-10">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" style={{ color: '#38bdf8' }} className="md:w-10 md:h-10">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
@@ -285,23 +285,23 @@ const ImageUploadPage = () => {
                     }
                   }}
                   className="px-4 py-2 md:px-6 md:py-3 rounded-full text-sm md:text-base font-semibold transition-all duration-300 transform hover:scale-105"
-                  style={{ backgroundColor: '#64946e', color: '#ffffff' }}
+                  style={{ backgroundColor: '#38bdf8', color: '#ffffff' }}
                   onMouseEnter={(e) => e.target.style.backgroundColor = '#5a8263'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = '#64946e'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = '#38bdf8'}
                 >
                   {getTranslatedText("Choose from Gallery")}
                 </button>
                 <button
                   onClick={handleNativeCamera}
-                  className="px-4 py-2 md:px-6 md:py-3 rounded-full text-sm md:text-base font-semibold transition-all duration-300 transform hover:scale-105 border-2 border-[#64946e]"
-                  style={{ backgroundColor: '#ffffff', color: '#64946e' }}
+                  className="px-4 py-2 md:px-6 md:py-3 rounded-full text-sm md:text-base font-semibold transition-all duration-300 transform hover:scale-105 border-2 border-[#38bdf8]"
+                  style={{ backgroundColor: '#ffffff', color: '#38bdf8' }}
                   onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = '#64946e';
+                    e.target.style.backgroundColor = '#38bdf8';
                     e.target.style.color = '#ffffff';
                   }}
                   onMouseLeave={(e) => {
                     e.target.style.backgroundColor = '#ffffff';
-                    e.target.style.color = '#64946e';
+                    e.target.style.color = '#38bdf8';
                   }}
                 >
                   {getTranslatedText("Take Photo")}
@@ -345,7 +345,7 @@ const ImageUploadPage = () => {
               whileTap={{ scale: 0.95 }}
               onClick={() => fileInputRef.current?.click()}
               className="w-full py-3 md:py-4 rounded-xl border-2 border-dashed flex items-center justify-center gap-2 transition-all duration-300"
-              style={{ borderColor: '#64946e', color: '#64946e' }}
+              style={{ borderColor: '#38bdf8', color: '#38bdf8' }}
               onMouseEnter={(e) => {
                 e.target.style.backgroundColor = 'rgba(100, 148, 110, 0.1)';
               }}
@@ -388,9 +388,9 @@ const ImageUploadPage = () => {
             onClick={handleContinue}
             disabled={isUploading}
             className="w-full py-3 md:py-4 rounded-full text-white font-semibold text-sm md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-60"
-            style={{ backgroundColor: '#64946e' }}
+            style={{ backgroundColor: '#38bdf8' }}
             onMouseEnter={(e) => { if (!isUploading) e.target.style.backgroundColor = '#5a8263'; }}
-            onMouseLeave={(e) => { if (!isUploading) e.target.style.backgroundColor = '#64946e'; }}
+            onMouseLeave={(e) => { if (!isUploading) e.target.style.backgroundColor = '#38bdf8'; }}
           >
             {isUploading ? getTranslatedText('Uploading...') : `${getTranslatedText("Continue with")} ${uploadedImages.length} ${uploadedImages.length === 1 ? getTranslatedText('Image') : getTranslatedText('Images')}`}
           </motion.button>
@@ -408,4 +408,5 @@ const ImageUploadPage = () => {
 };
 
 export default ImageUploadPage;
+
 

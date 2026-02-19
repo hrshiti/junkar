@@ -159,36 +159,35 @@ const ReferAndEarn = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl shadow-lg p-4 md:p-6 backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
-        <div className="flex items-center gap-4 mb-4">
+      <div
+        className="rounded-2xl shadow-xl p-4 backdrop-blur-sm border-2 border-emerald-100" 
+        style={{ backgroundColor: "rgba(255, 255, 255, 0.98)" }}>
+        <div className="flex items-center gap-3">
           <div
-            className="w-16 h-16 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: "rgba(100, 148, 110, 0.1)" }}>
-            <FaGift className="text-3xl" style={{ color: "#64946e" }} />
+            className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg"
+            style={{ backgroundColor: "rgba(100, 148, 110, 0.15)" }}>
+            <FaGift className="text-2xl" style={{ color: "#38bdf8" }} />
           </div>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <h1
-              className="text-2xl md:text-3xl font-bold mb-1"
-              style={{ color: "#2d3748" }}>
+              className="text-xl md:text-2xl font-bold leading-tight"
+              style={{ color: "#1e293b" }}>
               {getTranslatedText("Refer & Earn")}
             </h1>
-            <p className="text-sm md:text-base" style={{ color: "#718096" }}>
+            <p className="text-xs md:text-sm font-medium leading-tight mt-0.5" style={{ color: "#64748b" }}>
               {getTranslatedText("Invite friends and earn rewards")}
             </p>
           </div>
           {tierInfo && (
             <div
-              className="px-4 py-2 rounded-xl flex items-center gap-2"
+              className="px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-md flex-shrink-0"
               style={{
                 backgroundColor: `${tierInfo.color}20`,
                 border: `2px solid ${tierInfo.color}`,
               }}>
-              <FaTrophy style={{ color: tierInfo.color }} />
+              <FaTrophy className="text-sm" style={{ color: tierInfo.color }} />
               <span
-                className="font-bold text-sm"
+                className="font-bold text-xs"
                 style={{ color: tierInfo.color }}>
                 {tierInfo.name}
               </span>
@@ -198,70 +197,64 @@ const ReferAndEarn = () => {
 
         {/* Tier Progress */}
         {tierInfo && tierInfo.nextTier && (
-          <div className="mt-4">
-            <div className="flex items-center justify-between text-xs mb-2">
-              <span style={{ color: "#718096" }}>
+          <div className="mt-3">
+            <div className="flex items-center justify-between text-xs mb-1.5">
+              <span className="font-medium" style={{ color: "#64748b" }}>
                 {tierInfo.nextTier.referralsNeeded} more referrals to reach{" "}
                 {tierInfo.nextTier.name}
               </span>
-              <span className="font-semibold" style={{ color: "#2d3748" }}>
+              <span className="font-bold" style={{ color: "#1e293b" }}>
                 {tierInfo.totalReferrals}/{tierInfo.nextTier.minReferrals}
               </span>
             </div>
             <div
-              className="h-2 rounded-full"
-              style={{ backgroundColor: "rgba(100, 148, 110, 0.1)" }}>
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{
-                  width: `${(tierInfo.totalReferrals / tierInfo.nextTier.minReferrals) *
-                    100
-                    }%`,
+              className="h-2 rounded-full shadow-inner"
+              style={{ backgroundColor: "rgba(100, 148, 110, 0.15)" }}>
+              <div
+                className="h-full rounded-full shadow-md transition-all duration-300"
+                style={{ 
+                  backgroundColor: tierInfo.color,
+                  width: `${(tierInfo.totalReferrals / tierInfo.nextTier.minReferrals) * 100}%`
                 }}
-                className="h-full rounded-full"
-                style={{ backgroundColor: tierInfo.color }}
               />
             </div>
           </div>
         )}
-      </motion.div>
+      </div>
 
       {/* Referral Code Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="rounded-2xl shadow-lg p-4 md:p-6 backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
+      <div
+        className="rounded-2xl shadow-xl p-4 backdrop-blur-sm border-2 border-emerald-100 transition-shadow hover:shadow-2xl" 
+        style={{ backgroundColor: "rgba(255, 255, 255, 0.98)" }}>
         <h2
-          className="text-lg md:text-xl font-bold mb-4"
-          style={{ color: "#2d3748" }}>
+          className="text-base md:text-lg font-bold mb-3"
+          style={{ color: "#1e293b" }}>
           {getTranslatedText("Your Referral Code")}
         </h2>
 
         {/* Code Display */}
-        <div className="mb-4">
+        <div className="mb-3">
           <div
-            className="flex items-center justify-between p-4 rounded-xl border-2"
+            className="flex items-center justify-between p-3 rounded-xl border-3 shadow-lg"
             style={{
-              backgroundColor: "rgba(100, 148, 110, 0.05)",
-              borderColor: "#64946e",
+              backgroundColor: "rgba(100, 148, 110, 0.08)",
+              borderColor: "#38bdf8",
+              borderWidth: "3px"
             }}>
-            <div className="flex-1">
-              <p className="text-xs mb-1" style={{ color: "#718096" }}>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold leading-tight" style={{ color: "#64748b" }}>
                 {getTranslatedText("Referral Code")}
               </p>
               <p
-                className="text-2xl md:text-3xl font-bold"
-                style={{ color: "#64946e" }}>
+                className="text-xl md:text-2xl font-bold tracking-wider leading-tight mt-0.5"
+                style={{ color: "#38bdf8" }}>
                 {referralCode}
               </p>
             </div>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={handleCopyCode}
-              className="px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all"
-              style={{ backgroundColor: "#64946e", color: "#ffffff" }}>
+              className="px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 transition-shadow hover:shadow-lg flex-shrink-0"
+              style={{ backgroundColor: "#38bdf8", color: "#ffffff" }}>
               {copied ? (
                 <>
                   <FaCheckCircle />
@@ -273,15 +266,15 @@ const ReferAndEarn = () => {
                   {getTranslatedText("Copy")}
                 </>
               )}
-            </motion.button>
+            </button>
           </div>
         </div>
 
         {/* Share Link */}
-        <div className="mb-4">
+        <div className="mb-3">
           <label
-            className="block text-sm font-semibold mb-2"
-            style={{ color: "#2d3748" }}>
+            className="block text-sm font-bold mb-1.5"
+            style={{ color: "#1e293b" }}>
             {getTranslatedText("Share Link")}
           </label>
           <div className="flex gap-2">
@@ -289,67 +282,51 @@ const ReferAndEarn = () => {
               type="text"
               value={shareLink}
               readOnly
-              className="flex-1 px-4 py-2 rounded-xl border-2 text-sm"
+              className="flex-1 px-3 py-2 rounded-xl border-2 text-sm font-medium shadow-sm"
               style={{
                 borderColor: "#e2e8f0",
-                backgroundColor: "#f7fafc",
-                color: "#2d3748",
+                backgroundColor: "#f8fafc",
+                color: "#1e293b",
               }}
             />
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={handleCopyLink}
-              className="px-4 py-2 rounded-xl font-semibold text-sm transition-all"
-              style={{ backgroundColor: "#f7fafc", color: "#2d3748" }}>
+              className="px-3 py-2 rounded-xl font-semibold text-sm transition-shadow hover:shadow-lg flex-shrink-0"
+              style={{ backgroundColor: "#f1f5f9", color: "#1e293b" }}>
               <FaCopy />
-            </motion.button>
+            </button>
           </div>
         </div>
 
-        {/* QR Code Section */}
-        <div className="mb-4">
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => setShowQR(!showQR)}
-            className="w-full px-4 py-2 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all mb-3"
-            style={{ backgroundColor: "#f7fafc", color: "#2d3748" }}>
-            <FaQrcode />
-            {showQR
-              ? getTranslatedText("Hide")
-              : getTranslatedText("Show")}{" "}
-            {getTranslatedText("QR Code")}
+            className="px-3 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-shadow shadow-md hover:shadow-lg"
+            style={{ backgroundColor: "#f1f5f9", color: "#1e293b" }}>
+            <FaQrcode className="text-base" />
+            <span>{showQR ? getTranslatedText("Hide") : getTranslatedText("Show")} QR</span>
           </button>
-          {showQR && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="flex justify-center">
-              <QRCodeGenerator value={shareLink} size={200} />
-            </motion.div>
-          )}
+          <button
+            onClick={() => handleShare("whatsapp")}
+            className="px-3 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-shadow shadow-lg hover:shadow-xl"
+            style={{ backgroundColor: "#25D366", color: "#ffffff" }}>
+            <FaWhatsapp className="text-lg" />
+            <span>{getTranslatedText("WhatsApp")}</span>
+          </button>
         </div>
 
-        {/* Share Buttons */}
-        <div className="grid grid-cols-1 gap-2">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => handleShare("whatsapp")}
-            className="p-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all"
-            style={{ backgroundColor: "#25D366", color: "#ffffff" }}>
-            <FaWhatsapp className="text-xl" />
-            <span className="text-sm">{getTranslatedText("WhatsApp")}</span>
-          </motion.button>
-        </div>
-      </motion.div>
+        {/* QR Code Display */}
+        {showQR && (
+          <div className="flex justify-center p-3 bg-white rounded-xl shadow-inner mt-3">
+            <QRCodeGenerator value={shareLink} size={180} />
+          </div>
+        )}
+      </div>
 
       {/* Monthly Tier Bonus */}
       {tierInfo && tierInfo.monthlyBonus > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
+        <div
           className="rounded-2xl shadow-lg p-4 md:p-6 backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
           <div className="flex items-center justify-between">
             <div>
@@ -363,9 +340,7 @@ const ReferAndEarn = () => {
                 {tierInfo.name} tier member
               </p>
             </div>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={() => {
                 const result = processMonthlyTierBonus(
                   user.phone || user.id,
@@ -386,67 +361,64 @@ const ReferAndEarn = () => {
                   );
                 }
               }}
-              className="px-4 py-2 rounded-xl font-semibold text-sm transition-all"
-              style={{ backgroundColor: "#64946e", color: "#ffffff" }}>
+              className="px-4 py-2 rounded-xl font-semibold text-sm transition-shadow hover:shadow-lg"
+              style={{ backgroundColor: "#38bdf8", color: "#ffffff" }}>
               {getTranslatedText("Claim Bonus")}
-            </motion.button>
+            </button>
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="rounded-2xl shadow-lg p-4 md:p-6 backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
-          <div className="flex items-center gap-3 mb-4">
+      <div className="grid grid-cols-2 gap-3">
+        <div
+          className="rounded-2xl shadow-xl p-3 backdrop-blur-sm border-2 border-emerald-100 transition-shadow hover:shadow-2xl" 
+          style={{ backgroundColor: "rgba(255, 255, 255, 0.98)" }}>
+          <div className="flex items-center gap-2">
             <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: "rgba(100, 148, 110, 0.1)" }}>
-              <FaUsers className="text-xl" style={{ color: "#64946e" }} />
+              className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md flex-shrink-0"
+              style={{ backgroundColor: "rgba(100, 148, 110, 0.15)" }}>
+              <FaUsers className="text-lg" style={{ color: "#38bdf8" }} />
             </div>
-            <div>
-              <p className="text-sm" style={{ color: "#718096" }}>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold leading-tight" style={{ color: "#64748b" }}>
                 {getTranslatedText("Total Referrals")}
               </p>
-              <p className="text-2xl font-bold" style={{ color: "#2d3748" }}>
+              <p 
+                className="text-2xl font-bold leading-tight" 
+                style={{ color: "#1e293b" }}>
                 {stats.totalReferrals}
               </p>
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="rounded-2xl shadow-lg p-4 md:p-6 backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
-          <div className="flex items-center gap-3 mb-4">
+        <div
+          className="rounded-2xl shadow-xl p-3 backdrop-blur-sm border-2 border-emerald-100 transition-shadow hover:shadow-2xl" 
+          style={{ backgroundColor: "rgba(255, 255, 255, 0.98)" }}>
+          <div className="flex items-center gap-2">
             <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: "rgba(100, 148, 110, 0.1)" }}>
-              <FaRupeeSign className="text-xl" style={{ color: "#64946e" }} />
+              className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md flex-shrink-0"
+              style={{ backgroundColor: "rgba(100, 148, 110, 0.15)" }}>
+              <FaRupeeSign className="text-lg" style={{ color: "#38bdf8" }} />
             </div>
-            <div>
-              <p className="text-sm" style={{ color: "#718096" }}>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold leading-tight" style={{ color: "#64748b" }}>
                 {getTranslatedText("Total Earnings")}
               </p>
-              <p className="text-2xl font-bold" style={{ color: "#2d3748" }}>
+              <p 
+                className="text-2xl font-bold leading-tight" 
+                style={{ color: "#1e293b" }}>
                 ₹{stats.totalEarnings}
               </p>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Tier Benefits */}
       {tierInfo && tierInfo.bonusPercent > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
+        <div
           className="rounded-2xl shadow-lg p-4 md:p-6 backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
           <div className="flex items-center gap-3 mb-4">
             <FaTrophy className="text-2xl" style={{ color: tierInfo.color }} />
@@ -458,98 +430,108 @@ const ReferAndEarn = () => {
           </div>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <FaCheckCircle style={{ color: "#10b981" }} />
+              <FaCheckCircle style={{ color: "#0ea5e9" }} />
               <span className="text-sm" style={{ color: "#2d3748" }}>
                 {tierInfo.bonusPercent}% bonus on all referral rewards
               </span>
             </div>
             {tierInfo.monthlyBonus > 0 && (
               <div className="flex items-center gap-2">
-                <FaCheckCircle style={{ color: "#10b981" }} />
+                <FaCheckCircle style={{ color: "#0ea5e9" }} />
                 <span className="text-sm" style={{ color: "#2d3748" }}>
                   ₹{tierInfo.monthlyBonus} monthly tier bonus
                 </span>
               </div>
             )}
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* How It Works */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="rounded-2xl shadow-lg p-4 md:p-6 backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
+      <div
+        className="rounded-2xl shadow-xl p-4 backdrop-blur-sm border-2 border-emerald-100 transition-shadow hover:shadow-2xl" 
+        style={{ backgroundColor: "rgba(255, 255, 255, 0.98)" }}>
         <h2
-          className="text-lg md:text-xl font-bold mb-4"
-          style={{ color: "#2d3748" }}>
+          className="text-lg font-bold mb-4"
+          style={{ color: "#1e293b" }}>
           {getTranslatedText("How It Works")}
         </h2>
         <div className="space-y-4">
-          <div className="flex gap-4">
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: "rgba(100, 148, 110, 0.1)" }}>
-              <span className="font-bold" style={{ color: "#64946e" }}>
-                1
-              </span>
+          {/* Step 1 */}
+          <div className="flex items-start gap-3">
+            <div className="relative flex-shrink-0">
+              <div 
+                className="w-8 h-8 rounded-full flex items-center justify-center shadow-md"
+                style={{ background: "linear-gradient(135deg, #10b981 0%, #059669 100%)" }}>
+                <span className="font-bold text-sm text-white">1</span>
+              </div>
+              <div 
+                className="absolute top-8 left-1/2 w-0.5 h-6"
+                style={{ 
+                  transform: "translateX(-50%)",
+                  background: "linear-gradient(to bottom, rgba(16, 185, 129, 0.3), transparent)"
+                }}></div>
             </div>
-            <div>
-              <h3 className="font-semibold mb-1" style={{ color: "#2d3748" }}>
+            <div className="flex-1 pt-0.5">
+              <h3 className="font-bold text-sm mb-1" style={{ color: "#1e293b" }}>
                 {getTranslatedText("Share Your Code")}
               </h3>
-              <p className="text-sm" style={{ color: "#718096" }}>
-                {getTranslatedText(
-                  "Share your referral code or link with friends"
-                )}
+              <p className="text-xs leading-relaxed" style={{ color: "#64748b" }}>
+                {getTranslatedText("Share your referral code or link with friends")}
               </p>
             </div>
           </div>
-          <div className="flex gap-4">
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: "rgba(100, 148, 110, 0.1)" }}>
-              <span className="font-bold" style={{ color: "#64946e" }}>
-                2
-              </span>
+
+          {/* Step 2 */}
+          <div className="flex items-start gap-3">
+            <div className="relative flex-shrink-0">
+              <div 
+                className="w-8 h-8 rounded-full flex items-center justify-center shadow-md"
+                style={{ background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)" }}>
+                <span className="font-bold text-sm text-white">2</span>
+              </div>
+              <div 
+                className="absolute top-8 left-1/2 w-0.5 h-6"
+                style={{ 
+                  transform: "translateX(-50%)",
+                  background: "linear-gradient(to bottom, rgba(59, 130, 246, 0.3), transparent)"
+                }}></div>
             </div>
-            <div>
-              <h3 className="font-semibold mb-1" style={{ color: "#2d3748" }}>
+            <div className="flex-1 pt-0.5">
+              <h3 className="font-bold text-sm mb-1" style={{ color: "#1e293b" }}>
                 {getTranslatedText("They Sign Up")}
               </h3>
-              <p className="text-sm" style={{ color: "#718096" }}>
+              <p className="text-xs leading-relaxed" style={{ color: "#64748b" }}>
                 {getTranslatedText("Your friend signs up using your code")}
               </p>
             </div>
           </div>
-          <div className="flex gap-4">
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: "rgba(100, 148, 110, 0.1)" }}>
-              <span className="font-bold" style={{ color: "#64946e" }}>
-                3
-              </span>
+
+          {/* Step 3 */}
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <div 
+                className="w-8 h-8 rounded-full flex items-center justify-center shadow-md"
+                style={{ background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)" }}>
+                <span className="font-bold text-sm text-white">3</span>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold mb-1" style={{ color: "#2d3748" }}>
+            <div className="flex-1 pt-0.5">
+              <h3 className="font-bold text-sm mb-1" style={{ color: "#1e293b" }}>
                 {getTranslatedText("You Both Earn")}
               </h3>
-              <p className="text-sm" style={{ color: "#718096" }}>
+              <p className="text-xs leading-relaxed" style={{ color: "#64748b" }}>
                 You get ₹{settings.userRewards.signupBonus} and they get ₹
                 {settings.userRewards.refereeWelcomeBonus} welcome bonus
               </p>
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Referrals List with Milestones */}
       {stats.referrals.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+        <div
           className="rounded-2xl shadow-lg p-4 md:p-6 backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
           <h2
             className="text-lg md:text-xl font-bold mb-4"
@@ -578,7 +560,7 @@ const ReferAndEarn = () => {
                       <div
                         className="w-10 h-10 rounded-full flex items-center justify-center"
                         style={{ backgroundColor: "rgba(100, 148, 110, 0.1)" }}>
-                        <FaUsers style={{ color: "#64946e" }} />
+                        <FaUsers style={{ color: "#38bdf8" }} />
                       </div>
                       <div>
                         <p
@@ -594,7 +576,7 @@ const ReferAndEarn = () => {
                     <div className="text-right">
                       <p
                         className="text-sm font-semibold mb-1"
-                        style={{ color: "#64946e" }}>
+                        style={{ color: "#38bdf8" }}>
                         ₹{totalEarned}
                       </p>
                       <p className="text-xs" style={{ color: "#718096" }}>
@@ -665,10 +647,11 @@ const ReferAndEarn = () => {
               );
             })}
           </div>
-        </motion.div>
+        </div>
       )}
     </div>
   );
 };
 
 export default ReferAndEarn;
+

@@ -215,7 +215,7 @@ const WeightInputPage = () => {
               animate={{ width: '75%' }}
               transition={{ duration: 0.5 }}
               className="h-full rounded-full"
-              style={{ backgroundColor: '#64946e' }}
+              style={{ backgroundColor: '#38bdf8' }}
             />
           </div>
           <span className="text-xs md:text-sm" style={{ color: '#718096' }}>{getTranslatedText("Step 3 of 4")}</span>
@@ -267,7 +267,7 @@ const WeightInputPage = () => {
                 weightMode === 'auto' ? 'shadow-md' : ''
               }`}
               style={{
-                backgroundColor: weightMode === 'auto' ? '#64946e' : 'transparent',
+                backgroundColor: weightMode === 'auto' ? '#38bdf8' : 'transparent',
                 color: weightMode === 'auto' ? '#ffffff' : '#2d3748'
               }}
             >
@@ -279,7 +279,7 @@ const WeightInputPage = () => {
                 weightMode === 'manual' ? 'shadow-md' : ''
               }`}
               style={{
-                backgroundColor: weightMode === 'manual' ? '#64946e' : 'transparent',
+                backgroundColor: weightMode === 'manual' ? '#38bdf8' : 'transparent',
                 color: weightMode === 'manual' ? '#ffffff' : '#2d3748'
               }}
             >
@@ -301,7 +301,7 @@ const WeightInputPage = () => {
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                   className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 rounded-full border-4"
-                  style={{ borderTopColor: '#64946e', borderRightColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: 'transparent' }}
+                  style={{ borderTopColor: '#38bdf8', borderRightColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: 'transparent' }}
                 />
                 <p className="text-sm md:text-base font-semibold mb-2" style={{ color: '#2d3748' }}>
                   {getTranslatedText("Analyzing Images...")}
@@ -317,7 +317,7 @@ const WeightInputPage = () => {
                 </p>
                 <div className="flex items-center gap-3">
                   <div className="flex-1">
-                    <div className="text-3xl md:text-4xl font-bold mb-1" style={{ color: '#64946e' }}>
+                    <div className="text-3xl md:text-4xl font-bold mb-1" style={{ color: '#38bdf8' }}>
                       {autoDetectedWeight} <span className="text-lg md:text-xl" style={{ color: '#718096' }}>{getTranslatedText("kg")}</span>
                     </div>
                     <p className="text-xs md:text-sm" style={{ color: '#718096' }}>
@@ -327,7 +327,7 @@ const WeightInputPage = () => {
                   <button
                     onClick={() => setWeightMode('manual')}
                     className="px-3 py-2 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium border-2 transition-all duration-300"
-                    style={{ borderColor: '#64946e', color: '#64946e' }}
+                    style={{ borderColor: '#38bdf8', color: '#38bdf8' }}
                     onMouseEnter={(e) => {
                       e.target.style.backgroundColor = 'rgba(100, 148, 110, 0.1)';
                     }}
@@ -358,8 +358,8 @@ const WeightInputPage = () => {
             <button
               onClick={() => setRequestType('household')}
               className={`flex-1 p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-2 ${requestType === 'household'
-                  ? 'border-green-600 bg-green-50 text-green-700 shadow-md transform scale-[1.02]'
-                  : 'border-slate-200 bg-white text-slate-500 hover:border-green-200'
+                  ? 'border-sky-600 bg-sky-50 text-sky-700 shadow-md transform scale-[1.02]'
+                  : 'border-slate-200 bg-white text-slate-500 hover:border-sky-200'
                 }`}
             >
               <span className="text-2xl">🏠</span>
@@ -370,8 +370,8 @@ const WeightInputPage = () => {
             <button
               onClick={() => setRequestType('commercial')}
               className={`flex-1 p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-2 ${requestType === 'commercial'
-                  ? 'border-green-600 bg-green-50 text-green-700 shadow-md transform scale-[1.02]'
-                  : 'border-slate-200 bg-white text-slate-500 hover:border-green-200'
+                  ? 'border-sky-600 bg-sky-50 text-sky-700 shadow-md transform scale-[1.02]'
+                  : 'border-slate-200 bg-white text-slate-500 hover:border-sky-200'
                 }`}
             >
               <span className="text-2xl">🏭</span>
@@ -400,7 +400,7 @@ const WeightInputPage = () => {
                   placeholder="0.0"
                   className="w-full py-3 md:py-4 px-4 text-2xl md:text-3xl font-bold rounded-lg border-2 focus:outline-none focus:ring-2 transition-all"
                   style={{
-                    borderColor: manualWeight ? '#64946e' : 'rgba(100, 148, 110, 0.3)',
+                    borderColor: manualWeight ? '#38bdf8' : 'rgba(100, 148, 110, 0.3)',
                     color: '#2d3748',
                     backgroundColor: '#f9f9f9'
                   }}
@@ -423,9 +423,9 @@ const WeightInputPage = () => {
                     onClick={() => handleQuickWeight(weight)}
                     className="px-3 py-2 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-semibold transition-all duration-300 border-2"
                     style={{
-                      borderColor: manualWeight === weight.toString() ? '#64946e' : 'rgba(100, 148, 110, 0.3)',
-                      backgroundColor: manualWeight === weight.toString() ? '#64946e' : 'transparent',
-                      color: manualWeight === weight.toString() ? '#ffffff' : '#64946e'
+                      borderColor: manualWeight === weight.toString() ? '#38bdf8' : 'rgba(100, 148, 110, 0.3)',
+                      backgroundColor: manualWeight === weight.toString() ? '#38bdf8' : 'transparent',
+                      color: manualWeight === weight.toString() ? '#ffffff' : '#38bdf8'
                     }}
                     onMouseEnter={(e) => {
                       if (manualWeight !== weight.toString()) {
@@ -458,7 +458,7 @@ const WeightInputPage = () => {
               {getTranslatedText("Estimated Payout")}
             </p>
             <div className="flex items-baseline gap-2 mb-2">
-              <span className="text-2xl md:text-3xl font-bold" style={{ color: '#64946e' }}>
+              <span className="text-2xl md:text-3xl font-bold" style={{ color: '#38bdf8' }}>
                 ₹{estimatedPayout.toFixed(0)}
               </span>
               <span className="text-sm md:text-base" style={{ color: '#718096' }}>
@@ -492,9 +492,9 @@ const WeightInputPage = () => {
             transition={{ duration: 0.3 }}
             onClick={handleContinue}
             className="w-full py-3 md:py-4 rounded-full text-white font-semibold text-sm md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-            style={{ backgroundColor: '#64946e' }}
+            style={{ backgroundColor: '#38bdf8' }}
             onMouseEnter={(e) => e.target.style.backgroundColor = '#5a8263'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = '#64946e'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = '#38bdf8'}
           >
             {getTranslatedText("Continue with")} {currentWeight} {getTranslatedText("kg")}
           </motion.button>
@@ -512,4 +512,5 @@ const WeightInputPage = () => {
 };
 
 export default WeightInputPage;
+
 

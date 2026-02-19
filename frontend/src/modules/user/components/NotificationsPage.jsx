@@ -64,7 +64,7 @@ const NotificationsPage = () => {
     };
 
     return (
-        <div className="min-h-screen" style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+        <div className="min-h-screen" style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
             {/* Header */}
             <div
                 className="sticky top-0 z-40 px-4 md:px-6 lg:px-8 py-4 md:py-6"
@@ -145,3 +145,4 @@ const NotificationsPage = () => {
 };
 
 export default NotificationsPage;
+

@@ -340,7 +340,7 @@ const Hero = () => {
                   }`}
                   style={{
                     backgroundColor: "#ffffff",
-                    borderColor: isEditingLocation ? "#64946e" : "#e5ddd4",
+                    borderColor: isEditingLocation ? "#38bdf8" : "#e5ddd4",
                   }}
                   onClick={
                     !isEditingLocation ? handleLocationClick : undefined
@@ -351,7 +351,7 @@ const Hero = () => {
                     viewBox="0 0 24 24"
                     fill="none"
                     className="mr-3 flex-shrink-0"
-                    style={{ color: "#64946e" }}>
+                    style={{ color: "#38bdf8" }}>
                     <path
                       d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
                       fill="currentColor"
@@ -401,7 +401,7 @@ const Hero = () => {
                           }}
                           className="ml-2 px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-1.5 transition-all flex-shrink-0"
                           style={{
-                            backgroundColor: "#64946e",
+                            backgroundColor: "#38bdf8",
                             color: "#ffffff",
                           }}
                           title="Get current location">
@@ -426,7 +426,7 @@ const Hero = () => {
                           className="ml-2 p-1.5 rounded-lg transition-all flex-shrink-0"
                           style={{
                             backgroundColor: "transparent",
-                            color: "#64946e",
+                            color: "#38bdf8",
                           }}
                           title="Get current location">
                           <svg
@@ -476,7 +476,7 @@ const Hero = () => {
                               viewBox="0 0 24 24"
                               fill="none"
                               className="mt-0.5 flex-shrink-0"
-                              style={{ color: "#64946e" }}>
+                              style={{ color: "#38bdf8" }}>
                               <path
                                 d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
                                 fill="currentColor"
@@ -529,7 +529,7 @@ const Hero = () => {
                       style={{ color: "#2d3748" }}>
                       Sell Your Scrap
                       <br />
-                      <span style={{ color: "#64946e" }}>We'll Pick It Up</span>
+                      <span style={{ color: "#38bdf8" }}>We'll Pick It Up</span>
                     </h1>
                     <p
                       className="hidden md:block text-base md:text-lg lg:text-xl xl:text-2xl mb-4 md:mb-6 lg:mb-8 max-w-2xl"
@@ -597,7 +597,7 @@ const Hero = () => {
                 animate={{ y: 0 }}
                 transition={{ duration: 0.6, delay: 0.6 }}
                 className="relative rounded-2xl md:rounded-3xl mb-8 md:mb-12 overflow-hidden"
-                style={{ backgroundColor: "#64946e", minHeight: "150px" }}>
+                style={{ backgroundColor: "#38bdf8", minHeight: "150px" }}>
                 {/* Banner Slides */}
                 <div className="relative h-full">
                   {banners.map((banner, index) => (
@@ -637,7 +637,7 @@ const Hero = () => {
                             className="font-semibold py-1.5 px-4 md:py-2 md:px-5 rounded-full text-xs md:text-sm transition-all duration-300"
                             style={{
                               backgroundColor: "#f4ebe2",
-                              color: "#64946e",
+                              color: "#38bdf8",
                             }}
                             onMouseEnter={(e) => {
                               e.target.style.backgroundColor = "#e8ddd0";
@@ -723,7 +723,7 @@ const Hero = () => {
                   <button
                     onClick={() => navigate("/categories")}
                     className="text-sm md:text-base font-medium hover:opacity-80 transition-opacity"
-                    style={{ color: "#64946e" }}>
+                    style={{ color: "#38bdf8" }}>
                     See all
                   </button>
                 </div>
@@ -860,7 +860,7 @@ const Hero = () => {
                             className="w-10 h-10 md:w-14 md:h-14 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0"
                             style={{
                               backgroundColor: "rgba(100, 148, 110, 0.1)",
-                              color: "#64946e",
+                              color: "#38bdf8",
                             }}>
                             {item.icon}
                           </div>
@@ -884,7 +884,7 @@ const Hero = () => {
                         <div
                           className="hidden md:block mt-4 h-1 rounded-full"
                           style={{
-                            backgroundColor: "#64946e",
+                            backgroundColor: "#38bdf8",
                             width: "40px",
                           }}></div>
                       </div>
@@ -1002,3 +1002,4 @@ const Hero = () => {
 };
 
 export default Hero;
+

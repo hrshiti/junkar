@@ -135,7 +135,7 @@ const ServiceDetailsPage = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="min-h-screen w-full flex flex-col"
-      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+      style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
       {/* Header */}
       <div className="flex items-center gap-4 p-4 border-b border-white/20 bg-white/20 backdrop-blur-sm sticky top-0 z-10">
         <button
@@ -225,7 +225,7 @@ const ServiceDetailsPage = () => {
           onClick={handleContinue}
           disabled={isUploading}
           className="w-full py-3 rounded-xl font-bold text-white shadow-lg disabled:opacity-70"
-          style={{ backgroundColor: "#22c55e" }}>
+          style={{ backgroundColor: "#0ea5e9" }}>
           {isUploading
             ? getTranslatedText("Uploading...")
             : getTranslatedText("Continue")}
@@ -236,3 +236,5 @@ const ServiceDetailsPage = () => {
 };
 
 export default ServiceDetailsPage;
+
+

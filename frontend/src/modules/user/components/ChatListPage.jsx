@@ -121,7 +121,7 @@ const ChatListPage = () => {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+        style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
         <div className="text-center">
           <FaSpinner
             className="animate-spin mx-auto mb-4 text-white"
@@ -136,7 +136,7 @@ const ChatListPage = () => {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+    <div className="min-h-screen" style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
       <div className="p-4 md:p-6 space-y-4">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
@@ -175,15 +175,17 @@ const ChatListPage = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setFilter("active")}
-              className={`px-4 py-2 rounded-xl font-semibold transition-all shadow-sm ${filter === "active" ? "bg-emerald-600 text-white shadow-md" : "bg-white text-slate-600 hover:bg-slate-50"
+              className={`px-4 py-2 rounded-xl font-semibold transition-all shadow-sm ${filter === "active" ? "text-white shadow-md" : "bg-white text-slate-600 hover:bg-slate-50"
                 }`}
+              style={filter === "active" ? { background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)" } : {}}
             >
               {getTranslatedText("Active")}
             </button>
             <button
               onClick={() => setFilter("archived")}
-              className={`px-4 py-2 rounded-xl font-semibold transition-all shadow-sm ${filter === "archived" ? "bg-emerald-600 text-white shadow-md" : "bg-white text-slate-600 hover:bg-slate-50"
+              className={`px-4 py-2 rounded-xl font-semibold transition-all shadow-sm ${filter === "archived" ? "text-white shadow-md" : "bg-white text-slate-600 hover:bg-slate-50"
                 }`}
+              style={filter === "archived" ? { background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)" } : {}}
             >
               {getTranslatedText("Archived")}
             </button>
@@ -211,7 +213,7 @@ const ChatListPage = () => {
               style={{ color: "#ffffff" }}>
               {getTranslatedText("No chats found")}
             </p>
-            <p className="text-sm" style={{ color: "#ecfdf5" }}>
+            <p className="text-sm" style={{ color: "#f0f9ff" }}>
               {searchQuery
                 ? getTranslatedText("Try a different search term")
                 : getTranslatedText(
@@ -251,8 +253,8 @@ const ChatListPage = () => {
                     <div
                       className="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold relative flex-shrink-0"
                       style={{
-                        backgroundColor: "#ecfdf5",
-                        color: "#059669",
+                        backgroundColor: "#f0f9ff",
+                        color: "#0284c7",
                       }}>
                       {otherUserInitials}
                       {unreadCount > 0 && (
@@ -305,3 +307,4 @@ const ChatListPage = () => {
 };
 
 export default ChatListPage;
+

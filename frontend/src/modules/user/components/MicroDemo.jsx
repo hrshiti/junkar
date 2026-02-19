@@ -152,7 +152,7 @@ const MicroDemo = () => {
                     <div
                       className="absolute top-2 right-2 w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center font-bold text-[10px] md:text-xs shadow-md"
                       style={{
-                        backgroundColor: "#64946e",
+                        backgroundColor: "#38bdf8",
                         color: "#ffffff",
                       }}>
                       {String(stepNumber).padStart(2, "0")}
@@ -163,7 +163,7 @@ const MicroDemo = () => {
                       <div
                         className="w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3"
                         style={{
-                          backgroundColor: "#64946e",
+                          backgroundColor: "#38bdf8",
                           color: "#ffffff",
                           boxShadow: "0 4px 12px rgba(100, 148, 110, 0.3)",
                         }}>
@@ -188,7 +188,7 @@ const MicroDemo = () => {
                     className="h-1.5 md:h-2"
                     style={{
                       background:
-                        "linear-gradient(90deg, #64946e 0%, rgba(100, 148, 110, 0.6) 100%)",
+                        "linear-gradient(90deg, #38bdf8 0%, rgba(100, 148, 110, 0.6) 100%)",
                     }}
                   />
                 </div>
@@ -202,3 +202,4 @@ const MicroDemo = () => {
 };
 
 export default MicroDemo;
+

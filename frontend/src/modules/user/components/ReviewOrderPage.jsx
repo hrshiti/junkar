@@ -185,10 +185,10 @@ const ReviewOrderPage = () => {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+        style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
         <FaSpinner
           className="animate-spin text-4xl"
-          style={{ color: "#64946e" }}
+          style={{ color: "#38bdf8" }}
         />
       </div>
     );
@@ -198,7 +198,7 @@ const ReviewOrderPage = () => {
     return (
       <div
         className="min-h-screen flex flex-col items-center justify-center p-4"
-        style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+        style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
         <p className="text-red-500 mb-4">{error}</p>
         <button
           onClick={() => navigate(-1)}
@@ -210,7 +210,7 @@ const ReviewOrderPage = () => {
   }
 
   return (
-    <div className="min-h-screen pb-10" style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+    <div className="min-h-screen pb-10" style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
       {/* Header */}
       <div
         className="sticky top-0 z-40 px-4 py-4"
@@ -237,9 +237,9 @@ const ReviewOrderPage = () => {
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold shadow-inner"
               style={{
-                backgroundColor: "#ecfdf5",
-                color: "#059669",
-                border: "2px solid #10b981"
+                backgroundColor: "#f0f9ff",
+                color: "#0284c7",
+                border: "2px solid #0ea5e9"
               }}>
               {order.scrapper?.name?.[0] || "S"}
             </div>
@@ -327,7 +327,7 @@ const ReviewOrderPage = () => {
               type="submit"
               disabled={submitting || rating === 0}
               className="w-full py-3.5 rounded-xl font-bold text-white shadow-lg transition-all transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-xl hover:bg-emerald-600"
-              style={{ backgroundColor: "#059669" }}>
+              style={{ backgroundColor: "#0284c7" }}>
               {submitting
                 ? getTranslatedText("Submitting...")
                 : getTranslatedText("Submit Review")}
@@ -340,3 +340,4 @@ const ReviewOrderPage = () => {
 };
 
 export default ReviewOrderPage;
+

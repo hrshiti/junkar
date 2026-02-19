@@ -54,7 +54,7 @@ const defaultCenter = {
 // Icons (reused from scrapper module or simplified)
 const truckIcon = {
     path: 'M17 8h3a3 3 0 0 1 3 3v8h-3a2 2 0 0 1-4 0H9a2 2 0 0 1-4 0H3V9a3 3 0 0 1 3-3h11zm-1-5a2 2 0 0 1 2 2v3h-2V3zm-2 0h-4v3h4V3zm-6 2v3H6V5a2 2 0 0 1 2-2z',
-    fillColor: '#64946e',
+    fillColor: '#38bdf8',
     fillOpacity: 1,
     strokeWeight: 1,
     strokeColor: '#ffffff',
@@ -251,7 +251,7 @@ const TrackOrderPage = () => {
     if (!isLoaded || !order) return <div className="p-4 text-center">Loading...</div>;
 
     return (
-        <div className="relative h-screen w-full flex flex-col" style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+        <div className="relative h-screen w-full flex flex-col" style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
             {/* Header */}
             <div className="absolute top-0 left-0 right-0 z-10 p-4">
                 <div className="flex items-center gap-3">
@@ -311,7 +311,7 @@ const TrackOrderPage = () => {
                                 url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
                                     <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
                                         <ellipse cx="24" cy="44" rx="12" ry="3" fill="rgba(0,0,0,0.2)"/>
-                                        <path d="M8 20 L8 32 L32 32 L32 20 Z" fill="#64946e" stroke="#ffffff" stroke-width="2"/>
+                                        <path d="M8 20 L8 32 L32 32 L32 20 Z" fill="#38bdf8" stroke="#ffffff" stroke-width="2"/>
                                         <path d="M8 16 L8 20 L20 20 L20 16 Z" fill="#4a7356" stroke="#ffffff" stroke-width="2"/>
                                         <circle cx="14" cy="32" r="4" fill="#2d3748" stroke="#ffffff" stroke-width="2"/>
                                         <circle cx="26" cy="32" r="4" fill="#2d3748" stroke="#ffffff" stroke-width="2"/>
@@ -388,3 +388,4 @@ const TrackOrderPage = () => {
 };
 
 export default TrackOrderPage;
+

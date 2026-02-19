@@ -142,7 +142,7 @@ const CategorySelection = ({ onSelect, onClose, selectedCategory: propSelectedCa
               animate={{ width: '25%' }}
               transition={{ duration: 0.5 }}
               className="h-full rounded-full"
-              style={{ backgroundColor: '#64946e' }}
+              style={{ backgroundColor: '#38bdf8' }}
             />
           </div>
           <span className="text-xs md:text-sm" style={{ color: '#718096' }}>Step 1 of 4</span>
@@ -167,7 +167,7 @@ const CategorySelection = ({ onSelect, onClose, selectedCategory: propSelectedCa
                 className="rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
                 style={{
                   backgroundColor: '#ffffff',
-                  border: selectedCategory?.id === category.id ? '2px solid #64946e' : '2px solid transparent'
+                  border: selectedCategory?.id === category.id ? '2px solid #38bdf8' : '2px solid transparent'
                 }}
               >
                 {/* Category Image */}
@@ -190,7 +190,7 @@ const CategorySelection = ({ onSelect, onClose, selectedCategory: propSelectedCa
                         animate={{ scale: 1 }}
                         transition={{ type: 'spring', stiffness: 200 }}
                         className="w-12 h-12 rounded-full flex items-center justify-center"
-                        style={{ backgroundColor: '#64946e' }}
+                        style={{ backgroundColor: '#38bdf8' }}
                       >
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-white">
                           <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -210,7 +210,7 @@ const CategorySelection = ({ onSelect, onClose, selectedCategory: propSelectedCa
                   </p>
                   <p
                     className="text-xs md:text-sm font-medium"
-                    style={{ color: '#64946e' }}
+                    style={{ color: '#38bdf8' }}
                   >
                     ₹{category.price}/kg
                   </p>
@@ -230,9 +230,9 @@ const CategorySelection = ({ onSelect, onClose, selectedCategory: propSelectedCa
             transition={{ duration: 0.3 }}
             onClick={handleContinue}
             className="w-full py-3 md:py-4 rounded-full text-white font-semibold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-            style={{ backgroundColor: '#64946e' }}
+            style={{ backgroundColor: '#38bdf8' }}
             onMouseEnter={(e) => e.target.style.backgroundColor = '#5a8263'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = '#64946e'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = '#38bdf8'}
           >
             Continue with {selectedCategory.name}
           </motion.button>
@@ -250,4 +250,5 @@ const CategorySelection = ({ onSelect, onClose, selectedCategory: propSelectedCa
 };
 
 export default CategorySelection;
+
 

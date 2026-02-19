@@ -97,7 +97,7 @@ const OTPModal = ({ onClose }) => {
                     color: '#2d3748',
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = '#64946e';
+                    e.target.style.borderColor = '#38bdf8';
                     e.target.style.boxShadow = '0 0 0 2px rgba(100, 148, 110, 0.2)';
                   }}
                   onBlur={(e) => {
@@ -112,7 +112,7 @@ const OTPModal = ({ onClose }) => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="text-sm"
-                  style={{ color: '#64946e' }}
+                  style={{ color: '#38bdf8' }}
                 >
                   OTP sent to {phone}
                 </motion.p>
@@ -122,13 +122,13 @@ const OTPModal = ({ onClose }) => {
                 disabled={phone.length !== 10}
                 className="w-full text-white font-semibold py-3 rounded-lg disabled:cursor-not-allowed transition-all"
                 style={{ 
-                  backgroundColor: phone.length === 10 ? '#64946e' : '#cbd5e0',
+                  backgroundColor: phone.length === 10 ? '#38bdf8' : '#cbd5e0',
                 }}
                 onMouseEnter={(e) => {
                   if (phone.length === 10) e.target.style.backgroundColor = '#5a8263';
                 }}
                 onMouseLeave={(e) => {
-                  if (phone.length === 10) e.target.style.backgroundColor = '#64946e';
+                  if (phone.length === 10) e.target.style.backgroundColor = '#38bdf8';
                 }}
               >
                 {otpSent ? 'Resend OTP' : 'Send OTP'}
@@ -160,7 +160,7 @@ const OTPModal = ({ onClose }) => {
                         color: '#2d3748',
                       }}
                       onFocus={(e) => {
-                        e.target.style.borderColor = '#64946e';
+                        e.target.style.borderColor = '#38bdf8';
                         e.target.style.boxShadow = '0 0 0 2px rgba(100, 148, 110, 0.2)';
                       }}
                       onBlur={(e) => {
@@ -176,13 +176,13 @@ const OTPModal = ({ onClose }) => {
                 disabled={otp.some((digit) => digit === '')}
                 className="w-full text-white font-semibold py-3 rounded-lg disabled:cursor-not-allowed transition-all"
                 style={{ 
-                  backgroundColor: otp.every((digit) => digit !== '') ? '#64946e' : '#cbd5e0',
+                  backgroundColor: otp.every((digit) => digit !== '') ? '#38bdf8' : '#cbd5e0',
                 }}
                 onMouseEnter={(e) => {
                   if (otp.every((digit) => digit !== '')) e.target.style.backgroundColor = '#5a8263';
                 }}
                 onMouseLeave={(e) => {
-                  if (otp.every((digit) => digit !== '')) e.target.style.backgroundColor = '#64946e';
+                  if (otp.every((digit) => digit !== '')) e.target.style.backgroundColor = '#38bdf8';
                 }}
               >
                 Verify OTP
@@ -194,7 +194,7 @@ const OTPModal = ({ onClose }) => {
                   setOtp(['', '', '', '', '', '']);
                 }}
                 className="w-full font-medium py-2 hover:opacity-80 transition-opacity"
-                style={{ color: '#64946e' }}
+                style={{ color: '#38bdf8' }}
               >
                 Change Phone Number
               </button>
@@ -207,4 +207,5 @@ const OTPModal = ({ onClose }) => {
 };
 
 export default OTPModal;
+
 

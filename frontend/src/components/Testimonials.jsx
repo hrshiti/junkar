@@ -92,7 +92,7 @@ const Testimonials = () => {
                     height: '8rem',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#64946e';
+                    e.currentTarget.style.borderColor = '#38bdf8';
                     e.currentTarget.style.boxShadow = '0 8px 24px rgba(100, 148, 110, 0.3)';
                     e.currentTarget.style.transform = 'translateY(-4px) scale(1.05)';
                   }}
@@ -171,4 +171,5 @@ const Testimonials = () => {
 };
 
 export default Testimonials;
+
 

@@ -11,7 +11,7 @@ const ReferAndEarnPage = () => {
     return (
         <div
             className="min-h-screen w-full relative z-0 pb-20 md:pb-0 overflow-x-hidden"
-            style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+            style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
             {/* Sticky Header with Back Button */}
             <div
                 className="sticky top-0 z-40 px-4 md:px-6 lg:px-8 py-4 md:py-6"
@@ -37,3 +37,4 @@ const ReferAndEarnPage = () => {
 };
 
 export default ReferAndEarnPage;
+

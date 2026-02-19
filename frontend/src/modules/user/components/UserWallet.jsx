@@ -136,7 +136,7 @@ const UserWallet = () => {
                     email: user?.email,
                     contact: user?.phone
                 },
-                theme: { color: "#10b981" }
+                theme: { color: "#0ea5e9" }
             };
 
             await initializePayment(options, async (response) => {
@@ -254,41 +254,44 @@ const UserWallet = () => {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-gradient-to-br from-green-600 to-emerald-500 rounded-2xl p-6 text-white shadow-xl mb-6 relative overflow-hidden"
+                    className="bg-white rounded-2xl p-4 shadow-xl mb-6 relative overflow-hidden border-2 border-slate-100"
                 >
-                    <div className="absolute top-0 right-0 p-8 opacity-10">
-                        <FaWallet size={100} />
+                    {/* Subtle background decoration */}
+                    <div className="absolute inset-0 opacity-5">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-500 rounded-full translate-y-1/2 -translate-x-1/2"></div>
                     </div>
 
                     <div className="relative z-10">
-                        <p className="text-emerald-100 text-sm font-medium mb-1">{getTranslatedText("Total Balance")}</p>
-                        <h2 className="text-4xl font-bold mb-6">₹{balance.total.toLocaleString()}</h2>
+                        <p className="text-slate-500 text-xs font-semibold mb-1">{getTranslatedText("Total Balance")}</p>
+                        <h2 className="text-3xl font-bold text-slate-800 mb-4">₹{balance.total.toLocaleString()}</h2>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
-                                <p className="text-emerald-100 text-xs mb-1">{getTranslatedText("Available Balance")}</p>
-                                <p className="text-xl font-semibold">₹{balance.available.toLocaleString()}</p>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
+                                <p className="text-slate-500 text-xs mb-1">{getTranslatedText("Available Balance")}</p>
+                                <p className="text-lg font-bold text-slate-800">₹{balance.available.toLocaleString()}</p>
                             </div>
-                            <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
-                                <p className="text-emerald-100 text-xs mb-1">{getTranslatedText("Pending Clearance")}</p>
-                                <p className="text-xl font-semibold">₹{balance.pending.toLocaleString()}</p>
+                            <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
+                                <p className="text-slate-500 text-xs mb-1">{getTranslatedText("Pending Clearance")}</p>
+                                <p className="text-lg font-bold text-slate-800">₹{balance.pending.toLocaleString()}</p>
                             </div>
                         </div>
                     </div>
                 </motion.div>
 
                 {/* Actions */}
-                <div className="grid grid-cols-2 gap-4 mb-8">
+                <div className="grid grid-cols-2 gap-3 mb-6">
                     <button
                         onClick={() => setShowWithdraw(true)}
-                        className="flex items-center justify-center gap-2 bg-white text-emerald-600 py-3 px-4 rounded-xl font-semibold shadow-sm border border-emerald-100 hover:bg-emerald-50 transition-colors"
+                        className="flex items-center justify-center gap-2 bg-white text-slate-700 py-2.5 px-4 rounded-xl font-semibold shadow-sm border-2 border-slate-200 hover:bg-slate-50 transition-colors"
                     >
                         <FaArrowUp />
                         {getTranslatedText("Withdraw")}
                     </button>
                     <button
                         onClick={() => setShowAddMoney(true)}
-                        className="flex items-center justify-center gap-2 bg-emerald-600 text-white py-3 px-4 rounded-xl font-semibold shadow-lg hover:bg-emerald-700 transition-colors"
+                        className="flex items-center justify-center gap-2 text-white py-2.5 px-4 rounded-xl font-semibold shadow-md transition-colors"
+                        style={{ background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)" }}
                     >
                         <FaArrowDown />
                         {getTranslatedText("Add Money")}
@@ -300,21 +303,21 @@ const UserWallet = () => {
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.1 }}
-                    className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-8"
+                    className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-6"
                 >
                     <button
                         onClick={() => setShowCouponSection(!showCouponSection)}
                         className="w-full flex items-center justify-between text-left"
                     >
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
-                                <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm" style={{ background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)" }}>
+                                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                                 </svg>
                             </div>
                             <div>
-                                <p className="font-semibold text-gray-800 text-sm">Have a Coupon?</p>
-                                <p className="text-xs text-gray-500">Apply code to get instant credit</p>
+                                <p className="font-bold text-slate-800 text-sm">Have a Coupon?</p>
+                                <p className="text-xs text-slate-500">Apply code to get instant credit</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -324,18 +327,11 @@ const UserWallet = () => {
                                     setShowCouponsList(true);
                                     fetchCoupons();
                                 }}
-                                className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors"
+                                className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
+                                style={{ backgroundColor: "#f0f9ff", color: "#0ea5e9" }}
                             >
                                 View Offers
                             </button>
-                            <svg
-                                className={`w-5 h-5 text-gray-400 transition-transform ${showCouponSection ? 'rotate-180' : ''}`}
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
                         </div>
                     </button>
 
@@ -355,18 +351,19 @@ const UserWallet = () => {
                                             value={couponCode}
                                             onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                                             placeholder="Enter coupon code"
-                                            className="flex-1 px-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:outline-none text-sm font-mono uppercase"
+                                            className="flex-1 px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:border-cyan-500 focus:outline-none text-sm font-mono uppercase"
                                             disabled={applyingCoupon}
                                         />
                                         <button
                                             onClick={handleApplyCoupon}
                                             disabled={applyingCoupon || !couponCode}
-                                            className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="px-6 py-2.5 rounded-xl font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md text-white"
+                                            style={{ background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)" }}
                                         >
                                             {applyingCoupon ? 'Applying...' : 'Apply'}
                                         </button>
                                     </div>
-                                    <p className="text-xs text-gray-500 flex items-center gap-1">
+                                    <p className="text-xs text-slate-500 flex items-center gap-1">
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
@@ -445,7 +442,7 @@ const UserWallet = () => {
                     transition={{ delay: 0.1 }}
                 >
                     <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <FaHistory className="text-emerald-600" />
+                        <FaHistory className="text-cyan-600" />
                         {getTranslatedText("Recent Transactions")}
                     </h3>
 
@@ -493,7 +490,7 @@ const UserWallet = () => {
                                     >
                                         <div className="flex items-center gap-3">
                                             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.category === 'COUPON_CREDIT' ? 'bg-purple-100 text-purple-600' :
-                                                isDebit ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'
+                                                isDebit ? 'bg-red-50 text-red-500' : 'bg-cyan-50 text-cyan-600'
                                                 }`}>
                                                 {icon}
                                             </div>
@@ -508,11 +505,11 @@ const UserWallet = () => {
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className={`font-bold ${isDebit ? 'text-red-500' : 'text-emerald-600'
+                                            <p className={`font-bold ${isDebit ? 'text-red-500' : 'text-cyan-600'
                                                 }`}>
                                                 {isDebit ? '-' : '+'}₹{tx.amount?.toLocaleString()}
                                             </p>
-                                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${tx.status === 'SUCCESS' ? 'bg-green-100 text-green-700' :
+                                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${tx.status === 'SUCCESS' ? 'bg-cyan-100 text-cyan-700' :
                                                 tx.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
                                                 }`}>
                                                 {tx.status}
@@ -544,7 +541,7 @@ const UserWallet = () => {
                         >
                             <div className="flex justify-between items-center mb-6">
                                 <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                    <FaMoneyBillWave className="text-emerald-600" /> {getTranslatedText("Add Funds")}
+                                    <FaMoneyBillWave className="text-cyan-600" /> {getTranslatedText("Add Funds")}
                                 </h3>
                                 <button onClick={() => setShowAddMoney(false)} className="text-slate-400 hover:text-slate-600">
                                     <FaTimes size={20} />
@@ -604,7 +601,7 @@ const UserWallet = () => {
                         >
                             <div className="flex justify-between items-center mb-6">
                                 <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                    <FaUniversity className="text-emerald-600" /> {getTranslatedText("Withdraw Funds")}
+                                    <FaUniversity className="text-cyan-600" /> {getTranslatedText("Withdraw Funds")}
                                 </h3>
                                 <button onClick={() => setShowWithdraw(false)} className="text-slate-400 hover:text-slate-600">
                                     <FaTimes size={20} />
@@ -683,3 +680,4 @@ const UserWallet = () => {
 };
 
 export default UserWallet;
+
