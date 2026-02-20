@@ -48,7 +48,7 @@ app.use(helmet());
 // CORS Configuration
 const allowedOrigins = process.env.FRONTEND_URL
   ? process.env.FRONTEND_URL.split(',').map(url => url.trim().replace(/\/$/, "")) // Remove trailing slash
-  : ['http://localhost:5173', 'https://www.junkar.com', 'https://junkar.com'];
+  : ['http://localhost:5173','https://junkar.vercel.app','junkar.vercel.app'];
 
 app.use(
   cors({
