@@ -11,9 +11,9 @@ const getScrapperIcon = () => ({
             <!-- Shadow -->
             <ellipse cx="24" cy="44" rx="12" ry="3" fill="rgba(0,0,0,0.2)"/>
             <!-- Truck body -->
-            <path d="M8 20 L8 32 L32 32 L32 20 Z" fill="#64946e" stroke="#ffffff" stroke-width="2"/>
+            <path d="M8 20 L8 32 L32 32 L32 20 Z" fill="#0ea5e9" stroke="#ffffff" stroke-width="2"/>
             <!-- Truck cabin -->
-            <path d="M8 16 L8 20 L20 20 L20 16 Z" fill="#4a7356" stroke="#ffffff" stroke-width="2"/>
+            <path d="M8 16 L8 20 L20 20 L20 16 Z" fill="#0284c7" stroke="#ffffff" stroke-width="2"/>
             <!-- Wheels -->
             <circle cx="14" cy="32" r="4" fill="#2d3748" stroke="#ffffff" stroke-width="2"/>
             <circle cx="26" cy="32" r="4" fill="#2d3748" stroke="#ffffff" stroke-width="2"/>
@@ -237,9 +237,9 @@ const ScrapperMap = ({
 
     if (!isLoaded) {
         return (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 rounded-xl">
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-sky-50 to-blue-50 rounded-xl">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-600 mx-auto mb-4"></div>
+                    <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-sky-600 mx-auto mb-4"></div>
                     <p className="text-gray-700 font-semibold">{getTranslatedText("Loading 3D Map...")}</p>
                     <p className="text-sm text-gray-500 mt-2">{getTranslatedText("Preparing your route")}</p>
                 </div>
@@ -268,7 +268,7 @@ const ScrapperMap = ({
                     <Polyline
                         path={trail}
                         options={{
-                            strokeColor: '#64946e',
+                            strokeColor: '#0ea5e9',
                             strokeOpacity: 0.4,
                             strokeWeight: 4,
                             geodesic: true,
@@ -276,7 +276,7 @@ const ScrapperMap = ({
                                 icon: {
                                     path: window.google.maps.SymbolPath.CIRCLE,
                                     scale: 2,
-                                    fillColor: '#64946e',
+                                    fillColor: '#0ea5e9',
                                     fillOpacity: 0.6,
                                     strokeColor: '#ffffff',
                                     strokeWeight: 1,
@@ -347,7 +347,7 @@ const ScrapperMap = ({
                         icon={{
                             url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
                             <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="30" cy="30" r="28" fill="#10b981" stroke="#ffffff" stroke-width="3"/>
+                                <circle cx="30" cy="30" r="28" fill="#0ea5e9" stroke="#ffffff" stroke-width="3"/>
                                 <text x="30" y="40" font-size="30" text-anchor="middle" fill="white">✓</text>
                             </svg>
                         `),
@@ -370,7 +370,7 @@ const ScrapperMap = ({
                         <div className="w-[1px] h-8 bg-gray-200"></div>
                         <div>
                             <p className="text-xs text-gray-500 font-medium">Est. Time</p>
-                            <p className="text-lg font-bold text-green-600">{routeStats.duration}</p>
+                            <p className="text-lg font-bold text-sky-600">{routeStats.duration}</p>
                         </div>
                     </div>
                 </div>

@@ -150,7 +150,7 @@ const ChatListPage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="text-center">
-          <FaSpinner className="animate-spin mx-auto mb-4 text-3xl text-emerald-500" />
+          <FaSpinner className="animate-spin mx-auto mb-4 text-3xl text-sky-500" />
           <p className="text-white">{getTranslatedText("Loading chats...")}</p>
         </div>
       </div>
@@ -158,7 +158,7 @@ const ChatListPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-gray-900 to-black">
+    <div className="min-h-screen bg-gradient-to-br from-sky-900 via-gray-900 to-black">
       <div className="p-4 md:p-6 space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
@@ -176,7 +176,7 @@ const ChatListPage = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={getTranslatedText("Search chats...")}
-              className="w-full pl-12 pr-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 border-white/10 bg-zinc-900 text-white focus:border-emerald-500 placeholder-gray-500"
+              className="w-full pl-12 pr-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 border-white/10 bg-zinc-900 text-white focus:border-sky-500 placeholder-gray-500"
             />
           </div>
 
@@ -236,12 +236,12 @@ const ChatListPage = () => {
                   onClick={() => navigate(`/scrapper/chat/${chat._id}`, {
                     state: { orderId: chat.orderId?._id || chat.orderId }
                   })}
-                  className="rounded-2xl p-4 shadow-lg cursor-pointer transition-all bg-black border border-white/10 hover:border-emerald-500/50"
+                  className="rounded-2xl p-4 shadow-lg cursor-pointer transition-all bg-black border border-white/10 hover:border-sky-500/50"
                 >
                   <div className="flex items-center gap-3">
                     {/* Avatar */}
                     <div
-                      className="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold relative flex-shrink-0 bg-emerald-900/30 text-emerald-400"
+                      className="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold relative flex-shrink-0 bg-sky-900/30 text-sky-400"
                     >
                       {otherUserInitials}
                       {unreadCount > 0 && (
@@ -299,4 +299,5 @@ const ChatListPage = () => {
 };
 
 export default ChatListPage;
+
 

@@ -515,7 +515,7 @@ const ActiveRequestsPage = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="min-h-screen w-full relative bg-gradient-to-br from-emerald-900 via-gray-900 to-black"
+      className="min-h-screen w-full relative bg-gradient-to-br from-sky-900 via-gray-900 to-black"
     >
       {/* Header with Back Button and Status */}
       <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center justify-between bg-black/95 backdrop-blur-sm border-b border-white/10">
@@ -526,7 +526,7 @@ const ActiveRequestsPage = () => {
           {existingRequests.length > 0 && (
             <button
               onClick={() => setShowActiveRequestsPanel(!showActiveRequestsPanel)}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold shadow-md flex items-center gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+              className="px-3 py-1.5 rounded-full text-xs font-semibold shadow-md flex items-center gap-1.5 bg-sky-600 text-white hover:bg-sky-700 transition-colors"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                 <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -535,7 +535,7 @@ const ActiveRequestsPage = () => {
             </button>
           )}
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full animate-pulse bg-emerald-500" />
+            <div className="w-3 h-3 rounded-full animate-pulse bg-sky-500" />
             <span className="text-sm font-semibold text-white">{getTranslatedText("Online")}</span>
           </div>
         </div>
@@ -566,7 +566,7 @@ const ActiveRequestsPage = () => {
             onClick={() => setIsMinimized(!isMinimized)}
             className="w-full pt-4 pb-2 cursor-pointer flex justify-center hover:bg-slate-800/50 transition-colors rounded-t-2xl absolute top-0 z-10"
           >
-            <div className={`w-12 h-1.5 rounded-full flex-shrink-0 transition-colors ${isMinimized ? 'bg-emerald-500' : 'bg-slate-700'}`} />
+            <div className={`w-12 h-1.5 rounded-full flex-shrink-0 transition-colors ${isMinimized ? 'bg-sky-500' : 'bg-slate-700'}`} />
           </div>
 
           {/* Spacer for handle click area */}
@@ -594,8 +594,8 @@ const ActiveRequestsPage = () => {
               {/* Request Details - Compact */}
               <div className="space-y-2 mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-500/20">
-                    <span className="text-sm font-bold text-emerald-300">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-sky-500/20">
+                    <span className="text-sm font-bold text-sky-300">
                       {incomingRequest.userName[0]}
                     </span>
                   </div>
@@ -604,7 +604,7 @@ const ActiveRequestsPage = () => {
                     <p className="text-xs truncate text-slate-400">{incomingRequest.scrapType}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold text-emerald-400">{incomingRequest.estimatedEarnings}</p>
+                    <p className="text-sm font-bold text-sky-400">{incomingRequest.estimatedEarnings}</p>
                   </div>
                 </div>
 
@@ -662,8 +662,8 @@ const ActiveRequestsPage = () => {
 
                 {/* Active Requests Count */}
                 {existingRequests.length > 0 && (
-                  <div className="mt-2 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                    <p className="text-xs text-emerald-400">
+                  <div className="mt-2 p-2 rounded-lg bg-sky-500/10 border border-sky-500/20">
+                    <p className="text-xs text-sky-400">
                       {existingRequests.length === 1
                         ? getTranslatedText("You have {count} active request", { count: existingRequests.length })
                         : getTranslatedText("You have {count} active requests", { count: existingRequests.length })}
@@ -683,7 +683,7 @@ const ActiveRequestsPage = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleAcceptRequest}
-              className="w-full py-4 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 bg-emerald-500 text-slate-900 hover:bg-emerald-400 transition-all"
+              className="w-full py-4 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 bg-sky-500 text-slate-900 hover:bg-sky-400 transition-all"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -742,12 +742,12 @@ const ActiveRequestsPage = () => {
                       setShowActiveRequestsPanel(false);
                       navigate(`/scrapper/active-request/${request.id}`, { state: { request } });
                     }}
-                    className="p-3 mb-2 rounded-xl border cursor-pointer transition-all bg-black border-white/10 hover:border-emerald-500/30"
+                    className="p-3 mb-2 rounded-xl border cursor-pointer transition-all bg-black border-white/10 hover:border-sky-500/30"
                   >
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-900/30">
-                          <span className="text-xs font-bold text-emerald-400">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-sky-900/30">
+                          <span className="text-xs font-bold text-sky-400">
                             {request.userName?.[0]?.toUpperCase() || 'U'}
                           </span>
                         </div>
@@ -768,7 +768,7 @@ const ActiveRequestsPage = () => {
                       </span>
                     </div>
                     <div className="ml-10 space-y-1">
-                      <p className="text-xs font-bold text-emerald-600">
+                      <p className="text-xs font-bold text-sky-600">
                         {request.estimatedEarnings || '₹0'}
                       </p>
                       {request.location?.address && (
@@ -800,3 +800,5 @@ const ActiveRequestsPage = () => {
 };
 
 export default ActiveRequestsPage;
+
+

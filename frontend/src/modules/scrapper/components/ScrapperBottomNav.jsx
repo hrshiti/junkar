@@ -42,20 +42,20 @@ const ScrapperBottomNav = () => {
                         className={`flex flex-col items-center gap-1 w-16 ${item.isSpecial ? '-mt-6' : ''}`}
                     >
                         {item.isSpecial ? (
-                            <div className="w-14 h-14 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center text-white border-4 border-black">
+                            <div className="w-14 h-14 rounded-full bg-sky-500 shadow-lg flex items-center justify-center text-black border-4 border-black">
                                 <item.icon />
                             </div>
                         ) : (
-                            <div className={`text-xl mb-0.5 transition-colors ${isActive ? 'text-emerald-400' : 'text-gray-500'}`}>
+                            <div className={`text-xl mb-0.5 transition-colors ${isActive ? 'text-sky-400' : 'text-gray-500'}`}>
                                 <item.icon />
                             </div>
                         )}
 
-                        <span className={`text-[10px] font-medium transition-colors ${isActive ? 'text-emerald-400' : 'text-gray-500'}`}>
+                        <span className={`text-[10px] font-medium transition-colors ${isActive ? 'text-sky-400' : 'text-gray-500'}`}>
                             {item.label}
                         </span>
                         {isActive && !item.isSpecial && (
-                            <div className="absolute top-0 w-8 h-0.5 bg-emerald-500 rounded-b-full" />
+                            <div className="absolute top-0 w-8 h-0.5 bg-sky-500 rounded-b-full" />
                         )}
                     </button>
                 );

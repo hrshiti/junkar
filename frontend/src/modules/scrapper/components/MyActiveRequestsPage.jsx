@@ -205,8 +205,8 @@ const MyActiveRequestsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-[#f4fcf6]">
-        <p className="text-emerald-800 font-medium">{getTranslatedText("Loading active requests...")}</p>
+      <div className="min-h-screen w-full flex items-center justify-center bg-[#e0f2fe]">
+        <p className="text-sky-800 font-medium">{getTranslatedText("Loading active requests...")}</p>
       </div>
     );
   }
@@ -243,7 +243,7 @@ const MyActiveRequestsPage = () => {
           {activeRequests.length > 0 && (
             <button
               onClick={() => navigate('/scrapper/active-requests')}
-              className="px-4 py-2 rounded-full text-sm font-semibold transition-colors bg-emerald-600 text-white shadow-lg hover:bg-emerald-700"
+              className="px-4 py-2 rounded-full text-sm font-semibold transition-colors bg-sky-600 text-white shadow-lg hover:bg-sky-700"
             >
               {getTranslatedText("Go Online")}
             </button>
@@ -261,7 +261,7 @@ const MyActiveRequestsPage = () => {
           >
             <div className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center bg-white shadow-sm border border-slate-100">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" stroke="#34d399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
             <h3 className="text-lg md:text-xl font-bold mb-2 text-slate-800">
@@ -272,7 +272,7 @@ const MyActiveRequestsPage = () => {
             </p>
             <button
               onClick={() => navigate('/scrapper/active-requests')}
-              className="px-6 py-3 rounded-full font-semibold text-sm md:text-base transition-all bg-emerald-600 text-white shadow-lg hover:bg-emerald-700"
+              className="px-6 py-3 rounded-full font-semibold text-sm md:text-base transition-all bg-sky-600 text-white shadow-lg hover:bg-sky-700"
             >
               {getTranslatedText("Go Online to Receive Requests")}
             </button>
@@ -290,13 +290,13 @@ const MyActiveRequestsPage = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                   onClick={() => navigate(`/scrapper/active-request/${request.id}`, { state: { request } })}
-                  className="rounded-2xl p-4 md:p-6 shadow-md cursor-pointer transition-all hover:shadow-xl border bg-white border-slate-200 hover:border-emerald-200"
+                  className="rounded-2xl p-4 md:p-6 shadow-md cursor-pointer transition-all hover:shadow-xl border bg-white border-slate-200 hover:border-sky-200"
                 >
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
                       {/* User Avatar */}
                       <div
-                        className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-50 text-emerald-600 font-bold text-lg md:text-xl"
+                        className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center flex-shrink-0 bg-sky-50 text-sky-600 font-bold text-lg md:text-xl"
                       >
                         {request.userName?.[0]?.toUpperCase() || 'U'}
                       </div>
@@ -317,7 +317,7 @@ const MyActiveRequestsPage = () => {
                         <p className="text-sm md:text-base mb-2 text-slate-500">
                           {getTranslatedText(request.scrapType) || getTranslatedText('Scrap')}
                         </p>
-                        <p className="text-lg md:text-xl font-bold text-emerald-600">
+                        <p className="text-lg md:text-xl font-bold text-sky-600">
                           {request.estimatedEarnings || '₹0'}
                         </p>
                       </div>
@@ -397,7 +397,7 @@ const MyActiveRequestsPage = () => {
                         e.stopPropagation();
                         navigate(`/scrapper/active-request/${request.id}`, { state: { request } });
                       }}
-                      className="w-full py-3 rounded-xl font-semibold text-sm md:text-base transition-all bg-emerald-600 text-white hover:bg-emerald-700 shadow-md hover:shadow-lg"
+                      className="w-full py-3 rounded-xl font-semibold text-sm md:text-base transition-all bg-sky-600 text-white hover:bg-sky-700 shadow-md hover:shadow-lg"
                     >
                       {getTranslatedText("View Details & Continue")}
                     </button>

@@ -345,7 +345,7 @@ const LoginSignup = () => {
       className="min-h-screen w-full flex items-center justify-center px-4 py-6 md:px-6 md:py-10 lg:py-12 relative overflow-y-auto"
       style={{
         backgroundImage:
-          "radial-gradient(circle at top left, #bbf7d0 0, transparent 50%), radial-gradient(circle at bottom right, #86efac 0, transparent 55%), linear-gradient(135deg, #022c22 0%, #064e3b 40%, #052e16 100%)",
+          "radial-gradient(circle at top left, #bae6fd 0, transparent 50%), radial-gradient(circle at bottom right, #7dd3fc 0, transparent 55%), linear-gradient(135deg, #0c4a6e 0%, #0369a1 40%, #075985 100%)",
       }}>
       {/* Language Selector */}
       <div className="absolute top-4 right-4 z-50">
@@ -382,7 +382,7 @@ const LoginSignup = () => {
                         setIsLangOpen(false);
                       }}
                       className={`w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-gray-50 transition-colors ${language === code
-                        ? "text-green-600 bg-green-50"
+                        ? "text-sky-600 bg-sky-50"
                         : "text-gray-700"
                         }`}>
                       <span className="text-lg">{flag}</span>
@@ -396,8 +396,8 @@ const LoginSignup = () => {
         </AnimatePresence>
       </div>
       {/* Soft background orbs */}
-      <div className="pointer-events-none absolute -top-32 -left-24 w-72 h-72 rounded-full bg-emerald-400/30 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-32 -right-24 w-80 h-80 rounded-full bg-lime-300/20 blur-3xl" />
+      <div className="pointer-events-none absolute -top-32 -left-24 w-72 h-72 rounded-full bg-sky-400/30 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-32 -right-24 w-80 h-80 rounded-full bg-cyan-300/20 blur-3xl" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -405,16 +405,16 @@ const LoginSignup = () => {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="relative w-full max-w-5xl grid md:grid-cols-2 gap-0 bg-white/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/40 overflow-hidden">
         {/* Left panel – illustration & selling points */}
-        <div className="hidden md:flex flex-col justify-between p-8 lg:p-10 bg-gradient-to-br from-emerald-700 via-emerald-600 to-emerald-800 text-white relative">
+        <div className="hidden md:flex flex-col justify-between p-8 lg:p-10 bg-gradient-to-br from-sky-700 via-sky-600 to-sky-800 text-white relative">
           <div>
             <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-white/15 backdrop-blur">
-              <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-cyan-300 animate-pulse" />
               {getTranslatedText("Cleaner city, smarter scrap")}
             </p>
             <h2 className="mt-4 text-3xl lg:text-4xl font-extrabold leading-tight">
               {getTranslatedText("Turn your scrap into instant value.")}
             </h2>
-            <p className="mt-3 text-sm lg:text-base text-emerald-100/90">
+            <p className="mt-3 text-sm lg:text-base text-sky-100/90">
               {getTranslatedText(
                 "Book doorstep pickups at live market prices. Trusted scrappers, fair weights, and quick payouts."
               )}
@@ -424,7 +424,7 @@ const LoginSignup = () => {
           <div className="mt-6 space-y-3 text-xs lg:text-sm">
             <div className="flex items-start gap-3">
               <div className="mt-1 w-5 h-5 rounded-full bg-white/15 flex items-center justify-center">
-                <span className="w-2 h-2 rounded-full bg-emerald-300" />
+                <span className="w-2 h-2 rounded-full bg-cyan-300" />
               </div>
               <p>
                 {getTranslatedText(
@@ -434,7 +434,7 @@ const LoginSignup = () => {
             </div>
             <div className="flex items-start gap-3">
               <div className="mt-1 w-5 h-5 rounded-full bg-white/15 flex items-center justify-center">
-                <span className="w-2 h-2 rounded-full bg-emerald-300" />
+                <span className="w-2 h-2 rounded-full bg-cyan-300" />
               </div>
               <p>
                 {getTranslatedText(
@@ -444,7 +444,7 @@ const LoginSignup = () => {
             </div>
             <div className="flex items-start gap-3">
               <div className="mt-1 w-5 h-5 rounded-full bg-white/15 flex items-center justify-center">
-                <span className="w-2 h-2 rounded-full bg-emerald-300" />
+                <span className="w-2 h-2 rounded-full bg-cyan-300" />
               </div>
               <p>
                 {getTranslatedText("Login with OTP – no passwords, no hassle.")}
@@ -477,8 +477,8 @@ const LoginSignup = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.3 }}
             className="mb-6 md:mb-8 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-3">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-semibold mb-3">
+              <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse" />
               {getTranslatedText("Welcome to Junkar")}
             </div>
             <h1
@@ -508,7 +508,7 @@ const LoginSignup = () => {
                 setOtp(["", "", "", "", "", ""]);
               }}
               className={`px-5 py-2.5 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 ${isLogin
-                ? "bg-emerald-600 text-white shadow-md"
+                ? "bg-sky-600 text-white shadow-md"
                 : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                 }`}>
               {getTranslatedText("Login")}
@@ -520,7 +520,7 @@ const LoginSignup = () => {
                 setOtp(["", "", "", "", "", ""]);
               }}
               className={`px-5 py-2.5 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 ${!isLogin
-                ? "bg-emerald-600 text-white shadow-md"
+                ? "bg-sky-600 text-white shadow-md"
                 : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                 }`}>
               {getTranslatedText("Sign Up")}
@@ -566,7 +566,7 @@ const LoginSignup = () => {
                     stroke="currentColor"
                     strokeWidth="2"
                     className="mr-3"
-                    style={{ color: "#38bdf8" }}>
+                    style={{ color: "#000000" }}>
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                     <circle cx="12" cy="7" r="4" />
                   </svg>
@@ -611,7 +611,7 @@ const LoginSignup = () => {
                     stroke="currentColor"
                     strokeWidth="2"
                     className="mr-3"
-                    style={{ color: "#38bdf8" }}>
+                    style={{ color: "#000000" }}>
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                     <polyline points="22,6 12,13 2,6" />
                   </svg>
@@ -819,7 +819,7 @@ const LoginSignup = () => {
                     stroke="currentColor"
                     strokeWidth="2"
                     className="mr-3"
-                    style={{ color: "#38bdf8" }}>
+                    style={{ color: "#000000" }}>
                     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
                   </svg>
                   <input
@@ -875,17 +875,17 @@ const LoginSignup = () => {
                         onPaste={handlePaste}
                         className="w-8 h-10 md:w-11 md:h-11 text-center text-lg md:text-2xl font-bold border-2 rounded-lg focus:outline-none transition-all bg-white"
                         style={{
-                          borderColor: digit ? "#38bdf8" : "#e5ddd4",
+                          borderColor: digit ? "#0ea5e9" : "#e5ddd4",
                           color: "#2d3748",
                         }}
                         onFocus={(e) => {
-                          e.target.style.borderColor = "#38bdf8";
+                          e.target.style.borderColor = "#0ea5e9";
                           e.target.style.boxShadow =
-                            "0 0 0 2px rgba(100, 148, 110, 0.2)";
+                            "0 0 0 2px rgba(14, 165, 233, 0.2)";
                         }}
                         onBlur={(e) => {
                           e.target.style.borderColor = digit
-                            ? "#38bdf8"
+                            ? "#0ea5e9"
                             : "#e5ddd4";
                           e.target.style.boxShadow = "none";
                         }}
@@ -906,10 +906,10 @@ const LoginSignup = () => {
                   className="hidden"
                 />
                 <div
-                  className={`w-5 h-5 rounded border-2 flex items-center justify-center mr-2 transition-all ${rememberMe ? "border-green-600" : "border-gray-300"
+                  className={`w-5 h-5 rounded border-2 flex items-center justify-center mr-2 transition-all ${rememberMe ? "border-sky-600" : "border-gray-300"
                     }`}
                   style={{
-                    backgroundColor: rememberMe ? "#38bdf8" : "transparent",
+                    backgroundColor: rememberMe ? "#0ea5e9" : "transparent",
                   }}>
                   {rememberMe && (
                     <svg
@@ -952,7 +952,7 @@ const LoginSignup = () => {
                   }}
                   disabled={loading || resendTimer > 0}
                   className="text-sm font-medium hover:opacity-80 transition-opacity disabled:opacity-50"
-                  style={{ color: "#38bdf8" }}>
+                  style={{ color: "#0ea5e9" }}>
                   {loading ? getTranslatedText("Sending...") : resendTimer > 0 ? getTranslatedText("Resend in {seconds}s", { seconds: resendTimer }) : getTranslatedText("Resend OTP?")}
                 </button>
               )}
@@ -965,14 +965,14 @@ const LoginSignup = () => {
                   type="checkbox"
                   checked={termsAccepted}
                   onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="mt-1 w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer accent-emerald-600 shrink-0"
+                  className="mt-1 w-4 h-4 text-sky-600 rounded border-gray-300 focus:ring-sky-500 cursor-pointer accent-sky-600 shrink-0"
                 />
                 <p className="text-xs text-gray-600">
                   {getTranslatedText("I agree to the")}{" "}
                   <button
                     type="button"
                     onClick={() => navigate('/terms')}
-                    className="font-semibold text-emerald-600 hover:underline"
+                    className="font-semibold text-sky-600 hover:underline"
                   >
                     {getTranslatedText("Terms & Conditions")}
                   </button>
@@ -1000,15 +1000,16 @@ const LoginSignup = () => {
                     (!isLogin && (!name.trim() || !email.trim() || !termsAccepted)))) ||
                 (otpSent && otp.some((d) => d === ""))
               }
-              className="w-full text-white font-bold py-4 md:py-4.5 rounded-xl disabled:cursor-not-allowed disabled:opacity-50 transition-all text-base md:text-lg shadow-lg"
+              className="w-full font-bold py-4 md:py-4.5 rounded-xl disabled:cursor-not-allowed disabled:opacity-50 transition-all text-base md:text-lg shadow-lg"
               style={{
                 backgroundColor:
                   (!otpSent &&
                     phone.length === 10 &&
                     (isLogin || (name.trim() && email.trim() && termsAccepted))) ||
                     (otpSent && otp.every((d) => d !== ""))
-                    ? "#38bdf8"
+                    ? "#0ea5e9"
                     : "#cbd5e0",
+                color: "#000000"
               }}
               onMouseEnter={(e) => {
                 if (
@@ -1017,7 +1018,7 @@ const LoginSignup = () => {
                     (isLogin || (name.trim() && email.trim() && termsAccepted))) ||
                   (otpSent && otp.every((d) => d !== ""))
                 ) {
-                  e.target.style.backgroundColor = "#5a8263";
+                  e.target.style.backgroundColor = "#0284c7";
                 }
               }}
               onMouseLeave={(e) => {
@@ -1027,7 +1028,7 @@ const LoginSignup = () => {
                     (isLogin || (name.trim() && email.trim() && termsAccepted))) ||
                   (otpSent && otp.every((d) => d !== ""))
                 ) {
-                  e.target.style.backgroundColor = "#38bdf8";
+                  e.target.style.backgroundColor = "#0ea5e9";
                 }
               }}>
               {loading

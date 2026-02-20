@@ -75,7 +75,7 @@ const ScrapperTerms = () => {
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.25 }}
       className="min-h-screen w-full"
-      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}
+      style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}
     >
       <div className="w-full p-4 md:p-6 max-w-3xl mx-auto">
         <div className="flex items-center justify-between pb-3 md:pb-6">

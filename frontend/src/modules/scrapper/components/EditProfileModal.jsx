@@ -143,7 +143,7 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                                         type="text"
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none transition-all text-slate-800"
+                                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 outline-none transition-all text-slate-800"
                                         placeholder="John Doe"
                                     />
                                 </div>
@@ -160,7 +160,7 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                                                 type="button"
                                                 onClick={() => setFormData({ ...formData, vehicleType: type })}
                                                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-all border ${formData.vehicleType === type
-                                                    ? 'bg-emerald-50 border-emerald-500 text-emerald-700'
+                                                    ? 'bg-sky-50 border-sky-500 text-sky-700'
                                                     : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                                                     }`}
                                             >
@@ -179,7 +179,7 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                                         type="text"
                                         value={formData.vehicleNumber}
                                         onChange={(e) => setFormData({ ...formData, vehicleNumber: e.target.value })}
-                                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none transition-all text-slate-800 uppercase"
+                                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 outline-none transition-all text-slate-800 uppercase"
                                         placeholder="UP14 AB 1234"
                                     />
                                 </div>
@@ -196,7 +196,7 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        className="flex-1 py-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed transition-all"
+                                        className="flex-1 py-3 rounded-xl font-bold text-white bg-sky-600 hover:bg-sky-700 shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed transition-all"
                                     >
                                         {loading ? getTranslatedText("Saving...") : getTranslatedText("Save Changes")}
                                     </button>

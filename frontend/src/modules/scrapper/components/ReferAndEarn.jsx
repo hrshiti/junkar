@@ -156,9 +156,9 @@ const ReferAndEarn = () => {
       >
         <div className="flex items-center gap-3">
           <div
-            className="w-12 h-12 rounded-full flex items-center justify-center bg-emerald-500/10"
+            className="w-12 h-12 rounded-full flex items-center justify-center bg-sky-500/10"
           >
-            <FaGift className="text-2xl text-emerald-600" />
+            <FaGift className="text-2xl text-sky-600" />
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-xl md:text-2xl font-bold leading-tight text-slate-800">
@@ -192,7 +192,7 @@ const ReferAndEarn = () => {
                 {tierInfo.totalReferrals}/{tierInfo.nextTier.minReferrals}
               </span>
             </div>
-            <div className="h-2 rounded-full bg-emerald-500/10">
+            <div className="h-2 rounded-full bg-sky-500/10">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${(tierInfo.totalReferrals / tierInfo.nextTier.minReferrals) * 100}%` }}
@@ -218,11 +218,11 @@ const ReferAndEarn = () => {
         {/* Code Display */}
         <div className="mb-3">
           <div
-            className="flex items-center justify-between p-3 rounded-xl border-2 bg-emerald-500/5 border-emerald-500"
+            className="flex items-center justify-between p-3 rounded-xl border-2 bg-sky-500/5 border-sky-500"
           >
             <div className="flex-1 min-w-0">
               <p className="text-xs text-slate-500 leading-tight">{getTranslatedText("Referral Code")}</p>
-              <p className="text-xl md:text-2xl font-bold text-emerald-600 leading-tight mt-0.5">
+              <p className="text-xl md:text-2xl font-bold text-sky-600 leading-tight mt-0.5">
                 {referralCode}
               </p>
             </div>
@@ -230,7 +230,7 @@ const ReferAndEarn = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleCopyCode}
-              className="px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all bg-emerald-600 text-white flex-shrink-0"
+              className="px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all bg-sky-600 text-white flex-shrink-0"
             >
               {copied ? (
                 <>
@@ -342,7 +342,7 @@ const ReferAndEarn = () => {
                     alert(result.error || getTranslatedText('Unable to process monthly bonus'));
                   }
                 }}
-                className="px-4 py-2 rounded-xl font-semibold text-sm transition-all bg-emerald-600 text-white"
+                className="px-4 py-2 rounded-xl font-semibold text-sm transition-all bg-sky-600 text-white"
               >
                 {getTranslatedText("Claim Bonus")}
               </motion.button>
@@ -361,9 +361,9 @@ const ReferAndEarn = () => {
         >
           <div className="flex items-center gap-2">
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-500/10 flex-shrink-0"
+              className="w-10 h-10 rounded-xl flex items-center justify-center bg-sky-500/10 flex-shrink-0"
             >
-              <FaUsers className="text-lg text-emerald-600" />
+              <FaUsers className="text-lg text-sky-600" />
             </div>
             <div className="min-w-0">
               <p className="text-xs text-slate-500 leading-tight">{getTranslatedText("Total Referrals")}</p>
@@ -382,9 +382,9 @@ const ReferAndEarn = () => {
         >
           <div className="flex items-center gap-2">
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-500/10 flex-shrink-0"
+              className="w-10 h-10 rounded-xl flex items-center justify-center bg-sky-500/10 flex-shrink-0"
             >
-              <FaRupeeSign className="text-lg text-emerald-600" />
+              <FaRupeeSign className="text-lg text-sky-600" />
             </div>
             <div className="min-w-0">
               <p className="text-xs text-slate-500 leading-tight">{getTranslatedText("Total Earnings")}</p>
@@ -413,14 +413,14 @@ const ReferAndEarn = () => {
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <FaCheckCircle className="text-emerald-500" />
+                <FaCheckCircle className="text-sky-500" />
                 <span className="text-sm text-slate-800">
                   {getTranslatedText("{percent}% bonus on all referral rewards", { percent: tierInfo.bonusPercent })}
                 </span>
               </div>
               {tierInfo.monthlyBonus > 0 && (
                 <div className="flex items-center gap-2">
-                  <FaCheckCircle className="text-emerald-500" />
+                  <FaCheckCircle className="text-sky-500" />
                   <span className="text-sm text-slate-800">
                     {getTranslatedText("₹{amount} monthly tier bonus", { amount: tierInfo.monthlyBonus })}
                   </span>
@@ -445,10 +445,10 @@ const ReferAndEarn = () => {
           {/* Step 1 */}
           <div className="flex items-start gap-3">
             <div className="relative flex-shrink-0">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-md">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center shadow-md">
                 <span className="font-bold text-sm text-white">1</span>
               </div>
-              <div className="absolute top-8 left-1/2 -translate-x-1/2 w-0.5 h-6 bg-gradient-to-b from-emerald-300 to-transparent"></div>
+              <div className="absolute top-8 left-1/2 -translate-x-1/2 w-0.5 h-6 bg-gradient-to-b from-sky-300 to-transparent"></div>
             </div>
             <div className="flex-1 pt-0.5">
               <h3 className="font-bold text-sm text-slate-800 mb-1">
@@ -523,9 +523,9 @@ const ReferAndEarn = () => {
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <div
-                          className="w-10 h-10 rounded-full flex items-center justify-center bg-emerald-500/10"
+                          className="w-10 h-10 rounded-full flex items-center justify-center bg-sky-500/10"
                         >
-                          <FaUsers className="text-emerald-600" />
+                          <FaUsers className="text-sky-600" />
                         </div>
                         <div>
                           <p className="font-semibold text-sm text-slate-800">
@@ -537,7 +537,7 @@ const ReferAndEarn = () => {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-semibold mb-1 text-emerald-600">
+                        <p className="text-sm font-semibold mb-1 text-sky-600">
                           ₹{totalEarned}
                         </p>
                         <p className="text-xs text-slate-500">
@@ -566,25 +566,25 @@ const ReferAndEarn = () => {
                       </div>
                       <div className="space-y-1.5">
                         <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${milestones.refereeRegistered ? 'bg-green-500' : 'bg-gray-300'}`} />
+                          <div className={`w-2 h-2 rounded-full ${milestones.refereeRegistered ? 'bg-sky-500' : 'bg-gray-300'}`} />
                           <span className="text-xs text-slate-500">
                             {getTranslatedText("Registered")} {milestones.refereeRegistered ? '✓' : ''}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${milestones.refereeKYCVerified ? 'bg-green-500' : 'bg-gray-300'}`} />
+                          <div className={`w-2 h-2 rounded-full ${milestones.refereeKYCVerified ? 'bg-sky-500' : 'bg-gray-300'}`} />
                           <span className="text-xs text-slate-500">
                             {getTranslatedText("KYC Verified")} {milestones.refereeKYCVerified ? '✓' : ''}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${milestones.refereeSubscribed ? 'bg-green-500' : 'bg-gray-300'}`} />
+                          <div className={`w-2 h-2 rounded-full ${milestones.refereeSubscribed ? 'bg-sky-500' : 'bg-gray-300'}`} />
                           <span className="text-xs text-slate-500">
                             {getTranslatedText("Subscribed")} {milestones.refereeSubscribed ? '✓' : ''}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${milestones.refereeFirstPickup ? 'bg-green-500' : 'bg-gray-300'}`} />
+                          <div className={`w-2 h-2 rounded-full ${milestones.refereeFirstPickup ? 'bg-sky-500' : 'bg-gray-300'}`} />
                           <span className="text-xs text-slate-500">
                             {getTranslatedText("First Pickup")} {milestones.refereeFirstPickup ? '✓' : ''}
                           </span>

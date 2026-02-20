@@ -121,7 +121,7 @@ const SwipeSlider = ({ onAccept, disabled = false }) => {
         <motion.div
           className="absolute left-0 top-0 h-full rounded-full"
           style={{
-            backgroundColor: progress >= 85 ? '#10b981' : '#64946e',
+            backgroundColor: progress >= 85 ? '#0ea5e9' : '#7dd3fc',
             width: fillWidth
           }}
         />
@@ -152,14 +152,14 @@ const SwipeSlider = ({ onAccept, disabled = false }) => {
             userSelect: 'none'
           }}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: '#64946e' }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: '#0ea5e9' }}>
             <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </motion.div>
 
         {/* Text Overlay */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span className="text-xs font-semibold" style={{ color: progress >= 85 ? '#ffffff' : '#64946e' }}>
+          <span className="text-xs font-semibold" style={{ color: progress >= 85 ? '#ffffff' : '#0ea5e9' }}>
             {progress >= 85 ? getTranslatedText('Accepted!') : getTranslatedText('→ Slide Right')}
           </span>
         </div>

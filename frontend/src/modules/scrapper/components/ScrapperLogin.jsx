@@ -467,8 +467,8 @@ const ScrapperLogin = () => {
       className="min-h-screen w-full flex items-stretch sm:items-center justify-center p-4 relative bg-gradient-to-br from-zinc-900 via-gray-900 to-black overflow-y-auto"
     >
       {/* Soft glow circles */}
-      <div className="pointer-events-none absolute -top-24 -left-24 w-72 h-72 rounded-full bg-emerald-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-emerald-900/40 blur-3xl" />
+      <div className="pointer-events-none absolute -top-24 -left-24 w-72 h-72 rounded-full bg-sky-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-sky-900/40 blur-3xl" />
 
       <motion.div
         initial={{ opacity: 0, y: 24 }}
@@ -478,10 +478,10 @@ const ScrapperLogin = () => {
       >
         {/* Left panel - hero content */}
         <div className="hidden md:flex flex-col justify-between p-8 lg:p-10 bg-zinc-900 text-white relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/20 to-black/20 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-sky-900/20 to-black/20 pointer-events-none" />
           <div className="relative z-10">
             <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-white/15 backdrop-blur">
-              <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-cyan-300 animate-pulse" />
               {getTranslatedText("Join Scrapto Scrapper Network")}
             </p>
             <h2 className="mt-4 text-3xl lg:text-4xl font-extrabold leading-tight">
@@ -496,19 +496,19 @@ const ScrapperLogin = () => {
           <div className="mt-6 space-y-3 text-sm relative z-10">
             <div className="flex items-start gap-3">
               <div className="mt-1 w-5 h-5 rounded-full bg-white/15 flex items-center justify-center">
-                <span className="w-2 h-2 rounded-full bg-emerald-300" />
+                <span className="w-2 h-2 rounded-full bg-cyan-300" />
               </div>
               <p>{getTranslatedText("Real‑time market price updates linked with your dashboard.")}</p>
             </div>
             <div className="flex items-start gap-3">
               <div className="mt-1 w-5 h-5 rounded-full bg-white/15 flex items-center justify-center">
-                <span className="w-2 h-2 rounded-full bg-emerald-300" />
+                <span className="w-2 h-2 rounded-full bg-cyan-300" />
               </div>
               <p>{getTranslatedText("Priority access to high‑value pickups near your area.")}</p>
             </div>
             <div className="flex items-start gap-3">
               <div className="mt-1 w-5 h-5 rounded-full bg-white/15 flex items-center justify-center">
-                <span className="w-2 h-2 rounded-full bg-emerald-300" />
+                <span className="w-2 h-2 rounded-full bg-cyan-300" />
               </div>
               <p>{getTranslatedText("Simple OTP login – no passwords, no complications.")}</p>
             </div>
@@ -529,8 +529,8 @@ const ScrapperLogin = () => {
             transition={{ delay: 0.1, duration: 0.4 }}
             className="mb-6 md:mb-8 text-center md:text-left"
           >
-            <div className="inline-flex items-center gap-3 px-3 py-2 rounded-full bg-emerald-900/30 text-emerald-400 text-xs font-semibold mb-3">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="inline-flex items-center gap-3 px-3 py-2 rounded-full bg-sky-900/30 text-sky-400 text-xs font-semibold mb-3">
+              <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse" />
               {isLogin ? getTranslatedText('Login to continue pickups') : getTranslatedText('New to Scrapto? Register now')}
             </div>
             <h1 className="text-2xl md:text-3xl font-bold mb-1 text-white">
@@ -561,7 +561,7 @@ const ScrapperLogin = () => {
                 setSelectedServices(['scrap_pickup']);
               }}
               className={`px-5 py-2.5 rounded-full font-semibold text-xs md:text-sm transition-all duration-300 ${isLogin
-                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md'
+                ? 'bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-md'
                 : 'bg-zinc-800 text-gray-400 hover:bg-zinc-700'
                 }`}
             >
@@ -578,7 +578,7 @@ const ScrapperLogin = () => {
                 setSelectedServices(['scrap_pickup']);
               }}
               className={`px-5 py-2.5 rounded-full font-semibold text-xs md:text-sm transition-all duration-300 ${!isLogin
-                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md'
+                ? 'bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-md'
                 : 'bg-zinc-800 text-gray-400 hover:bg-zinc-700'
                 }`}
             >
@@ -618,7 +618,7 @@ const ScrapperLogin = () => {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder={getTranslatedText("Enter your full name")}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-zinc-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-900/20 focus:outline-none transition-all text-sm md:text-base bg-black text-white placeholder-gray-600"
+                        className="w-full px-4 py-3 rounded-xl border-2 border-zinc-700 focus:border-sky-500 focus:ring-2 focus:ring-sky-900/20 focus:outline-none transition-all text-sm md:text-base bg-black text-white placeholder-gray-600"
 
                         required={!isLogin}
                       />
@@ -639,7 +639,7 @@ const ScrapperLogin = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder={getTranslatedText("Enter your email address")}
-                        className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${email ? 'border-emerald-500' : 'border-zinc-700'}`}
+                        className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${email ? 'border-sky-500' : 'border-zinc-700'}`}
                         required={!isLogin}
                       />
                     </motion.div>
@@ -658,7 +658,7 @@ const ScrapperLogin = () => {
                       <select
                         value={heardFrom}
                         onChange={(e) => setHeardFrom(e.target.value)}
-                        className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white ${heardFrom ? 'border-emerald-500' : 'border-zinc-700'}`}
+                        className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white ${heardFrom ? 'border-sky-500' : 'border-zinc-700'}`}
                       >
                         <option value="">{getTranslatedText("Select an option")}</option>
                         <option value="youtube">{getTranslatedText("YouTube")}</option>
@@ -675,7 +675,7 @@ const ScrapperLogin = () => {
                           value={heardFromOther}
                           onChange={(e) => setHeardFromOther(e.target.value)}
                           placeholder={getTranslatedText("Please specify (e.g., association, poster)")}
-                          className={`mt-2 w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white ${heardFromOther ? 'border-emerald-500' : 'border-zinc-700'}`}
+                          className={`mt-2 w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white ${heardFromOther ? 'border-sky-500' : 'border-zinc-700'}`}
                         />
                       )}
                     </motion.div>
@@ -694,7 +694,7 @@ const ScrapperLogin = () => {
                       <div className="grid grid-cols-1 gap-3">
                         <label
                           className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${selectedServices.includes('scrap_pickup')
-                            ? 'border-emerald-500 bg-emerald-900/20'
+                            ? 'border-sky-500 bg-sky-900/20'
                             : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
                             }`}
                         >
@@ -708,7 +708,7 @@ const ScrapperLogin = () => {
                                 setSelectedServices(selectedServices.filter(s => s !== 'scrap_pickup'));
                               }
                             }}
-                            className="w-4 h-4 rounded text-emerald-500 focus:ring-emerald-500 bg-zinc-900 border-zinc-600"
+                            className="w-4 h-4 rounded text-sky-500 focus:ring-sky-500 bg-zinc-900 border-zinc-600"
                           />
                           <span className="text-sm text-white">Scrap Pickup</span>
                         </label>
@@ -729,7 +729,7 @@ const ScrapperLogin = () => {
                       <div className="grid grid-cols-2 gap-3">
                         <label
                           className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 cursor-pointer transition-all ${scrapperType === 'small'
-                            ? 'border-emerald-500 bg-emerald-900/20'
+                            ? 'border-sky-500 bg-sky-900/20'
                             : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
                             }`}
                         >
@@ -748,7 +748,7 @@ const ScrapperLogin = () => {
 
                         <label
                           className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 cursor-pointer transition-all ${scrapperType === 'big'
-                            ? 'border-emerald-500 bg-emerald-900/20'
+                            ? 'border-sky-500 bg-sky-900/20'
                             : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
                             }`}
                         >
@@ -782,7 +782,7 @@ const ScrapperLogin = () => {
                         value={vehicleInfo}
                         onChange={(e) => setVehicleInfo(e.target.value)}
                         placeholder={getTranslatedText("e.g., Truck - MH-12-AB-1234")}
-                        className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${vehicleInfo ? 'border-emerald-500' : 'border-zinc-700'}`}
+                        className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${vehicleInfo ? 'border-sky-500' : 'border-zinc-700'}`}
                         required={!isLogin}
                       />
                     </motion.div>
@@ -800,7 +800,7 @@ const ScrapperLogin = () => {
                           type="button"
                           onClick={() => setShowReferralCode(!showReferralCode)}
                           className="text-sm font-medium flex items-center gap-1"
-                          style={{ color: '#64946e' }}
+                          style={{ color: '#0ea5e9' }}
                         >
                           {showReferralCode ? getTranslatedText('Hide') : getTranslatedText('Have a referral code?')}
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -815,7 +815,7 @@ const ScrapperLogin = () => {
                             value={referralCode}
                             onChange={handleReferralCodeChange}
                             placeholder={getTranslatedText("Enter referral code (e.g., SCRAP-ABC123)")}
-                            className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base uppercase bg-black text-white placeholder-gray-600 ${referralCodeError ? 'border-red-500' : referrerName ? 'border-emerald-500' : 'border-zinc-700'
+                            className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base uppercase bg-black text-white placeholder-gray-600 ${referralCodeError ? 'border-red-500' : referrerName ? 'border-sky-500' : 'border-zinc-700'
                               }`}
                             maxLength={13}
                           />
@@ -825,7 +825,7 @@ const ScrapperLogin = () => {
                             </p>
                           )}
                           {referrerName && !referralCodeError && (
-                            <p className="text-xs mt-1" style={{ color: '#10b981' }}>
+                            <p className="text-xs mt-1" style={{ color: '#0ea5e9' }}>
                               {getTranslatedText("✓ You were referred by {name}", { name: referrerName })}
                             </p>
                           )}
@@ -846,7 +846,7 @@ const ScrapperLogin = () => {
                         setPhone(value);
                       }}
                       placeholder={getTranslatedText("Enter 10-digit phone number")}
-                      className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${phone.length === 10 ? 'border-emerald-500' : 'border-zinc-700'}`}
+                      className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${phone.length === 10 ? 'border-sky-500' : 'border-zinc-700'}`}
                       maxLength={10}
                       required
                     />
@@ -860,7 +860,7 @@ const ScrapperLogin = () => {
                         checked={rememberMe}
                         onChange={(e) => setRememberMe(e.target.checked)}
                         className="w-4 h-4 rounded"
-                        style={{ accentColor: '#64946e' }}
+                        style={{ accentColor: '#0ea5e9' }}
                       />
                       <label htmlFor="remember" className="text-xs md:text-sm text-gray-400">
                         {getTranslatedText("Remember me")}
@@ -884,7 +884,7 @@ const ScrapperLogin = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     disabled={loading || phone.length !== 10 || (!isLogin && (!name.trim() || !vehicleInfo.trim()))}
-                    className="w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+                    className="w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-sky-500 to-sky-600 text-white"
                   >
                     {loading ? getTranslatedText('Processing...') : (isLogin ? getTranslatedText('Send OTP') : getTranslatedText('Register & Send OTP'))}
                   </motion.button>
@@ -923,7 +923,7 @@ const ScrapperLogin = () => {
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: 0.1 + index * 0.05 }}
                         className={`w-9 h-11 text-lg sm:w-10 sm:h-12 sm:text-xl md:w-14 md:h-14 md:text-2xl text-center font-bold rounded-lg md:rounded-xl border-2 focus:outline-none focus:ring-2 transition-all ${digit
-                          ? 'border-emerald-500 bg-emerald-900/30 text-emerald-400'
+                          ? 'border-sky-500 bg-sky-900/30 text-sky-400'
                           : 'border-zinc-700 bg-black text-white'
                           }`}
                       />
@@ -945,7 +945,7 @@ const ScrapperLogin = () => {
                     <button
                       onClick={handleResendOtp}
                       disabled={loading || resendTimer > 0}
-                      className="text-sm font-semibold transition-colors disabled:opacity-50 text-green-600 hover:text-green-700 hover:underline disabled:text-gray-500 disabled:no-underline"
+                      className="text-sm font-semibold transition-colors disabled:opacity-50 text-sky-600 hover:text-sky-700 hover:underline disabled:text-gray-500 disabled:no-underline"
                     >
                       {loading
                         ? getTranslatedText('Sending...')
@@ -968,7 +968,7 @@ const ScrapperLogin = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     disabled={loading || !otp.every((digit) => digit !== '')}
-                    className="w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+                    className="w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-sky-500 to-sky-600 text-white"
                   >
                     {loading ? getTranslatedText('Verifying...') : getTranslatedText('Verify & Continue')}
                   </motion.button>
@@ -985,7 +985,7 @@ const ScrapperLogin = () => {
             className="text-center mt-4 text-xs md:text-sm text-gray-400"
           >
             {getTranslatedText("By continuing, you agree to our ")}
-            <Link to="/scrapper/terms" className="underline hover:text-emerald-400 transition-colors">
+            <Link to="/scrapper/terms" className="underline hover:text-sky-400 transition-colors">
               {getTranslatedText("Terms & Conditions")}
             </Link>
           </motion.div>

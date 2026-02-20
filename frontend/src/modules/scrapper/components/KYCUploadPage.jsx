@@ -84,7 +84,7 @@ const KYCUploadPage = () => {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-black">
         <div className="text-center">
-          <div className="w-12 h-12 rounded-full border-4 border-t-transparent animate-spin mx-auto mb-4 border-emerald-500" />
+          <div className="w-12 h-12 rounded-full border-4 border-t-transparent animate-spin mx-auto mb-4 border-sky-500" />
           <p className="text-sm font-semibold text-white">{getTranslatedText("Checking status...")}</p>
         </div>
       </div>
@@ -238,12 +238,12 @@ const KYCUploadPage = () => {
           className="mb-6"
         >
           <div className="flex items-center gap-2 mb-2">
-            <div className="flex-1 h-2 rounded-full bg-emerald-900/30">
+            <div className="flex-1 h-2 rounded-full bg-sky-900/30">
               <motion.div
                 initial={{ width: '0%' }}
                 animate={{ width: '100%' }}
                 transition={{ duration: 0.5, delay: 0.3 }}
-                className="h-full rounded-full bg-emerald-500"
+                className="h-full rounded-full bg-sky-500"
               />
             </div>
             <span className="text-xs md:text-sm text-gray-400">{getTranslatedText("Step 1 of 1")}</span>
@@ -269,7 +269,7 @@ const KYCUploadPage = () => {
               onChange={handleAadhaarNumberChange}
               placeholder={getTranslatedText("Enter 12-digit Aadhaar number")}
               maxLength={12}
-              className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${aadhaarNumber.length === 12 ? 'border-emerald-500' : 'border-zinc-700'}`}
+              className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${aadhaarNumber.length === 12 ? 'border-sky-500' : 'border-zinc-700'}`}
               required
             />
             {aadhaarNumber.length === 12 && (
@@ -285,13 +285,13 @@ const KYCUploadPage = () => {
               {getTranslatedText("Aadhaar Card Photo")} <span className="text-red-500">*</span>
             </label>
             <div className="space-y-3">
-              <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all hover:border-emerald-500 bg-black ${aadhaarPhoto ? 'border-emerald-500' : 'border-zinc-700'}`}
+              <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all hover:border-sky-500 bg-black ${aadhaarPhoto ? 'border-sky-500' : 'border-zinc-700'}`}
               >
                 {aadhaarPreview ? (
                   <img src={aadhaarPreview} alt="Aadhaar preview" className="w-full h-full object-cover rounded-xl" />
                 ) : (
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <svg className="w-10 h-10 mb-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-10 h-10 mb-3 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
                     <p className="mb-2 text-sm text-gray-400">
@@ -330,13 +330,13 @@ const KYCUploadPage = () => {
               {getTranslatedText("Selfie Photo")} <span className="text-red-500">*</span>
             </label>
             <div className="space-y-3">
-              <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all hover:border-emerald-500 bg-black ${selfiePhoto ? 'border-emerald-500' : 'border-zinc-700'}`}
+              <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all hover:border-sky-500 bg-black ${selfiePhoto ? 'border-sky-500' : 'border-zinc-700'}`}
               >
                 {selfiePreview ? (
                   <img src={selfiePreview} alt="Selfie preview" className="w-full h-full object-cover rounded-xl" />
                 ) : (
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <svg className="w-10 h-10 mb-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-10 h-10 mb-3 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                     <p className="mb-2 text-sm text-gray-400">
@@ -375,13 +375,13 @@ const KYCUploadPage = () => {
               {getTranslatedText("Driving License (optional)")}
             </label>
             <div className="space-y-3">
-              <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all hover:border-emerald-500 bg-black ${licenseFile ? 'border-emerald-500' : 'border-zinc-700'}`}
+              <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all hover:border-sky-500 bg-black ${licenseFile ? 'border-sky-500' : 'border-zinc-700'}`}
               >
                 {licensePreview ? (
                   <img src={licensePreview} alt="License preview" className="w-full h-full object-cover rounded-xl" />
                 ) : (
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <svg className="w-10 h-10 mb-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-10 h-10 mb-3 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                     <p className="mb-2 text-sm text-gray-400">
@@ -416,7 +416,7 @@ const KYCUploadPage = () => {
           {/* Info Box */}
           <div className="p-4 rounded-xl bg-zinc-800/50">
             <div className="flex items-start gap-3">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-emerald-400 shrink-0 mt-0.5">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-sky-400 shrink-0 mt-0.5">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor" />
               </svg>
               <div>
@@ -439,8 +439,7 @@ const KYCUploadPage = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             disabled={isSubmitting || !aadhaarNumber || aadhaarNumber.length !== 12 || !aadhaarPhoto || !selfiePhoto}
-            className="w-full py-4 md:py-5 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ backgroundColor: '#64946e', color: '#ffffff' }}
+            className="w-full py-4 md:py-5 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-sky-600 text-white hover:bg-sky-700"
           >
             {isSubmitting ? (
               <div className="flex items-center justify-center gap-2">
@@ -467,12 +466,12 @@ const KYCUploadPage = () => {
               transition={{ duration: 0.3 }}
               className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4"
             >
-              <div className="rounded-2xl p-6 shadow-2xl bg-zinc-900 border-2 border-emerald-500">
+              <div className="rounded-2xl p-6 shadow-2xl bg-zinc-900 border-2 border-sky-500">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-900/30">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-sky-900/30">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="12" cy="12" r="10" stroke="#10b981" strokeWidth="2" fill="#10b981" fillOpacity="0.1" />
-                      <path d="M9 12l2 2 4-4" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                      <circle cx="12" cy="12" r="10" stroke="#0ea5e9" strokeWidth="2" fill="#0ea5e9" fillOpacity="0.1" />
+                      <path d="M9 12l2 2 4-4" stroke="#0ea5e9" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </div>
                   <div className="flex-1">
@@ -482,11 +481,11 @@ const KYCUploadPage = () => {
                     <p className="text-sm mb-2 text-gray-400">
                       {getTranslatedText("Your KYC documents have been submitted for verification.")}
                     </p>
-                    <div className="p-3 rounded-lg bg-emerald-900/20">
+                    <div className="p-3 rounded-lg bg-sky-900/20">
                       <p className="text-xs font-semibold mb-1 text-white">
                         ⏱️ {getTranslatedText("Verification Time:")}
                       </p>
-                      <p className="text-xs text-emerald-400">
+                      <p className="text-xs text-sky-400">
                         {getTranslatedText("Usually takes 24-48 hours. You'll be notified once verification is complete.")}
                       </p>
                     </div>

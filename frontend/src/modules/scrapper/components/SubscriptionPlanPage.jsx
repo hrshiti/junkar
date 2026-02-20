@@ -231,7 +231,7 @@ const SubscriptionPlanPage = () => {
           entityType: 'subscription'
         },
         theme: {
-          color: '#64946e'
+          color: '#0ea5e9'
         }
       };
 
@@ -263,7 +263,7 @@ const SubscriptionPlanPage = () => {
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-            className="w-12 h-12 rounded-full border-4 border-zinc-800 border-t-green-500 mx-auto mb-4"
+            className="w-12 h-12 rounded-full border-4 border-zinc-800 border-t-sky-500 mx-auto mb-4"
           />
           <p className="text-gray-400">{getTranslatedText("Loading subscription plans...")}</p>
         </div>
@@ -311,13 +311,13 @@ const SubscriptionPlanPage = () => {
           <div className="flex justify-center gap-4 mt-4 mb-6" style={{ display: 'none' }}>
             <button
               onClick={() => { setPlanType('general'); setSelectedPlan(null); }}
-              className={`px-4 py-2 rounded-full font-semibold transition-colors ${planType === 'general' ? 'bg-emerald-600 text-white' : 'bg-zinc-900 text-gray-400'}`}
+              className={`px-4 py-2 rounded-full font-semibold transition-colors ${planType === 'general' ? 'bg-sky-600 text-white' : 'bg-zinc-900 text-gray-400'}`}
             >
               {getTranslatedText("Platform Access")}
             </button>
             <button
               onClick={() => { setPlanType('market_price'); setSelectedPlan(null); }}
-              className={`px-4 py-2 rounded-full font-semibold transition-colors ${planType === 'market_price' ? 'bg-emerald-600 text-white' : 'bg-zinc-900 text-gray-400'}`}
+              className={`px-4 py-2 rounded-full font-semibold transition-colors ${planType === 'market_price' ? 'bg-sky-600 text-white' : 'bg-zinc-900 text-gray-400'}`}
             >
               {getTranslatedText("Market Prices")}
             </button>
@@ -329,7 +329,7 @@ const SubscriptionPlanPage = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 rounded-2xl p-6 shadow-lg bg-zinc-900 border-2 border-emerald-500/50"
+            className="mb-6 rounded-2xl p-6 shadow-lg bg-zinc-900 border-2 border-sky-500/50"
           >
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
@@ -340,7 +340,7 @@ const SubscriptionPlanPage = () => {
                   {getTranslatedText("Expires: {date}", { date: activeSubForTab.expiryDate ? new Date(activeSubForTab.expiryDate).toLocaleDateString() : 'N/A' })}
                 </p>
               </div>
-              <div className="px-4 py-2 rounded-lg font-semibold bg-emerald-900/30 text-emerald-400">
+              <div className="px-4 py-2 rounded-lg font-semibold bg-sky-900/30 text-sky-400">
                 {getTranslatedText("Active")}
               </div>
             </div>
@@ -356,12 +356,12 @@ const SubscriptionPlanPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 + index * 0.1 }}
               onClick={() => handlePlanSelect(plan.id)}
-              className={`relative rounded-2xl p-6 md:p-8 shadow-lg cursor-pointer transition-all duration-300 bg-zinc-900 ${selectedPlan === plan.id ? 'ring-4 ring-emerald-500 border-emerald-500' : 'hover:shadow-xl border-white/10 border'
+              className={`relative rounded-2xl p-6 md:p-8 shadow-lg cursor-pointer transition-all duration-300 bg-zinc-900 ${selectedPlan === plan.id ? 'ring-4 ring-sky-500 border-sky-500' : 'hover:shadow-xl border-white/10 border'
                 }`}
             >
               {/* Popular Badge */}
               {plan.popular && (
-                <div className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white">
+                <div className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold bg-sky-600 text-white">
                   {getTranslatedText("Popular")}
                 </div>
               )}
@@ -372,7 +372,7 @@ const SubscriptionPlanPage = () => {
                   {plan.name}
                 </h3>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl md:text-4xl font-bold text-emerald-400">
+                  <span className="text-3xl md:text-4xl font-bold text-sky-400">
                     ₹{plan.price}
                   </span>
                   <span className="text-sm md:text-base text-gray-400">
@@ -385,7 +385,7 @@ const SubscriptionPlanPage = () => {
               <ul className="space-y-3 mb-6">
                 {plan.features.map((feature, idx) => (
                   <li key={idx} className="flex items-start gap-2">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="flex-shrink-0 mt-0.5 text-emerald-400">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="flex-shrink-0 mt-0.5 text-sky-400">
                       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="currentColor" fillOpacity="0.1" />
                       <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -401,7 +401,7 @@ const SubscriptionPlanPage = () => {
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="w-full py-2 rounded-lg text-center font-semibold bg-emerald-900/30 text-emerald-400"
+                  className="w-full py-2 rounded-lg text-center font-semibold bg-sky-900/30 text-sky-400"
                 >
                   {getTranslatedText("Selected")}
                 </motion.div>
@@ -426,7 +426,7 @@ const SubscriptionPlanPage = () => {
               handleSubscribe(e);
             }}
             disabled={!selectedPlan || isProcessing}
-            className="w-full py-4 md:py-5 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-emerald-600 text-white hover:bg-emerald-700"
+            className="w-full py-4 md:py-5 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-sky-600 text-white hover:bg-sky-700"
           >
             {isProcessing ? (
               <div className="flex items-center justify-center gap-2">
@@ -451,7 +451,7 @@ const SubscriptionPlanPage = () => {
           className="mt-6 rounded-2xl p-4 md:p-6 shadow-lg bg-zinc-900"
         >
           <div className="flex items-start gap-3">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-emerald-400 flex-shrink-0 mt-0.5">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-sky-400 flex-shrink-0 mt-0.5">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor" />
             </svg>
             <div>

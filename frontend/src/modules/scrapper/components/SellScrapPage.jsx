@@ -85,27 +85,27 @@ const SellScrapPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 p-4 pb-24">
-            <header className="mb-6 flex items-center gap-3">
+        <div className="min-h-screen bg-slate-50 p-3 pb-24">
+            <header className="mb-4 flex items-center gap-3">
                 <button onClick={() => navigate(-1)} className="p-2 bg-white rounded-full shadow-sm">
                     ⬅️
                 </button>
                 <h1 className="text-xl font-bold text-slate-800">{getTranslatedText("Sell Bulk Scrap")}</h1>
             </header>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-3">
                 {/* Categories */}
-                <section className="bg-white p-4 rounded-2xl shadow-sm">
-                    <h2 className="text-sm font-semibold mb-3 text-slate-700">{getTranslatedText("Select Categories")}</h2>
-                    <div className="grid grid-cols-3 gap-3">
+                <section className="bg-white p-3.5 rounded-xl shadow-sm">
+                    <h2 className="text-sm font-semibold mb-2.5 text-slate-700">{getTranslatedText("Select Categories")}</h2>
+                    <div className="grid grid-cols-3 gap-2.5">
                         {availableCategories.map(cat => (
                             <button
                                 key={cat.id}
                                 type="button"
                                 onClick={() => handleCategoryToggle(cat.id)}
-                                className={`p-3 rounded-xl flex flex-col items-center gap-2 border-2 transition-all ${categories.includes(cat.id)
-                                    ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                                    : 'border-slate-100 bg-slate-50 text-slate-500'
+                                className={`p-2.5 rounded-lg flex flex-col items-center gap-1.5 border-2 transition-all ${categories.includes(cat.id)
+                                    ? 'border-sky-500 bg-sky-50 text-sky-700'
+                                    : 'border-slate-200 bg-slate-50 text-slate-500'
                                     }`}
                             >
                                 <span className="text-2xl">{cat.icon}</span>
@@ -116,38 +116,38 @@ const SellScrapPage = () => {
                 </section>
 
                 {/* Weight */}
-                <section className="bg-white p-4 rounded-2xl shadow-sm">
-                    <h2 className="text-sm font-semibold mb-3 text-slate-700">{getTranslatedText("Approx Weight (kg)")}</h2>
+                <section className="bg-white p-3.5 rounded-xl shadow-sm">
+                    <h2 className="text-sm font-semibold mb-2.5 text-slate-700">{getTranslatedText("Approx Weight (kg)")}</h2>
                     <input
                         type="number"
                         value={weight}
                         onChange={(e) => setWeight(e.target.value)}
                         placeholder="e.g. 150"
-                        className="w-full p-4 text-2xl font-bold border-2 border-slate-200 rounded-xl focus:border-emerald-500 outline-none"
+                        className="w-full p-3 text-xl font-bold border-2 border-slate-200 rounded-lg focus:border-sky-500 outline-none text-slate-700"
                     />
                 </section>
 
                 {/* Address */}
-                <section className="bg-white p-4 rounded-2xl shadow-sm">
-                    <h2 className="text-sm font-semibold mb-3 text-slate-700">{getTranslatedText("Pickup Address")}</h2>
+                <section className="bg-white p-3.5 rounded-xl shadow-sm">
+                    <h2 className="text-sm font-semibold mb-2.5 text-slate-700">{getTranslatedText("Pickup Address")}</h2>
                     <textarea
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
                         placeholder="Enter full address..."
-                        className="w-full p-3 border-2 border-slate-200 rounded-xl focus:border-emerald-500 outline-none h-24"
+                        className="w-full p-3 border-2 border-slate-200 rounded-lg focus:border-sky-500 outline-none h-20 text-sm text-slate-700 placeholder:text-slate-400"
                     />
                 </section>
 
                 {/* Images */}
-                <section className="bg-white p-4 rounded-2xl shadow-sm">
-                    <h2 className="text-sm font-semibold mb-3 text-slate-700">{getTranslatedText("Upload Images")}</h2>
-                    <div className="flex gap-3 overflow-x-auto pb-2">
-                        <label className="w-20 h-20 flex-shrink-0 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center text-slate-400 cursor-pointer">
+                <section className="bg-white p-3.5 rounded-xl shadow-sm">
+                    <h2 className="text-sm font-semibold mb-2.5 text-slate-700">{getTranslatedText("Upload Images")}</h2>
+                    <div className="flex gap-2.5 overflow-x-auto pb-2">
+                        <label className="w-20 h-20 flex-shrink-0 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center text-slate-400 cursor-pointer hover:border-sky-400 hover:bg-sky-50 transition-colors">
                             <input type="file" multiple accept="image/*" onChange={handleImageUpload} className="hidden" />
-                            <span className="text-2xl">+</span>
+                            <span className="text-3xl">+</span>
                         </label>
                         {images.map((img, idx) => (
-                            <img key={idx} src={img.url} alt="preview" className="w-20 h-20 object-cover rounded-xl" />
+                            <img key={idx} src={img.url} alt="preview" className="w-20 h-20 object-cover rounded-lg border-2 border-slate-200" />
                         ))}
                     </div>
                 </section>
@@ -156,7 +156,7 @@ const SellScrapPage = () => {
                     whileTap={{ scale: 0.95 }}
                     type="submit"
                     disabled={loading}
-                    className="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold text-lg shadow-lg disabled:opacity-50"
+                    className="w-full py-3.5 bg-sky-600 text-white rounded-xl font-bold text-base shadow-lg disabled:opacity-50 hover:bg-sky-700 transition-colors"
                 >
                     {loading ? getTranslatedText("Processing...") : getTranslatedText("Create Request")}
                 </motion.button>

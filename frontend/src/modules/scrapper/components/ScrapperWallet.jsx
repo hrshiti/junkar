@@ -137,7 +137,7 @@ const ScrapperWallet = () => {
                     email: user?.email,
                     contact: user?.phone
                 },
-                theme: { color: "#10b981" }
+                theme: { color: "#0ea5e9" }
             };
 
             await initializePayment(options, async (response) => {
@@ -243,7 +243,7 @@ const ScrapperWallet = () => {
     };
 
     return (
-        <div className="min-h-screen pb-20" style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+        <div className="min-h-screen pb-20" style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}>
             {/* Header for Mobile */}
             <div className="md:hidden sticky top-0 z-40 px-4 py-4" style={{ background: "transparent" }}>
                 <h1 className="text-xl font-bold text-white">{getTranslatedText("My Wallet")}</h1>
@@ -255,23 +255,23 @@ const ScrapperWallet = () => {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-gradient-to-br from-emerald-800 to-emerald-600 rounded-2xl p-6 text-white shadow-xl mb-6 relative overflow-hidden"
+                    className="bg-gradient-to-br from-sky-800 to-sky-600 rounded-2xl p-6 text-white shadow-xl mb-6 relative overflow-hidden"
                 >
                     <div className="absolute top-0 right-0 p-8 opacity-10">
                         <FaWallet size={100} />
                     </div>
 
                     <div className="relative z-10">
-                        <p className="text-emerald-100 text-sm font-medium mb-1">{getTranslatedText("Total Balance")}</p>
+                        <p className="text-sky-100 text-sm font-medium mb-1">{getTranslatedText("Total Balance")}</p>
                         <h2 className="text-4xl font-bold mb-6">₹{balance.total.toLocaleString()}</h2>
 
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
-                                <p className="text-emerald-100 text-xs mb-1">{getTranslatedText("Available Balance")}</p>
+                            <div className="bg-white/20 rounded-xl p-3 backdrop-blur-sm border border-white/30">
+                                <p className="text-white text-xs mb-1 font-medium">{getTranslatedText("Available Balance")}</p>
                                 <p className="text-xl font-semibold">₹{balance.available.toLocaleString()}</p>
                             </div>
-                            <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
-                                <p className="text-emerald-100 text-xs mb-1">{getTranslatedText("Pending Clearance")}</p>
+                            <div className="bg-white/20 rounded-xl p-3 backdrop-blur-sm border border-white/30">
+                                <p className="text-white text-xs mb-1 font-medium">{getTranslatedText("Pending Clearance")}</p>
                                 <p className="text-xl font-semibold">₹{balance.pending.toLocaleString()}</p>
                             </div>
                         </div>
@@ -282,7 +282,7 @@ const ScrapperWallet = () => {
                 <div className="grid grid-cols-2 gap-4 mb-8">
                     <button
                         onClick={() => setShowWithdraw(true)}
-                        className="flex items-center justify-center gap-2 bg-emerald-600 text-white py-3 px-4 rounded-xl font-semibold shadow-lg hover:bg-emerald-700 transition-colors"
+                        className="flex items-center justify-center gap-2 bg-sky-600 text-white py-3 px-4 rounded-xl font-semibold shadow-lg hover:bg-sky-700 transition-colors"
                     >
                         <FaArrowUp />
                         {getTranslatedText("Withdraw")}
@@ -308,8 +308,8 @@ const ScrapperWallet = () => {
                         className="w-full flex items-center justify-between text-left"
                     >
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
-                                <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div className="w-10 h-10 rounded-full bg-sky-50 flex items-center justify-center">
+                                <svg className="w-5 h-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                                 </svg>
                             </div>
@@ -325,7 +325,7 @@ const ScrapperWallet = () => {
                                     setShowCouponsList(true);
                                     fetchCoupons();
                                 }}
-                                className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors"
+                                className="text-xs font-semibold text-sky-600 hover:text-sky-700 bg-sky-50 hover:bg-sky-100 px-3 py-1.5 rounded-lg transition-colors"
                             >
                                 View Offers
                             </button>
@@ -356,13 +356,13 @@ const ScrapperWallet = () => {
                                             value={couponCode}
                                             onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                                             placeholder="Enter coupon code"
-                                            className="flex-1 px-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:outline-none text-sm font-mono uppercase"
+                                            className="flex-1 px-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-sky-500 focus:outline-none text-sm font-mono uppercase"
                                             disabled={applyingCoupon}
                                         />
                                         <button
                                             onClick={handleApplyCoupon}
                                             disabled={applyingCoupon || !couponCode}
-                                            className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="px-6 py-2.5 bg-sky-600 text-white rounded-xl font-semibold text-sm hover:bg-sky-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {applyingCoupon ? 'Applying...' : 'Apply'}
                                         </button>
@@ -392,7 +392,7 @@ const ScrapperWallet = () => {
                             >
                                 <div className="flex justify-between items-center mb-6">
                                     <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                        <FaMoneyBillWave className="text-emerald-600" /> Available Offers
+                                        <FaMoneyBillWave className="text-sky-600" /> Available Offers
                                     </h3>
                                     <button onClick={() => setShowCouponsList(false)} className="text-slate-400 hover:text-slate-600">
                                         <FaTimes size={20} />
@@ -401,7 +401,7 @@ const ScrapperWallet = () => {
 
                                 {loadingCoupons ? (
                                     <div className="flex justify-center p-8">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600"></div>
                                     </div>
                                 ) : availableCoupons.length === 0 ? (
                                     <div className="text-center py-8 text-slate-500">
@@ -417,10 +417,10 @@ const ScrapperWallet = () => {
                                                     setShowCouponsList(false);
                                                     if (!showCouponSection) setShowCouponSection(true);
                                                 }}
-                                                className="border rounded-xl p-4 hover:border-emerald-500 cursor-pointer transition-colors bg-slate-50 group"
+                                                className="border rounded-xl p-4 hover:border-sky-500 cursor-pointer transition-colors bg-slate-50 group"
                                             >
                                                 <div className="flex justify-between items-start mb-2">
-                                                    <span className="font-bold text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full text-xs tracking-wider border border-emerald-200">
+                                                    <span className="font-bold text-sky-800 bg-sky-100 px-3 py-1 rounded-full text-xs tracking-wider border border-sky-200">
                                                         {coupon.code}
                                                     </span>
                                                     <span className="font-bold text-slate-900">₹{coupon.amount}</span>
@@ -439,26 +439,24 @@ const ScrapperWallet = () => {
                     )}
                 </AnimatePresence>
 
-                {/* Transactions History */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                >
-                    <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <FaHistory className="text-emerald-600" />
-                        {getTranslatedText("Recent Transactions")}
-                    </h3>
+            </div>
 
-                    {loading ? (
-                        <div className="space-y-3">
-                            {[1, 2, 3].map(i => (
-                                <div key={i} className="bg-slate-100 rounded-xl p-4 h-20 animate-pulse" />
-                            ))}
-                        </div>
-                    ) : transactions.length > 0 ? (
-                        <div className="space-y-3">
-                            {transactions.map((tx, index) => {
+            {/* Transactions History - Full Width */}
+            <div className="mb-6">
+                <h3 className="text-lg font-bold text-slate-800 mb-3 px-4 flex items-center gap-2">
+                    <FaHistory className="text-sky-600" />
+                    {getTranslatedText("Recent Transactions")}
+                </h3>
+
+                {loading ? (
+                    <div className="space-y-3 px-4">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="bg-slate-100 rounded-xl p-4 h-20 animate-pulse" />
+                        ))}
+                    </div>
+                ) : transactions.length > 0 ? (
+                    <div className="bg-white border-y-2 border-sky-200 rounded-xl overflow-hidden">
+                        {transactions.map((tx, index) => {
                                 const isDebit = tx.type === 'DEBIT';
 
                                 let label = getTranslatedText("Completed Pickup");
@@ -484,51 +482,49 @@ const ScrapperWallet = () => {
                                 }
 
                                 return (
-                                    <motion.div
-                                        key={index}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: 0.05 * index }}
-                                        className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex items-center justify-between"
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.category === 'COUPON_CREDIT' ? 'bg-purple-100 text-purple-600' :
-                                                isDebit ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'
-                                                }`}>
-                                                {icon}
+                                    <div key={index}>
+                                        <div className="p-4 flex items-center justify-between">
+                                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${tx.category === 'COUPON_CREDIT' ? 'bg-purple-100 text-purple-600' :
+                                                    isDebit ? 'bg-red-50 text-red-500' : 'bg-sky-100 text-sky-600'
+                                                    }`}>
+                                                    {icon}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-semibold text-sm text-slate-800 truncate">
+                                                        {label}
+                                                        {tx.orderId && <span className="text-xs text-slate-400 ml-1">#{typeof tx.orderId === 'string' ? tx.orderId.slice(-4) : '...'}</span>}
+                                                    </p>
+                                                    <p className="text-xs text-slate-500">
+                                                        {formatDate(tx.createdAt)}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p className="font-semibold text-slate-800">
-                                                    {label}
-                                                    {tx.orderId && <span className="text-xs text-slate-400 ml-1">#{typeof tx.orderId === 'string' ? tx.orderId.slice(-4) : '...'}</span>}
+                                            <div className="text-right flex-shrink-0 ml-3">
+                                                <p className={`font-bold text-base mb-0.5 ${isDebit ? 'text-red-500' : 'text-slate-800'
+                                                    }`}>
+                                                    {isDebit ? '-' : '+'}₹{tx.amount?.toLocaleString()}
                                                 </p>
-                                                <p className="text-xs text-slate-500">
-                                                    {formatDate(tx.createdAt)}
-                                                </p>
+                                                <span className={`text-[10px] px-2 py-0.5 rounded-md ${tx.status === 'SUCCESS' ? 'bg-sky-100 text-sky-700' :
+                                                    tx.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
+                                                    }`}>
+                                                    {tx.status}
+                                                </span>
                                             </div>
                                         </div>
-                                        <div className="text-right">
-                                            <p className={`font-bold ${isDebit ? 'text-red-500' : 'text-emerald-600'
-                                                }`}>
-                                                {isDebit ? '-' : '+'}₹{tx.amount?.toLocaleString()}
-                                            </p>
-                                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${tx.status === 'SUCCESS' ? 'bg-green-100 text-green-700' :
-                                                tx.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
-                                                }`}>
-                                                {tx.status}
-                                            </span>
-                                        </div>
-                                    </motion.div>
+                                        {index < transactions.length - 1 && (
+                                            <div className="border-b border-slate-200" />
+                                        )}
+                                    </div>
                                 );
                             })}
                         </div>
                     ) : (
-                        <div className="text-center py-10 bg-white rounded-xl border border-dashed border-slate-300">
+                        <div className="text-center py-10 bg-white mx-4 rounded-xl border border-dashed border-slate-300">
                             <FaExclamationCircle className="mx-auto text-slate-400 mb-3" size={40} />
                             <p className="text-slate-500">{getTranslatedText("No transactions yet")}</p>
                         </div>
                     )}
-                </motion.div>
             </div>
 
             {/* Add Money Modal */}
@@ -544,7 +540,7 @@ const ScrapperWallet = () => {
                         >
                             <div className="flex justify-between items-center mb-6">
                                 <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                    <FaMoneyBillWave className="text-emerald-600" /> {getTranslatedText("Add Funds")}
+                                    <FaMoneyBillWave className="text-sky-600" /> {getTranslatedText("Add Funds")}
                                 </h3>
                                 <button onClick={() => setShowAddMoney(false)} className="text-slate-400 hover:text-slate-600">
                                     <FaTimes size={20} />
@@ -559,7 +555,7 @@ const ScrapperWallet = () => {
                                             type="number"
                                             value={amount}
                                             onChange={(e) => setAmount(e.target.value)}
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-slate-800 text-lg font-bold focus:border-emerald-500 outline-none"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-slate-800 text-lg font-bold focus:border-sky-500 outline-none"
                                             placeholder="1000"
                                             min="1"
                                             required
@@ -581,7 +577,7 @@ const ScrapperWallet = () => {
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {processing ? getTranslatedText("Processing...") : getTranslatedText("Add Funds")}
                                 </button>
@@ -604,7 +600,7 @@ const ScrapperWallet = () => {
                         >
                             <div className="flex justify-between items-center mb-6">
                                 <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                    <FaUniversity className="text-emerald-600" /> {getTranslatedText("Withdraw Funds")}
+                                    <FaUniversity className="text-sky-600" /> {getTranslatedText("Withdraw Funds")}
                                 </h3>
                                 <button onClick={() => setShowWithdraw(false)} className="text-slate-400 hover:text-slate-600">
                                     <FaTimes size={20} />
@@ -619,7 +615,7 @@ const ScrapperWallet = () => {
                                             type="number"
                                             value={withdrawDetails.amount}
                                             onChange={(e) => setWithdrawDetails({ ...withdrawDetails, amount: e.target.value })}
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-slate-800 text-lg font-bold focus:border-emerald-500 outline-none"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-slate-800 text-lg font-bold focus:border-sky-500 outline-none"
                                             placeholder="1000"
                                             min="100"
                                             required
@@ -635,7 +631,7 @@ const ScrapperWallet = () => {
                                             type="text"
                                             value={withdrawDetails.accountHolderName}
                                             onChange={(e) => setWithdrawDetails({ ...withdrawDetails, accountHolderName: e.target.value })}
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-800 focus:border-emerald-500 outline-none"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-800 focus:border-sky-500 outline-none"
                                             required
                                         />
                                     </div>
@@ -645,7 +641,7 @@ const ScrapperWallet = () => {
                                             type="text"
                                             value={withdrawDetails.accountNumber}
                                             onChange={(e) => setWithdrawDetails({ ...withdrawDetails, accountNumber: e.target.value })}
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-800 focus:border-emerald-500 outline-none"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-800 focus:border-sky-500 outline-none"
                                             required
                                         />
                                     </div>
@@ -655,7 +651,7 @@ const ScrapperWallet = () => {
                                             type="text"
                                             value={withdrawDetails.ifscCode}
                                             onChange={(e) => setWithdrawDetails({ ...withdrawDetails, ifscCode: e.target.value })}
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-800 focus:border-emerald-500 outline-none"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-800 focus:border-sky-500 outline-none"
                                             required
                                         />
                                     </div>
@@ -664,7 +660,7 @@ const ScrapperWallet = () => {
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {processing ? getTranslatedText("Processing...") : getTranslatedText("Request Withdrawal")}
                                 </button>
@@ -683,3 +679,4 @@ const ScrapperWallet = () => {
 };
 
 export default ScrapperWallet;
+

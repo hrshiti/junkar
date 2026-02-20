@@ -183,7 +183,7 @@ const ScrapperModule = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Verifying authentication...</p>
         </div>
       </div>
@@ -220,7 +220,7 @@ const ScrapperModule = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-cyan-50 to-blue-50">
       <WebViewHeader navItems={navItems} userRole="scrapper" />
       <Routes>
         {/* KYC Upload Route */}

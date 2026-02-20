@@ -75,7 +75,7 @@ const ScrapperHelpSupport = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
       className="min-h-screen w-full p-4 md:p-6"
-      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}
+      style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}
     >
       <div className="w-full p-2 md:p-4">
         <h2 className="text-xl md:text-2xl font-bold mb-2 text-slate-800">
@@ -101,7 +101,7 @@ const ScrapperHelpSupport = () => {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base border-emerald-100 bg-slate-50 text-slate-800 focus:border-emerald-500"
+              className="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base border-sky-100 bg-slate-50 text-slate-800 focus:border-sky-500"
             >
               <option value="">{getTranslatedText("Select an issue")}</option>
               <option value="pickup_routing">{getTranslatedText("Pickup routing / request assignment")}</option>
@@ -122,7 +122,7 @@ const ScrapperHelpSupport = () => {
               onChange={(e) => setMessage(e.target.value)}
               rows={5}
               placeholder={getTranslatedText("Please include request ID, approximate time, and any details that can help us...")}
-              className="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base resize-none border-emerald-100 bg-slate-50 text-slate-800 focus:border-emerald-500"
+              className="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base resize-none border-sky-100 bg-slate-50 text-slate-800 focus:border-sky-500"
             />
           </div>
 
@@ -131,7 +131,7 @@ const ScrapperHelpSupport = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             disabled={submitting || !category || !message.trim()}
-            className="w-full py-3 md:py-4 rounded-xl font-bold text-sm md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-emerald-600 text-white hover:bg-emerald-700"
+            className="w-full py-3 md:py-4 rounded-xl font-bold text-sm md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-sky-600 text-white hover:bg-sky-700"
           >
             {submitting ? getTranslatedText('Submitting...') : getTranslatedText('Submit Ticket')}
           </motion.button>

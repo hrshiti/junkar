@@ -494,7 +494,7 @@ const ScrapperDashboard = () => {
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-            className="w-12 h-12 rounded-full border-4 border-t-transparent mx-auto mb-4 border-emerald-600"
+            className="w-12 h-12 rounded-full border-4 border-t-transparent mx-auto mb-4 border-sky-600"
           />
           <p className="text-sm font-semibold text-slate-800">
             {getTranslatedText("Loading dashboard...")}
@@ -510,7 +510,7 @@ const ScrapperDashboard = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
       className="min-h-screen w-full text-slate-800"
-      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}
+      style={{ background: "linear-gradient(to bottom, #7dd3fc, #e0f2fe)" }}
     >
       {/* Header */}
       <div className="p-4 md:p-6 border-b border-white/10">
@@ -526,7 +526,7 @@ const ScrapperDashboard = () => {
               className="focus:outline-none"
             >
               <div
-                className="w-12 h-12 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-shadow bg-emerald-600"
+                className="w-12 h-12 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-shadow bg-sky-600"
               >
                 <span className="text-white font-bold text-lg">
                   {(user?.name || 'S')[0].toUpperCase()}
@@ -545,7 +545,7 @@ const ScrapperDashboard = () => {
         >
           <div className="flex items-center gap-3">
             <div
-              className={`w-3 h-3 rounded-full ${isAvailable ? 'animate-pulse bg-emerald-500' : 'bg-red-500'}`}
+              className={`w-3 h-3 rounded-full ${isAvailable ? 'animate-pulse bg-sky-500' : 'bg-red-500'}`}
             />
             <div>
               <p className="text-sm font-semibold text-slate-800">
@@ -559,7 +559,7 @@ const ScrapperDashboard = () => {
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={handleAvailabilityToggle}
-            className={`px-6 py-2 rounded-full font-semibold text-sm transition-all duration-300 ${isAvailable ? 'shadow-lg bg-emerald-600 text-white' : 'bg-emerald-500/20 text-emerald-600'}`}
+            className={`px-6 py-2 rounded-full font-semibold text-sm transition-all duration-300 ${isAvailable ? 'shadow-lg bg-sky-600 text-white' : 'bg-sky-500/20 text-sky-600'}`}
           >
             {isAvailable ? getTranslatedText('ON') : getTranslatedText('OFF')}
           </motion.button>
@@ -590,15 +590,15 @@ const ScrapperDashboard = () => {
           <div className="flex items-start justify-between gap-3 relative z-10">
             <div className="flex gap-3">
               <div className="mt-1 w-10 h-10 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: subscriptionData?.isMarketActive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(148, 163, 184, 0.15)' }}>
+                style={{ backgroundColor: subscriptionData?.isMarketActive ? 'rgba(14, 165, 233, 0.2)' : 'rgba(148, 163, 184, 0.15)' }}>
                 {subscriptionData?.isMarketActive ? (
-                  <FaCheck className="text-emerald-400" />
+                  <FaCheck className="text-sky-400" />
                 ) : (
-                  <FaChartLine className="text-emerald-400" />
+                  <FaChartLine className="text-sky-400" />
                 )}
               </div>
               <div>
-                <p className="text-xs font-semibold mb-1" style={{ color: subscriptionData?.isMarketActive ? '#34d399' : '#a5b4fc' }}>
+                <p className="text-xs font-semibold mb-1" style={{ color: subscriptionData?.isMarketActive ? '#38bdf8' : '#a5b4fc' }}>
                   {subscriptionData?.isMarketActive ? getTranslatedText("Active Subscription") : getTranslatedText("Market Price Add‑On")}
                 </p>
                 <h3 className="text-sm md:text-base font-bold mb-1" style={{ color: '#e5e7eb' }}>
@@ -613,9 +613,9 @@ const ScrapperDashboard = () => {
                 type="button"
                 className="mt-1 px-3 py-1.5 rounded-full text-[11px] md:text-xs font-semibold border transition-colors"
                 style={{
-                  borderColor: subscriptionData?.isMarketActive ? '#34d399' : '#4b5563',
-                  color: subscriptionData?.isMarketActive ? '#34d399' : '#e5e7eb',
-                  backgroundColor: subscriptionData?.isMarketActive ? 'rgba(16, 185, 129, 0.1)' : 'transparent'
+                  borderColor: subscriptionData?.isMarketActive ? '#38bdf8' : '#4b5563',
+                  color: subscriptionData?.isMarketActive ? '#38bdf8' : '#e5e7eb',
+                  backgroundColor: subscriptionData?.isMarketActive ? 'rgba(14, 165, 233, 0.1)' : 'transparent'
                 }}
               >
                 {subscriptionData?.isMarketActive ? getTranslatedText("Manage Plan") : getTranslatedText("View plans")}
@@ -626,39 +626,39 @@ const ScrapperDashboard = () => {
       </div>
 
       {/* Content */}
-      <div className="p-4 pb-24 md:p-6 space-y-4 md:space-y-6">
+      <div className="p-4 pb-24 md:p-6 space-y-3">
         {/* Earnings Summary */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="rounded-2xl p-4 md:p-6 shadow-lg bg-white"
+          className="rounded-2xl p-3 shadow-lg bg-white"
         >
-          <h2 className="text-lg md:text-xl font-bold mb-4 text-slate-800">
+          <h2 className="text-base font-bold mb-2.5 text-slate-800">
             {getTranslatedText("Earnings Summary")}
           </h2>
-          <div className="grid grid-cols-2 gap-3 md:gap-4">
-            <div className="p-3 md:p-4 rounded-xl bg-slate-50 border border-slate-100">
-              <p className="text-xs md:text-sm mb-1 text-slate-500">{getTranslatedText("Today")}</p>
-              <p className="text-lg md:text-2xl font-bold text-emerald-600">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="p-2 rounded-lg bg-white border-2 border-sky-200">
+              <p className="text-[10px] font-medium mb-0.5 text-slate-500">{getTranslatedText("Today")}</p>
+              <p className="text-lg font-bold text-slate-800">
                 ₹{earnings.today.toLocaleString()}
               </p>
             </div>
-            <div className="p-3 md:p-4 rounded-xl bg-slate-50 border border-slate-100">
-              <p className="text-xs md:text-sm mb-1 text-slate-500">{getTranslatedText("This Week")}</p>
-              <p className="text-lg md:text-2xl font-bold text-emerald-600">
+            <div className="p-2 rounded-lg bg-white border-2 border-sky-200">
+              <p className="text-[10px] font-medium mb-0.5 text-slate-500">{getTranslatedText("This Week")}</p>
+              <p className="text-lg font-bold text-slate-800">
                 ₹{earnings.week.toLocaleString()}
               </p>
             </div>
-            <div className="p-3 md:p-4 rounded-xl bg-slate-50 border border-slate-100">
-              <p className="text-xs md:text-sm mb-1 text-slate-500">{getTranslatedText("This Month")}</p>
-              <p className="text-lg md:text-2xl font-bold text-emerald-600">
+            <div className="p-2 rounded-lg bg-white border-2 border-sky-200">
+              <p className="text-[10px] font-medium mb-0.5 text-slate-500">{getTranslatedText("This Month")}</p>
+              <p className="text-lg font-bold text-slate-800">
                 ₹{earnings.month.toLocaleString()}
               </p>
             </div>
-            <div className="p-3 md:p-4 rounded-xl bg-slate-50 border border-slate-100">
-              <p className="text-xs md:text-sm mb-1 text-slate-500">{getTranslatedText("Total")}</p>
-              <p className="text-lg md:text-2xl font-bold text-emerald-600">
+            <div className="p-2 rounded-lg bg-white border-2 border-sky-200">
+              <p className="text-[10px] font-medium mb-0.5 text-slate-500">{getTranslatedText("Total")}</p>
+              <p className="text-lg font-bold text-slate-800">
                 ₹{earnings.total.toLocaleString()}
               </p>
             </div>
@@ -672,34 +672,34 @@ const ScrapperDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="rounded-2xl p-4 md:p-6 shadow-lg bg-white"
+          className="rounded-2xl p-3 shadow-lg bg-white"
         >
-          <h2 className="text-lg md:text-xl font-bold mb-4 text-slate-800">
+          <h2 className="text-base font-bold mb-2.5 text-slate-800">
             {getTranslatedText("Quick Stats")}
           </h2>
-          <div className="grid grid-cols-3 gap-3 md:gap-4">
-            <div className="text-center p-3 rounded-xl bg-green-50">
-              <p className="text-2xl md:text-3xl font-bold mb-1 text-emerald-600">
+          <div className="grid grid-cols-3 gap-2">
+            <div className="text-center p-2 rounded-lg bg-white border-2 border-sky-200">
+              <p className="text-xl font-bold mb-0.5 text-slate-800">
                 {stats.completedPickups}
               </p>
-              <p className="text-xs md:text-sm text-slate-500">{getTranslatedText("Completed")}</p>
+              <p className="text-[10px] font-medium text-slate-500">{getTranslatedText("Completed")}</p>
             </div>
-            <div className="text-center p-3 rounded-xl bg-slate-50 border border-slate-100">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <div className="text-center p-2 rounded-lg bg-white border-2 border-amber-200">
+              <div className="flex items-center justify-center gap-0.5 mb-0.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#fbbf24" />
                 </svg>
-                <p className="text-2xl md:text-3xl font-bold text-slate-800">
+                <p className="text-xl font-bold text-slate-800">
                   {stats.rating}
                 </p>
               </div>
-              <p className="text-xs md:text-sm text-slate-500">{getTranslatedText("Rating")}</p>
+              <p className="text-[10px] font-medium text-slate-500">{getTranslatedText("Rating")}</p>
             </div>
-            <div className="text-center p-3 rounded-xl bg-slate-50 border border-slate-100">
-              <p className="text-2xl md:text-3xl font-bold mb-1 text-slate-800">
+            <div className="text-center p-2 rounded-lg bg-white border-2 border-slate-200">
+              <p className="text-xl font-bold mb-0.5 text-slate-800">
                 {stats.activeRequests}
               </p>
-              <p className="text-xs md:text-sm text-slate-500">{getTranslatedText("Active")}</p>
+              <p className="text-[10px] font-medium text-slate-500">{getTranslatedText("Active")}</p>
             </div>
           </div>
         </motion.div>
@@ -731,7 +731,7 @@ const ScrapperDashboard = () => {
                 </h2>
                 <button
                   onClick={() => navigate('/scrapper/my-active-requests')}
-                  className="text-xs md:text-sm font-semibold px-3 py-1.5 rounded-full transition-colors bg-green-50 text-emerald-700 hover:bg-green-100"
+                  className="text-xs md:text-sm font-semibold px-3 py-1.5 rounded-full transition-colors bg-sky-50 text-sky-700 hover:bg-sky-100"
                 >
                   {getTranslatedText("View All")}
                 </button>
@@ -760,8 +760,8 @@ const ScrapperDashboard = () => {
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-100">
-                              <span className="text-xs font-bold text-emerald-600">
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-sky-100">
+                              <span className="text-xs font-bold text-sky-600">
                                 {request.userName?.[0]?.toUpperCase() || 'U'}
                               </span>
                             </div>
@@ -796,7 +796,7 @@ const ScrapperDashboard = () => {
                           </div>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="text-sm font-bold mb-1" style={{ color: '#34d399' }}>
+                          <p className="text-sm font-bold mb-1" style={{ color: '#38bdf8' }}>
                             {request.estimatedEarnings || '₹0'}
                           </p>
                           <span
@@ -814,7 +814,7 @@ const ScrapperDashboard = () => {
               {activeRequests.length > 3 && (
                 <button
                   onClick={() => navigate('/scrapper/my-active-requests')}
-                  className="w-full mt-3 py-2 rounded-lg text-sm font-semibold transition-colors bg-emerald-500/10 text-emerald-700"
+                  className="w-full mt-3 py-2 rounded-lg text-sm font-semibold transition-colors bg-sky-500/10 text-sky-700"
                 >
                   {activeRequests.length - 3 > 1
                     ? getTranslatedText("View {count} more requests", { count: activeRequests.length - 3 })
@@ -870,8 +870,8 @@ const ScrapperDashboard = () => {
                       {getTranslatedText("Active until {date}", { date: formattedDate })}
                     </p>
                   </div>
-                  <div className="px-4 py-2 rounded-full bg-emerald-500/10">
-                    <p className="text-xs md:text-sm font-semibold text-emerald-500">
+                  <div className="px-4 py-2 rounded-full bg-sky-500/10">
+                    <p className="text-xs md:text-sm font-semibold text-sky-500">
                       {getTranslatedText("Active")}
                     </p>
                   </div>
@@ -888,20 +888,20 @@ const ScrapperDashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="rounded-2xl p-4 md:p-6 shadow-lg bg-black border border-white/10"
+              className="rounded-2xl p-3.5 shadow-lg bg-black border border-white/10"
             >
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg md:text-xl font-bold text-white">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-bold text-white">
                   {getTranslatedText("Recent Activity")}
                 </h2>
                 <button
                   onClick={() => navigate('/scrapper/earnings')}
-                  className="text-xs md:text-sm font-semibold px-3 py-1.5 rounded-full transition-colors bg-zinc-800 text-emerald-400 hover:bg-zinc-700"
+                  className="text-xs font-semibold px-3 py-1.5 rounded-full transition-colors bg-zinc-800 text-sky-400 hover:bg-zinc-700"
                 >
                   {getTranslatedText("View Earnings")}
                 </button>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {completedOrders.slice(0, 5).map((order, index) => {
                   const date = new Date(order.completedAt || order.createdAt);
 
@@ -911,13 +911,13 @@ const ScrapperDashboard = () => {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 * index }}
-                      className="p-3 md:p-4 rounded-xl border flex items-center justify-between bg-zinc-950 border-white/10"
+                      className="p-3 rounded-xl border flex items-center justify-between bg-zinc-950 border-white/10"
                     >
                       <div className="flex items-center gap-3">
                         <div
-                          className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-900/20"
+                          className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-sky-900/20"
                         >
-                          <span className="text-sm font-bold text-emerald-500">
+                          <span className="text-sm font-bold text-sky-500">
                             ✓
                           </span>
                         </div>
@@ -931,10 +931,10 @@ const ScrapperDashboard = () => {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-bold text-emerald-400">
+                        <p className="text-sm font-bold text-sky-400">
                           ₹{order.amount || order.totalAmount || 0}
                         </p>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-semibold">
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 font-semibold">
                           {getTranslatedText("Completed")}
                         </span>
                       </div>
@@ -951,68 +951,63 @@ const ScrapperDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45 }}
-          className="rounded-2xl p-4 md:p-6 shadow-lg cursor-pointer bg-black border border-white/10"
+          className="rounded-2xl p-3.5 shadow-lg cursor-pointer bg-black border border-white/10"
           onClick={() => navigate('/scrapper/refer')}
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center bg-emerald-900/20"
+                className="w-11 h-11 rounded-xl flex items-center justify-center bg-sky-900/20"
               >
-                <FaGift className="text-2xl text-emerald-500" />
+                <FaGift className="text-xl text-sky-500" />
               </div>
               <div>
-                <h3 className="text-base md:text-lg font-bold mb-1 text-white">
+                <h3 className="text-base font-bold mb-0.5 text-white">
                   {getTranslatedText("Refer & Earn")}
                 </h3>
-                <p className="text-xs md:text-sm text-gray-400">
+                <p className="text-xs text-gray-400">
                   {getTranslatedText("Invite scrappers and earn rewards")}
                 </p>
               </div>
             </div>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64946e" strokeWidth="2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" strokeWidth="2">
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </div>
         </motion.div>
 
-        {/* Orders History */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="rounded-2xl p-4 md:p-6 shadow-lg bg-black border border-white/10"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg md:text-xl font-bold text-white">
+        {/* Orders History - Full Width */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3 px-4">
+            <h2 className="text-lg font-bold text-slate-800">
               {getTranslatedText("Orders History")}
             </h2>
             {completedOrders.length > 0 && (
-              <span className="text-xs md:text-sm px-3 py-1 rounded-full bg-emerald-900/30 text-emerald-400">
+              <span className="text-xs px-3 py-1 rounded-full bg-sky-100 text-sky-700">
                 {completedOrders.length} {completedOrders.length === 1 ? getTranslatedText('order') : getTranslatedText('orders')}
               </span>
             )}
           </div>
 
           {completedOrders.length === 0 ? (
-            <div className="text-center py-8 md:py-12">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-emerald-500/10">
+            <div className="text-center py-8 md:py-12 bg-white mx-4 rounded-xl border border-dashed border-slate-300">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-sky-100">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M5 17h14l-1-7H6l-1 7z" stroke="#64946e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                  <circle cx="7" cy="19" r="1.5" fill="#64946e" />
-                  <circle cx="17" cy="19" r="1.5" fill="#64946e" />
-                  <path d="M3 12h18" stroke="#64946e" strokeWidth="2" strokeLinecap="round" />
+                  <path d="M5 17h14l-1-7H6l-1 7z" stroke="#0ea5e9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                  <circle cx="7" cy="19" r="1.5" fill="#0ea5e9" />
+                  <circle cx="17" cy="19" r="1.5" fill="#0ea5e9" />
+                  <path d="M3 12h18" stroke="#0ea5e9" strokeWidth="2" strokeLinecap="round" />
                 </svg>
               </div>
-              <h3 className="text-base md:text-lg font-bold mb-2 text-white">
+              <h3 className="text-base md:text-lg font-bold mb-2 text-slate-800">
                 {getTranslatedText("No Completed Orders Yet")}
               </h3>
-              <p className="text-sm md:text-base text-gray-400">
+              <p className="text-sm md:text-base text-slate-500">
                 {getTranslatedText("Your completed orders will appear here")}
               </p>
             </div>
           ) : (
-            <div className="space-y-3 max-h-96 overflow-y-auto">
+            <div className="bg-white border-y-2 border-sky-200 rounded-xl overflow-hidden max-h-96 overflow-y-auto">
               {completedOrders.map((order, index) => {
                 const completedDate = order.completedAt ? new Date(order.completedAt) : null;
                 const formattedDate = completedDate
@@ -1029,101 +1024,99 @@ const ScrapperDashboard = () => {
                 const amountValue = amount;
 
                 return (
-                  <motion.div
-                    key={order.id || order.orderId || index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1 * index }}
-                    className="p-4 rounded-xl border transition-all hover:shadow-md bg-zinc-950 border-emerald-900/20"
-                  >
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-900/30 text-emerald-400">
-                            <span className="text-xs font-bold">
-                              {order.userName?.[0]?.toUpperCase() || 'U'}
-                            </span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold truncate text-white">
-                              {order.userName || getTranslatedText('Unknown User')}
-                            </p>
-                            <p className="text-xs truncate text-gray-400">
-                              {order.orderId || order.id || 'N/A'}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="ml-10 space-y-1">
-                          <p className="text-xs font-medium text-white">
-                            {getTranslatedText(order.scrapType || 'Scrap')}
-                          </p>
-                          {order.location?.address && (
-                            <div className="flex items-center gap-1">
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-gray-400 flex-shrink-0">
-                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor" />
-                              </svg>
-                              <p className="text-xs truncate text-gray-400">
-                                {order.location.address}
+                  <div key={order.id || order.orderId || index}>
+                    <div className="p-4">
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-sky-100 text-sky-600">
+                              <span className="text-xs font-bold">
+                                {order.userName?.[0]?.toUpperCase() || 'U'}
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold truncate text-slate-800">
+                                {order.userName || getTranslatedText('Unknown User')}
+                              </p>
+                              <p className="text-xs truncate text-slate-500">
+                                {order.orderId || order.id || 'N/A'}
                               </p>
                             </div>
-                          )}
-                          {/* Scrap Images */}
-                          {order.images && order.images.length > 0 && (
-                            <div className="mt-2">
-                              <div className="flex gap-1.5">
-                                {order.images.slice(0, 4).map((image, imgIdx) => (
-                                  <motion.div
-                                    key={image.id || imgIdx}
-                                    whileHover={{ scale: 1.1 }}
-                                    className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-emerald-900/20"
-                                  >
-                                    <img
-                                      src={image.preview || image}
-                                      alt={`Scrap ${imgIdx + 1}`}
-                                      className="w-full h-full object-cover"
-                                      onError={(e) => {
-                                        e.target.src = 'https://via.placeholder.com/48?text=Scrap';
-                                      }}
-                                    />
-                                  </motion.div>
-                                ))}
-                                {order.images.length > 4 && (
-                                  <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-emerald-900/30">
-                                    <span className="text-xs font-bold text-emerald-400">
-                                      +{order.images.length - 4}
-                                    </span>
-                                  </div>
-                                )}
+                          </div>
+                          <div className="ml-10 space-y-1">
+                            <p className="text-xs font-medium text-slate-800">
+                              {getTranslatedText(order.scrapType || 'Scrap')}
+                            </p>
+                            {order.location?.address && (
+                              <div className="flex items-center gap-1">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-slate-400 flex-shrink-0">
+                                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor" />
+                                </svg>
+                                <p className="text-xs truncate text-slate-500">
+                                  {order.location.address}
+                                </p>
                               </div>
-                            </div>
-                          )}
+                            )}
+                            {/* Scrap Images */}
+                            {order.images && order.images.length > 0 && (
+                              <div className="mt-2">
+                                <div className="flex gap-1.5">
+                                  {order.images.slice(0, 4).map((image, imgIdx) => (
+                                    <div
+                                      key={image.id || imgIdx}
+                                      className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-sky-50"
+                                    >
+                                      <img
+                                        src={image.preview || image}
+                                        alt={`Scrap ${imgIdx + 1}`}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                          e.target.src = 'https://via.placeholder.com/48?text=Scrap';
+                                        }}
+                                      />
+                                    </div>
+                                  ))}
+                                  {order.images.length > 4 && (
+                                    <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-sky-100">
+                                      <span className="text-xs font-bold text-sky-600">
+                                        +{order.images.length - 4}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-base font-bold mb-1 text-slate-800">
+                            {`₹${amountValue}`}
+                          </p>
+                          <div className="flex items-center justify-end gap-1">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-sky-600">
+                              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            <span className="text-xs font-semibold text-sky-600">
+                              {getTranslatedText("Completed")}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="text-base font-bold mb-1 text-emerald-400">
-                          {`₹${amountValue}`}
+                      <div className="mt-2 pt-2 border-t border-slate-200">
+                        <p className="text-xs text-slate-500">
+                          {getTranslatedText("Completed on:")} {formattedDate}
                         </p>
-                        <div className="flex items-center justify-end gap-1">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-emerald-400">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                          <span className="text-xs font-semibold text-emerald-400">
-                            {getTranslatedText("Completed")}
-                          </span>
-                        </div>
                       </div>
                     </div>
-                    <div className="mt-2 pt-2 border-t border-emerald-900/30">
-                      <p className="text-xs text-gray-400">
-                        {getTranslatedText("Completed on:")} {formattedDate}
-                      </p>
-                    </div>
-                  </motion.div>
+                    {index < completedOrders.length - 1 && (
+                      <div className="border-b border-slate-200" />
+                    )}
+                  </div>
                 );
               })}
             </div>
           )}
-        </motion.div>
+        </div>
       </div >
     </motion.div >
   );

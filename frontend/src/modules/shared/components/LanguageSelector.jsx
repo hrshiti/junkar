@@ -77,7 +77,7 @@ const LanguageSelector = ({ variant = 'light', direction = 'bottom' }) => {
                                         changeLanguage(code);
                                         setIsOpen(false);
                                     }}
-                                    className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors hover:bg-emerald-50 ${language === code ? 'bg-emerald-50 text-emerald-700' : 'text-gray-700'
+                                    className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors hover:bg-sky-50 ${language === code ? 'bg-sky-50 text-sky-700' : 'text-gray-700'
                                         }`}
                                 >
                                     <div className="flex items-center gap-3">
@@ -85,7 +85,7 @@ const LanguageSelector = ({ variant = 'light', direction = 'bottom' }) => {
                                         <span className="font-medium text-sm">{lang.label}</span>
                                     </div>
                                     {language === code && (
-                                        <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                        <div className="w-2 h-2 rounded-full bg-sky-500"></div>
                                     )}
                                 </button>
                             ))}

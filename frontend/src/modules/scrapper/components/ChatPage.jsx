@@ -403,7 +403,7 @@ const ChatPage = () => {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black">
         <div className="text-center">
-          <FaSpinner className="animate-spin mx-auto mb-4 text-3xl text-emerald-500" />
+          <FaSpinner className="animate-spin mx-auto mb-4 text-3xl text-sky-500" />
           <p className="text-white">{getTranslatedText("Loading chat...")}</p>
         </div>
       </div>
@@ -419,7 +419,7 @@ const ChatPage = () => {
           </p>
           <button
             onClick={() => navigate(-1)}
-            className="px-6 py-2 rounded-xl font-semibold text-white shadow-md transition-transform active:scale-95 bg-emerald-600 hover:bg-emerald-700"
+            className="px-6 py-2 rounded-xl font-semibold text-white shadow-md transition-transform active:scale-95 bg-sky-600 hover:bg-sky-700"
           >
             {getTranslatedText("Go Back")}
           </button>
@@ -464,7 +464,7 @@ const ChatPage = () => {
       >
         <button
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-full flex items-center justify-center transition-colors active:opacity-70 bg-emerald-900/30 text-emerald-400"
+          className="w-10 h-10 rounded-full flex items-center justify-center transition-colors active:opacity-70 bg-sky-900/30 text-sky-400"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-white">
             <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -474,12 +474,12 @@ const ChatPage = () => {
         {otherUser && (
           <div className="flex items-center gap-3 flex-1 px-3">
             <div
-              className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold relative bg-emerald-900/30 text-emerald-400"
+              className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold relative bg-sky-900/30 text-sky-400"
             >
               {otherUser.name?.split(' ').map(n => n[0]).join('') || getTranslatedText('U')}
               {/* Online indicator */}
               <div
-                className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 bg-emerald-500 border-zinc-900"
+                className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 bg-sky-500 border-zinc-900"
               />
             </div>
             <div className="flex-1 min-w-0">
@@ -493,7 +493,7 @@ const ChatPage = () => {
                   </span>
                 )}
                 {!otherUserTyping && (
-                  <span className="text-xs text-emerald-400">
+                  <span className="text-xs text-sky-400">
                     • {getTranslatedText("Online")}
                   </span>
                 )}
@@ -508,9 +508,9 @@ const ChatPage = () => {
               window.location.href = `tel:${otherUser.phone}`;
             }
           }}
-          className="w-10 h-10 rounded-full flex items-center justify-center transition-colors active:opacity-70 bg-emerald-900/30 text-emerald-400"
+          className="w-10 h-10 rounded-full flex items-center justify-center transition-colors active:opacity-70 bg-sky-900/30 text-sky-400"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-emerald-400">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-sky-400">
             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
@@ -529,7 +529,7 @@ const ChatPage = () => {
       >
         {loadingMore && (
           <div className="text-center py-2">
-            <FaSpinner className="animate-spin mx-auto text-emerald-400" />
+            <FaSpinner className="animate-spin mx-auto text-sky-400" />
           </div>
         )}
 
@@ -550,7 +550,7 @@ const ChatPage = () => {
                 <div className={`flex items-end gap-2 max-w-[85%] ${isScrapperMessage ? 'flex-row-reverse' : 'flex-row'}`}>
                   {/* Avatar */}
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${isScrapperMessage ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-900/20 text-emerald-600'}`}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${isScrapperMessage ? 'bg-sky-900/30 text-sky-400' : 'bg-sky-900/20 text-sky-600'}`}
                   >
                     {senderInitials}
                   </div>
@@ -559,7 +559,7 @@ const ChatPage = () => {
                   <div className="flex flex-col">
                     <div
                       className={`rounded-2xl px-4 py-2.5 shadow-sm ${isScrapperMessage
-                        ? 'rounded-tr-md bg-emerald-600 text-white shadow-emerald-900/20'
+                        ? 'rounded-tr-md bg-sky-600 text-white shadow-sky-900/20'
                         : 'rounded-tl-md bg-zinc-800 text-white shadow-black/20'
                         }`}
                     >
@@ -611,7 +611,7 @@ const ChatPage = () => {
               placeholder={getTranslatedText("Type a message...")}
               rows={1}
               disabled={sending}
-              className="w-full py-2.5 px-4 rounded-2xl border-2 focus:outline-none resize-none text-sm disabled:opacity-50 border-white/10 text-white bg-black min-h-[44px] max-h-[100px] transition-all focus:border-emerald-500 placeholder-gray-500"
+              className="w-full py-2.5 px-4 rounded-2xl border-2 focus:outline-none resize-none text-sm disabled:opacity-50 border-white/10 text-white bg-black min-h-[44px] max-h-[100px] transition-all focus:border-sky-500 placeholder-gray-500"
               onInput={(e) => {
                 e.target.style.height = 'auto';
                 e.target.style.height = `${Math.min(e.target.scrollHeight, 100)}px`;
@@ -623,7 +623,7 @@ const ChatPage = () => {
             whileTap={{ scale: 0.95 }}
             onClick={handleSendMessage}
             disabled={inputMessage.trim() === '' || sending}
-            className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 flex-shrink-0 disabled:opacity-50 ${inputMessage.trim() && !sending ? 'bg-emerald-600 text-white shadow-emerald-500/40 shadow-lg' : 'bg-emerald-900/30 text-emerald-400'}`}
+            className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 flex-shrink-0 disabled:opacity-50 ${inputMessage.trim() && !sending ? 'bg-sky-600 text-white shadow-sky-500/40 shadow-lg' : 'bg-sky-900/30 text-sky-400'}`}
           >
             {sending ? (
               <FaSpinner className="animate-spin" />
@@ -645,4 +645,5 @@ const ChatPage = () => {
 };
 
 export default ChatPage;
+
 

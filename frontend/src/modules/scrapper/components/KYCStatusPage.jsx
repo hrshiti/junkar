@@ -124,11 +124,11 @@ const KYCStatusPage = () => {
       case 'verified':
         return {
           label: getTranslatedText('Verified'),
-          color: '#10b981',
+          color: '#0ea5e9',
           icon: (
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" stroke="#10b981" strokeWidth="2" fill="#10b981" fillOpacity="0.1" />
-              <path d="M9 12l2 2 4-4" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              <circle cx="12" cy="12" r="10" stroke="#0ea5e9" strokeWidth="2" fill="#0ea5e9" fillOpacity="0.1" />
+              <path d="M9 12l2 2 4-4" stroke="#0ea5e9" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           ),
           message: getTranslatedText('Your KYC has been verified'),
@@ -227,7 +227,7 @@ const KYCStatusPage = () => {
             <div className="p-4 rounded-xl" style={{ backgroundColor: 'rgba(100, 148, 110, 0.1)' }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: '#64946e' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: '#0ea5e9' }}>
                     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" />
                     <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -235,7 +235,7 @@ const KYCStatusPage = () => {
                     {getTranslatedText("Estimated Completion Time:")}
                   </span>
                 </div>
-                <span className="text-sm font-bold" style={{ color: '#64946e' }}>
+                <span className="text-sm font-bold" style={{ color: '#0ea5e9' }}>
                   {statusConfig.estimatedTime}
                 </span>
               </div>
@@ -288,7 +288,7 @@ const KYCStatusPage = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate('/scrapper/kyc')}
-                className="w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-emerald-600 text-white hover:bg-emerald-700"
+                className="w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-sky-600 text-white hover:bg-sky-700"
               >
                 {getTranslatedText("Resubmit KYC")}
               </motion.button>
@@ -307,7 +307,7 @@ const KYCStatusPage = () => {
                     navigate('/scrapper/subscription', { replace: true });
                   }
                 }}
-                className="w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-emerald-600 text-white hover:bg-emerald-700"
+                className="w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-sky-600 text-white hover:bg-sky-700"
               >
                 {getTranslatedText("Continue to Subscription")}
               </motion.button>
@@ -334,7 +334,7 @@ const KYCStatusPage = () => {
           className="rounded-2xl p-4 md:p-6 shadow-lg bg-zinc-900 border border-white/10"
         >
           <div className="flex items-start gap-3">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-emerald-400 flex-shrink-0 mt-0.5">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-sky-400 flex-shrink-0 mt-0.5">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor" />
             </svg>
             <div>
