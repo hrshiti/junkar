@@ -9,9 +9,36 @@ import brassImage from '../../../modules/user/assets/brass.jpg';
 import steelImage from '../../../modules/user/assets/metal2.jpg';
 import scrapImage2 from '../../../modules/user/assets/scrab.png';
 import electronicImage from '../../../modules/user/assets/electronicbg.png';
+import woodTableImage from '../../../modules/user/assets/wooditem/table.jpg';
+import woodChairImage from '../../../modules/user/assets/wooditem/chair.jpg';
+import woodBedImage from '../../../modules/user/assets/wooditem/Beds.jpg';
+import woodOtherImage from '../../../modules/user/assets/wooditem/other_furniture.jpg';
+import woodAnotherImage from '../../../modules/user/assets/wooditem/wood_another.jpg';
+import v2WheelerImage from '../../../modules/user/assets/vehicle_categry/2 wheecle.png';
+import v4WheelerImage from '../../../modules/user/assets/vehicle_categry/4 wheecle.jpg';
+import vAutoPartsImage from '../../../modules/user/assets/vehicle_categry/autoparts.png';
+import vTyreImage from '../../../modules/user/assets/vehicle_categry/tyre.jpg';
+import vBatteryImage from '../../../modules/user/assets/vehicle_categry/baterry.jpg';
+import vOtherVehicleImage from '../../../modules/user/assets/vehicle_categry/other_vehical_parts.jpg';
+import hACImage from '../../../modules/user/assets/home_appliance/Ac.jpg';
+import hFridgeImage from '../../../modules/user/assets/home_appliance/Fridge.jpg';
+import hWMImage from '../../../modules/user/assets/home_appliance/washing_machine.jpg';
+import hTVImage from '../../../modules/user/assets/home_appliance/TV.jpg';
+import hMicroImage from '../../../modules/user/assets/home_appliance/Microwave.jpg';
+import hOtherApplianceImage from '../../../modules/user/assets/home_appliance/other.jpg';
+import eBatteryImage from '../../../modules/user/assets/e-waste/battery.png';
+import eCablesImage from '../../../modules/user/assets/e-waste/cables.png';
+import eComputerImage from '../../../modules/user/assets/e-waste/computer.png';
+import eLaptopImage from '../../../modules/user/assets/e-waste/laptop.png';
+import eMotherboardImage from '../../../modules/user/assets/e-waste/motherboar.png';
+import eOtherEWasteImage from '../../../modules/user/assets/e-waste/other_e-waste.png';
+
+
+
+
 
 import { publicAPI } from '../../../modules/shared/utils/api';
-import { getEffectivePriceFeed } from '../../../modules/shared/utils/priceFeedUtils';
+import { getEffectivePriceFeed, NEGOTIABLE_CATEGORIES } from '../../../modules/shared/utils/priceFeedUtils';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
 const CategorySelectionPage = () => {
@@ -27,11 +54,34 @@ const CategorySelectionPage = () => {
     "Plastic",
     "Metal",
     "Paper",
-    "Electronics",
     "Copper",
     "Aluminium",
     "Steel",
-    "Brass"
+    "Brass",
+    "E-Waste",
+    "Scrap Iron",
+    "Raddi",
+    "Furniture",
+    "Vehicle Scrap",
+    "Home Appliance",
+    "Table",
+    "Chair",
+    "Sofa",
+    "Bed",
+    "Wooden Items",
+    "Other Furniture",
+    "AC",
+    "Fridge",
+    "Washing Machine",
+    "TV",
+    "Microwave",
+    "Other Appliance",
+    "2-Wheeler",
+    "4-Wheeler",
+    "Auto Parts",
+    "Tyre",
+    "Battery",
+    "Other Vehicle Parts"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -44,16 +94,21 @@ const CategorySelectionPage = () => {
     const fetchCategories = async () => {
       setLoading(true);
 
-      // 1. Start with the fixed 8 static categories
+      // 1. Start with the fixed 14 static categories
       const staticCategories = [
-        { id: 'plastic', name: 'Plastic', image: plasticImage, price: 45 },
-        { id: 'metal', name: 'Metal', image: metalImage, price: 180 },
-        { id: 'paper', name: 'Paper', image: scrapImage2, price: 12 },
-        { id: 'electronics', name: 'Electronics', image: electronicImage, price: 85 },
-        { id: 'copper', name: 'Copper', image: copperImage, price: 650 },
-        { id: 'aluminium', name: 'Aluminium', image: aluminiumImage, price: 180 },
-        { id: 'steel', name: 'Steel', image: steelImage, price: 35 },
-        { id: 'brass', name: 'Brass', image: brassImage, price: 420 },
+        { id: 'plastic', name: 'Plastic', image: plasticImage, price: 45, pricingType: 'kg_based' },
+        { id: 'metal', name: 'Metal', image: metalImage, price: 180, pricingType: 'kg_based' },
+        { id: 'paper', name: 'Paper', image: scrapImage2, price: 12, pricingType: 'kg_based' },
+        { id: 'copper', name: 'Copper', image: copperImage, price: 650, pricingType: 'kg_based' },
+        { id: 'aluminium', name: 'Aluminium', image: aluminiumImage, price: 180, pricingType: 'kg_based' },
+        { id: 'steel', name: 'Steel', image: steelImage, price: 35, pricingType: 'kg_based' },
+        { id: 'brass', name: 'Brass', image: brassImage, price: 420, pricingType: 'kg_based' },
+        { id: 'e_waste', name: 'E-Waste', image: electronicImage, price: 100, pricingType: 'negotiable' },
+        { id: 'scrap_iron', name: 'Scrap Iron', image: steelImage, price: 30, pricingType: 'kg_based' },
+        { id: 'raddi', name: 'Raddi', image: scrapImage2, price: 8, pricingType: 'kg_based' },
+        { id: 'furniture', name: 'Furniture', image: scrapImage2, price: 15, pricingType: 'negotiable' },
+        { id: 'vehicle_scrap', name: 'Vehicle Scrap', image: steelImage, price: 25, pricingType: 'negotiable' },
+        { id: 'home_appliance', name: 'Home Appliance', image: electronicImage, price: 20, pricingType: 'negotiable' },
       ];
 
       try {
@@ -90,15 +145,22 @@ const CategorySelectionPage = () => {
     fetchCategories();
   }, []);
 
-  // Auto-select category if coming from AllCategoriesPage
+  // Auto-select or expand category if coming from homepage/AllCategoriesPage
   useEffect(() => {
     const preSelectedCategoryName = location.state?.preSelectedCategory;
     if (preSelectedCategoryName && categories.length > 0) {
       const categoryToSelect = categories.find(
         cat => cat.name.toLowerCase() === preSelectedCategoryName.toLowerCase()
       );
-      if (categoryToSelect && selectedCategories.length === 0) {
-        setSelectedCategories([categoryToSelect]);
+
+      if (categoryToSelect) {
+        // If it has subcategories, expand it
+        if (subCategoriesMap[categoryToSelect.id]) {
+          setExpandedCategoryId(categoryToSelect.id);
+        } else if (selectedCategories.length === 0) {
+          // Otherwise just select it
+          setSelectedCategories([categoryToSelect]);
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -108,13 +170,37 @@ const CategorySelectionPage = () => {
   const [expandedCategoryId, setExpandedCategoryId] = useState(null);
 
   const subCategoriesMap = {
-    'electronics': [
-      { id: 'elec_comp', name: 'Computer Items', image: electronicImage, price: 85 },
-      { id: 'elec_mob', name: 'Laptops/Mobiles', image: electronicImage, price: 150 },
-      { id: 'elec_mb', name: 'Motherboard', image: electronicImage, price: 400 },
-      { id: 'elec_cable', name: 'Cables/Wires', image: electronicImage, price: 80 },
-      { id: 'elec_batt', name: 'Batteries', image: electronicImage, price: 60 },
-      { id: 'elec_other', name: 'Other Electronics', image: electronicImage, price: 50 },
+    'e_waste': [
+      { id: 'ew_comp', name: 'Computer Items', image: eComputerImage, price: 100, pricingType: 'negotiable' },
+      { id: 'ew_mob', name: 'Laptops/Mobiles', image: eLaptopImage, price: 150, pricingType: 'negotiable' },
+      { id: 'ew_mb', name: 'Motherboard', image: eMotherboardImage, price: 400, pricingType: 'negotiable' },
+      { id: 'ew_cable', name: 'Cables/Wires', image: eCablesImage, price: 80, pricingType: 'negotiable' },
+      { id: 'ew_batt', name: 'Batteries', image: eBatteryImage, price: 60, pricingType: 'negotiable' },
+      { id: 'ew_other', name: 'Other E-Waste', image: eOtherEWasteImage, price: 50, pricingType: 'negotiable' },
+    ],
+    'furniture': [
+      { id: 'furn_table', name: 'Table', image: woodTableImage, price: 20, pricingType: 'negotiable' },
+      { id: 'furn_chair', name: 'Chair', image: woodChairImage, price: 15, pricingType: 'negotiable' },
+      { id: 'furn_sofa', name: 'Sofa', image: woodAnotherImage, price: 25, pricingType: 'negotiable' },
+      { id: 'furn_bed', name: 'Bed', image: woodBedImage, price: 30, pricingType: 'negotiable' },
+      { id: 'furn_wood', name: 'Wooden Items', image: woodAnotherImage, price: 10, pricingType: 'negotiable' },
+      { id: 'furn_other', name: 'Other Furniture', image: woodOtherImage, price: 12, pricingType: 'negotiable' },
+    ],
+    'home_appliance': [
+      { id: 'ha_ac', name: 'AC', image: hACImage, price: 35, pricingType: 'negotiable' },
+      { id: 'ha_fridge', name: 'Fridge', image: hFridgeImage, price: 30, pricingType: 'negotiable' },
+      { id: 'ha_wm', name: 'Washing Machine', image: hWMImage, price: 25, pricingType: 'negotiable' },
+      { id: 'ha_tv', name: 'TV', image: hTVImage, price: 20, pricingType: 'negotiable' },
+      { id: 'ha_micro', name: 'Microwave', image: hMicroImage, price: 15, pricingType: 'negotiable' },
+      { id: 'ha_other', name: 'Other Appliance', image: hOtherApplianceImage, price: 18, pricingType: 'negotiable' },
+    ],
+    'vehicle_scrap': [
+      { id: 'vs_2w', name: '2-Wheeler', image: v2WheelerImage, price: 30, pricingType: 'negotiable' },
+      { id: 'vs_4w', name: '4-Wheeler', image: v4WheelerImage, price: 25, pricingType: 'negotiable' },
+      { id: 'vs_parts', name: 'Auto Parts', image: vAutoPartsImage, price: 35, pricingType: 'negotiable' },
+      { id: 'vs_tyre', name: 'Tyre', image: vTyreImage, price: 10, pricingType: 'negotiable' },
+      { id: 'vs_batt', name: 'Battery', image: vBatteryImage, price: 60, pricingType: 'negotiable' },
+      { id: 'vs_other', name: 'Other Vehicle Parts', image: vOtherVehicleImage, price: 20, pricingType: 'negotiable' },
     ]
   };
 
@@ -122,10 +208,23 @@ const CategorySelectionPage = () => {
     ? subCategoriesMap[expandedCategoryId] || []
     : categories;
 
+  // Modal for "Other" category input
+  const [showOtherModal, setShowOtherModal] = useState(false);
+  const [otherItemInput, setOtherItemInput] = useState('');
+  const [activeOtherCategory, setActiveOtherCategory] = useState(null);
+
   const handleCategoryClick = (category) => {
     // If it's a main category that has subcategories, drill down
     if (!expandedCategoryId && subCategoriesMap[category.id]) {
       setExpandedCategoryId(category.id);
+      return;
+    }
+
+    // Check if it's an "Other" category
+    if (category.id.endsWith('_other')) {
+      setActiveOtherCategory(category);
+      setOtherItemInput('');
+      setShowOtherModal(true);
       return;
     }
 
@@ -140,6 +239,20 @@ const CategorySelectionPage = () => {
     });
   };
 
+  const handleOtherSubmit = (e) => {
+    e.preventDefault();
+    if (otherItemInput.trim()) {
+      const customCategory = {
+        ...activeOtherCategory,
+        name: otherItemInput.trim(), // Replace generic name with user input
+        id: `${activeOtherCategory.id}_${Date.now()}` // Unique ID for this specific selection
+      };
+      setSelectedCategories(prev => [...prev, customCategory]);
+      setShowOtherModal(false);
+      setActiveOtherCategory(null);
+    }
+  };
+
   const handleContinue = () => {
     if (selectedCategories.length > 0) {
       // Store selected categories in sessionStorage for next step
@@ -150,7 +263,7 @@ const CategorySelectionPage = () => {
   };
 
   const isCategorySelected = (categoryId) => {
-    return selectedCategories.some(cat => cat.id === categoryId);
+    return selectedCategories.some(cat => cat.id === categoryId || (typeof cat.id === 'string' && cat.id.startsWith(categoryId + '_')));
   };
 
   return (
@@ -205,11 +318,11 @@ const CategorySelectionPage = () => {
       {/* Optimized Categories Grid */}
       <div className="flex-1 overflow-y-auto p-3 md:p-4 pb-24 md:pb-6">
         {expandedCategoryId && (
-          <p className="text-xs font-bold mb-3 text-sky-600 flex items-center gap-1" onClick={() => setExpandedCategoryId(null)}>
+          <p className="text-xs font-bold mb-3 text-sky-600 flex items-center gap-1 cursor-pointer" onClick={() => setExpandedCategoryId(null)}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
               <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            Back to All Categories
+            {getTranslatedText("Back to All Categories")}
           </p>
         )}
         <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
@@ -230,7 +343,7 @@ const CategorySelectionPage = () => {
                 <img
                   src={category.image}
                   alt={getTranslatedText(category.name)}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain p-1"
                   loading="lazy"
                 />
                 {isCategorySelected(category.id) && (
@@ -271,17 +384,66 @@ const CategorySelectionPage = () => {
                 <p
                   className="text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded-md inline-block"
                   style={{
-                    color: '#000000',
-                    backgroundColor: '#f1f5f9'
+                    color: category.pricingType === 'negotiable' ? '#b45309' : '#000000',
+                    backgroundColor: category.pricingType === 'negotiable' ? 'rgba(245,158,11,0.12)' : '#f1f5f9'
                   }}
                 >
-                  ₹{category.price}/{getTranslatedText("kg")}
+                  {category.pricingType === 'negotiable'
+                    ? '🤝 ' + getTranslatedText('Negotiable')
+                    : `₹${category.price}/${getTranslatedText('kg')}`
+                  }
                 </p>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* "Other" Item Input Modal */}
+      {showOtherModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl"
+          >
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-xl font-bold text-slate-800">
+                {getTranslatedText("Specify Item")}
+              </h3>
+              <button onClick={() => setShowOtherModal(false)} className="text-slate-400 hover:text-slate-600">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+
+            <p className="text-sm text-slate-500 mb-4">
+              {getTranslatedText("Please enter the name of the item you want to sell.")}
+            </p>
+
+            <form onSubmit={handleOtherSubmit}>
+              <input
+                autoFocus
+                type="text"
+                placeholder={getTranslatedText("e.g. Broken Scanner, Iron Chair...")}
+                value={otherItemInput}
+                onChange={(e) => setOtherItemInput(e.target.value)}
+                className="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-100 focus:border-sky-500 focus:outline-none transition-colors text-lg font-medium mb-6"
+              />
+
+              <button
+                type="submit"
+                disabled={!otherItemInput.trim()}
+                className="w-full py-4 rounded-2xl bg-sky-500 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:shadow-none"
+              >
+                {getTranslatedText("Add Item")}
+              </button>
+            </form>
+          </motion.div>
+        </div>
+      )}
 
       {/* Compact Footer */}
       <div
@@ -301,7 +463,7 @@ const CategorySelectionPage = () => {
               {getTranslatedText("Continue with")} {selectedCategories.length} {selectedCategories.length === 1 ? getTranslatedText("Category") : getTranslatedText("Categories")}
             </button>
             <p
-              className="text-xs text-center mt-1.5 font-semibold truncate"
+              className="text-xs text-center mt-1.5 font-semibold truncate px-2"
               style={{ color: '#1e293b' }}
             >
               {getTranslatedText("Selected:")} {selectedCategories.map(cat => getTranslatedText(cat.name)).join(', ')}

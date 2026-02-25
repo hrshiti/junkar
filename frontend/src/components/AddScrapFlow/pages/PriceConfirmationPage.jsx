@@ -59,7 +59,14 @@ const PriceConfirmationPage = () => {
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat",
     "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
     "Select Date", "Select Time", "Selected Time",
-    "When for?", "Right Now", "Schedule", "Scrapper will come immediately"
+    "When for?", "Right Now", "Schedule", "Scrapper will come immediately",
+    "Negotiable Item",
+    "Condition:",
+    "Good", "Average", "Damaged",
+    "Expected Price:",
+    "Vendor will decide",
+    "Negotiation Required",
+    "Apply for Pickup"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -170,11 +177,23 @@ const PriceConfirmationPage = () => {
   const mapCategoryToBackend = (cat) => {
     const id = (cat.id || '').toLowerCase();
     const name = (cat.name || '').toLowerCase();
+    // New categories and their sub-category prefixes
+    if (id === 'e_waste' || id.startsWith('ew_')) return 'e_waste';
+    if (id === 'scrap_iron') return 'scrap_iron';
+    if (id === 'raddi') return 'raddi';
+    if (id === 'furniture' || id.startsWith('furn_')) return 'furniture';
+    if (id === 'vehicle_scrap' || id.startsWith('vs_')) return 'vehicle_scrap';
+    if (id === 'home_appliance' || id.startsWith('ha_')) return 'home_appliance';
+    // Original categories
     if (id.includes('metal') || name === 'metal') return 'metal';
     if (id.includes('plastic') || name === 'plastic') return 'plastic';
     if (id.includes('paper') || name === 'paper') return 'paper';
     if (id.includes('electronic') || name === 'electronics' || name === 'electronic') return 'electronic';
     if (id.includes('glass') || name === 'glass') return 'glass';
+    if (id.includes('copper') || name === 'copper') return 'metal';
+    if (id.includes('aluminium') || name === 'aluminium') return 'metal';
+    if (id.includes('steel') || name === 'steel') return 'metal';
+    if (id.includes('brass') || name === 'brass') return 'metal';
     return 'other';
   };
 
@@ -232,21 +251,44 @@ const PriceConfirmationPage = () => {
       };
     }
 
+    const isNegotiableOrder = weightData?.pricingType === 'negotiable';
     const totalWeight = Number(weightData?.weight || 0);
     const itemCount = Math.max(selectedCategories.length, 1);
     const weightPerItem = totalWeight > 0 ? totalWeight / itemCount : 0;
 
-    const scrapItems = selectedCategories.map((cat) => {
-      const category = mapCategoryToBackend(cat);
-      const rate = cat.price || marketPrices[cat.name] || 0;
-      const total = weightPerItem * rate;
-      return {
-        category,
-        weight: weightPerItem || 1,
-        rate,
-        total
-      };
-    });
+    let scrapItems;
+
+    if (isNegotiableOrder) {
+      // Model B: Negotiable items
+      scrapItems = selectedCategories.map((cat) => {
+        const category = mapCategoryToBackend(cat);
+        return {
+          category,
+          name: cat.name, // Original name (e.g., Computer Items)
+          pricingType: 'negotiable',
+          weight: 0,
+          rate: 0,
+          total: 0,
+          itemCondition: weightData?.itemCondition || 'average',
+          expectedPrice: weightData?.expectedPrice || null
+        };
+      });
+    } else {
+      // Model A: kg_based items (existing logic, untouched)
+      scrapItems = selectedCategories.map((cat) => {
+        const category = mapCategoryToBackend(cat);
+        const rate = cat.price || marketPrices[cat.name] || 0;
+        const total = weightPerItem * rate;
+        return {
+          category,
+          name: cat.name, // Original name
+          pricingType: 'kg_based',
+          weight: weightPerItem || 1,
+          rate,
+          total
+        };
+      });
+    }
 
     const images = uploadedImages.map((img) => ({
       url: img.url || img.preview,
@@ -269,7 +311,8 @@ const PriceConfirmationPage = () => {
       pickupAddress,
       images,
       notes,
-      quantityType: weightData?.quantityType || 'small'
+      quantityType: weightData?.quantityType || 'small',
+      isNegotiated: isNegotiableOrder
     };
 
     try {
@@ -403,20 +446,44 @@ const PriceConfirmationPage = () => {
             </div>
           )}
 
-          {/* Weight */}
+          {/* Weight or Condition (depends on pricing type) */}
           {weightData && (
             <div className="mb-4">
-              <p className="text-xs md:text-sm mb-1" style={{ color: '#718096' }}>
-                {getTranslatedText("Weight:")}
-              </p>
-              <p className="text-base md:text-lg font-semibold" style={{ color: '#2d3748' }}>
-                {weightData.weight} {getTranslatedText("kg")}
-                {weightData.mode === 'auto' && (
-                  <span className="text-xs md:text-sm ml-2" style={{ color: '#718096' }}>
-                    {getTranslatedText("(Auto-detected)")}
-                  </span>
-                )}
-              </p>
+              {weightData.pricingType === 'negotiable' ? (
+                <>
+                  <p className="text-xs md:text-sm mb-1" style={{ color: '#718096' }}>
+                    {getTranslatedText("Condition:")}
+                  </p>
+                  <p className="text-base md:text-lg font-semibold capitalize" style={{ color: '#2d3748' }}>
+                    {weightData.itemCondition === 'good' ? '✅ ' : weightData.itemCondition === 'average' ? '⚠️ ' : '🔧 '}
+                    {getTranslatedText(weightData.itemCondition === 'good' ? 'Good' : weightData.itemCondition === 'average' ? 'Average' : 'Damaged')}
+                  </p>
+                  {weightData.expectedPrice && (
+                    <div className="mt-2">
+                      <p className="text-xs md:text-sm mb-1" style={{ color: '#718096' }}>
+                        {getTranslatedText("Expected Price:")}
+                      </p>
+                      <p className="text-base md:text-lg font-semibold" style={{ color: '#38bdf8' }}>
+                        ₹{weightData.expectedPrice}
+                      </p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="text-xs md:text-sm mb-1" style={{ color: '#718096' }}>
+                    {getTranslatedText("Weight:")}
+                  </p>
+                  <p className="text-base md:text-lg font-semibold" style={{ color: '#2d3748' }}>
+                    {weightData.weight} {getTranslatedText("kg")}
+                    {weightData.mode === 'auto' && (
+                      <span className="text-xs md:text-sm ml-2" style={{ color: '#718096' }}>
+                        {getTranslatedText("(Auto-detected)")}
+                      </span>
+                    )}
+                  </p>
+                </>
+              )}
             </div>
           )}
 
@@ -437,44 +504,68 @@ const PriceConfirmationPage = () => {
             </div>
           )}
 
-          {/* Price Breakdown */}
-          <div className="mb-4 pb-4 border-b" style={{ borderColor: 'rgba(100, 148, 110, 0.2)' }}>
-            <p className="text-xs md:text-sm mb-2" style={{ color: '#718096' }}>
-              {getTranslatedText("Price Breakdown:")}
-            </p>
-            {selectedCategories.map((cat) => (
-              <div key={cat.id} className="flex justify-between items-center mb-1">
-                <span className="text-xs md:text-sm" style={{ color: '#2d3748' }}>
-                  {getTranslatedText(cat.name)}
-                </span>
-                <span className="text-xs md:text-sm font-medium" style={{ color: '#38bdf8' }}>
-                  {(() => {
-                    const info = marketPrices[cat.name];
-                    if (info && (info.minPrice || info.maxPrice)) {
-                      return `₹${info.minPrice || info.pricePerKg} - ₹${info.maxPrice || info.pricePerKg}`;
-                    }
-                    const price = info?.pricePerKg || cat.price || 0;
-                    return `₹${price}`;
-                  })()}/{getTranslatedText("kg")}
-                </span>
+          {/* Price Breakdown or Negotiation Info */}
+          {weightData?.pricingType === 'negotiable' ? (
+            <div className="mb-4 pb-4 border-b" style={{ borderColor: 'rgba(100, 148, 110, 0.2)' }}>
+              <div className="flex items-center gap-2 px-4 py-3 rounded-xl"
+                style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)' }}
+              >
+                <span className="text-xl">🤝</span>
+                <div>
+                  <p className="text-sm font-bold" style={{ color: '#b45309' }}>
+                    {getTranslatedText("Negotiation Required")}
+                  </p>
+                  <p className="text-xs" style={{ color: '#92400e' }}>
+                    {getTranslatedText("Vendor will decide")}
+                  </p>
+                </div>
               </div>
-            ))}
-          </div>
-
-          {/* Total Estimated Payout */}
-          <div className="pt-4">
-            <p className="text-xs md:text-sm mb-2" style={{ color: '#718096' }}>
-              {getTranslatedText("Estimated Payout:")}
-            </p>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl md:text-4xl font-bold" style={{ color: '#38bdf8' }}>
-                ₹{estimatedPayout.toFixed(0)}
-              </span>
-              <span className="text-sm md:text-base" style={{ color: '#718096' }}>
-                {getTranslatedText("for")} {weightData?.weight || 0} {getTranslatedText("kg")}
-              </span>
             </div>
-          </div>
+          ) : (
+            <>
+              <div className="mb-4 pb-4 border-b" style={{ borderColor: 'rgba(100, 148, 110, 0.2)' }}>
+                <p className="text-xs md:text-sm mb-2" style={{ color: '#718096' }}>
+                  {getTranslatedText("Price Breakdown:")}
+                </p>
+                {selectedCategories.map((cat) => (
+                  <div key={cat.id} className="flex justify-between items-center mb-1">
+                    <span className="text-xs md:text-sm" style={{ color: '#2d3748' }}>
+                      {getTranslatedText(cat.name)}
+                    </span>
+                    <span className="text-xs md:text-sm font-medium" style={{ color: '#38bdf8' }}>
+                      {(() => {
+                        const info = marketPrices[cat.name];
+                        if (info && (info.minPrice || info.maxPrice)) {
+                          return `₹${info.minPrice || info.pricePerKg} - ₹${info.maxPrice || info.pricePerKg}`;
+                        }
+                        const price = info?.pricePerKg || cat.price || 0;
+                        return `₹${price}`;
+                      })()}/{getTranslatedText("kg")}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Total Estimated Payout */}
+              <div className="pt-4">
+                <p className="text-xs md:text-sm mb-2" style={{ color: '#718096' }}>
+                  {getTranslatedText("Estimated Payout:")}
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl md:text-4xl font-bold" style={{ color: '#38bdf8' }}>
+                    {weightData?.pricingType === 'negotiable'
+                      ? (weightData.expectedPrice ? `₹${weightData.expectedPrice}` : getTranslatedText('Negotiable'))
+                      : `₹${estimatedPayout.toFixed(0)}`}
+                  </span>
+                  <span className="text-sm md:text-base" style={{ color: '#718096' }}>
+                    {weightData?.pricingType === 'negotiable'
+                      ? (weightData.expectedPrice ? `(${getTranslatedText('Expected')})` : getTranslatedText('Quote Pending'))
+                      : `${getTranslatedText("for")} ${weightData?.weight || 0} ${getTranslatedText("kg")}`}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
         </motion.div>
 
         {/* Additional Options */}
@@ -706,7 +797,10 @@ const PriceConfirmationPage = () => {
               }
             }}
           >
-            {getTranslatedText("Apply for Pickup -")} ₹{estimatedPayout.toFixed(0)}
+            {weightData?.pricingType === 'negotiable'
+              ? getTranslatedText("Apply for Pickup")
+              : `${getTranslatedText("Apply for Pickup -")} ₹${estimatedPayout.toFixed(0)}`
+            }
           </motion.button>
         )}
         <p className="text-xs md:text-sm text-center mt-3" style={{ color: '#718096' }}>

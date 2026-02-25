@@ -330,8 +330,8 @@ const AddressInputPage = () => {
                     <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                             <span style={{ color: '#718096' }}>{getTranslatedText("Categories:")}</span>
-                            <span className="font-semibold" style={{ color: '#2d3748' }}>
-                                {selectedCategories.length} {getTranslatedText("selected")}
+                            <span className="font-semibold text-right" style={{ color: '#2d3748', maxWidth: '70%' }}>
+                                {selectedCategories.map(cat => getTranslatedText(cat.name)).join(', ')}
                             </span>
                         </div>
                         <div className="flex justify-between text-sm">

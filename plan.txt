@@ -1,0 +1,385 @@
+ Junkar - Client Requirements Analysis & Implementation Plan (Hindi)
+Client ki voice conversation aur text notes ka pura analysis karke, project ke current state ke saath comparison kiya gaya hai.
+
+✅ 1) COMPLETELY DONE (Puri Tarah Se Ban Chuka Hai)
+1.1 Categories System (Seller ke liye listing)
+Feature	Status	Details
+E-waste / Computer / Motherboard	✅ Done	e_waste category + subcategories define hain 
+constants.js
+ mein
+Scrap Iron Items	✅ Done	scrap_iron category available
+Metal Items	✅ Done	metal category available
+Raddi, Bottle, Craft	✅ Done	raddi + paper categories available
+Furniture Items	✅ Done	furniture category, negotiable pricing
+Vehicle Scraps	✅ Done	vehicle_scrap category, negotiable pricing
+Plastic Items	✅ Done	plastic category available
+Home Appliances	✅ Done	home_appliance category, negotiable pricing
+"Other" category	✅ Done	Custom name input modal + name field in scrapItems
+Dynamic Category (Admin se create)	✅ Done	
+PriceFeedEditor.jsx
+ mein Admin koi bhi category bana sakta hai
+Category Images	✅ Done	Static images + Admin upload support
+1.2 Subscription Model
+Feature	Status	Details
+Subscription Plans	✅ Done	
+SubscriptionPlan.js
+ model, admin create/manage karta hai
+Payment Integration (Razorpay)	✅ Done	
+SubscriptionPlanPage.jsx
+ scrapper side
+Auto Renew	✅ Done	autoRenew field in Scrapper schema
+Subscription Management (Admin)	✅ Done	
+SubscriptionManagement.jsx
+ + 
+SubscriptionPlanManagement.jsx
+1.3 Rating System (1-5 Star)
+Feature	Status	Details
+1-5 Star Rating	✅ Done	
+Review.js
+ model, min:1 max:5
+Rating Breakdown (5/4/3/2/1)	✅ Done	Scrapper schema mein rating.breakdown
+Average Rating Calculation	✅ Done	
+calculateAverageRating
+ static method
+Tags (punctual, friendly, etc.)	✅ Done	8 predefined tags in Review schema
+Review moderation (Admin)	✅ Done	approve/reject/flag methods
+1.4 Refer and Earn
+Feature	Status	Details
+Referral Code Generation	✅ Done	USER-XXXXXX / SCRAP-XXXXXX format
+Referral Tracking	✅ Done	
+Referral.js
+, 
+ReferralSetting.js
+ models
+Signup Bonus	✅ Done	processSignupBonus function
+Referral in Registration	✅ Done	User aur Scrapper dono mein referral code field
+Points System	✅ Done	Wallet balance aur referral points
+Campaign & Tier Management	✅ Done	Admin panel mein CampaignManagement, TierManagement
+1.5 Rate List
+Feature	Status	Details
+Scrap Rate List	✅ Done	
+PriceListPage.jsx
+ user ke liye, 
+PriceFeedEditor.jsx
+ admin ke liye
+Price Range (Min-Max)	✅ Done	
+minPrice
+, maxPrice fields in Price model
+1.6 Chat System
+Feature	Status	Details
+User-Scrapper Chat	✅ Done	
+ChatPage.jsx
+ user & scrapper dono side
+Chat List	✅ Done	
+ChatListPage.jsx
+1.7 OTP Login (Simple Login)
+Feature	Status	Details
+OTP based login	✅ Done	User & Scrapper dono mein OTP flow implement
+Remember Me	✅ Done	
+ScrapperLogin.jsx
+ mein option hai
+1.8 Order Management
+Feature	Status	Details
+Order Create/Accept/Complete	✅ Done	Full flow with status tracking
+Payment on spot (Cash/Online)	✅ Done	dealType: ['Cash', 'Online']
+Order Images	✅ Done	images field in Order schema
+Pickup Time Slot	✅ Done	pickupSlot field with day/date/slot
+1.9 Wallet System
+Feature	Status	Details
+User Wallet	✅ Done	
+UserWallet.jsx
+, balance tracking
+Scrapper Wallet	✅ Done	
+ScrapperWallet.jsx
+, earnings + withdrawal
+Transaction History	✅ Done	
+WalletTransaction.js
+ model
+1.10 Help & Support
+Feature	Status	Details
+Support Ticket System	✅ Done	
+HelpSupport.jsx
+ user & scrapper, Admin management
+1.11 KYC Basic
+Feature	Status	Details
+Aadhaar Upload	✅ Done	kyc.aadhaarPhotoUrl
+KYC Status (pending/verified/rejected)	✅ Done	Full flow with admin verification
+Admin KYC Queue	✅ Done	
+KYCQueue.jsx
+, 
+KYCDetailModal.jsx
+1.12 Lead Forward (Bulk Deal)
+Feature	Status	Details
+Forward to Big Scrapper	✅ Done	forwardedBy field in Order, 
+forwardToBigScrapper
+ API
+1.13 Leaderboard
+Feature	Status	Details
+Referral Leaderboard	✅ Done	
+LeaderboardPage.jsx
+, 
+LeaderboardManagement.jsx
+1.14 Banner Management
+Feature	Status	Details
+Admin Banner CRUD	✅ Done	
+BannerManagement.jsx
+🟡 2) PARTIALLY DONE (Aadha Kaam Hua Hai)
+2.1 ⚠️ Scrapper Types / Business Categories
+Client Chahta Hai:
+
+फेरी वाला (Feri Wala) — Aadhaar mandatory, kahi se bhi maal le sakta hai
+दुकानदार (Shopkeeper) — Shop photo mandatory, GST optional, Udyam Aadhaar se bhi registration
+Wholesaler / Industrial / Trader — GST mandatory (ya verify manually by admin)
+Current Implementation:
+
+Sirf small aur big types hain (
+Scrapper.js
+ line 37-41)
+big type mein business location hai, lekin koi GST/shop photo requirement nahi
+Kya Baki Hai:
+
+scrapperType ko expand karna: ['feri_wala', 'dukandaar', 'wholesaler']
+Registration form mein teeno options dikhana
+Dukandaar: Shop photo upload mandatory banana
+Wholesaler: GST number field add karna (optional but preferred)
+Admin manually verify kar sake agar GST nahi hai
+Category-wise deals dikhana (wholesaler ko sirf wholesale deals dikhein)
+2.2 ⚠️ Vehicle Options
+Client Chahta Hai: Cycle, Thela, E-Rickshaw, Tempo
+
+Current Implementation:
+
+Vehicle types: ['bike', 'auto', 'truck'] — sirf teen options hain
+Vehicle number aur capacity fields hain
+Kya Baki Hai:
+
+Vehicle enum expand karna: ['cycle', 'thela', 'e_rickshaw', 'tempo', 'bike', 'auto', 'truck']
+Registration form mein updated vehicle options dikhana
+Vehicle photo field add karna (profile mein gaadi ki photo)
+2.3 ⚠️ KYC — Scrapper Selfie & Photo Match
+Client Chahta Hai:
+
+Scrapper ki selfie leni chahiye
+Photo aur Aadhaar match hona chahiye
+Update karne par bhi dono match ho
+Current Implementation:
+
+kyc.selfieUrl field already hai Scrapper model mein
+KYCUploadPage.jsx
+ mein selfie upload ka UI hai
+Lekin photo-aadhaar match verification logic nahi hai
+Kya Baki Hai:
+
+Admin KYC review mein dono photos side-by-side dikhana (comparison view)
+Agar scrapper photo update karta hai toh re-verification trigger hona chahiye
+2.4 ⚠️ Pahla Mahina Free (Subscription)
+Client Chahta Hai: Pehla mahina free, dusre mahine se payment
+
+Current Implementation:
+
+Subscription model hai (
+SubscriptionPlan.js
+) with trial period
+trialDays field hai plan mein
+Lekin registration ke baad auto-trial activate ka logic verify karna hoga
+Kya Baki Hai:
+
+Verify ki registration ke baad pehla plan auto-activate hota hai ya nahi
+Agar nahi hota, toh auto trial logic add karna
+2.5 ⚠️ Location Change Restriction
+Client Chahta Hai:
+
+Feri wala location change kar sake
+Shopkeeper / Wholesaler ka address fix rahe, change karna ho toh request kare
+Ya unit add kare toh naya address dal sake
+Current Implementation:
+
+liveLocation (real-time) aur businessLocation (fixed) dono fields hain Scrapper model mein
+Lekin koi restriction logic nahi hai ki shopkeeper location change na kar sake
+Kya Baki Hai:
+
+scrapperType ke basis par location edit restrict karna
+"Request Address Change" feature for shopkeeper/wholesaler
+Multiple units/branch support (address list)
+2.6 ⚠️ Scrapper Profile mein Vehicle Photo
+Client Chahta Hai: Profile mein gaadi ki photo aur naam dikhna chahiye
+
+Current Implementation:
+
+Profile page (
+ScrapperProfile.jsx
+) mein vehicleInfo dikhta hai (type/number/capacity)
+Profile edit modal hai (
+EditProfileModal.jsx
+)
+Lekin vehicle photo upload ka field nahi hai
+Kya Baki Hai:
+
+vehiclePhotoUrl field add karna Scrapper model mein
+Profile edit mein vehicle photo upload option
+2.7 ⚠️ Unique ID per User
+Client Chahta Hai: Har user ki ek unique ID ho
+
+Current Implementation:
+
+MongoDB _id toh automatically unique hai
+referralCode bhi unique hai (USER-XXXXXX format)
+Kya Baki Hai:
+
+Ek readable display ID banana (e.g., JNKR-12345) jo user ko dikhaya ja sake
+Profile section mein dikhana
+❌ 3) NOT DONE YET (Abhi Tak Nahi Bana)
+3.1 🔴 Report Fake Lead
+Client Chahta Hai:
+
+Agar customer galat saamaan ya galat pata daale, toh partner "Report Fake Lead" kar sake
+Kya Banana Hai:
+
+Order detail page mein "Report Fake Lead" button add karna (Scrapper side)
+Fake lead ka reason select karne ka dropdown (wrong item, wrong address, not available, etc.)
+Admin panel mein reported leads ki list dikhana
+FraudDetection.jsx
+ already hai admin mein — usko connect karna
+3.2 🔴 "Jodhpur Trusted Scrap Dealer" Badge
+Client Chahta Hai:
+
+Rating 4.5 se upar wale partner ko badge milega
+Kya Banana Hai:
+
+Scrapper model mein badges array field add karna
+Backend logic: jab rating 4.5+ ho toh auto-assign "Trusted Dealer" badge
+Scrapper profile aur listing mein badge dikhana
+Badge icon/UI design karna
+3.3 🔴 "Top Buyer of the Month" Title
+Client Chahta Hai:
+
+Mahine ke end mein sabse zyada rating wale partner ko app mein hi title mile
+Kya Banana Hai:
+
+Monthly cron job / scheduled task jo top performer calculate kare
+Dashboard par "Top Buyer of the Month" banner/card dikhana
+History mein previous winners bhi dikhana
+Admin panel mein manage karne ka option
+3.4 🔴 Device Login Restriction (Single Device)
+Client Chahta Hai:
+
+Ek number ek hi device mein chale
+Dusre mein login karte hi pehle se log out ho jaye
+Kya Banana Hai:
+
+deviceId / sessionToken field add karna User aur Scrapper model mein
+Login ke time device fingerprint store karna
+JWT token validation mein device check add karna
+Purani device ke token ko invalidate karna
+3.5 🔴 Contact List — Vendor Discovery (WhatsApp-style)
+Client Chahta Hai:
+
+Partner ko dikhe ki uski contact list mein kaun kaun se vendor Junkar pe hain
+Vendor lead forward bhi kar sake
+Kya Banana Hai:
+
+Phone contacts read karne ka permission lena (mobile app feature, PWA mein limited)
+Backend API jo phone numbers match kare registered scrappers se
+"Junkar pe hain" list dikhana with forward lead option
+Note: Ye feature mobile app (React Native / Flutter) mein zyada effective hoga
+3.6 🔴 Donation Feature
+Client Chahta Hai:
+
+Seller chahe toh kabad donate kar sake
+Khareedaar ke parivaar ki taraf se "Thank You" message mile
+Kya Banana Hai:
+
+Order create flow mein "Donate" option add karna
+isDonation: Boolean field Order schema mein
+Donation ke baad auto thank-you message/notification
+Donation history tracking
+3.7 🔴 Nature / Environment Message + Social Sharing
+Client Chahta Hai:
+
+Kabad bechne ke baad message: "Aapne pradushan kam karne mein itni madad ki"
+Instagram / WhatsApp pe JUNKAR logo/frame ke saath share
+Kya Banana Hai:
+
+Order complete hone par environment impact calculate karna (CO₂ saved, trees saved, etc.)
+Sharable card/image generate karna with Junkar branding
+Share buttons (WhatsApp, Instagram)
+generate_image tool se dynamic card template banana
+3.8 🔴 State / City Filter
+Client Chahta Hai:
+
+State aur city ke hisaab se data dekhne ka option
+Kya Banana Hai:
+
+Admin dashboard mein state/city filter add karna
+Reports mein location-based filtering
+Price feed mein region-wise support (partially exists with regionCode)
+3.9 🔴 GST Field for Wholesaler / Industrial
+Client Chahta Hai:
+
+Wholesaler / Industrial ke liye GST mandatory (ya manual admin verification)
+Kya Banana Hai:
+
+kyc.gstNumber aur kyc.gstCertificateUrl fields add karna Scrapper model mein
+Registration form mein wholesaler select karne par GST field show karna
+Admin verification flow mein GST check
+3.10 🔴 Scrapper apni Category Choose kare (Kisme Deal karta hai)
+Client Chahta Hai:
+
+Industrial scrapper register kare toh bataye ki wo kisme deal karta hai (e.g., sirf PAT bottle)
+Kya Banana Hai:
+
+dealCategories field add karna Scrapper model mein (array of categories)
+Registration/profile mein category selection
+Orders filter karna unki categories ke basis par
+3.11 🔴 Location Sharing (Live — Request Based)
+Client Chahta Hai:
+
+Seller aur partner ek dusre ki location dekh sakein (request bhejne par)
+Kya Banana Hai:
+
+Order accept hone ke baad live location sharing enable karna
+Map integration (Google Maps already loaded hai)
+"Share My Location" toggle button
+Real-time location update via socket/polling
+3.12 🔴 iOS Deployment Preparation
+Client Chahta Hai:
+
+iOS ke liye procedure abhi se shuru karna
+Kya Banana Hai:
+
+Apple Developer Account setup
+PWA → Native wrapper (Capacitor/Cordova) ya React Native port
+App Store listing and review process
+Push notification certificate for iOS
+🗺️ Implementation Priority (Step-by-Step Kya Karein)
+Sabse pehle woh features jo revenue aur core flow ko impact karein, phir user experience, phir advanced features.
+
+Phase 1 — Core Business Logic (1-2 Weeks)
+Scrapper Types Expand karna (Feri Wala / Dukandaar / Wholesaler)
+Vehicle Options Update karna (cycle, thela, e-rickshaw, tempo add karna)
+GST Field Scrapper KYC mein add karna (wholesaler ke liye)
+Shop Photo mandatory dukandaar ke liye
+Pahla Mahina Free subscription logic verify/fix karna
+Phase 2 — Trust & Safety (1 Week)
+Report Fake Lead button + admin panel integration
+Device Login Restriction (single device per number)
+Scrapper Selfie verification improve karna (admin comparison view)
+Trusted Dealer Badge (4.5+ rating auto-badge)
+Phase 3 — User Engagement (1 Week)
+Top Buyer of the Month title system
+Scrapper Deal Categories selection (kisme deal karta hai)
+Unique Display ID for users
+Vehicle Photo upload in profile
+Phase 4 — Social & Growth (1-2 Weeks)
+Donation Feature add karna
+Nature Message + Social Share (environment impact card)
+State/City Filter admin dashboard mein
+Contact List / Vendor Discovery (phone contacts matching)
+Location Sharing (live location tracking)
+Phase 5 — Platform Expansion (2-3 Weeks)
+Location Change Restriction (feri-wala vs shopkeeper logic)
+iOS Deployment preparation
+kabadiwalanearme.com website se Junkar link/redirect setup
+IMPORTANT
+
+Ye plan sirf analysis aur planning hai. Code mein koi changes nahi kiye gaye hain. User ke approve karne ke baad, phase-wise implementation shuru hoga.

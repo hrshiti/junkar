@@ -27,7 +27,13 @@ export const SCRAP_CATEGORIES = {
   PAPER: 'paper',
   ELECTRONIC: 'electronic',
   GLASS: 'glass',
-  OTHER: 'other'
+  OTHER: 'other',
+  E_WASTE: 'e_waste',
+  SCRAP_IRON: 'scrap_iron',
+  RADDI: 'raddi',
+  FURNITURE: 'furniture',
+  VEHICLE_SCRAP: 'vehicle_scrap',
+  HOME_APPLIANCE: 'home_appliance'
 };
 
 export const FILE_TYPES = {
@@ -49,6 +55,25 @@ export const ORDER_TYPES = {
 export const PRICE_TYPES = {
   MATERIAL: 'material'
 };
+
+export const PRICING_TYPES = {
+  KG_BASED: 'kg_based',
+  NEGOTIABLE: 'negotiable'
+};
+
+export const ITEM_CONDITIONS = {
+  GOOD: 'good',
+  AVERAGE: 'average',
+  DAMAGED: 'damaged'
+};
+
+// Categories that default to negotiable pricing (per-item, not per-kg)
+export const NEGOTIABLE_CATEGORIES = [
+  'furniture',
+  'vehicle_scrap',
+  'home_appliance',
+  'e_waste'
+];
 
 export const NOTIFICATION_TYPES = {
   ORDER_UPDATE: 'order_update',

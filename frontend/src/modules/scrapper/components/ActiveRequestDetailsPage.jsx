@@ -197,7 +197,10 @@ const ActiveRequestDetailsPage = () => {
             // Backend fields
             assignmentStatus: order.assignmentStatus,
             acceptedAt: order.acceptedAt,
-            notes: order.notes || ''
+            notes: order.notes || '',
+            // Model B fields
+            isNegotiated: order.isNegotiated || false,
+            scrapItems: order.scrapItems || [],
           };
 
           setRequestData(mappedRequest);
@@ -297,7 +300,10 @@ const ActiveRequestDetailsPage = () => {
               : `₹${order.totalAmount || 0}`,
             status: order.status,
             paymentStatus: order.paymentStatus,
-            notes: order.notes || ''
+            notes: order.notes || '',
+            // Model B fields
+            isNegotiated: order.isNegotiated || false,
+            scrapItems: order.scrapItems || [],
           };
 
           setRequestData(mappedRequest);
@@ -1018,6 +1024,31 @@ const ActiveRequestDetailsPage = () => {
                       <p className="text-sm font-bold text-sky-600">{requestData.estimatedEarnings}</p>
                     </div>
                   </div>
+
+                  {/* Negotiable Order Info (Model B) */}
+                  {(requestData.isNegotiated || requestData.scrapItems?.some(item => item.pricingType === 'negotiable')) && (
+                    <div className="mt-2 p-3 rounded-xl border" style={{ backgroundColor: 'rgba(245, 158, 11, 0.08)', borderColor: 'rgba(245, 158, 11, 0.3)' }}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg">🤝</span>
+                        <span className="text-xs font-bold" style={{ color: '#b45309' }}>Negotiation Required</span>
+                      </div>
+                      {requestData.scrapItems?.filter(item => item.pricingType === 'negotiable').map((item, idx) => (
+                        <div key={idx} className="text-xs space-y-1" style={{ color: '#4a5568' }}>
+                          {item.itemCondition && (
+                            <p>
+                              <span className="font-semibold">Condition:</span>{' '}
+                              {item.itemCondition === 'good' ? '✅ Good' : item.itemCondition === 'average' ? '⚠️ Average' : '🔧 Damaged'}
+                            </p>
+                          )}
+                          {item.expectedPrice && (
+                            <p>
+                              <span className="font-semibold">Expected Price:</span> ₹{item.expectedPrice}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   {renderPickupSlot()}
 

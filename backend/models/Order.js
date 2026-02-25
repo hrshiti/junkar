@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { ORDER_STATUS, PAYMENT_STATUS, SCRAP_CATEGORIES } from '../config/constants.js';
+import { ORDER_STATUS, PAYMENT_STATUS, SCRAP_CATEGORIES, PRICING_TYPES, ITEM_CONDITIONS } from '../config/constants.js';
 
 const orderSchema = new mongoose.Schema({
   user: {
@@ -33,30 +33,44 @@ const orderSchema = new mongoose.Schema({
       enum: Object.values(SCRAP_CATEGORIES),
       required: true
     },
+    name: String,
+    pricingType: {
+      type: String,
+      enum: Object.values(PRICING_TYPES),
+      default: PRICING_TYPES.KG_BASED
+    },
     weight: {
       type: Number,
-      required: true,
+      default: 0,
       min: 0
     },
     rate: {
       type: Number,
-      required: true,
+      default: 0,
       min: 0
     },
     total: {
       type: Number,
-      required: true,
+      default: 0,
+      min: 0
+    },
+    itemCondition: {
+      type: String,
+      enum: [...Object.values(ITEM_CONDITIONS), null],
+      default: null
+    },
+    expectedPrice: {
+      type: Number,
+      default: null,
       min: 0
     }
   }],
   totalWeight: {
     type: Number,
-    required: true,
     default: 0
   },
   totalAmount: {
     type: Number,
-    required: true,
     default: 0
   },
   status: {

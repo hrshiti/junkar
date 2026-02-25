@@ -29,7 +29,8 @@ class OrderService {
             serviceDetails,
             serviceFee,
             quantityType,
-            targetScrapperIds
+            targetScrapperIds,
+            isNegotiated
         } = orderData;
 
         // Wallet validation for cleaning service
@@ -74,6 +75,7 @@ class OrderService {
         if (orderType) orderPayload.orderType = orderType;
         if (serviceDetails) orderPayload.serviceDetails = serviceDetails;
         if (serviceFee) orderPayload.serviceFee = serviceFee;
+        if (isNegotiated) orderPayload.isNegotiated = true;
 
         // Determine quantity type
         if (quantityType) {

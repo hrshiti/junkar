@@ -8,6 +8,13 @@ import aluminiumImage from "../assets/Aluminium.jpg";
 import scrapImage2 from "../assets/scrab.png";
 import electronicImage from "../assets/electronicbg.png";
 
+// Specific Category Images
+import vehicleImage from "../assets/vehicle_categry/4 wheecle.jpg";
+import furnitureImage from "../assets/wooditem/chair.jpg";
+import homeApplianceImage from "../assets/home_appliance/washing_machine.jpg";
+import eWasteImage from "../assets/e-waste/motherboar.png";
+import paperImage from "../assets/scrap5.png";
+
 import { useState, useEffect } from "react";
 import { publicAPI } from "../../shared/utils/api";
 import { getEffectivePriceFeed, PRICE_TYPES } from "../../shared/utils/priceFeedUtils";
@@ -45,16 +52,21 @@ const AllCategoriesPage = () => {
     if (
       lowerName.includes("paper") ||
       lowerName.includes("book") ||
-      lowerName.includes("cardboard")
+      lowerName.includes("cardboard") ||
+      lowerName.includes("raddi")
     )
       return scrapImage2;
     if (
       lowerName.includes("electron") ||
       lowerName.includes("device") ||
       lowerName.includes("computer") ||
-      lowerName.includes("phone")
+      lowerName.includes("phone") ||
+      lowerName.includes("e-waste")
     )
-      return electronicImage;
+      return eWasteImage;
+    if (lowerName.includes("appliance")) return homeApplianceImage;
+    if (lowerName.includes("furniture")) return furnitureImage;
+    if (lowerName.includes("vehicle")) return vehicleImage;
     return scrapImage2; // Default fallback
   };
 
@@ -62,32 +74,43 @@ const AllCategoriesPage = () => {
     const fetchCategories = async () => {
       setLoading(true);
       try {
-        const response = await publicAPI.getPrices();
-        if (
-          response.success &&
-          response.data?.prices &&
-          response.data.prices.length > 0
-        ) {
-          const allItems = response.data.prices;
+        // 1. Get default categories
+        const defaultFeed = getEffectivePriceFeed();
+        const defaultMapped = defaultFeed.map((item) => ({
+          name: item.category,
+          image: getCategoryImage(item.category),
+          type: PRICE_TYPES.MATERIAL,
+        }));
 
-          // Filter Materials
-          const materialsRaw = allItems.filter(
+        // 2. Try to get categories from API
+        const response = await publicAPI.getPrices();
+        let finalCategories = [...defaultMapped];
+
+        if (response.success && response.data?.prices) {
+          const apiItems = response.data.prices.filter(
             (p) => !p.type || p.type === PRICE_TYPES.MATERIAL
           );
 
-          const mappedMaterials = materialsRaw.map((price) => ({
+          const apiMapped = apiItems.map((price) => ({
             name: price.category,
             image: price.image || getCategoryImage(price.category),
-            // We don't translate here to avoid dependency loops
             type: PRICE_TYPES.MATERIAL,
           }));
-          setCategories(mappedMaterials);
-        } else {
-          throw new Error("No prices from API");
+
+          // 3. Merge: prefer API data for items that exist in both
+          const merged = [...apiMapped];
+          defaultMapped.forEach((def) => {
+            if (!merged.find((m) => m.name.toLowerCase() === def.name.toLowerCase())) {
+              merged.push(def);
+            }
+          });
+          finalCategories = merged;
         }
+
+        setCategories(finalCategories);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
-        // Fallback
+        // Fallback to defaults only
         const defaultFeed = getEffectivePriceFeed();
         const mapped = defaultFeed.map((item) => ({
           name: item.category,
@@ -103,8 +126,8 @@ const AllCategoriesPage = () => {
   }, []); // Removed dependency to prevent re-fetching loop
 
   const handleCategoryClick = (item) => {
-    // Navigate to scrap flow
-    navigate("/add-scrap/weight", {
+    // Navigate to category selection to handle subcategories
+    navigate("/add-scrap/category", {
       state: { preSelectedCategory: item.name },
     });
   };

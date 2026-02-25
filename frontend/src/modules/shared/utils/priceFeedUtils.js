@@ -6,6 +6,17 @@ export const PRICE_TYPES = {
   MATERIAL: 'material'
 };
 
+// Categories that use negotiable (per-item) pricing instead of kg-based
+export const NEGOTIABLE_CATEGORIES = [
+  'furniture', 'vehicle_scrap', 'home_appliance', 'e_waste'
+];
+
+export const ITEM_CONDITIONS = [
+  { value: 'good', label: 'Good Condition' },
+  { value: 'average', label: 'Average Condition' },
+  { value: 'damaged', label: 'Damaged / Broken' }
+];
+
 export const DEFAULT_PRICE_FEED = [
   { id: 'price_001', category: 'Plastic', pricePerKg: 45, region: 'All', type: PRICE_TYPES.MATERIAL },
   { id: 'price_002', category: 'Metal', pricePerKg: 180, region: 'All', type: PRICE_TYPES.MATERIAL },
@@ -14,7 +25,13 @@ export const DEFAULT_PRICE_FEED = [
   { id: 'price_005', category: 'Copper', pricePerKg: 650, region: 'All', type: PRICE_TYPES.MATERIAL },
   { id: 'price_006', category: 'Aluminium', pricePerKg: 180, region: 'All', type: PRICE_TYPES.MATERIAL },
   { id: 'price_007', category: 'Steel', pricePerKg: 35, region: 'All', type: PRICE_TYPES.MATERIAL },
-  { id: 'price_008', category: 'Brass', pricePerKg: 420, region: 'All', type: PRICE_TYPES.MATERIAL }
+  { id: 'price_008', category: 'Brass', pricePerKg: 420, region: 'All', type: PRICE_TYPES.MATERIAL },
+  { id: 'price_009', category: 'E-Waste', pricePerKg: 100, region: 'All', type: PRICE_TYPES.MATERIAL },
+  { id: 'price_010', category: 'Scrap Iron', pricePerKg: 30, region: 'All', type: PRICE_TYPES.MATERIAL },
+  { id: 'price_011', category: 'Raddi', pricePerKg: 8, region: 'All', type: PRICE_TYPES.MATERIAL },
+  { id: 'price_012', category: 'Furniture', pricePerKg: 15, region: 'All', type: PRICE_TYPES.MATERIAL },
+  { id: 'price_013', category: 'Vehicle Scrap', pricePerKg: 25, region: 'All', type: PRICE_TYPES.MATERIAL },
+  { id: 'price_014', category: 'Home Appliance', pricePerKg: 20, region: 'All', type: PRICE_TYPES.MATERIAL }
 ];
 
 const STORAGE_KEY = 'adminPriceFeed';

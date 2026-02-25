@@ -20,6 +20,13 @@ import aluminiumImage from "../assets/Aluminium.jpg";
 import brassImage from "../assets/brass.jpg";
 import steelImage from "../assets/metal2.jpg";
 
+// Specific Category Images
+import vehicleImage from "../assets/vehicle_categry/4 wheecle.jpg";
+import furnitureImage from "../assets/wooditem/chair.jpg";
+import homeApplianceImage from "../assets/home_appliance/washing_machine.jpg";
+import eWasteImage from "../assets/e-waste/motherboar.png";
+import paperImage from "../assets/scrap5.png";
+
 import BannerSlider from "../../shared/components/BannerSlider";
 import { publicAPI } from "../../shared/utils/api";
 import { getEffectivePriceFeed, PRICE_TYPES } from "../../shared/utils/priceFeedUtils";
@@ -91,16 +98,21 @@ const Hero = () => {
     if (
       lowerName.includes("paper") ||
       lowerName.includes("book") ||
-      lowerName.includes("cardboard")
+      lowerName.includes("cardboard") ||
+      lowerName.includes("raddi")
     )
       return scrapImage2;
     if (
       lowerName.includes("electron") ||
       lowerName.includes("device") ||
       lowerName.includes("computer") ||
-      lowerName.includes("phone")
+      lowerName.includes("phone") ||
+      lowerName.includes("e-waste")
     )
-      return electronicImage;
+      return eWasteImage;
+    if (lowerName.includes("appliance")) return homeApplianceImage;
+    if (lowerName.includes("furniture")) return furnitureImage;
+    if (lowerName.includes("vehicle")) return vehicleImage;
     return scrapImage2; // Default fallback
   };
 
@@ -118,6 +130,12 @@ const Hero = () => {
         { name: 'Aluminium', originalName: 'Aluminium', image: aluminiumImage },
         { name: 'Steel', originalName: 'Steel', image: steelImage },
         { name: 'Brass', originalName: 'Brass', image: brassImage },
+        { name: 'E-Waste', originalName: 'E-Waste', image: eWasteImage },
+        { name: 'Scrap Iron', originalName: 'Scrap Iron', image: steelImage },
+        { name: 'Raddi', originalName: 'Raddi', image: scrapImage2 },
+        { name: 'Furniture', originalName: 'Furniture', image: furnitureImage },
+        { name: 'Vehicle Scrap', originalName: 'Vehicle Scrap', image: vehicleImage },
+        { name: 'Home Appliance', originalName: 'Home Appliance', image: homeApplianceImage },
       ];
 
       try {
@@ -217,7 +235,12 @@ const Hero = () => {
     "E-Waste",
     "Batteries",
     "Cables",
-    "Book Now"
+    "Book Now",
+    "Scrap Iron",
+    "Raddi",
+    "Furniture",
+    "Vehicle Scrap",
+    "Home Appliance"
   ]);
 
   useEffect(() => {
@@ -754,8 +777,8 @@ const Hero = () => {
                       key={category.name}
                       className="cursor-pointer flex flex-col items-center flex-shrink-0 w-[30%] md:w-32"
                       onClick={() =>
-                        navigate("/add-scrap/weight", {
-                          state: { preSelectedCategory: category.name },
+                        navigate("/add-scrap/category", {
+                          state: { preSelectedCategory: category.originalName },
                         })
                       }>
                       {/* Circular Image Container */}

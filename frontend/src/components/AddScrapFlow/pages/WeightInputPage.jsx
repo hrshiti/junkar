@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import { ITEM_CONDITIONS, NEGOTIABLE_CATEGORIES } from '../../../modules/shared/utils/priceFeedUtils';
 
 const WeightInputPage = () => {
   const staticTexts = [
@@ -31,20 +32,49 @@ const WeightInputPage = () => {
     "Aluminium",
     "Steel",
     "Brass",
-    "Note: The final payout will be determined by the scrap partner after inspection based on the material’s quality, quantity, and condition. The displayed amount is only an estimate and may vary."
+    "Note: The final payout will be determined by the scrap partner after inspection based on the material's quality, quantity, and condition. The displayed amount is only an estimate and may vary.",
+    // Model B texts
+    "Item Details",
+    "Item Condition",
+    "Select condition...",
+    "Good Condition",
+    "Average Condition",
+    "Damaged / Broken",
+    "Expected Price (₹)",
+    "Enter your expected price",
+    "Optional - Vendor will send you a quote",
+    "Note: For this category, the final price will be decided by the vendor after inspection. Upload clear images for an accurate quote.",
+    "Select item condition to continue",
+    "Continue",
+    "Negotiable",
+    "Price decided by vendor",
+    "Household",
+    "Commercial",
+    "Small Quantity",
+    "Bulk (>100kg)",
+    "Request Type:"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
   const location = useLocation();
   const [uploadedImages, setUploadedImages] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [weightMode, setWeightMode] = useState('manual'); // 'auto' or 'manual'
+  const [weightMode, setWeightMode] = useState('manual');
   const [autoDetectedWeight, setAutoDetectedWeight] = useState(null);
   const [manualWeight, setManualWeight] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [marketPrices, setMarketPrices] = useState({});
   const [estimatedPayout, setEstimatedPayout] = useState(0);
-  const [requestType, setRequestType] = useState('household'); // 'household' (small) or 'commercial' (large)
+  const [requestType, setRequestType] = useState('household');
+
+  // Model B states
+  const [itemCondition, setItemCondition] = useState('');
+  const [expectedPrice, setExpectedPrice] = useState('');
+
+  // Determine pricing type from selected categories
+  const isNegotiable = selectedCategories.some(cat =>
+    cat.pricingType === 'negotiable' || NEGOTIABLE_CATEGORIES.includes(cat.id)
+  );
 
   // Load data from sessionStorage
   useEffect(() => {
@@ -73,14 +103,12 @@ const WeightInputPage = () => {
         const response = await publicAPI.getPrices();
 
         if (response.success && response.data?.prices) {
-          // Convert prices array to object for easy lookup
           const pricesMap = {};
           response.data.prices.forEach(price => {
             pricesMap[price.category] = price.pricePerKg;
           });
           setMarketPrices(pricesMap);
         } else {
-          // Fallback to default prices if API fails
           setMarketPrices({
             'Plastic': 45,
             'Metal': 180,
@@ -94,7 +122,6 @@ const WeightInputPage = () => {
         }
       } catch (error) {
         console.error('Failed to fetch market prices:', error);
-        // Fallback to default prices
         setMarketPrices({
           'Plastic': 45,
           'Metal': 180,
@@ -111,33 +138,17 @@ const WeightInputPage = () => {
     fetchMarketPrices();
   }, []);
 
-  // Auto-detect weight from images (mock API call) - HIDDEN FOR NOW
-  // useEffect(() => {
-  //   if (uploadedImages.length > 0 && weightMode === 'auto') {
-  //     setIsAnalyzing(true);
-  //     // Simulate API call for weight detection
-  //     setTimeout(() => {
-  //       // Mock: Generate random weight between 5-50 kg
-  //       const detectedWeight = (Math.random() * 45 + 5).toFixed(1);
-  //       setAutoDetectedWeight(parseFloat(detectedWeight));
-  //       setIsAnalyzing(false);
-  //     }, 2000);
-  //   }
-  // }, [uploadedImages, weightMode]);
-
-  // Calculate estimated payout
+  // Calculate estimated payout (only for kg_based)
   useEffect(() => {
-    if (selectedCategories.length > 0) {
+    if (!isNegotiable && selectedCategories.length > 0) {
       const currentWeight = weightMode === 'auto' && autoDetectedWeight
         ? autoDetectedWeight
         : parseFloat(manualWeight) || 0;
 
       if (currentWeight > 0) {
-        // Calculate average price from selected categories
         const totalPrice = selectedCategories.reduce((sum, cat) => {
           const apiInfo = marketPrices[cat.name];
           const apiPrice = typeof apiInfo === 'object' ? apiInfo.pricePerKg : (apiInfo || 0);
-          // Use API price if available, otherwise use price from category object
           const priceToUse = apiPrice || cat.price || 0;
           return sum + priceToUse;
         }, 0);
@@ -148,10 +159,9 @@ const WeightInputPage = () => {
         setEstimatedPayout(0);
       }
     }
-  }, [selectedCategories, weightMode, autoDetectedWeight, manualWeight, marketPrices]);
+  }, [selectedCategories, weightMode, autoDetectedWeight, manualWeight, marketPrices, isNegotiable]);
 
   const handleWeightChange = (value) => {
-    // Only allow numbers and one decimal point
     const regex = /^\d*\.?\d*$/;
     if (regex.test(value) || value === '') {
       setManualWeight(value);
@@ -163,21 +173,48 @@ const WeightInputPage = () => {
     setWeightMode('manual');
   };
 
-  const handleContinue = () => {
-    const finalWeight = weightMode === 'auto' && autoDetectedWeight
-      ? autoDetectedWeight
-      : parseFloat(manualWeight);
+  const handleExpectedPriceChange = (value) => {
+    const regex = /^\d*$/;
+    if (regex.test(value) || value === '') {
+      setExpectedPrice(value);
+    }
+  };
 
-    if (finalWeight > 0) {
+  const handleContinue = () => {
+    if (isNegotiable) {
+      // Model B: condition is required
+      if (!itemCondition) return;
+
       const weightData = {
-        weight: finalWeight,
-        mode: weightMode,
-        autoDetected: autoDetectedWeight,
-        estimatedPayout: estimatedPayout,
-        quantityType: requestType === 'commercial' ? 'large' : 'small'
+        weight: 0,
+        mode: 'negotiable',
+        estimatedPayout: 0,
+        quantityType: requestType === 'commercial' ? 'large' : 'small',
+        // Model B specific data
+        pricingType: 'negotiable',
+        itemCondition,
+        expectedPrice: expectedPrice ? parseFloat(expectedPrice) : null,
       };
       sessionStorage.setItem('weightData', JSON.stringify(weightData));
       navigate('/add-scrap/upload');
+    } else {
+      // Model A: weight is required
+      const finalWeight = weightMode === 'auto' && autoDetectedWeight
+        ? autoDetectedWeight
+        : parseFloat(manualWeight);
+
+      if (finalWeight > 0) {
+        const weightData = {
+          weight: finalWeight,
+          mode: weightMode,
+          autoDetected: autoDetectedWeight,
+          estimatedPayout: estimatedPayout,
+          quantityType: requestType === 'commercial' ? 'large' : 'small',
+          pricingType: 'kg_based',
+        };
+        sessionStorage.setItem('weightData', JSON.stringify(weightData));
+        navigate('/add-scrap/upload');
+      }
     }
   };
 
@@ -186,6 +223,9 @@ const WeightInputPage = () => {
     : parseFloat(manualWeight) || 0;
 
   const quickWeights = [5, 10, 15, 20, 25, 30];
+
+  // Can continue? depends on model
+  const canContinue = isNegotiable ? !!itemCondition : currentWeight > 0;
 
   return (
     <motion.div
@@ -211,9 +251,9 @@ const WeightInputPage = () => {
           className="text-lg md:text-2xl font-bold"
           style={{ color: '#2d3748' }}
         >
-          {getTranslatedText("Enter Weight")}
+          {isNegotiable ? getTranslatedText("Item Details") : getTranslatedText("Enter Weight")}
         </h2>
-        <div className="w-10"></div> {/* Spacer for centering */}
+        <div className="w-10"></div>
       </div>
 
       {/* Progress Indicator */}
@@ -268,97 +308,6 @@ const WeightInputPage = () => {
           </motion.div>
         )}
 
-        {/* Weight Mode Toggle - Auto Detect Hidden */}
-        {/* <div className="mb-4 md:mb-6">
-          <div className="flex gap-2 p-1 rounded-xl" style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}>
-            <button
-              onClick={() => setWeightMode('auto')}
-              className={`flex-1 py-2 md:py-3 rounded-lg text-sm md:text-base font-semibold transition-all duration-300 ${
-                weightMode === 'auto' ? 'shadow-md' : ''
-              }`}
-              style={{
-                backgroundColor: weightMode === 'auto' ? '#38bdf8' : 'transparent',
-                color: weightMode === 'auto' ? '#ffffff' : '#2d3748'
-              }}
-            >
-              {getTranslatedText("Auto Detect")}
-            </button>
-            <button
-              onClick={() => setWeightMode('manual')}
-              className={`flex-1 py-2 md:py-3 rounded-lg text-sm md:text-base font-semibold transition-all duration-300 ${
-                weightMode === 'manual' ? 'shadow-md' : ''
-              }`}
-              style={{
-                backgroundColor: weightMode === 'manual' ? '#38bdf8' : 'transparent',
-                color: weightMode === 'manual' ? '#ffffff' : '#2d3748'
-              }}
-            >
-              {getTranslatedText("Manual Input")}
-            </button>
-          </div>
-        </div> */}
-
-        {/* Auto Detection Section - HIDDEN */}
-        {/* {weightMode === 'auto' && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-4 md:mb-6"
-          >
-            {isAnalyzing ? (
-              <div className="rounded-xl p-6 md:p-8 text-center" style={{ backgroundColor: '#ffffff' }}>
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                  className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 rounded-full border-4"
-                  style={{ borderTopColor: '#38bdf8', borderRightColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: 'transparent' }}
-                />
-                <p className="text-sm md:text-base font-semibold mb-2" style={{ color: '#2d3748' }}>
-                  {getTranslatedText("Analyzing Images...")}
-                </p>
-                <p className="text-xs md:text-sm" style={{ color: '#718096' }}>
-                  {getTranslatedText("Detecting weight from your images")}
-                </p>
-              </div>
-            ) : autoDetectedWeight ? (
-              <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: '#ffffff' }}>
-                <p className="text-xs md:text-sm mb-2" style={{ color: '#718096' }}>
-                  {getTranslatedText("Auto-detected Weight")}
-                </p>
-                <div className="flex items-center gap-3">
-                  <div className="flex-1">
-                    <div className="text-3xl md:text-4xl font-bold mb-1" style={{ color: '#38bdf8' }}>
-                      {autoDetectedWeight} <span className="text-lg md:text-xl" style={{ color: '#718096' }}>{getTranslatedText("kg")}</span>
-                    </div>
-                    <p className="text-xs md:text-sm" style={{ color: '#718096' }}>
-                      {getTranslatedText("Based on image analysis")}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setWeightMode('manual')}
-                    className="px-3 py-2 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium border-2 transition-all duration-300"
-                    style={{ borderColor: '#38bdf8', color: '#38bdf8' }}
-                    onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = 'rgba(100, 148, 110, 0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = 'transparent';
-                    }}
-                  >
-                    {getTranslatedText("Edit")}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-xl p-6 md:p-8 text-center" style={{ backgroundColor: '#ffffff' }}>
-                <p className="text-sm md:text-base" style={{ color: '#718096' }}>
-                  {getTranslatedText('Click "Auto Detect" to analyze your images')}
-                </p>
-              </div>
-            )}
-          </motion.div>
-        )} */}
-
         {/* Request Type Selection */}
         <div className="mb-6">
           <p className="text-xs md:text-sm mb-2" style={{ color: '#718096' }}>
@@ -391,128 +340,234 @@ const WeightInputPage = () => {
           </div>
         </div>
 
-        {/* Manual Input Section */}
-        {(
+        {/* ============== MODEL B: NEGOTIABLE FORM ============== */}
+        {isNegotiable ? (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 md:mb-6"
+            className="space-y-4"
           >
-            <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: '#ffffff' }}>
-              <label className="block text-xs md:text-sm font-semibold mb-2" style={{ color: '#2d3748' }}>
-                {getTranslatedText("Enter Weight (kg)")}
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={manualWeight}
-                  onChange={(e) => handleWeightChange(e.target.value)}
-                  placeholder="0.0"
-                  className="w-full py-3 md:py-4 px-4 text-2xl md:text-3xl font-bold rounded-lg border-2 focus:outline-none focus:ring-2 transition-all"
-                  style={{
-                    borderColor: manualWeight ? '#38bdf8' : 'rgba(100, 148, 110, 0.3)',
-                    color: '#2d3748',
-                    backgroundColor: '#f9f9f9'
-                  }}
-                />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-lg md:text-xl font-semibold" style={{ color: '#718096' }}>
-                  {getTranslatedText("kg")}
-                </span>
+            {/* Negotiable Badge */}
+            <div className="flex items-center gap-2 px-4 py-3 rounded-xl"
+              style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)' }}
+            >
+              <span className="text-xl">🤝</span>
+              <div>
+                <p className="text-sm font-bold" style={{ color: '#b45309' }}>
+                  {getTranslatedText("Negotiable")}
+                </p>
+                <p className="text-xs" style={{ color: '#92400e' }}>
+                  {getTranslatedText("Price decided by vendor")}
+                </p>
               </div>
             </div>
 
-            {/* Quick Weight Buttons */}
-            <div className="mt-4">
-              <p className="text-xs md:text-sm mb-2" style={{ color: '#718096' }}>
-                {getTranslatedText("Quick Select:")}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {quickWeights.map((weight) => (
+            {/* Item Condition Dropdown */}
+            <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: '#ffffff' }}>
+              <label className="block text-xs md:text-sm font-semibold mb-3" style={{ color: '#2d3748' }}>
+                {getTranslatedText("Item Condition")} <span style={{ color: '#e53e3e' }}>*</span>
+              </label>
+              <div className="flex flex-col gap-2">
+                {ITEM_CONDITIONS.map((condition) => (
                   <button
-                    key={weight}
-                    onClick={() => handleQuickWeight(weight)}
-                    className="px-3 py-2 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-semibold transition-all duration-300 border-2"
-                    style={{
-                      borderColor: manualWeight === weight.toString() ? '#38bdf8' : 'rgba(100, 148, 110, 0.3)',
-                      backgroundColor: manualWeight === weight.toString() ? '#38bdf8' : 'transparent',
-                      color: manualWeight === weight.toString() ? '#ffffff' : '#38bdf8'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (manualWeight !== weight.toString()) {
-                        e.target.style.backgroundColor = 'rgba(100, 148, 110, 0.1)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (manualWeight !== weight.toString()) {
-                        e.target.style.backgroundColor = 'transparent';
-                      }
-                    }}
+                    key={condition.value}
+                    onClick={() => setItemCondition(condition.value)}
+                    className={`w-full p-3 rounded-xl border-2 text-left transition-all flex items-center gap-3 ${itemCondition === condition.value
+                        ? 'border-sky-500 bg-sky-50 shadow-md'
+                        : 'border-slate-200 bg-white hover:border-sky-200'
+                      }`}
                   >
-                    {weight} {getTranslatedText("kg")}
+                    <span className="text-xl">
+                      {condition.value === 'good' ? '✅' : condition.value === 'average' ? '⚠️' : '🔧'}
+                    </span>
+                    <span className={`text-sm font-semibold ${itemCondition === condition.value ? 'text-sky-700' : 'text-slate-600'
+                      }`}>
+                      {getTranslatedText(condition.label)}
+                    </span>
+                    {itemCondition === condition.value && (
+                      <svg className="ml-auto w-5 h-5 text-sky-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    )}
                   </button>
                 ))}
               </div>
             </div>
-          </motion.div>
-        )}
 
-        {/* Price Calculation Preview */}
-        {currentWeight > 0 && selectedCategories.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="rounded-xl p-4 md:p-6 mb-4 md:mb-6"
-            style={{ backgroundColor: 'rgba(100, 148, 110, 0.1)' }}
-          >
-            <p className="text-xs md:text-sm mb-3" style={{ color: '#718096' }}>
-              {getTranslatedText("Estimated Payout")}
-            </p>
-            <div className="flex items-baseline gap-2 mb-2">
-              <span className="text-2xl md:text-3xl font-bold" style={{ color: '#38bdf8' }}>
-                ₹{estimatedPayout.toFixed(0)}
-              </span>
-              <span className="text-sm md:text-base" style={{ color: '#718096' }}>
-                {getTranslatedText("for")} {currentWeight} {getTranslatedText("kg")}
-              </span>
+            {/* Expected Price Input (Optional) */}
+            <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: '#ffffff' }}>
+              <label className="block text-xs md:text-sm font-semibold mb-2" style={{ color: '#2d3748' }}>
+                {getTranslatedText("Expected Price (₹)")}
+              </label>
+              <p className="text-xs mb-3" style={{ color: '#a0aec0' }}>
+                {getTranslatedText("Optional - Vendor will send you a quote")}
+              </p>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg md:text-xl font-semibold" style={{ color: '#718096' }}>₹</span>
+                <input
+                  type="text"
+                  value={expectedPrice}
+                  onChange={(e) => handleExpectedPriceChange(e.target.value)}
+                  placeholder="0"
+                  className="w-full py-3 md:py-4 pl-10 pr-4 text-2xl md:text-3xl font-bold rounded-lg border-2 focus:outline-none focus:ring-2 transition-all"
+                  style={{
+                    borderColor: expectedPrice ? '#38bdf8' : 'rgba(100, 148, 110, 0.3)',
+                    color: '#2d3748',
+                    backgroundColor: '#f9f9f9'
+                  }}
+                />
+              </div>
             </div>
-            <div className="text-xs md:text-sm" style={{ color: '#718096' }}>
-              {selectedCategories.map((cat, idx) => {
-                const apiInfo = marketPrices[cat.name];
-                const price = (typeof apiInfo === 'object' ? apiInfo.pricePerKg : (apiInfo || 0)) || cat.price || 0;
-                return (
-                  <span key={cat.id}>
-                    {getTranslatedText(cat.name)} @ ₹{price}/{getTranslatedText("kg")}
-                    {idx < selectedCategories.length - 1 && ' • '}
+
+            {/* Negotiable Note */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 rounded-xl border-l-4 shadow-sm"
+              style={{
+                backgroundColor: 'rgba(245, 158, 11, 0.08)',
+                borderColor: '#f59e0b'
+              }}
+            >
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                  </svg>
+                </div>
+                <p className="text-xs md:text-sm leading-relaxed" style={{ color: '#4a5568', fontWeight: '500' }}>
+                  <span style={{ color: '#b45309', fontWeight: '700' }}>Note:</span> {getTranslatedText("Note: For this category, the final price will be decided by the vendor after inspection. Upload clear images for an accurate quote.")}
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : (
+          /* ============== MODEL A: KG-BASED FORM (EXISTING) ============== */
+          <>
+            {/* Manual Input Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4 md:mb-6"
+            >
+              <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: '#ffffff' }}>
+                <label className="block text-xs md:text-sm font-semibold mb-2" style={{ color: '#2d3748' }}>
+                  {getTranslatedText("Enter Weight (kg)")}
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={manualWeight}
+                    onChange={(e) => handleWeightChange(e.target.value)}
+                    placeholder="0.0"
+                    className="w-full py-3 md:py-4 px-4 text-2xl md:text-3xl font-bold rounded-lg border-2 focus:outline-none focus:ring-2 transition-all"
+                    style={{
+                      borderColor: manualWeight ? '#38bdf8' : 'rgba(100, 148, 110, 0.3)',
+                      color: '#2d3748',
+                      backgroundColor: '#f9f9f9'
+                    }}
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-lg md:text-xl font-semibold" style={{ color: '#718096' }}>
+                    {getTranslatedText("kg")}
                   </span>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
+                </div>
+              </div>
 
-        {/* Disclaimer Note */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-4 p-4 rounded-xl border-l-4 shadow-sm"
-          style={{
-            backgroundColor: 'rgba(56, 189, 248, 0.08)',
-            borderColor: '#38bdf8'
-          }}
-        >
-          <div className="flex gap-3">
-            <div className="flex-shrink-0 mt-0.5">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-              </svg>
-            </div>
-            <p className="text-xs md:text-sm leading-relaxed" style={{ color: '#4a5568', fontWeight: '500' }}>
-              <span style={{ color: '#38bdf8', fontWeight: '700' }}>Note:</span> {getTranslatedText("Note: The final payout will be determined by the scrap partner after inspection based on the material’s quality, quantity, and condition. The displayed amount is only an estimate and may vary.")}
-            </p>
-          </div>
-        </motion.div>
+              {/* Quick Weight Buttons */}
+              <div className="mt-4">
+                <p className="text-xs md:text-sm mb-2" style={{ color: '#718096' }}>
+                  {getTranslatedText("Quick Select:")}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {quickWeights.map((weight) => (
+                    <button
+                      key={weight}
+                      onClick={() => handleQuickWeight(weight)}
+                      className="px-3 py-2 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-semibold transition-all duration-300 border-2"
+                      style={{
+                        borderColor: manualWeight === weight.toString() ? '#38bdf8' : 'rgba(100, 148, 110, 0.3)',
+                        backgroundColor: manualWeight === weight.toString() ? '#38bdf8' : 'transparent',
+                        color: manualWeight === weight.toString() ? '#ffffff' : '#38bdf8'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (manualWeight !== weight.toString()) {
+                          e.target.style.backgroundColor = 'rgba(100, 148, 110, 0.1)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (manualWeight !== weight.toString()) {
+                          e.target.style.backgroundColor = 'transparent';
+                        }
+                      }}
+                    >
+                      {weight} {getTranslatedText("kg")}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Price Calculation Preview */}
+            {currentWeight > 0 && selectedCategories.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-xl p-4 md:p-6 mb-4 md:mb-6"
+                style={{ backgroundColor: 'rgba(100, 148, 110, 0.1)' }}
+              >
+                <p className="text-xs md:text-sm mb-3" style={{ color: '#718096' }}>
+                  {getTranslatedText("Estimated Payout")}
+                </p>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className="text-2xl md:text-3xl font-bold" style={{ color: '#38bdf8' }}>
+                    ₹{estimatedPayout.toFixed(0)}
+                  </span>
+                  <span className="text-sm md:text-base" style={{ color: '#718096' }}>
+                    {getTranslatedText("for")} {currentWeight} {getTranslatedText("kg")}
+                  </span>
+                </div>
+                <div className="text-xs md:text-sm" style={{ color: '#718096' }}>
+                  {selectedCategories.map((cat, idx) => {
+                    const apiInfo = marketPrices[cat.name];
+                    const price = (typeof apiInfo === 'object' ? apiInfo.pricePerKg : (apiInfo || 0)) || cat.price || 0;
+                    return (
+                      <span key={cat.id}>
+                        {getTranslatedText(cat.name)} @ ₹{price}/{getTranslatedText("kg")}
+                        {idx < selectedCategories.length - 1 && ' • '}
+                      </span>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Disclaimer Note */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 p-4 rounded-xl border-l-4 shadow-sm"
+              style={{
+                backgroundColor: 'rgba(56, 189, 248, 0.08)',
+                borderColor: '#38bdf8'
+              }}
+            >
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                  </svg>
+                </div>
+                <p className="text-xs md:text-sm leading-relaxed" style={{ color: '#4a5568', fontWeight: '500' }}>
+                  <span style={{ color: '#38bdf8', fontWeight: '700' }}>Note:</span> {getTranslatedText("Note: The final payout will be determined by the scrap partner after inspection based on the material's quality, quantity, and condition. The displayed amount is only an estimate and may vary.")}
+                </p>
+              </div>
+            </motion.div>
+          </>
+        )}
       </div>
 
       {/* Footer with Continue Button - Fixed on Mobile */}
@@ -523,7 +578,7 @@ const WeightInputPage = () => {
           backgroundColor: '#f4ebe2'
         }}
       >
-        {currentWeight > 0 ? (
+        {canContinue ? (
           <motion.button
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -534,14 +589,20 @@ const WeightInputPage = () => {
             onMouseEnter={(e) => e.target.style.backgroundColor = '#5a8263'}
             onMouseLeave={(e) => e.target.style.backgroundColor = '#38bdf8'}
           >
-            {getTranslatedText("Continue with")} {currentWeight} {getTranslatedText("kg")}
+            {isNegotiable
+              ? getTranslatedText("Continue")
+              : `${getTranslatedText("Continue with")} ${currentWeight} ${getTranslatedText("kg")}`
+            }
           </motion.button>
         ) : (
           <p
             className="text-xs md:text-sm text-center"
             style={{ color: '#718096' }}
           >
-            {getTranslatedText("Enter weight to continue")}
+            {isNegotiable
+              ? getTranslatedText("Select item condition to continue")
+              : getTranslatedText("Enter weight to continue")
+            }
           </p>
         )}
       </div>
@@ -550,5 +611,3 @@ const WeightInputPage = () => {
 };
 
 export default WeightInputPage;
-
-

@@ -612,7 +612,7 @@ const RequestStatusPage = () => {
                     : (requestData.categories
                       ? requestData.categories.map(c => getTranslatedText(c.name)).join(', ')
                       : (requestData.scrapItems
-                        ? requestData.scrapItems.map(item => getTranslatedText(item.category.charAt(0).toUpperCase() + item.category.slice(1))).join(', ')
+                        ? requestData.scrapItems.map(item => getTranslatedText(item.name || item.category.charAt(0).toUpperCase() + item.category.slice(1))).join(', ')
                         : '')
                     )
                   }
@@ -649,12 +649,23 @@ const RequestStatusPage = () => {
                   <span className="text-base md:text-lg font-bold" style={{ color: '#2d3748' }}>
                     {requestData.orderType === 'cleaning_service' ? getTranslatedText('Service Fee:') : getTranslatedText('Estimated Payout:')}
                   </span>
-                  <span className="text-xl md:text-2xl font-bold" style={{ color: '#38bdf8' }}>
-                    {requestData.orderType === 'cleaning_service'
-                      ? `₹${requestData.serviceFee || 0}`
-                      : `₹${requestData.totalAmount?.toFixed(0) || 0}`
-                    }
-                  </span>
+                  <div className="flex flex-col items-end">
+                    <span className="text-xl md:text-2xl font-bold" style={{ color: '#38bdf8' }}>
+                      {requestData.orderType === 'cleaning_service'
+                        ? `₹${requestData.serviceFee || 0}`
+                        : (requestData.isNegotiated || requestData.scrapItems?.some(i => i.pricingType === 'negotiable')
+                          ? (requestData.scrapItems?.[0]?.expectedPrice
+                            ? `₹${requestData.scrapItems[0].expectedPrice}`
+                            : getTranslatedText('Negotiable'))
+                          : `₹${requestData.totalAmount?.toFixed(0) || 0}`)
+                      }
+                    </span>
+                    {(requestData.isNegotiated || requestData.scrapItems?.some(i => i.pricingType === 'negotiable')) && (
+                      <span className="text-[10px] md:text-xs font-medium" style={{ color: '#718096' }}>
+                        {requestData.scrapItems?.[0]?.expectedPrice ? `(${getTranslatedText('Expected')})` : getTranslatedText('Vendor will quote')}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
