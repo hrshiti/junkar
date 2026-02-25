@@ -9,7 +9,7 @@ import { compressImages } from '../../../modules/shared/utils/imageCompressor';
 const ImageUploadPage = () => {
   const staticTexts = [
     "Upload Scrap Images",
-    "Step 2 of 4",
+    "Step 3 of 5",
     "Selected Categories:",
     "Drag & drop images here or click to browse",
     "Choose from Gallery",
@@ -129,7 +129,7 @@ const ImageUploadPage = () => {
       }));
 
       sessionStorage.setItem('uploadedImages', JSON.stringify(imagesData));
-      navigate('/add-scrap/weight');
+      navigate('/add-scrap/address');
     } catch (error) {
       console.error('Upload failed:', error);
       if (error.status === 401) {
@@ -203,14 +203,14 @@ const ImageUploadPage = () => {
         <div className="flex items-center gap-2">
           <div className="flex-1 h-2 rounded-full" style={{ backgroundColor: 'rgba(100, 148, 110, 0.2)' }}>
             <motion.div
-              initial={{ width: '25%' }}
-              animate={{ width: '50%' }}
+              initial={{ width: '40%' }}
+              animate={{ width: '60%' }}
               transition={{ duration: 0.5 }}
               className="h-full rounded-full"
               style={{ backgroundColor: '#38bdf8' }}
             />
           </div>
-          <span className="text-xs md:text-sm" style={{ color: '#718096' }}>{getTranslatedText("Step 2 of 4")}</span>
+          <span className="text-xs md:text-sm" style={{ color: '#718096' }}>{getTranslatedText("Step 3 of 5")}</span>
         </div>
       </div>
 

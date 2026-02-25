@@ -22,7 +22,7 @@ export const getPublicPrices = asyncHandler(async (req, res) => {
         }
 
         const prices = await Price.find(filter)
-            .select('category pricePerKg price type regionCode effectiveDate updatedAt image')
+            .select('category pricePerKg price type regionCode effectiveDate updatedAt image minPrice maxPrice')
             .sort({ category: 1 });
 
         sendSuccess(res, 'Public prices retrieved successfully', { prices });

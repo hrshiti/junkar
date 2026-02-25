@@ -28,7 +28,8 @@ class OrderService {
             orderType,
             serviceDetails,
             serviceFee,
-            quantityType
+            quantityType,
+            targetScrapperIds
         } = orderData;
 
         // Wallet validation for cleaning service
@@ -62,9 +63,13 @@ class OrderService {
             pickupSlot,
             images: images || [],
             notes: notes || '',
-            assignmentStatus: 'unassigned',
+            assignmentStatus: targetScrapperIds && targetScrapperIds.length > 0 ? 'targeted' : 'unassigned',
             status: ORDER_STATUS.PENDING
         };
+
+        if (targetScrapperIds && targetScrapperIds.length > 0) {
+            orderPayload.targetedScrappers = targetScrapperIds;
+        }
 
         if (orderType) orderPayload.orderType = orderType;
         if (serviceDetails) orderPayload.serviceDetails = serviceDetails;
@@ -85,9 +90,15 @@ class OrderService {
         logger.info(`Order created: ${order._id} by user: ${userId} (Type: ${order.orderType || 'scrap'})`);
 
         // Notify scrappers asynchronously (non-blocking)
-        notificationService.notifyOnlineScrappers(order).catch(err => {
-            logger.error('Failed to notify scrappers:', err);
-        });
+        if (order.targetedScrappers && order.targetedScrappers.length > 0) {
+            notificationService.notifyTargetedScrappers(order).catch(err => {
+                logger.error('Failed to notify targeted scrappers:', err);
+            });
+        } else {
+            notificationService.notifyOnlineScrappers(order).catch(err => {
+                logger.error('Failed to notify scrappers:', err);
+            });
+        }
 
         return order;
     }
@@ -99,7 +110,18 @@ class OrderService {
      * @returns {Object} Accepted order
      */
     async acceptOrder(orderId, scrapperId) {
-        // Validate scrapper wallet balance first
+        // Find scrapper to check online status
+        const scrapper = await Scrapper.findById(scrapperId);
+        if (!scrapper) {
+            throw new Error('Scrapper profile not found');
+        }
+
+        // Only online scrappers can accept orders
+        if (!scrapper.isOnline) {
+            throw new Error('Please go online to accept this request');
+        }
+
+        // Validate scrapper wallet balance
         await walletService.validateBalance(scrapperId, 100, 'scrapper');
 
         // ATOMIC CLAIM: Only update if order is still unassigned/pending
@@ -109,6 +131,7 @@ class OrderService {
                 status: ORDER_STATUS.PENDING,
                 $or: [
                     { assignmentStatus: 'unassigned' },
+                    { assignmentStatus: 'targeted' },
                     { assignmentStatus: { $exists: false } },
                     { assignmentStatus: null }
                 ]
@@ -153,6 +176,11 @@ class OrderService {
         await order.populate('scrapper', 'name phone');
 
         logger.info(`Order ${orderId} accepted by scrapper ${scrapperId}`);
+
+        // Notify user about acceptance
+        notificationService.notifyOrderStatusChange(order, ORDER_STATUS.CONFIRMED).catch(err => {
+            logger.error('Failed to notify user about order acceptance:', err);
+        });
 
         return order;
     }
@@ -295,7 +323,8 @@ class OrderService {
         if (scrapper.scrapperType === 'big') {
             query.$or = [
                 { quantityType: 'large' },
-                { forwardedBy: { $ne: null } }
+                { forwardedBy: { $ne: null } },
+                { targetedScrappers: scrapperId }
             ];
         } else {
             query.quantityType = 'small';

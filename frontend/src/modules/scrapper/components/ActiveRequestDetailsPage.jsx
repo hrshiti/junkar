@@ -98,6 +98,8 @@ const ActiveRequestDetailsPage = () => {
   const [useWallet, setUseWallet] = useState(true);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isNegotiated, setIsNegotiated] = useState(false);
+  const [dealType, setDealType] = useState('Cash');
 
   useEffect(() => {
     const storedUser = localStorage.getItem('scrapperUser');
@@ -470,30 +472,48 @@ const ActiveRequestDetailsPage = () => {
   // Payment Logic for Scrap Sell (Scrapper Pays User)
   const processScrapPayment = async () => {
     const amount = Number(paidAmount);
+    const commission = Math.max(1, Math.round(amount * 0.01));
 
-    // 1. Check Wallet Balance
-    if (useWallet && walletBalance >= amount) {
-      // Pay via Wallet
-      try {
-        setIsProcessingPayment(true);
-        await walletService.payOrderViaWallet((requestData._id || requestData.id), amount);
-        completePaymentSuccess(amount);
-      } catch (error) {
-        alert(error.response?.data?.message || 'Wallet payment failed');
-        setIsProcessingPayment(false);
+    // Case 1: Cash Payment (No wallet transfer to user, just platform fee)
+    if (dealType === 'Cash') {
+      if (walletBalance < commission) {
+        alert(getTranslatedText("Insufficient balance for platform fee (₹{fee})", { fee: commission }));
+        return;
+      }
+      setIsProcessingPayment(true);
+      await completePaymentSuccess(amount);
+      return;
+    }
+
+    // Case 2: Wallet Payment
+    if (useWallet) {
+      if (walletBalance >= (amount + commission)) {
+        // Pay via Wallet
+        try {
+          setIsProcessingPayment(true);
+          await walletService.payOrderViaWallet((requestData._id || requestData.id), amount);
+          await completePaymentSuccess(amount);
+        } catch (error) {
+          alert(error.response?.data?.message || 'Wallet payment failed');
+          setIsProcessingPayment(false);
+        }
+      } else {
+        alert(getTranslatedText("Insufficient balance for this deal and platform fee."));
       }
     } else {
-      // 2. Pay via Razorpay
+      // Case 3: Pay via Razorpay (Online)
       try {
         setIsProcessingPayment(true);
         const res = await loadRazorpay();
         if (!res) {
           alert('Razorpay SDK failed to load');
+          setIsProcessingPayment(false);
           return;
         }
 
-        // Create Order
-        const orderData = await walletService.createRechargeOrder(amount); // Reusing logic for now
+        // Recharge wallet first (Amount + Commission to ensure success on backend)
+        const rechargeAmount = amount + commission;
+        const orderData = await walletService.createRechargeOrder(rechargeAmount);
 
         const options = {
           key: orderData.data.keyId,
@@ -507,14 +527,14 @@ const ActiveRequestDetailsPage = () => {
               // Verify and Complete
               await walletService.verifyRecharge({
                 ...response,
-                amount: amount
+                amount: rechargeAmount
               });
 
               // FIX: Now that wallet is recharged, actually PAY the order
               // This transfers from Scrapper -> User
               await walletService.payOrderViaWallet((requestData._id || requestData.id), amount);
 
-              completePaymentSuccess(amount);
+              await completePaymentSuccess(amount);
             } catch (err) {
               console.error("Payment Error:", err);
               alert(err.response?.data?.message || 'Payment processing failed. If money was deducted, it is in your wallet.');
@@ -544,7 +564,11 @@ const ActiveRequestDetailsPage = () => {
     const orderId = requestData._id || requestData.id;
     // Update order status
     try {
-      await orderAPI.updateStatus(orderId, 'in_progress', 'completed', amount);
+      await orderAPI.updateStatus(orderId, 'in_progress', 'completed', amount, {
+        isNegotiated,
+        dealType,
+        finalPrice: amount
+      });
       setPaymentStatus('completed');
       setShowPaymentInput(false);
       setIsProcessingPayment(false);
@@ -602,7 +626,9 @@ const ActiveRequestDetailsPage = () => {
         return;
       } else if (confirmAction === 'payment_cleaning') {
         // Update order status to in_progress (just in case) and paymentStatus to completed
-        const response = await orderAPI.updateStatus(orderId, 'in_progress', 'completed', Number(paidAmount));
+        const response = await orderAPI.updateStatus(orderId, 'in_progress', 'completed', Number(paidAmount), {
+          dealType: 'Cash' // Cleaning is always cash collected for now or handled separately
+        });
 
         if (response.success) {
           setPaymentStatus('completed');
@@ -812,33 +838,78 @@ const ActiveRequestDetailsPage = () => {
 
                   {/* Payment Mode Selection for Scrap Pickup - Hidden for Cleaning Service */}
                   {requestData.orderType !== 'cleaning_service' && (
-                    <div className="mb-6 p-3 rounded-xl bg-slate-50 border border-slate-200">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-slate-500 text-sm">Wallet Balance</span>
-                        <span className="text-slate-800 font-bold">₹{walletBalance}</span>
+                    <div className="mb-6 space-y-4">
+                      {/* Wallet Balance Section */}
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-slate-500 text-sm">{getTranslatedText("Wallet Balance")}</span>
+                          <span className="text-slate-800 font-bold">₹{walletBalance}</span>
+                        </div>
+
+                        {paidAmount && (() => {
+                          const amount = Number(paidAmount);
+                          const commission = Math.max(1, Math.round(amount * 0.01));
+                          const isOnlineDeal = dealType === 'Online';
+
+                          // Case 1: Wallet Payment (Amount + Commission)
+                          if (isOnlineDeal && useWallet && walletBalance < (amount + commission)) {
+                            return <p className="text-red-500 text-xs mb-2">{getTranslatedText("Insufficient Balance. Please recharge.")}</p>;
+                          }
+                          // Case 2: Cash/Online Deal (Only Commission checked from wallet)
+                          if (walletBalance < commission) {
+                            return <p className="text-red-500 text-xs mb-2">{getTranslatedText("Insufficient balance for platform fee (₹{fee})", { fee: commission })}</p>;
+                          }
+                          return null;
+                        })()}
+
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              setUseWallet(true);
+                              setDealType('Online');
+                            }}
+                            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${dealType === 'Online' && useWallet ? 'bg-sky-600 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                          >
+                            {getTranslatedText("Wallet")}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setUseWallet(false);
+                              setDealType('Online');
+                            }}
+                            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${dealType === 'Online' && !useWallet ? 'bg-sky-600 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                          >
+                            {getTranslatedText("Online")}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setDealType('Cash');
+                              setUseWallet(true); // Default to check commission from wallet
+                            }}
+                            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${dealType === 'Cash' ? 'bg-amber-500 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                          >
+                            {getTranslatedText("Cash")}
+                          </button>
+                        </div>
                       </div>
 
-                      {paidAmount && Number(paidAmount) > walletBalance && (
-                        <p className="text-red-500 text-xs mb-2">Insufficient Balance. Pay online.</p>
-                      )}
-
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setUseWallet(true)}
-                          className={`flex-1 py-2 rounded-lg text-sm transition-all ${useWallet ? 'bg-sky-600 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}
-                        >
-                          Wallet
-                        </button>
-                        <button
-                          onClick={() => setUseWallet(false)}
-                          className={`flex-1 py-2 rounded-lg text-sm transition-all ${!useWallet ? 'bg-sky-600 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}
-                        >
-                          Online
-                        </button>
+                      {/* Negotiation Checkbox */}
+                      <div className="flex items-center gap-3 p-3 rounded-xl bg-amber-50 border border-amber-100">
+                        <input
+                          type="checkbox"
+                          id="negotiated"
+                          checked={isNegotiated}
+                          onChange={(e) => setIsNegotiated(e.target.checked)}
+                          className="w-5 h-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                        />
+                        <label htmlFor="negotiated" className="text-sm font-semibold text-amber-900">
+                          {getTranslatedText("Price Negotiated with User?")}
+                        </label>
                       </div>
                     </div>
                   )}
 
+                  {/* Amount Input */}
                   <div className="mb-4">
                     <label className="block text-sm font-semibold mb-2" style={{ color: '#475569' }}>
                       {getTranslatedText("Amount (₹)")}
@@ -888,6 +959,7 @@ const ActiveRequestDetailsPage = () => {
                     ))}
                   </div>
 
+                  {/* Final Confirm Button */}
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -910,7 +982,7 @@ const ActiveRequestDetailsPage = () => {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </motion.div >
         ) : (
           <>
             {/* Request Details & Contact Info - Bottom Slide (when payment not pending) */}

@@ -13,10 +13,12 @@ import scrapImage from "../assets/truck.png";
 import scrapImage2 from "../assets/scrab.png";
 import scrapImage3 from "../assets/scrap5.png";
 import plasticImage from "../assets/plastic.jpg";
-import metalImage from "../assets/metal2.jpg";
+import metalImage from "../assets/metal1.jpg";
 import copperImage from "../assets/metal.jpg";
 import electronicImage from "../assets/electronicbg.png";
 import aluminiumImage from "../assets/Aluminium.jpg";
+import brassImage from "../assets/brass.jpg";
+import steelImage from "../assets/metal2.jpg";
 
 import BannerSlider from "../../shared/components/BannerSlider";
 import { publicAPI } from "../../shared/utils/api";
@@ -105,35 +107,36 @@ const Hero = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       setCategoriesLoading(true);
+
+      // 1. Fixed 8 static categories
+      const staticCategories = [
+        { name: 'Plastic', originalName: 'Plastic', image: plasticImage },
+        { name: 'Metal', originalName: 'Metal', image: metalImage },
+        { name: 'Paper', originalName: 'Paper', image: scrapImage2 },
+        { name: 'Electronics', originalName: 'Electronics', image: electronicImage },
+        { name: 'Copper', originalName: 'Copper', image: copperImage },
+        { name: 'Aluminium', originalName: 'Aluminium', image: aluminiumImage },
+        { name: 'Steel', originalName: 'Steel', image: steelImage },
+        { name: 'Brass', originalName: 'Brass', image: brassImage },
+      ];
+
       try {
         const response = await publicAPI.getPrices();
-        if (response.success && response.data?.prices?.length > 0) {
-          // Filter out services, keep only materials
-          const materials = response.data.prices.filter(p => !p.type || p.type === PRICE_TYPES.MATERIAL);
-
-          // Map to display format and limit to 6 for the home screen
-          const mapped = materials.slice(0, 6).map(p => ({
-            name: p.category,
-            originalName: p.category,
-            image: p.image || getCategoryImage(p.category)
-          }));
-
-          setRawCategories(mapped);
-          setActiveCategories(mapped);
+        if (response.success && response.data?.prices) {
+          // If we had logic to update icons/names from API we could do it here
+          // but user wants static cards with only prices being dynamic elsewhere.
+          // For the Hero categories (which don't show prices directly in the circle), 
+          // we just ensure they exist.
+          setRawCategories(staticCategories);
+          setActiveCategories(staticCategories);
         } else {
-          throw new Error("No prices found");
+          setRawCategories(staticCategories);
+          setActiveCategories(staticCategories);
         }
       } catch (error) {
         console.error("Failed to fetch categories:", error);
-        // Fallback to default
-        const feed = getEffectivePriceFeed();
-        const mapped = feed.slice(0, 6).map(item => ({
-          name: item.category,
-          originalName: item.category,
-          image: getCategoryImage(item.category)
-        }));
-        setRawCategories(mapped);
-        setActiveCategories(mapped);
+        setRawCategories(staticCategories);
+        setActiveCategories(staticCategories);
       } finally {
         setCategoriesLoading(false);
       }
@@ -669,12 +672,12 @@ const Hero = () => {
                   <div className="absolute bottom-0 right-0 w-56 h-56 bg-white opacity-40 rounded-full translate-x-1/3 translate-y-1/3"></div>
                   <div className="absolute top-1/2 right-1/4 w-40 h-40 bg-white opacity-35 rounded-full"></div>
                   <div className="absolute bottom-1/3 left-1/3 w-36 h-36 bg-white opacity-35 rounded-full"></div>
-                  
+
                   {/* Recycling symbols pattern - much darker and prominent */}
                   <div className="absolute top-1/4 left-1/4 text-white text-7xl opacity-60 font-bold">♻</div>
                   <div className="absolute bottom-1/4 right-1/3 text-white text-6xl opacity-60 font-bold">♻</div>
                   <div className="absolute top-1/2 left-1/2 text-white text-5xl opacity-50 font-bold">♻</div>
-                  
+
                   {/* Geometric shapes - highly prominent */}
                   <div className="absolute top-1/3 right-1/2 w-32 h-32 bg-white opacity-50 rotate-45"></div>
                   <div className="absolute bottom-1/2 left-1/4 w-28 h-28 bg-white opacity-45 rotate-12"></div>
@@ -683,19 +686,19 @@ const Hero = () => {
                 <div className="relative z-10">
                   {/* Banner Text */}
                   <div className="mb-4 text-center md:text-left">
-                    <h2 
+                    <h2
                       className="text-xl md:text-2xl lg:text-3xl font-bold mb-2 flex items-center justify-center md:justify-start gap-2"
-                      style={{ 
+                      style={{
                         color: "#1e3a8a",
-                        textShadow: "1px 1px 2px rgba(255, 255, 255, 0.5)" 
+                        textShadow: "1px 1px 2px rgba(255, 255, 255, 0.5)"
                       }}>
                       Turn Your Trash into Cash!
                     </h2>
-                    <p 
+                    <p
                       className="text-sm md:text-base lg:text-lg"
-                      style={{ 
+                      style={{
                         color: "#1e40af",
-                        textShadow: "1px 1px 2px rgba(255, 255, 255, 0.3)" 
+                        textShadow: "1px 1px 2px rgba(255, 255, 255, 0.3)"
                       }}>
                       Get the best rates for your scrap at your doorstep
                     </p>
@@ -751,7 +754,7 @@ const Hero = () => {
                       key={category.name}
                       className="cursor-pointer flex flex-col items-center flex-shrink-0 w-[30%] md:w-32"
                       onClick={() =>
-                        navigate("/add-scrap/category", {
+                        navigate("/add-scrap/weight", {
                           state: { preSelectedCategory: category.name },
                         })
                       }>

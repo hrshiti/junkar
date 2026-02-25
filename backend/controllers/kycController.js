@@ -10,7 +10,7 @@ import logger from '../utils/logger.js';
 export const submitKyc = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { aadhaarNumber } = req.body;
+    const { aadhaarNumber, panNumber } = req.body;
 
     logger.info(`Starting KYC submission for user: ${userId}`);
     logger.info(`Files received: ${req.files ? Object.keys(req.files).join(',') : 'None'}`);
@@ -42,21 +42,23 @@ export const submitKyc = async (req, res) => {
     const files = req.files || {};
     const aadhaarFile = files['aadhaar'] ? files['aadhaar'][0] : null;
     const selfieFile = files['selfie'] ? files['selfie'][0] : null;
-    const licenseFile = files['license'] ? files['license'][0] : null;
+    const panFile = files['pan'] ? files['pan'][0] : null;
+    const shopLicenseFile = files['shopLicense'] ? files['shopLicense'][0] : null;
 
-    if (!aadhaarFile || !selfieFile) {
-      return sendError(res, 'Aadhaar and Selfie photos are required.', 400);
+    if (!aadhaarFile || !selfieFile || !panFile || !shopLicenseFile) {
+      return sendError(res, 'Aadhaar, Selfie, PAN and Shop License photos are required.', 400);
     }
 
-    if (!aadhaarNumber) {
-      return sendError(res, 'Aadhaar number is required.', 400);
+    if (!aadhaarNumber || !panNumber) {
+      return sendError(res, 'Aadhaar number and PAN number are required.', 400);
     }
 
     // 3. Upload to Cloudinary
     // We update fields one by one to ensure we have the URLs
     let aadhaarUrl = scrapper.kyc?.aadhaarPhotoUrl;
     let selfieUrl = scrapper.kyc?.selfieUrl;
-    let licenseUrl = scrapper.kyc?.licenseUrl;
+    let panUrl = scrapper.kyc?.panPhotoUrl;
+    let shopLicenseUrl = scrapper.kyc?.shopLicenseUrl;
 
     try {
       if (aadhaarFile) {
@@ -69,9 +71,14 @@ export const submitKyc = async (req, res) => {
         selfieUrl = result.secure_url;
       }
 
-      if (licenseFile) {
-        const result = await uploadFile(licenseFile, { folder: 'scrapto/kyc/license' });
-        licenseUrl = result.secure_url;
+      if (panFile) {
+        const result = await uploadFile(panFile, { folder: 'scrapto/kyc/pan' });
+        panUrl = result.secure_url;
+      }
+
+      if (shopLicenseFile) {
+        const result = await uploadFile(shopLicenseFile, { folder: 'scrapto/kyc/shopLicense' });
+        shopLicenseUrl = result.secure_url;
       }
     } catch (uploadError) {
       logger.error('Error uploading KYC documents:', uploadError);
@@ -83,7 +90,9 @@ export const submitKyc = async (req, res) => {
       aadhaarNumber: aadhaarNumber,
       aadhaarPhotoUrl: aadhaarUrl,
       selfieUrl: selfieUrl,
-      licenseUrl: licenseUrl,
+      panNumber: panNumber,
+      panPhotoUrl: panUrl,
+      shopLicenseUrl: shopLicenseUrl,
       status: 'pending',
       submittedAt: new Date(),
       rejectionReason: null,
@@ -208,7 +217,7 @@ export const getAllScrappersWithKyc = async (req, res) => {
 
     // Get scrappers with KYC info
     const scrappers = await Scrapper.find(query)
-      .select('name phone email subscription status totalPickups earnings rating createdAt vehicleInfo kyc.aadhaarNumber kyc.aadhaarPhotoUrl kyc.selfieUrl kyc.licenseUrl kyc.status kyc.verifiedAt kyc.rejectionReason')
+      .select('name phone email scrapperType businessLocation subscription status totalPickups earnings rating createdAt vehicleInfo kyc.aadhaarNumber kyc.aadhaarPhotoUrl kyc.selfieUrl kyc.panNumber kyc.panPhotoUrl kyc.shopLicenseUrl kyc.status kyc.verifiedAt kyc.rejectionReason')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))

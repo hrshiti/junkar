@@ -24,6 +24,16 @@ const priceSchema = new mongoose.Schema({
     min: [0, 'Price cannot be negative'],
     default: 0
   },
+  minPrice: {
+    type: Number,
+    min: [0, 'Price cannot be negative'],
+    default: 0
+  },
+  maxPrice: {
+    type: Number,
+    min: [0, 'Price cannot be negative'],
+    default: 0
+  },
   image: {
     type: String,
     trim: true,

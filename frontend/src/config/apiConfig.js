@@ -49,6 +49,7 @@ export const API_ENDPOINTS = {
   earnings: {
     scrapperSummary: '/scrapper/earnings/summary',
     scrapperHistory: '/scrapper/earnings/history',
+    scrapperScrapStats: '/scrapper/earnings/scrap-stats',
     adminScrapperEarnings: (scrapperId) => `/admin/scrappers/${scrapperId}/earnings`,
     adminAdjustEarnings: (scrapperId) => `/admin/scrappers/${scrapperId}/earnings/adjust`,
   },

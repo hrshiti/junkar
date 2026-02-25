@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Autocomplete, useJsApiLoader } from '@react-google-maps/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import { scrapperProfileAPI } from '../../shared/utils/api';
 import { useAuth } from '../../shared/context/AuthContext';
@@ -25,11 +26,19 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
     ];
     const { getTranslatedText } = usePageTranslation(staticTexts);
     const { user } = useAuth();
+    const autocompleteRef = useRef(null);
+
+    const { isLoaded } = useJsApiLoader({
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+        libraries: ['places']
+    });
 
     const [formData, setFormData] = useState({
         name: '',
         vehicleType: 'bike',
-        vehicleNumber: ''
+        vehicleNumber: '',
+        businessAddress: '',
+        businessCoordinates: null
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -42,10 +51,28 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
             setFormData({
                 name: initialData.name || '',
                 vehicleType: initialData.vehicleInfo?.type || 'bike',
-                vehicleNumber: initialData.vehicleInfo?.number || ''
+                vehicleNumber: initialData.vehicleInfo?.number || '',
+                businessAddress: initialData.businessLocation?.address || '',
+                businessCoordinates: initialData.businessLocation?.coordinates || null
             });
         }
     }, [initialData, isOpen]);
+
+    const handlePlaceSelect = () => {
+        if (autocompleteRef.current) {
+            const place = autocompleteRef.current.getPlace();
+            if (place.geometry) {
+                setFormData({
+                    ...formData,
+                    businessAddress: place.formatted_address,
+                    businessCoordinates: [
+                        place.geometry.location.lng(),
+                        place.geometry.location.lat()
+                    ]
+                });
+            }
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -72,6 +99,14 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                     number: formData.vehicleNumber.toUpperCase() // Standardize to uppercase
                 }
             };
+
+            if (initialData?.scrapperType === 'big') {
+                payload.businessLocation = {
+                    type: 'Point',
+                    coordinates: formData.businessCoordinates || [0, 0],
+                    address: formData.businessAddress
+                };
+            }
 
             const response = await scrapperProfileAPI.updateMyProfile(payload);
 
@@ -183,6 +218,65 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                                         placeholder="UP14 AB 1234"
                                     />
                                 </div>
+
+                                {/* Business Location (B2B Only) */}
+                                {initialData?.scrapperType === 'big' && (
+                                    <div className="pt-2 border-t border-slate-100 space-y-3">
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Business Details (B2B)</p>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-sm font-medium text-slate-700 block">
+                                                {getTranslatedText("Business Address")}
+                                            </label>
+                                            {isLoaded ? (
+                                                <Autocomplete
+                                                    onLoad={(ref) => autocompleteRef.current = ref}
+                                                    onPlaceChanged={handlePlaceSelect}
+                                                >
+                                                    <input
+                                                        type="text"
+                                                        value={formData.businessAddress || ''}
+                                                        onChange={(e) => setFormData({ ...formData, businessAddress: e.target.value })}
+                                                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 outline-none transition-all text-slate-800"
+                                                        placeholder="Search shop location"
+                                                    />
+                                                </Autocomplete>
+                                            ) : (
+                                                <textarea
+                                                    value={formData.businessAddress || ''}
+                                                    onChange={(e) => setFormData({ ...formData, businessAddress: e.target.value })}
+                                                    className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:border-sky-500 bg-slate-50 text-slate-800 text-sm resize-none"
+                                                    rows="2"
+                                                    placeholder="Enter full shop/warehouse address"
+                                                />
+                                            )}
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (navigator.geolocation) {
+                                                    navigator.geolocation.getCurrentPosition(
+                                                        (position) => {
+                                                            setFormData({
+                                                                ...formData,
+                                                                businessCoordinates: [position.coords.longitude, position.coords.latitude]
+                                                            });
+                                                        },
+                                                        (error) => alert("Failed to get location")
+                                                    );
+                                                }
+                                            }}
+                                            className={`w-full py-2.5 rounded-xl border-2 flex items-center justify-center gap-2 transition-all ${formData.businessCoordinates
+                                                ? 'border-emerald-500/50 bg-emerald-50 text-emerald-700'
+                                                : 'border-slate-200 bg-slate-50 text-slate-600'
+                                                }`}
+                                        >
+                                            <span className="text-base">📍</span>
+                                            {formData.businessCoordinates ? "Location Set" : "Update Shop Location"}
+                                        </button>
+                                    </div>
+                                )}
 
                                 {/* Footer Actions */}
                                 <div className="pt-4 flex items-center gap-3">

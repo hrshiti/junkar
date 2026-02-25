@@ -13,7 +13,8 @@ router.post(
   uploadFields([
     { name: 'aadhaar', maxCount: 1 },
     { name: 'selfie', maxCount: 1 },
-    { name: 'license', maxCount: 1 },
+    { name: 'pan', maxCount: 1 },
+    { name: 'shopLicense', maxCount: 1 },
   ]),
   submitKyc
 );

@@ -3,7 +3,8 @@ import {
     getMyProfile,
     updateMyProfile,
     getScrapperPublicProfile,
-    updateFcmToken
+    updateFcmToken,
+    getNearbyBigScrappers
 } from '../controllers/scrapperController.js';
 import { protect, authorize } from '../middleware/auth.js';
 import { USER_ROLES } from '../config/constants.js';
@@ -17,5 +18,8 @@ router.get('/:id/profile', protect, getScrapperPublicProfile);
 router.get('/me', protect, authorize(USER_ROLES.SCRAPPER), getMyProfile);
 router.put('/me', protect, authorize(USER_ROLES.SCRAPPER), updateMyProfile);
 router.post('/fcm-token', protect, authorize(USER_ROLES.SCRAPPER), updateFcmToken);
+
+// B2B Discovery
+router.get('/nearby-big', protect, authorize(USER_ROLES.SCRAPPER), getNearbyBigScrappers);
 
 export default router;

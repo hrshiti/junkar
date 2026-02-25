@@ -3,10 +3,23 @@ import { sendSuccess, sendError } from '../utils/responseHandler.js';
 import Order from '../models/Order.js';
 import mongoose from 'mongoose';
 import Scrapper from '../models/Scrapper.js';
+import User from '../models/User.js';
 import { ORDER_STATUS } from '../config/constants.js';
 import logger from '../utils/logger.js';
 import orderService from '../services/orderService.js';
 import walletService from '../services/walletService.js';
+import WalletTransaction from '../models/WalletTransaction.js';
+import Analytics from '../models/Analytics.js';
+import { PAYMENT_STATUS } from '../config/constants.js';
+
+// Order State Machine - Valid Status Transitions
+const ORDER_STATUS_TRANSITIONS = {
+  [ORDER_STATUS.PENDING]: [ORDER_STATUS.CONFIRMED, ORDER_STATUS.CANCELLED],
+  [ORDER_STATUS.CONFIRMED]: [ORDER_STATUS.IN_PROGRESS, ORDER_STATUS.CANCELLED],
+  [ORDER_STATUS.IN_PROGRESS]: [ORDER_STATUS.COMPLETED, ORDER_STATUS.CANCELLED],
+  [ORDER_STATUS.COMPLETED]: [], // Terminal state
+  [ORDER_STATUS.CANCELLED]: []  // Terminal state
+};
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -224,16 +237,30 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     return sendError(res, 'Not authorized to update this order', 403);
   }
 
-  // Validate status transition
-  const validStatuses = Object.values(ORDER_STATUS);
-  if (!validStatuses.includes(status)) {
-    return sendError(res, 'Invalid order status', 400);
+  // Validate status transition using State Machine
+  const currentStatus = order.status;
+  if (status !== currentStatus) {
+    const allowedTransitions = ORDER_STATUS_TRANSITIONS[currentStatus] || [];
+    if (!allowedTransitions.includes(status)) {
+      return sendError(res, `Invalid status transition: ${currentStatus} -> ${status}`, 400);
+    }
   }
+
+  // Update negotiation fields and total amount
+  const { isNegotiated, finalPrice, dealType, totalAmount } = req.body;
+
+  if (isNegotiated !== undefined) order.isNegotiated = isNegotiated;
+  if (finalPrice !== undefined) order.finalPrice = Number(finalPrice);
+  if (dealType !== undefined) order.dealType = dealType;
+
+  // Use finalPrice if negotiated, else use totalAmount, else keep current
+  const finalTotalAmount = finalPrice || totalAmount || order.totalAmount;
+  order.totalAmount = Number(finalTotalAmount);
 
   // Update status
   order.status = status;
 
-  // Update paymentStatus if provided (e.g. for cash payments)
+  // Update paymentStatus if provided
   const { paymentStatus } = req.body;
   if (paymentStatus) {
     const validPaymentStatuses = Object.values(PAYMENT_STATUS);
@@ -243,96 +270,154 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     order.paymentStatus = paymentStatus;
   }
 
-  // Update totalAmount if provided (e.g. final negotiated price)
-  const { totalAmount } = req.body;
-  if (totalAmount !== undefined && totalAmount !== null) {
-    order.totalAmount = Number(totalAmount);
-  }
-
-  // Set completion date if completed
   // Set completion date if completed
   if (status === ORDER_STATUS.COMPLETED) {
-    order.completedDate = new Date();
-
     const session = await mongoose.startSession();
     try {
       await session.withTransaction(async () => {
-        // ---------------------------------------------------------
-        // ATOMIC WALLET & COMMISSION LOGIC - SCRAP SELL ONLY
-        // ---------------------------------------------------------
-
-        // Scrap Sell: Scrapper pays User
-        if (order.scrapper) {
-          const orderAmount = order.totalAmount || 0;
-          const commissionAmount = Math.max(1, Math.round(orderAmount * 0.01));
-
-          // 1. Deduct Order Amount (Payment to User)
-          if (orderAmount > 0 && order.paymentStatus !== 'completed') {
-            const updatedScrapper = await Scrapper.findByIdAndUpdate(
-              order.scrapper,
-              { $inc: { "wallet.balance": -orderAmount } },
-              { session, new: true }
-            );
-
-            if (updatedScrapper) {
-              await WalletTransaction.create([{
-                trxId: `TRX-PAY-${Date.now()}-${order._id.toString().slice(-4)}`,
-                user: updatedScrapper._id,
-                userType: 'Scrapper',
-                amount: orderAmount,
-                type: 'DEBIT',
-                balanceBefore: updatedScrapper.wallet.balance + orderAmount,
-                balanceAfter: updatedScrapper.wallet.balance,
-                category: 'PAYMENT_SENT',
-                status: 'SUCCESS',
-                description: `Payment to User for Order #${order._id}`,
-                orderId: order._id,
-                gateway: { provider: 'WALLET' }
-              }], { session });
-
-              logger.info(`[Wallet] Deducted ₹${orderAmount} from Scrapper ${updatedScrapper._id}`);
-            }
-          }
-
-          // 2. Deduct 1% Commission
-          const updatedScrapperComm = await Scrapper.findByIdAndUpdate(
-            order.scrapper,
-            { $inc: { "wallet.balance": -commissionAmount } },
-            { session, new: true }
-          );
-
-          if (updatedScrapperComm) {
-            await WalletTransaction.create([{
-              trxId: `TRX-COMM-${Date.now()}-${order._id.toString().slice(-4)}`,
-              user: updatedScrapperComm._id,
-              userType: 'Scrapper',
-              amount: commissionAmount,
-              type: 'DEBIT',
-              balanceBefore: updatedScrapperComm.wallet.balance + commissionAmount,
-              balanceAfter: updatedScrapperComm.wallet.balance,
-              category: 'COMMISSION',
-              status: 'SUCCESS',
-              description: `Platform Fee (1%) for Order #${order._id}`,
-              orderId: order._id,
-              gateway: { provider: 'SYSTEM' }
-            }], { session });
-
-            logger.info(`[Commission] Deducted ₹${commissionAmount} from Scrapper ${updatedScrapperComm._id}`);
-          }
+        const lockedOrder = await Order.findById(id).session(session);
+        if (!lockedOrder || lockedOrder.status === ORDER_STATUS.COMPLETED) {
+          throw new Error('Order is already completed or not found');
         }
 
-        // Save order state within transaction
-        await order.save({ session });
+        // Use lockedOrder from now on
+        if (isNegotiated !== undefined) lockedOrder.isNegotiated = isNegotiated;
+        if (finalPrice !== undefined) lockedOrder.finalPrice = Number(finalPrice);
+        if (dealType !== undefined) lockedOrder.dealType = dealType;
+        lockedOrder.totalAmount = Number(finalTotalAmount);
+        lockedOrder.status = status;
+        lockedOrder.completedDate = new Date();
+        if (paymentStatus) lockedOrder.paymentStatus = paymentStatus;
+
+        if (lockedOrder.scrapper) {
+          const scrapper = await Scrapper.findById(lockedOrder.scrapper).session(session);
+          if (!scrapper) throw new Error('Scrapper not found');
+
+          const orderAmount = lockedOrder.totalAmount || 0;
+          const commissionAmount = Math.max(1, Math.round(orderAmount * 0.01));
+
+          // Decide what to deduct based on dealType
+          // If 'Cash', scrapper paid user in cash, but still owes 1% commission to platform
+          // If 'Online', scrapper pays user via platform (deduct totalAmount from wallet) + 1% commission
+          let totalDeduction = commissionAmount;
+          if (lockedOrder.dealType === 'Online') {
+            totalDeduction += orderAmount;
+          }
+
+          // SECURITY CHECK: Verify scrapper has enough balance
+          if (scrapper.wallet.balance < totalDeduction) {
+            throw new Error(`Insufficient wallet balance. Required: ₹${totalDeduction}, Available: ₹${scrapper.wallet.balance}`);
+          }
+
+          // 1. Deduct Commission (Always)
+          scrapper.wallet.balance -= commissionAmount;
+          await scrapper.save({ session });
+
+          await WalletTransaction.create([{
+            trxId: `TRX-COMM-${Date.now()}-${lockedOrder._id.toString().slice(-4)}`,
+            user: scrapper._id,
+            userType: 'Scrapper',
+            amount: commissionAmount,
+            type: 'DEBIT',
+            balanceBefore: scrapper.wallet.balance + commissionAmount,
+            balanceAfter: scrapper.wallet.balance,
+            category: 'COMMISSION',
+            status: 'SUCCESS',
+            description: `Platform Fee (1%) for Order #${lockedOrder._id}`,
+            orderId: lockedOrder._id,
+            gateway: { provider: 'SYSTEM' }
+          }], { session });
+
+          // 2. Deduct Order Amount (Only if Online)
+          if (lockedOrder.dealType === 'Online' && orderAmount > 0) {
+            scrapper.wallet.balance -= orderAmount;
+            await scrapper.save({ session });
+
+            await WalletTransaction.create([{
+              trxId: `TRX-PAY-${Date.now()}-${lockedOrder._id.toString().slice(-4)}`,
+              user: scrapper._id,
+              userType: 'Scrapper',
+              amount: orderAmount,
+              type: 'DEBIT',
+              balanceBefore: scrapper.wallet.balance + orderAmount,
+              balanceAfter: scrapper.wallet.balance,
+              category: 'PAYMENT_SENT',
+              status: 'SUCCESS',
+              description: `Payment for Order #${lockedOrder._id} (Negotiated: ${lockedOrder.isNegotiated})`,
+              orderId: lockedOrder._id,
+              gateway: { provider: 'WALLET' }
+            }], { session });
+
+            // 3. Credit User Wallet
+            const user = await User.findById(lockedOrder.user).session(session);
+            if (user) {
+              const uBalanceBefore = user.wallet.balance;
+              user.wallet.balance += orderAmount;
+              await user.save({ session });
+
+              await WalletTransaction.create([{
+                trxId: `TRX-REC-${Date.now()}-${lockedOrder._id.toString().slice(-4)}`,
+                user: user._id,
+                userType: 'User',
+                amount: orderAmount,
+                type: 'CREDIT',
+                balanceBefore: uBalanceBefore,
+                balanceAfter: user.wallet.balance,
+                category: 'PAYMENT_RECEIVED',
+                status: 'SUCCESS',
+                description: `Payment received for Scrap Order #${lockedOrder._id}`,
+                orderId: lockedOrder._id,
+                gateway: { provider: 'WALLET' }
+              }], { session });
+            }
+
+            order.paymentStatus = PAYMENT_STATUS.COMPLETED;
+          }
+
+          logger.info(`[Wallet] Deducted total ₹${totalDeduction} from Scrapper ${scrapper._id} for Order ${lockedOrder._id}`);
+        }
+
+        // Save order state
+        await lockedOrder.save({ session });
+
+        // Record Analytics Event
+        await Analytics.create([{
+          event: 'ORDER_COMPLETED',
+          category: 'ORDER',
+          metadata: {
+            orderId: lockedOrder._id,
+            totalAmount: lockedOrder.totalAmount,
+            isNegotiated: lockedOrder.isNegotiated,
+            dealType: lockedOrder.dealType,
+            scrapperId: lockedOrder.scrapper
+          }
+        }], { session });
+
+        // Sync local order object for response
+        Object.assign(order, lockedOrder.toObject());
       });
     } catch (transactionError) {
       logger.error(`[Order Completion] Transaction failed:`, transactionError);
-      throw new Error(`Transaction failed: ${transactionError.message}`);
+      return sendError(res, transactionError.message, 400);
     } finally {
       session.endSession();
     }
   } else {
     // Non-completion updates (standard save)
     await order.save();
+
+    // Record Status Change Analytics
+    if (status !== currentStatus) {
+      await Analytics.create({
+        event: 'ORDER_STATUS_CHANGED',
+        category: 'ORDER',
+        metadata: {
+          orderId: order._id,
+          from: currentStatus,
+          to: status
+        }
+      });
+    }
   }
 
   await order.populate('user', 'name phone');
@@ -488,5 +573,24 @@ export const forwardToBigScrapper = asyncHandler(async (req, res) => {
   logger.info(`Order ${id} forwarded to Big Scrapper pool by ${scrapperId}`);
 
   sendSuccess(res, 'Order forwarded to Big Scrappers successfully', { order });
+});
+
+// @desc    Get targeted orders for big scrappers (B2B)
+// @route   GET /api/orders/targeted
+// @access  Private (Scrapper)
+export const getTargetedOrders = asyncHandler(async (req, res) => {
+  const scrapperId = req.user.scrapperId || req.user.id;
+
+  const query = {
+    status: ORDER_STATUS.PENDING,
+    assignmentStatus: 'targeted',
+    targetedScrappers: scrapperId
+  };
+
+  const orders = await Order.find(query)
+    .populate('user', 'name phone')
+    .sort({ createdAt: -1 });
+
+  sendSuccess(res, 'Targeted orders retrieved successfully', { orders });
 });
 

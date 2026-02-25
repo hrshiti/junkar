@@ -140,3 +140,35 @@ export const updateTicketStatus = asyncHandler(async (req, res) => {
         sendError(res, 'Failed to update status', 500);
     }
 });
+// @desc    Respond to a ticket
+// @route   POST /api/support/:id/respond
+// @access  Private
+export const respondToTicket = asyncHandler(async (req, res) => {
+    try {
+        const { message } = req.body;
+        const ticketId = req.params.id;
+
+        const ticket = await HelpTicket.findById(ticketId);
+        if (!ticket) {
+            return sendError(res, 'Ticket not found', 404);
+        }
+
+        ticket.responses.push({
+            sender: req.user.id,
+            senderModel: req.user.role === 'scrapper' ? 'Scrapper' : 'User',
+            message
+        });
+
+        // Auto change status if admin responds
+        if (req.user.role !== 'scrapper' && ticket.status === 'open') {
+            ticket.status = 'in_progress';
+        }
+
+        await ticket.save();
+
+        sendSuccess(res, 'Response added successfully', { ticket });
+    } catch (error) {
+        logger.error('[Support] Error responding to ticket:', error);
+        sendError(res, 'Failed to add response', 500);
+    }
+});

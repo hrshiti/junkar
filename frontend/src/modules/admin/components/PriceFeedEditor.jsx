@@ -5,6 +5,16 @@ import { DEFAULT_PRICE_FEED, PRICE_TYPES } from '../../shared/utils/priceFeedUti
 import { adminAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
+// Import images for static categories
+import plasticImage from '../../user/assets/plastic.jpg';
+import metalImage from '../../user/assets/metal1.jpg';
+import copperImage from '../../user/assets/metal.jpg';
+import aluminiumImage from '../../user/assets/Aluminium.jpg';
+import paperImage from '../../user/assets/scrab.png';
+import electronicImage from '../../user/assets/electronicbg.png';
+import brassImage from '../../user/assets/brass.jpg';
+import steelImage from '../../user/assets/metal2.jpg';
+
 const PriceFeedEditor = () => {
   const [prices, setPrices] = useState([]);
   const [activeTab, setActiveTab] = useState(PRICE_TYPES.MATERIAL);
@@ -94,37 +104,61 @@ const PriceFeedEditor = () => {
     setLoading(true);
     setError(null);
     try {
+      // 1. Fixed 8 static categories with images
+      const staticCategories = [
+        { id: 'plastic', category: 'Plastic', image: plasticImage, pricePerKg: 45, type: PRICE_TYPES.MATERIAL },
+        { id: 'metal', category: 'Metal', image: metalImage, pricePerKg: 180, type: PRICE_TYPES.MATERIAL },
+        { id: 'paper', category: 'Paper', image: paperImage, pricePerKg: 12, type: PRICE_TYPES.MATERIAL },
+        { id: 'electronics', category: 'Electronics', image: electronicImage, pricePerKg: 85, type: PRICE_TYPES.MATERIAL },
+        { id: 'copper', category: 'Copper', image: copperImage, pricePerKg: 650, type: PRICE_TYPES.MATERIAL },
+        { id: 'aluminium', category: 'Aluminium', image: aluminiumImage, pricePerKg: 180, type: PRICE_TYPES.MATERIAL },
+        { id: 'steel', category: 'Steel', image: steelImage, pricePerKg: 35, type: PRICE_TYPES.MATERIAL },
+        { id: 'brass', category: 'Brass', image: brassImage, pricePerKg: 420, type: PRICE_TYPES.MATERIAL },
+      ];
+
       const response = await adminAPI.getAllPrices();
-      let dbPrices = [];
 
       if (response.success && response.data?.prices) {
-        // Transform backend prices to frontend format
-        dbPrices = response.data.prices.map((price) => ({
-          id: price._id || price.id,
-          category: price.category || 'Unknown',
-          pricePerKg: price.pricePerKg || 0,
-          price: price.price || 0,
-          image: price.image || '',
-          region: price.regionCode || price.region || 'IN-DL',
-          effectiveDate: price.effectiveDate || price.createdAt || new Date().toISOString(),
-          updatedAt: price.updatedAt || price.createdAt || new Date().toISOString(),
-          type: price.type || PRICE_TYPES.MATERIAL
-        }));
-      }
+        // 2. Map API prices to our static list
+        const apiPriceMap = {};
+        response.data.prices.forEach(p => {
+          apiPriceMap[p.category.toLowerCase()] = {
+            price: p.pricePerKg,
+            id: p._id || p.id,
+            updatedAt: p.updatedAt
+          };
+        });
 
-      setPrices(dbPrices);
+        const mergedPrices = staticCategories.map(cat => ({
+          ...cat,
+          id: apiPriceMap[cat.category.toLowerCase()]?.id || `static_${cat.id}`,
+          pricePerKg: apiPriceMap[cat.category.toLowerCase()]?.price !== undefined
+            ? apiPriceMap[cat.category.toLowerCase()].price
+            : cat.pricePerKg,
+          updatedAt: apiPriceMap[cat.category.toLowerCase()]?.updatedAt || new Date().toISOString(),
+          region: 'IN-DL'
+        }));
+
+        setPrices(mergedPrices);
+      } else {
+        setPrices(staticCategories.map(c => ({ ...c, region: 'IN-DL', updatedAt: new Date().toISOString() })));
+      }
     } catch (err) {
       console.error('Error loading prices:', err);
-      // Fallback to defaults on error
+      // Fallback
       const nowIso = new Date().toISOString();
       const defaultPrices = [
-        ...DEFAULT_PRICE_FEED.map((p) => ({ ...p, effectiveDate: nowIso, updatedAt: nowIso, type: PRICE_TYPES.MATERIAL })),
-        ...DEFAULT_SERVICE_FEED.map((p) => ({ ...p, effectiveDate: nowIso, updatedAt: nowIso, type: PRICE_TYPES.SERVICE }))
-      ];
+        { category: 'Plastic', pricePerKg: 45, image: plasticImage, type: PRICE_TYPES.MATERIAL },
+        { category: 'Metal', pricePerKg: 180, image: metalImage, type: PRICE_TYPES.MATERIAL },
+        { category: 'Paper', pricePerKg: 12, image: paperImage, type: PRICE_TYPES.MATERIAL },
+        { category: 'Electronics', pricePerKg: 85, image: electronicImage, type: PRICE_TYPES.MATERIAL },
+        { category: 'Copper', pricePerKg: 650, image: copperImage, type: PRICE_TYPES.MATERIAL },
+        { category: 'Aluminium', pricePerKg: 180, image: aluminiumImage, type: PRICE_TYPES.MATERIAL },
+        { category: 'Steel', pricePerKg: 35, image: steelImage, type: PRICE_TYPES.MATERIAL },
+        { category: 'Brass', pricePerKg: 420, image: brassImage, type: PRICE_TYPES.MATERIAL },
+      ].map(p => ({ ...p, id: `err_${p.category.toLowerCase()}`, region: 'IN-DL', updatedAt: nowIso }));
+
       setPrices(defaultPrices);
-      if (err.response?.status !== 404) {
-        setError(err.message || getTranslatedText('Failed to load prices'));
-      }
     } finally {
       setLoading(false);
     }
@@ -203,10 +237,12 @@ const PriceFeedEditor = () => {
       };
 
       let response;
-      if (modalMode === 'add') {
+      const isStaticId = currentPriceData.id && String(currentPriceData.id).startsWith('static_');
+
+      if (modalMode === 'add' || isStaticId) {
         response = await adminAPI.createPrice(payload);
       } else {
-        // Edit mode
+        // Edit mode with a real DB ID
         response = await adminAPI.updatePrice(currentPriceData.id, payload);
       }
 
@@ -474,13 +510,12 @@ const PriceFeedEditor = () => {
                         <span className="font-semibold text-xs md:text-sm" style={{ color: '#2d3748' }}>{price.category}</span>
                       </td>
                       <td className="px-2 py-2 md:px-6 md:py-4">
-                        {price.image ? (
-                          <img src={price.image} alt={price.category} className="w-10 h-10 rounded-md object-cover shadow-sm" />
-                        ) : (
-                          <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center text-gray-400 text-xs">
-                            No Img
-                          </div>
-                        )}
+                        <img
+                          src={price.image}
+                          alt={price.category}
+                          className="w-10 h-10 rounded-full object-cover shadow-sm border"
+                          style={{ borderColor: '#e2e8f0' }}
+                        />
                       </td>
                       <td className="px-2 py-2 md:px-6 md:py-4">
                         <div className="flex items-center gap-2">
@@ -510,17 +545,21 @@ const PriceFeedEditor = () => {
                           >
                             <FaEdit className="text-xs md:text-sm" />
                           </motion.button>
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => handleDelete(price.id)}
-                            className="p-1.5 md:p-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                            style={{ backgroundColor: '#fee2e2', color: '#dc2626' }}
-                            title={getTranslatedText("Delete category")}
-                            disabled={isSaving}
-                          >
-                            <FaTrash className="text-xs md:text-sm" />
-                          </motion.button>
+
+                          {/* Only show delete if it's not one of the 8 fixed categories */}
+                          {!['plastic', 'metal', 'paper', 'electronics', 'copper', 'aluminium', 'steel', 'brass'].includes(price.category.toLowerCase()) && (
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => handleDelete(price.id)}
+                              className="p-1.5 md:p-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                              style={{ backgroundColor: '#fee2e2', color: '#dc2626' }}
+                              title={getTranslatedText("Delete category")}
+                              disabled={isSaving}
+                            >
+                              <FaTrash className="text-xs md:text-sm" />
+                            </motion.button>
+                          )}
                         </div>
                       </td>
                     </motion.tr>
@@ -607,9 +646,10 @@ const PriceFeedEditor = () => {
                     value={currentPriceData.category}
                     onChange={(e) => setCurrentPriceData(prev => ({ ...prev, category: e.target.value }))}
                     placeholder={activeTab === PRICE_TYPES.SERVICE ? getTranslatedText("e.g. Garage Cleaning") : getTranslatedText("e.g. Copper Wire")}
-                    className="w-full px-4 py-2 rounded-xl border-2 focus:outline-none focus:ring-2 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 rounded-xl border-2 focus:outline-none focus:ring-2 focus:border-transparent transition-all disabled:bg-gray-50 disabled:text-gray-500"
                     style={{ borderColor: '#e2e8f0', focusRingColor: '#64946e' }}
                     required
+                    disabled={['plastic', 'metal', 'paper', 'electronics', 'copper', 'aluminium', 'steel', 'brass'].includes(currentPriceData.category.toLowerCase())}
                   />
                 </div>
                 <div>
@@ -637,12 +677,13 @@ const PriceFeedEditor = () => {
                     value={currentPriceData.image}
                     onChange={(e) => setCurrentPriceData(prev => ({ ...prev, image: e.target.value }))}
                     placeholder={getTranslatedText("https://example.com/image.jpg")}
-                    className="w-full px-4 py-2 rounded-xl border-2 focus:outline-none focus:ring-2 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 rounded-xl border-2 focus:outline-none focus:ring-2 focus:border-transparent transition-all disabled:bg-gray-50"
                     style={{ borderColor: '#e2e8f0', focusRingColor: '#64946e' }}
+                    disabled={['plastic', 'metal', 'paper', 'electronics', 'copper', 'aluminium', 'steel', 'brass'].includes(currentPriceData.category.toLowerCase())}
                   />
                   {currentPriceData.image && (
-                    <div className="mt-2 w-full h-32 rounded-lg overflow-hidden border border-gray-200">
-                      <img src={currentPriceData.image} alt="Preview" className="w-full h-full object-cover" onError={(e) => e.target.style.display = 'none'} />
+                    <div className="mt-2 w-full h-32 rounded-lg overflow-hidden border border-gray-200 bg-white flex items-center justify-center">
+                      <img src={currentPriceData.image} alt="Preview" className="max-h-full object-contain" />
                     </div>
                   )}
                 </div>

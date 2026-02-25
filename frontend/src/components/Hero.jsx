@@ -335,9 +335,8 @@ const Hero = () => {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="relative">
                 <div
-                  className={`flex items-center rounded-full px-4 py-3 md:py-4 border transition-all ${
-                    isEditingLocation ? "" : "cursor-pointer"
-                  }`}
+                  className={`flex items-center rounded-full px-4 py-3 md:py-4 border transition-all ${isEditingLocation ? "" : "cursor-pointer"
+                    }`}
                   style={{
                     backgroundColor: "#ffffff",
                     borderColor: isEditingLocation ? "#38bdf8" : "#e5ddd4",
@@ -523,9 +522,8 @@ const Hero = () => {
                   {/* Left Side - Text and Button */}
                   <div className="flex-1 text-left">
                     <h1
-                      className={`text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-2 md:mb-4 lg:mb-6 leading-tight ${
-                        isWebView ? "text-left" : "text-right"
-                      }`}
+                      className={`text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-2 md:mb-4 lg:mb-6 leading-tight ${isWebView ? "text-left" : "text-right"
+                        }`}
                       style={{ color: "#2d3748" }}>
                       Sell Your Scrap
                       <br />
@@ -550,9 +548,8 @@ const Hero = () => {
                       initial={{ scale: 0.95 }}
                       animate={{ scale: 1 }}
                       transition={{ duration: 0.5, delay: 0.4 }}
-                      className={`flex mb-4 md:mb-8 lg:mb-12 ${
-                        isWebView ? "justify-start" : "justify-end"
-                      }`}>
+                      className={`flex mb-4 md:mb-8 lg:mb-12 ${isWebView ? "justify-start" : "justify-end"
+                        }`}>
                       <button
                         onClick={() => navigate("/add-scrap/category")}
                         className="relative inline-flex items-center justify-center text-white font-semibold py-2 px-6 md:py-4 md:px-8 lg:py-5 lg:px-12 xl:py-6 xl:px-16 rounded-full text-sm md:text-lg lg:text-xl xl:text-2xl bg-gradient-to-r from-green-500 to-emerald-400 shadow-[0_10px_25px_rgba(34,197,94,0.5)] hover:shadow-[0_15px_35px_rgba(34,197,94,0.7)] transform hover:-translate-y-0.5 hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-emerald-300">
@@ -609,8 +606,8 @@ const Hero = () => {
                           index === currentBanner
                             ? 0
                             : index < currentBanner
-                            ? -100
-                            : 100,
+                              ? -100
+                              : 100,
                       }}
                       animate={{
                         opacity: index === currentBanner ? 1 : 0,
@@ -618,8 +615,8 @@ const Hero = () => {
                           index === currentBanner
                             ? 0
                             : index < currentBanner
-                            ? -100
-                            : 100,
+                              ? -100
+                              : 100,
                         display: index === currentBanner ? "block" : "none",
                       }}
                       transition={{ duration: 0.6, ease: "easeInOut" }}
@@ -677,9 +674,8 @@ const Hero = () => {
                           setCurrentBanner((prev) => (prev + 1) % 3);
                         }, 4000);
                       }}
-                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                        index === currentBanner ? "w-8" : ""
-                      }`}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentBanner ? "w-8" : ""
+                        }`}
                       style={{
                         backgroundColor:
                           index === currentBanner
@@ -940,7 +936,7 @@ const Hero = () => {
                 e.preventDefault();
                 e.stopPropagation();
                 console.log(
-                  "Add Scrap button clicked - navigating to /add-scrap/category"
+                  "Add Scrap button clicked - navigating to /add-scrap/weight"
                 );
                 navigate("/add-scrap/category");
               }}

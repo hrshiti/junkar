@@ -11,6 +11,9 @@ const KYCUploadPage = () => {
     "Please enter a valid 12-digit Aadhaar number",
     "Please upload Aadhaar photo",
     "Please upload selfie photo",
+    "Please enter a valid PAN number",
+    "Please upload PAN photo",
+    "Please upload Shop License photo",
     "Failed to submit KYC. Please try again.",
     "KYC Verification",
     "Complete your KYC to start receiving pickup requests",
@@ -25,8 +28,14 @@ const KYCUploadPage = () => {
     "Remove Photo",
     "Selfie Photo",
     "selfie photo",
-    "Driving License (optional)",
-    "license",
+    "PAN Number",
+    "Enter 10-digit PAN number",
+    "PAN Card Photo",
+    "PAN photo",
+    "Remove PAN",
+    "Shop License",
+    "Shop License Photo",
+    "shop license photo",
     "Remove License",
     "Important Information",
     "Your KYC documents will be verified by our admin team",
@@ -47,10 +56,13 @@ const KYCUploadPage = () => {
   const [aadhaarNumber, setAadhaarNumber] = useState('');
   const [aadhaarPhoto, setAadhaarPhoto] = useState(null);
   const [selfiePhoto, setSelfiePhoto] = useState(null);
-  const [licenseFile, setLicenseFile] = useState(null);
+  const [panNumber, setPanNumber] = useState('');
+  const [panPhoto, setPanPhoto] = useState(null);
+  const [shopLicenseFile, setShopLicenseFile] = useState(null);
   const [aadhaarPreview, setAadhaarPreview] = useState(null);
   const [selfiePreview, setSelfiePreview] = useState(null);
-  const [licensePreview, setLicensePreview] = useState(null);
+  const [panPreview, setPanPreview] = useState(null);
+  const [shopLicensePreview, setShopLicensePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isLoadingCheck, setIsLoadingCheck] = useState(true);
@@ -144,6 +156,43 @@ const KYCUploadPage = () => {
     setAadhaarNumber(value);
   };
 
+  const handlePanNumberChange = (e) => {
+    const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
+    setPanNumber(value);
+  };
+
+  const handlePanPhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert(getTranslatedText('File is too large (Max 5MB)'));
+        return;
+      }
+      setPanPhoto(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPanPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleShopLicensePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert(getTranslatedText('File is too large (Max 5MB)'));
+        return;
+      }
+      setShopLicenseFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setShopLicensePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -162,6 +211,21 @@ const KYCUploadPage = () => {
       return;
     }
 
+    if (!panNumber || panNumber.length !== 10) {
+      alert(getTranslatedText('Please enter a valid PAN number'));
+      return;
+    }
+
+    if (!panPhoto) {
+      alert(getTranslatedText('Please upload PAN photo'));
+      return;
+    }
+
+    if (!shopLicenseFile) {
+      alert(getTranslatedText('Please upload Shop License photo'));
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -169,9 +233,9 @@ const KYCUploadPage = () => {
       formData.append('aadhaarNumber', aadhaarNumber);
       formData.append('aadhaar', aadhaarPhoto);
       formData.append('selfie', selfiePhoto);
-      if (licenseFile) {
-        formData.append('license', licenseFile);
-      }
+      formData.append('panNumber', panNumber);
+      formData.append('pan', panPhoto);
+      formData.append('shopLicense', shopLicenseFile);
 
       const res = await kycAPI.submit(formData);
       const kyc = res.data?.kyc;
@@ -369,23 +433,39 @@ const KYCUploadPage = () => {
             </div>
           </div>
 
-          {/* License Upload (optional) */}
+          {/* PAN Number */}
           <div>
             <label className="block text-sm font-semibold mb-2 text-white">
-              {getTranslatedText("Driving License (optional)")}
+              {getTranslatedText("PAN Number")} <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={panNumber}
+              onChange={handlePanNumberChange}
+              placeholder={getTranslatedText("Enter 10-digit PAN number")}
+              maxLength={10}
+              className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${panNumber.length === 10 ? 'border-sky-500' : 'border-zinc-700'}`}
+              required
+            />
+          </div>
+
+          {/* PAN Photo Upload */}
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-white">
+              {getTranslatedText("PAN Card Photo")} <span className="text-red-500">*</span>
             </label>
             <div className="space-y-3">
-              <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all hover:border-sky-500 bg-black ${licenseFile ? 'border-sky-500' : 'border-zinc-700'}`}
+              <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all hover:border-sky-500 bg-black ${panPhoto ? 'border-sky-500' : 'border-zinc-700'}`}
               >
-                {licensePreview ? (
-                  <img src={licensePreview} alt="License preview" className="w-full h-full object-cover rounded-xl" />
+                {panPreview ? (
+                  <img src={panPreview} alt="PAN preview" className="w-full h-full object-cover rounded-xl" />
                 ) : (
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     <svg className="w-10 h-10 mb-3 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
                     <p className="mb-2 text-sm text-gray-400">
-                      <span className="font-semibold">{getTranslatedText("Click to upload")}</span> {getTranslatedText("license")}
+                      <span className="font-semibold">{getTranslatedText("Click to upload")}</span> {getTranslatedText("PAN photo")}
                     </p>
                     <p className="text-xs text-gray-500">{getTranslatedText("PNG, JPG or JPEG (MAX. 5MB)")}</p>
                   </div>
@@ -394,15 +474,61 @@ const KYCUploadPage = () => {
                   type="file"
                   className="hidden"
                   accept="image/*"
-                  onChange={handleLicensePhotoChange}
+                  onChange={handlePanPhotoChange}
+                  required
                 />
               </label>
-              {licenseFile && (
+              {panPhoto && (
                 <button
                   type="button"
                   onClick={() => {
-                    setLicenseFile(null);
-                    setLicensePreview(null);
+                    setPanPhoto(null);
+                    setPanPreview(null);
+                  }}
+                  className="text-xs font-semibold"
+                  style={{ color: '#ef4444' }}
+                >
+                  {getTranslatedText("Remove PAN")}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Shop License Upload */}
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-white">
+              {getTranslatedText("Shop License")} <span className="text-red-500">*</span>
+            </label>
+            <div className="space-y-3">
+              <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all hover:border-sky-500 bg-black ${shopLicenseFile ? 'border-sky-500' : 'border-zinc-700'}`}
+              >
+                {shopLicensePreview ? (
+                  <img src={shopLicensePreview} alt="Shop License preview" className="w-full h-full object-cover rounded-xl" />
+                ) : (
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <svg className="w-10 h-10 mb-3 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p className="mb-2 text-sm text-gray-400">
+                      <span className="font-semibold">{getTranslatedText("Click to upload")}</span> {getTranslatedText("shop license photo")}
+                    </p>
+                    <p className="text-xs text-gray-500">{getTranslatedText("PNG, JPG or JPEG (MAX. 5MB)")}</p>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleShopLicensePhotoChange}
+                  required
+                />
+              </label>
+              {shopLicenseFile && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShopLicenseFile(null);
+                    setShopLicensePreview(null);
                   }}
                   className="text-xs font-semibold"
                   style={{ color: '#ef4444' }}
@@ -438,7 +564,7 @@ const KYCUploadPage = () => {
             type="submit"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            disabled={isSubmitting || !aadhaarNumber || aadhaarNumber.length !== 12 || !aadhaarPhoto || !selfiePhoto}
+            disabled={isSubmitting || !aadhaarNumber || aadhaarNumber.length !== 12 || !aadhaarPhoto || !selfiePhoto || !panNumber || panNumber.length !== 10 || !panPhoto || !shopLicenseFile}
             className="w-full py-4 md:py-5 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-sky-600 text-white hover:bg-sky-700"
           >
             {isSubmitting ? (

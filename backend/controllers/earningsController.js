@@ -236,3 +236,44 @@ export const getScrapperEarningsForAdmin = asyncHandler(async (req, res) => {
   sendSuccess(res, 'Scrapper earnings retrieved successfully', { summary });
 });
 
+// @desc    Get scrapper scrap statistics (category-wise weight)
+// @route   GET /api/scrapper/earnings/scrap-stats
+// @access  Private (Scrapper)
+export const getScrapStats = asyncHandler(async (req, res) => {
+  const scrapperId = req.user.id;
+
+  const completedOrders = await Order.find({
+    scrapper: scrapperId,
+    status: ORDER_STATUS.COMPLETED
+  }).select('scrapItems totalWeight');
+
+  const stats = {};
+  let totalWeightCount = 0;
+
+  completedOrders.forEach(order => {
+    totalWeightCount += (order.totalWeight || 0);
+    if (order.scrapItems && Array.isArray(order.scrapItems)) {
+      order.scrapItems.forEach(item => {
+        const cat = item.category;
+        const weight = item.weight || 0;
+        if (stats[cat]) {
+          stats[cat] += weight;
+        } else {
+          stats[cat] = weight;
+        }
+      });
+    }
+  });
+
+  // Convert stats object to array for easier frontend handling
+  const categoryStats = Object.keys(stats).map(category => ({
+    category,
+    weight: stats[category]
+  })).sort((a, b) => b.weight - a.weight);
+
+  sendSuccess(res, 'Scrap statistics retrieved successfully', {
+    totalWeight: totalWeightCount,
+    categoryStats
+  });
+});
+

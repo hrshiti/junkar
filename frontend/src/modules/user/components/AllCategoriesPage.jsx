@@ -104,7 +104,7 @@ const AllCategoriesPage = () => {
 
   const handleCategoryClick = (item) => {
     // Navigate to scrap flow
-    navigate("/add-scrap/category", {
+    navigate("/add-scrap/weight", {
       state: { preSelectedCategory: item.name },
     });
   };

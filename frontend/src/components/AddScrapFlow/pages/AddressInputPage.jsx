@@ -186,7 +186,7 @@ const AddressInputPage = () => {
             {/* Header */}
             <div className="flex items-center justify-between p-3 md:p-6 border-b" style={{ borderColor: 'rgba(100, 148, 110, 0.2)' }}>
                 <button
-                    onClick={() => navigate('/add-scrap/weight')}
+                    onClick={() => navigate('/add-scrap/upload')}
                     className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white transition-colors"
                     style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}
                 >
@@ -208,8 +208,8 @@ const AddressInputPage = () => {
                 <div className="flex items-center gap-2">
                     <div className="flex-1 h-2 rounded-full" style={{ backgroundColor: 'rgba(100, 148, 110, 0.2)' }}>
                         <motion.div
-                            initial={{ width: '75%' }}
-                            animate={{ width: '87.5%' }}
+                            initial={{ width: '60%' }}
+                            animate={{ width: '80%' }}
                             transition={{ duration: 0.5 }}
                             className="h-full rounded-full"
                             style={{ backgroundColor: '#38bdf8' }}

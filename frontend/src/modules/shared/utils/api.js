@@ -33,8 +33,13 @@ export const apiRequest = async (endpoint, options = {}) => {
 
     if (!response.ok) {
       // Log response for debugging
-      console.error(`API Error Response: ${response.status} ${response.statusText}`, data);
-      const apiError = new Error(data.error || data.message || 'Something went wrong');
+      // Extract the most relevant error message
+      const errorMessage = data.error ||
+        data.message ||
+        (data.errors && Array.isArray(data.errors) && data.errors.length > 0 ? data.errors[0].msg : null) ||
+        'Something went wrong';
+
+      const apiError = new Error(errorMessage);
       apiError.status = response.status;
       apiError.data = data;
       throw apiError;
@@ -113,8 +118,8 @@ export const orderAPI = {
       method: 'GET',
     });
   },
-  updateStatus: async (id, status, paymentStatus = null, totalAmount = null) => {
-    const body = { status };
+  updateStatus: async (id, status, paymentStatus = null, totalAmount = null, extraParams = {}) => {
+    const body = { status, ...extraParams };
     if (paymentStatus) body.paymentStatus = paymentStatus;
     if (totalAmount) body.totalAmount = totalAmount;
     return apiRequest(API_ENDPOINTS.orders.status(id), {
@@ -310,10 +315,13 @@ export const scrapperOrdersAPI = {
   },
   getMyForwarded: async (query = '') => {
     const suffix = query ? `?${query}` : '';
-    return apiRequest(`/api/orders/my-forwarded${suffix}`, { method: 'GET' });
+    return apiRequest(`/orders/my-forwarded${suffix}`, { method: 'GET' });
   },
   accept: async (id) => {
     return apiRequest(API_ENDPOINTS.orders.accept(id), { method: 'POST' });
+  },
+  getTargeted: async () => {
+    return apiRequest('/orders/targeted', { method: 'GET' });
   },
 };
 
@@ -349,6 +357,9 @@ export const earningsAPI = {
   getHistory: async (query = '') => {
     const suffix = query ? `?${query}` : '';
     return apiRequest(`${API_ENDPOINTS.earnings.scrapperHistory}${suffix}`, { method: 'GET' });
+  },
+  getScrapStats: async () => {
+    return apiRequest(API_ENDPOINTS.earnings.scrapperScrapStats, { method: 'GET' });
   },
   getScrapperEarnings: async (scrapperId, query = '') => {
     const suffix = query ? `?${query}` : '';
@@ -591,6 +602,9 @@ export const scrapperProfileAPI = {
   },
   getPublicProfile: async (id) => {
     return apiRequest(`/scrappers/${id}/profile`, { method: 'GET' });
+  },
+  getNearbyBig: async (lat, lng, radius = 1000) => {
+    return apiRequest(`/scrappers/nearby-big?lat=${lat}&lng=${lng}&radius=${radius}`, { method: 'GET' });
   },
 };
 

@@ -107,7 +107,7 @@ const orderSchema = new mongoose.Schema({
   },
   assignmentStatus: {
     type: String,
-    enum: ['unassigned', 'assigned', 'accepted', 'rejected'],
+    enum: ['unassigned', 'assigned', 'accepted', 'rejected', 'targeted'],
     default: 'unassigned'
   },
   assignmentHistory: [{
@@ -137,7 +137,24 @@ const orderSchema = new mongoose.Schema({
       type: [Number],
       default: [0, 0]
     }
-  }
+  },
+  isNegotiated: {
+    type: Boolean,
+    default: false
+  },
+  finalPrice: {
+    type: Number,
+    default: null
+  },
+  dealType: {
+    type: String,
+    enum: ['Cash', 'Online'],
+    default: 'Cash'
+  },
+  targetedScrappers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Scrapper'
+  }]
 }, {
   timestamps: true
 });

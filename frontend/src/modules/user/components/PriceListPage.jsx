@@ -165,27 +165,27 @@ const PriceListPage = () => {
                                 key={item.id || index}
                                 className="bg-white rounded-lg p-2.5 shadow-md hover:shadow-lg flex items-center gap-2.5 border border-slate-200 transition-all duration-200"
                             >
-                                <div 
+                                <div
                                     className="w-14 h-14 rounded-lg overflow-hidden bg-gradient-to-br from-sky-50 to-blue-50 flex-shrink-0 border border-sky-100"
                                 >
-                                    <img 
-                                        src={item.image} 
-                                        alt={item.name} 
+                                    <img
+                                        src={item.image}
+                                        alt={item.name}
                                         className="w-full h-full object-cover"
                                     />
                                 </div>
-                                
+
                                 <div className="flex-1 min-w-0">
-                                    <h3 
-                                        className="font-bold text-sm mb-0.5 truncate" 
+                                    <h3
+                                        className="font-bold text-sm mb-0.5 truncate"
                                         style={{ color: "#1e293b" }}
                                     >
                                         {item.name}
                                     </h3>
                                     <p className="text-xs text-slate-500">Per {item.unit}</p>
                                 </div>
-                                
-                                <div 
+
+                                <div
                                     className="text-right bg-slate-50 px-2.5 py-1.5 rounded-md border border-slate-200"
                                 >
                                     <p className="text-sm font-bold" style={{ color: "#000000" }}>₹{item.price}</p>

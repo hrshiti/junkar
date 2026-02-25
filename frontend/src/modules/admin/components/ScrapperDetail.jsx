@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   FaArrowLeft, FaTruck, FaPhone, FaIdCard, FaStar, FaRupeeSign,
-  FaCheckCircle, FaTimesCircle, FaClock, FaUserTimes, FaCar, FaCreditCard, FaChartLine
+  FaCheckCircle, FaTimesCircle, FaClock, FaUserTimes, FaCar, FaCreditCard, FaChartLine, FaMapMarkerAlt
 } from 'react-icons/fa';
 import { adminAPI, earningsAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
@@ -65,7 +65,12 @@ const ScrapperDetail = () => {
     "Location: ",
     "Completed: ",
     "N/A",
-    "User"
+    "User",
+    "Business Location",
+    "PAN Number",
+    "PAN Photo",
+    "Shop License",
+    "Coordinates"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
@@ -123,6 +128,8 @@ const ScrapperDetail = () => {
         vehicleInfo: backendScrapper.vehicleInfo
           ? `${backendScrapper.vehicleInfo.type || ''} - ${backendScrapper.vehicleInfo.number || ''}`
           : getTranslatedText('Not provided'),
+        businessLocation: backendScrapper.businessLocation || null,
+        scrapperType: backendScrapper.scrapperType || 'small',
         joinedAt: backendScrapper.createdAt || new Date().toISOString(),
         earnings: earningsData,
         status: backendScrapper.status || 'active'
@@ -328,6 +335,20 @@ const ScrapperDetail = () => {
                   <p className="font-semibold" style={{ color: '#2d3748' }}>{getTranslatedText(scrapper.vehicleInfo)}</p>
                 </div>
               </div>
+              {scrapper.scrapperType === 'big' && scrapper.businessLocation && (
+                <div className="flex items-start gap-3 md:col-span-2">
+                  <FaMapMarkerAlt style={{ color: '#64946e', marginTop: '4px' }} />
+                  <div>
+                    <p className="text-xs" style={{ color: '#718096' }}>{getTranslatedText("Business Location")}</p>
+                    <p className="font-semibold" style={{ color: '#2d3748' }}>{scrapper.businessLocation.address || getTranslatedText('N/A')}</p>
+                    {scrapper.businessLocation.coordinates && (
+                      <p className="text-[10px] text-gray-400">
+                        {getTranslatedText("Coordinates")}: {scrapper.businessLocation.coordinates[1].toFixed(6)}, {scrapper.businessLocation.coordinates[0].toFixed(6)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -415,6 +436,10 @@ const ScrapperDetail = () => {
               <p className="font-semibold" style={{ color: '#2d3748' }}>{scrapper.kycData.aadhaarNumber || getTranslatedText('Not provided')}</p>
             </div>
             <div>
+              <p className="text-xs mb-1" style={{ color: '#718096' }}>{getTranslatedText("PAN Number")}</p>
+              <p className="font-semibold" style={{ color: '#2d3748' }}>{scrapper.kycData.panNumber || getTranslatedText('Not provided')}</p>
+            </div>
+            <div>
               <p className="text-xs mb-1" style={{ color: '#718096' }}>{getTranslatedText("Verified On")}</p>
               <p className="font-semibold" style={{ color: '#2d3748' }}>
                 {scrapper.kycData.verifiedAt ? new Date(scrapper.kycData.verifiedAt).toLocaleDateString() : getTranslatedText('N/A')}
@@ -461,7 +486,27 @@ const ScrapperDetail = () => {
                 </div>
               </div>
             )}
-            {!scrapper.kycData.aadhaarPhotoUrl && !scrapper.kycData.licenseUrl && !scrapper.kycData.selfieUrl && (
+            {scrapper.kycData.panPhotoUrl && (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold" style={{ color: '#718096' }}>{getTranslatedText("PAN Photo")}</p>
+                <div className="border rounded-lg overflow-hidden h-40 bg-gray-50 flex items-center justify-center">
+                  <img src={scrapper.kycData.panPhotoUrl} alt={getTranslatedText("PAN Photo")} className="max-w-full max-h-full object-contain cursor-pointer hover:scale-105 transition-transform"
+                    onClick={() => window.open(scrapper.kycData.panPhotoUrl, '_blank')}
+                  />
+                </div>
+              </div>
+            )}
+            {scrapper.kycData.shopLicenseUrl && (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold" style={{ color: '#718096' }}>{getTranslatedText("Shop License")}</p>
+                <div className="border rounded-lg overflow-hidden h-40 bg-gray-50 flex items-center justify-center">
+                  <img src={scrapper.kycData.shopLicenseUrl} alt={getTranslatedText("Shop License")} className="max-w-full max-h-full object-contain cursor-pointer hover:scale-105 transition-transform"
+                    onClick={() => window.open(scrapper.kycData.shopLicenseUrl, '_blank')}
+                  />
+                </div>
+              </div>
+            )}
+            {!scrapper.kycData.aadhaarPhotoUrl && !scrapper.kycData.licenseUrl && !scrapper.kycData.selfieUrl && !scrapper.kycData.panPhotoUrl && !scrapper.kycData.shopLicenseUrl && (
               <p className="text-sm text-gray-500 italic">{getTranslatedText("No documents uploaded.")}</p>
             )}
           </div>

@@ -91,6 +91,47 @@ class NotificationService {
     }
 
     /**
+     * Notify specific targeted scrappers about a B2B request
+     * @param {Object} order - Order object with targetedScrappers array
+     * @returns {Promise<void>}
+     */
+    async notifyTargetedScrappers(order) {
+        try {
+            if (!order.targetedScrappers || order.targetedScrappers.length === 0) return;
+
+            const scrapperIds = order.targetedScrappers.map(id => id.toString());
+
+            const targetedScrappers = await Scrapper.find({
+                _id: { $in: scrapperIds }
+            }).select('_id fcmTokens fcmTokenMobile');
+
+            if (targetedScrappers.length === 0) {
+                logger.info(`No targeted scrappers found for Order ${order._id}`);
+                return;
+            }
+
+            const notificationPayload = {
+                title: 'New Direct Request 🎯',
+                body: 'A retailer has sent you a direct B2B scrap request!',
+                data: {
+                    orderId: order._id.toString(),
+                    type: 'targeted_order'
+                }
+            };
+
+            await Promise.allSettled(
+                targetedScrappers.map(scrapper =>
+                    this.notifyScrapper(scrapper._id.toString(), order, notificationPayload)
+                )
+            );
+
+            logger.info(`Notified ${targetedScrappers.length} targeted scrappers for Order ${order._id}`);
+        } catch (error) {
+            logger.error('Error notifying targeted scrappers:', error);
+        }
+    }
+
+    /**
      * Notify a single scrapper via Socket.io and FCM
      * @param {String} scrapperId - Scrapper ID
      * @param {Object} order - Order object

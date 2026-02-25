@@ -5,6 +5,7 @@ import {
   // Dashboard & Analytics
   getDashboardStats,
   getPaymentAnalytics,
+  getBusinessAnalytics,
 
   // User Management
   getAllUsers,
@@ -87,6 +88,7 @@ router.use(isAdmin);
 // ============================================
 router.get('/dashboard/stats', getDashboardStats);
 router.get('/analytics/payments', getPaymentAnalytics);
+router.get('/analytics/business', getBusinessAnalytics);
 
 // ============================================
 // USER MANAGEMENT

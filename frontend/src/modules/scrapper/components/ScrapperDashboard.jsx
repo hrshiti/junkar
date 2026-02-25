@@ -94,6 +94,7 @@ const ScrapperDashboard = () => {
 
   const [completedOrders, setCompletedOrders] = useState([]);
   const [activeRequests, setActiveRequests] = useState([]);
+  const [targetedRequests, setTargetedRequests] = useState([]);
 
   // Function to load and update dashboard data
   const loadDashboardData = async () => {
@@ -217,6 +218,18 @@ const ScrapperDashboard = () => {
         ...prev,
         activeRequests: activeCount
       }));
+    }
+
+    // Load targeted requests for big scrappers
+    if (user?.scrapperType === 'big') {
+      try {
+        const targetedResponse = await scrapperOrdersAPI.getTargeted();
+        if (targetedResponse.success && targetedResponse.data?.orders) {
+          setTargetedRequests(targetedResponse.data.orders);
+        }
+      } catch (error) {
+        console.error('Failed to load targeted requests:', error);
+      }
     }
 
     // Load separate market price subscription status (different from onboarding subscription)
@@ -715,6 +728,51 @@ const ScrapperDashboard = () => {
         <div className="px-2">
           <ScrapperSolutions />
         </div>
+
+        {/* Targeted B2B Requests (For Big Scrappers) */}
+        {user?.scrapperType === 'big' && targetedRequests.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl p-4 shadow-lg bg-sky-900 text-white border border-sky-700"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🎯</span>
+                <h2 className="text-lg font-bold">Direct B2B Requests</h2>
+              </div>
+              <span className="bg-sky-500 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse">
+                New
+              </span>
+            </div>
+            <div className="space-y-3">
+              {targetedRequests.slice(0, 2).map((req) => (
+                <div
+                  key={req._id}
+                  onClick={() => navigate(`/scrapper/active-requests`, { state: { filter: 'targeted' } })}
+                  className="p-3 rounded-xl bg-sky-800/50 border border-sky-700/50 flex items-center justify-between gap-3 cursor-pointer hover:bg-sky-800 transition-colors"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold truncate">{req.user?.name || 'Retailer'}</p>
+                    <p className="text-[10px] text-sky-300 font-medium">Approx. {req.totalWeight}kg • {req.scrapItems?.map(i => i.category).join(', ')}</p>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <p className="text-xs font-bold text-sky-400">View Detail</p>
+                    <p className="text-[10px] text-sky-300">Targeted to you</p>
+                  </div>
+                </div>
+              ))}
+              {targetedRequests.length > 2 && (
+                <button
+                  onClick={() => navigate('/scrapper/active-requests', { state: { filter: 'targeted' } })}
+                  className="w-full text-center text-[11px] font-bold text-sky-300 py-1"
+                >
+                  +{targetedRequests.length - 2} more targeted requests
+                </button>
+              )}
+            </div>
+          </motion.div>
+        )}
 
         {/* Active Requests List */}
         {

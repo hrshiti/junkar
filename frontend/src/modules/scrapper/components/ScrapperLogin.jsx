@@ -1,11 +1,13 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { Autocomplete, useJsApiLoader } from '@react-google-maps/api';
 import { useAuth } from '../../shared/context/AuthContext';
 import { validateReferralCode, createReferral, processSignupBonus, getReferralSettings } from '../../shared/utils/referralUtils';
 import { linkLeadToScrapper } from '../../shared/utils/leadUtils';
 import { authAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import { FaPhone, FaLock, FaUser, FaEnvelope, FaTruck, FaMapMarkerAlt, FaCheckCircle, FaExclamationCircle, FaInfoCircle, FaMapMarkedAlt, FaSearchLocation } from 'react-icons/fa';
 
 const ScrapperLogin = () => {
   const staticTexts = [
@@ -73,7 +75,9 @@ const ScrapperLogin = () => {
     "✓ You were referred by {name}",
     "✓ You were referred by {name}",
     "By continuing, you agree to our Terms & Conditions",
-    "Resend in {seconds}s"
+    "Resend in {seconds}s",
+    "Search shop location (e.g. Bhopal)",
+    "Location coordinates verified via Google Maps"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -87,6 +91,9 @@ const ScrapperLogin = () => {
   const [heardFromOther, setHeardFromOther] = useState('');
   const [selectedServices, setSelectedServices] = useState(['scrap_pickup']);
   const [scrapperType, setScrapperType] = useState('small'); // 'small' or 'big'
+  const [businessAddress, setBusinessAddress] = useState('');
+  const [businessCoordinates, setBusinessCoordinates] = useState(null);
+  const [isLocatingBusiness, setIsLocatingBusiness] = useState(false);
   const [referralCode, setReferralCode] = useState('');
   const [referralCodeError, setReferralCodeError] = useState('');
   const [referrerName, setReferrerName] = useState('');
@@ -100,6 +107,12 @@ const ScrapperLogin = () => {
   const [resendTimer, setResendTimer] = useState(0);
   const inputRefs = useRef([]);
   const { login, isAuthenticated, user } = useAuth();
+  const autocompleteRef = useRef(null);
+
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    libraries: ['places']
+  });
 
   // Handle resend timer
   useEffect(() => {
@@ -134,6 +147,19 @@ const ScrapperLogin = () => {
     // Clear error - validation happens on backend onSubmit
     setReferralCodeError('');
     setReferrerName(getTranslatedText('Valid Code Format')); // Generic success message until API check
+  };
+
+  const handlePlaceSelect = () => {
+    if (autocompleteRef.current) {
+      const place = autocompleteRef.current.getPlace();
+      if (place.geometry) {
+        setBusinessAddress(place.formatted_address);
+        setBusinessCoordinates([
+          place.geometry.location.lng(),
+          place.geometry.location.lat()
+        ]);
+      }
+    }
   };
 
   // Check for referral code in URL
@@ -292,16 +318,26 @@ const ScrapperLogin = () => {
         // Register scrapper and send OTP
         const password = 'temp123'; // Temporary password (can be changed later)
 
-        const response = await authAPI.register({
+        const registrationData = {
           name,
           email: email.trim(),
           phone,
           password,
           role: 'scrapper',
           services: selectedServices,
-          referralCode: referralCode, // Send referral code to backend
-          scrapperType: scrapperType // Include scrapper type
-        });
+          referralCode: referralCode,
+          scrapperType: scrapperType
+        };
+
+        if (scrapperType === 'big' && businessCoordinates) {
+          registrationData.businessLocation = {
+            type: 'Point',
+            coordinates: businessCoordinates,
+            address: businessAddress
+          };
+        }
+
+        const response = await authAPI.register(registrationData);
 
         if (response.success) {
           // OTP is sent automatically on registration
@@ -639,7 +675,7 @@ const ScrapperLogin = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder={getTranslatedText("Enter your email address")}
-                        className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${email ? 'border-sky-500' : 'border-zinc-700'}`}
+                        className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${email ? 'border-sky-500 ring-sky-900/20' : 'border-zinc-700 focus:border-sky-500'} `}
                         required={!isLogin}
                       />
                     </motion.div>
@@ -658,7 +694,7 @@ const ScrapperLogin = () => {
                       <select
                         value={heardFrom}
                         onChange={(e) => setHeardFrom(e.target.value)}
-                        className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white ${heardFrom ? 'border-sky-500' : 'border-zinc-700'}`}
+                        className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white ${heardFrom ? 'border-sky-500 ring-sky-900/20' : 'border-zinc-700 focus:border-sky-500'} `}
                       >
                         <option value="">{getTranslatedText("Select an option")}</option>
                         <option value="youtube">{getTranslatedText("YouTube")}</option>
@@ -675,7 +711,7 @@ const ScrapperLogin = () => {
                           value={heardFromOther}
                           onChange={(e) => setHeardFromOther(e.target.value)}
                           placeholder={getTranslatedText("Please specify (e.g., association, poster)")}
-                          className={`mt-2 w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white ${heardFromOther ? 'border-sky-500' : 'border-zinc-700'}`}
+                          className={`mt-2 w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white ${heardFromOther ? 'border-sky-500 ring-sky-900/20' : 'border-zinc-700 focus:border-sky-500'} `}
                         />
                       )}
                     </motion.div>
@@ -741,9 +777,9 @@ const ScrapperLogin = () => {
                             onChange={() => setScrapperType('small')}
                             className="hidden"
                           />
-                          <img src="https://cdn-icons-png.flaticon.com/512/2972/2972185.png" alt="Small Scrapper" className="w-12 h-12 mb-1 object-contain" />
-                          <span className="text-sm font-bold text-white text-center">Small Scrapper</span>
-                          <span className="text-[10px] text-gray-400 text-center">(Individual / Kabadiwala)</span>
+                          <img src="https://cdn-icons-png.flaticon.com/512/2972/2972185.png" alt="Small Scrapper" className="w-10 h-10 mb-2 object-contain" />
+                          <span className="text-sm font-bold text-white text-center">Small</span>
+                          <span className="text-[10px] text-gray-500 text-center leading-tight">(Individual)</span>
                         </label>
 
                         <label
@@ -760,11 +796,100 @@ const ScrapperLogin = () => {
                             onChange={() => setScrapperType('big')}
                             className="hidden"
                           />
-                          <img src="https://cdn-icons-png.flaticon.com/512/1355/1355463.png" alt="Big Scrapper" className="w-12 h-12 mb-1 object-contain" />
-                          <span className="text-sm font-bold text-white text-center">Big Scrapper</span>
-                          <span className="text-[10px] text-gray-400 text-center">(Dealer / Wholesaler)</span>
+                          <img src="https://cdn-icons-png.flaticon.com/512/1355/1355463.png" alt="Big Scrapper" className="w-10 h-10 mb-2 object-contain" />
+                          <span className="text-sm font-bold text-white text-center">Big</span>
+                          <span className="text-[10px] text-gray-500 text-center leading-tight">(Dealer)</span>
                         </label>
                       </div>
+
+                      <AnimatePresence>
+                        {scrapperType === 'big' && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="mt-4 space-y-3"
+                          >
+                            <div>
+                              <label className="block text-xs font-semibold mb-1 text-gray-400">
+                                {getTranslatedText("Shop / Warehouse Address")}
+                              </label>
+                              {isLoaded ? (
+                                <Autocomplete
+                                  onLoad={(ref) => autocompleteRef.current = ref}
+                                  onPlaceChanged={handlePlaceSelect}
+                                >
+                                  <div className="relative">
+                                    <input
+                                      type="text"
+                                      value={businessAddress}
+                                      onChange={(e) => setBusinessAddress(e.target.value)}
+                                      placeholder={getTranslatedText("Search shop location (e.g. Bhopal)")}
+                                      className="w-full px-4 py-3 pr-10 rounded-xl border-2 border-zinc-700 focus:border-sky-500 bg-black/50 text-white text-sm outline-none transition-all"
+                                      required={scrapperType === 'big'}
+                                    />
+                                    <FaSearchLocation className="absolute right-4 top-1/2 -translate-y-1/2 text-sky-500" />
+                                  </div>
+                                </Autocomplete>
+                              ) : (
+                                <textarea
+                                  value={businessAddress}
+                                  onChange={(e) => setBusinessAddress(e.target.value)}
+                                  placeholder={getTranslatedText("Enter full business address")}
+                                  className="w-full px-4 py-2 rounded-xl border-2 border-zinc-700 focus:border-sky-500 bg-black text-white text-sm resize-none"
+                                  rows="2"
+                                  required={scrapperType === 'big'}
+                                />
+                              )}
+                              {businessCoordinates && (
+                                <p className="text-[10px] text-green-500 mt-1 flex items-center gap-1">
+                                  <FaCheckCircle className="text-[8px]" /> {getTranslatedText("Location coordinates verified via Google Maps")}
+                                </p>
+                              )}
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsLocatingBusiness(true);
+                                if (navigator.geolocation) {
+                                  navigator.geolocation.getCurrentPosition(
+                                    (position) => {
+                                      setBusinessCoordinates([position.coords.longitude, position.coords.latitude]);
+                                      setIsLocatingBusiness(false);
+                                    },
+                                    (error) => {
+                                      console.error("Error getting location:", error);
+                                      setIsLocatingBusiness(false);
+                                      alert("Failed to get location. Please allow permissions.");
+                                    }
+                                  );
+                                }
+                              }}
+                              className={`w-full py-2.5 rounded-xl border-2 flex items-center justify-center gap-2 transition-all ${businessCoordinates
+                                ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400'
+                                : 'border-zinc-700 bg-zinc-800 text-gray-300 hover:border-zinc-600'
+                                }`}
+                            >
+                              {isLocatingBusiness ? (
+                                <span className="flex items-center gap-2">
+                                  <motion.span
+                                    animate={{ rotate: 360 }}
+                                    transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                                    className="w-4 h-4 border-2 border-sky-500 border-t-transparent rounded-full"
+                                  />
+                                  Locating...
+                                </span>
+                              ) : (
+                                <>
+                                  <span className="text-lg">📍</span>
+                                  {businessCoordinates ? "Location Set Successfully" : "Pin Shop Location on Map"}
+                                </>
+                              )}
+                            </button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </motion.div>
                   )}
 
@@ -782,7 +907,7 @@ const ScrapperLogin = () => {
                         value={vehicleInfo}
                         onChange={(e) => setVehicleInfo(e.target.value)}
                         placeholder={getTranslatedText("e.g., Truck - MH-12-AB-1234")}
-                        className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${vehicleInfo ? 'border-sky-500' : 'border-zinc-700'}`}
+                        className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${vehicleInfo ? 'border-sky-500 ring-sky-900/20' : 'border-zinc-700 focus:border-sky-500'} `}
                         required={!isLogin}
                       />
                     </motion.div>
@@ -815,8 +940,8 @@ const ScrapperLogin = () => {
                             value={referralCode}
                             onChange={handleReferralCodeChange}
                             placeholder={getTranslatedText("Enter referral code (e.g., SCRAP-ABC123)")}
-                            className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base uppercase bg-black text-white placeholder-gray-600 ${referralCodeError ? 'border-red-500' : referrerName ? 'border-sky-500' : 'border-zinc-700'
-                              }`}
+                            className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base uppercase bg-black text-white placeholder-gray-600 ${referralCodeError ? 'border-red-500 ring-red-900/20' : referrerName ? 'border-sky-500 ring-sky-900/20' : 'border-zinc-700 focus:border-sky-500'
+                              } `}
                             maxLength={13}
                           />
                           {referralCodeError && (
@@ -846,7 +971,7 @@ const ScrapperLogin = () => {
                         setPhone(value);
                       }}
                       placeholder={getTranslatedText("Enter 10-digit phone number")}
-                      className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${phone.length === 10 ? 'border-sky-500' : 'border-zinc-700'}`}
+                      className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${phone.length === 10 ? 'border-sky-500 ring-sky-900/20' : 'border-zinc-700 focus:border-sky-500'} `}
                       maxLength={10}
                       required
                     />
@@ -907,7 +1032,7 @@ const ScrapperLogin = () => {
                     </p>
                   </div>
 
-                  <div className="flex justify-center flex-nowrap gap-1 sm:gap-2 md:gap-3 px-1 w-full max-w-sm mx-auto">
+                  <div className="flex justify-center gap-2 sm:gap-3 px-1">
                     {otp.map((digit, index) => (
                       <motion.input
                         key={index}
@@ -922,9 +1047,9 @@ const ScrapperLogin = () => {
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: 0.1 + index * 0.05 }}
-                        className={`w-9 h-11 text-lg sm:w-10 sm:h-12 sm:text-xl md:w-14 md:h-14 md:text-2xl text-center font-bold rounded-lg md:rounded-xl border-2 focus:outline-none focus:ring-2 transition-all ${digit
-                          ? 'border-sky-500 bg-sky-900/30 text-sky-400'
-                          : 'border-zinc-700 bg-black text-white'
+                        className={`w-10 h-12 sm:w-12 sm:h-14 text-xl sm:text-2xl text-center font-bold rounded-xl border-2 focus:outline-none focus:ring-2 transition-all ${digit
+                          ? 'border-sky-500 bg-sky-900/30 text-sky-400 ring-sky-900/20'
+                          : 'border-zinc-700 bg-black text-white focus:border-sky-500'
                           }`}
                       />
                     ))}

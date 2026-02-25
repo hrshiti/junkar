@@ -453,7 +453,7 @@ export const getScrapperById = asyncHandler(async (req, res) => {
   try {
     // Admin needs to see full details including hidden fields like aadhaarNumber
     const scrapper = await Scrapper.findById(req.params.id)
-      .select('+kyc.aadhaarNumber')
+      .select('+kyc.aadhaarNumber +kyc.panNumber')
       .lean();
 
     if (!scrapper) {
@@ -895,7 +895,7 @@ export const getAllPrices = asyncHandler(async (req, res) => {
 // @access  Private (Admin)
 export const createPrice = asyncHandler(async (req, res) => {
   try {
-    const { category, pricePerKg, price: fixedPrice, regionCode, effectiveDate, isActive, image, type } = req.body;
+    const { category, pricePerKg, price: fixedPrice, regionCode, effectiveDate, isActive, image, type, minPrice, maxPrice } = req.body;
 
     if (!category) {
       return sendError(res, 'Category is required', 400);
@@ -924,7 +924,9 @@ export const createPrice = asyncHandler(async (req, res) => {
       isActive: isActive !== undefined ? isActive : true,
       updatedBy: req.user.id,
       image,
-      type: type || 'material'
+      type: type || 'material',
+      minPrice: minPrice || 0,
+      maxPrice: maxPrice || 0
     });
 
     sendSuccess(res, 'Price created successfully', { price: newPriceEntry });
@@ -939,7 +941,7 @@ export const createPrice = asyncHandler(async (req, res) => {
 // @access  Private (Admin)
 export const updatePrice = asyncHandler(async (req, res) => {
   try {
-    const { pricePerKg, effectiveDate, isActive, image } = req.body;
+    const { pricePerKg, effectiveDate, isActive, image, minPrice, maxPrice } = req.body;
     const priceId = req.params.id;
 
     const price = await Price.findById(priceId);
@@ -952,6 +954,8 @@ export const updatePrice = asyncHandler(async (req, res) => {
     if (isActive !== undefined) price.isActive = isActive;
     if (isActive !== undefined) price.isActive = isActive;
     if (image !== undefined) price.image = image;
+    if (minPrice !== undefined) price.minPrice = minPrice;
+    if (maxPrice !== undefined) price.maxPrice = maxPrice;
     price.updatedBy = req.user.id;
 
     await price.save();
@@ -1135,6 +1139,100 @@ export const getPaymentAnalytics = asyncHandler(async (req, res) => {
   } catch (error) {
     logger.error('[Admin] Error fetching payment analytics:', error);
     sendError(res, 'Failed to fetch payment analytics', 500);
+  }
+});
+
+// @desc    Get Business/Scrap Analytics
+// @route   GET /api/admin/analytics/business
+// @access  Private (Admin)
+export const getBusinessAnalytics = asyncHandler(async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    const filter = { status: ORDER_STATUS.COMPLETED };
+
+    if (startDate || endDate) {
+      filter.completedDate = {};
+      if (startDate) filter.completedDate.$gte = new Date(startDate);
+      if (endDate) filter.completedDate.$lte = new Date(endDate);
+    }
+
+    const [
+      categoryStats,
+      negotiationStats,
+      topScrappers,
+      totalWeight
+    ] = await Promise.all([
+      Order.aggregate([
+        { $match: filter },
+        { $unwind: '$scrapItems' },
+        {
+          $group: {
+            _id: '$scrapItems.category',
+            totalWeight: { $sum: '$scrapItems.weight' },
+            totalAmount: { $sum: '$scrapItems.total' },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { totalWeight: -1 } }
+      ]),
+      Order.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: '$isNegotiated',
+            count: { $sum: 1 },
+            avgAmount: { $avg: '$totalAmount' }
+          }
+        }
+      ]),
+      Order.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: '$scrapper',
+            totalOrders: { $sum: 1 },
+            totalEarnings: { $sum: '$totalAmount' }
+          }
+        },
+        { $sort: { totalOrders: -1 } },
+        { $limit: 10 },
+        {
+          $lookup: {
+            from: 'scrappers',
+            localField: '_id',
+            foreignField: '_id',
+            as: 'scrapperInfo'
+          }
+        },
+        { $unwind: '$scrapperInfo' },
+        {
+          $project: {
+            name: '$scrapperInfo.name',
+            phone: '$scrapperInfo.phone',
+            totalOrders: 1,
+            totalEarnings: 1
+          }
+        }
+      ]),
+      Order.aggregate([
+        { $match: filter },
+        { $group: { _id: null, weight: { $sum: '$totalWeight' } } }
+      ])
+    ]);
+
+    sendSuccess(res, 'Business analytics retrieved successfully', {
+      totalWeight: totalWeight[0]?.weight || 0,
+      categories: categoryStats,
+      negotiation: {
+        negotiatedCount: negotiationStats.find(s => s._id === true)?.count || 0,
+        standardCount: negotiationStats.find(s => s._id === false)?.count || 0,
+        avgNegotiatedPrice: negotiationStats.find(s => s._id === true)?.avgAmount || 0
+      },
+      topScrappers
+    });
+  } catch (error) {
+    logger.error('[Admin] Error fetching business analytics:', error);
+    sendError(res, 'Failed to fetch business analytics', 500);
   }
 });
 

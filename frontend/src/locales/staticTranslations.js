@@ -48,6 +48,11 @@ export const staticTranslations = {
         "E-Waste": "ई-कचरा",
         "Batteries": "बैटरी",
         "Cables": "केबल्स",
+        "Computer Items": "कंप्यूटर आइटम",
+        "Motherboard": "मदरबोर्ड",
+        "Laptops/Mobiles": "लैपटॉप/मोबाइल",
+        "Cables/Wires": "केबल/तार",
+        "Other Electronics": "अन्य इलेक्ट्रॉनिक्स",
 
         // Services
         "Home Services": "घरेलू सेवाएं",

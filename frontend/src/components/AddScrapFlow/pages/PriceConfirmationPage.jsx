@@ -117,7 +117,7 @@ const PriceConfirmationPage = () => {
           // Convert prices array to object for easy lookup
           const pricesMap = {};
           response.data.prices.forEach(price => {
-            pricesMap[price.category] = price.pricePerKg;
+            pricesMap[price.category] = price;
           });
           setMarketPrices(pricesMap);
         } else {
@@ -338,7 +338,7 @@ const PriceConfirmationPage = () => {
         <div className="flex items-center gap-2">
           <div className="flex-1 h-2 rounded-full" style={{ backgroundColor: 'rgba(100, 148, 110, 0.2)' }}>
             <motion.div
-              initial={{ width: '75%' }}
+              initial={{ width: '80%' }}
               animate={{ width: '100%' }}
               transition={{ duration: 0.5 }}
               className="h-full rounded-full"
@@ -448,7 +448,14 @@ const PriceConfirmationPage = () => {
                   {getTranslatedText(cat.name)}
                 </span>
                 <span className="text-xs md:text-sm font-medium" style={{ color: '#38bdf8' }}>
-                  ₹{marketPrices[cat.name] || 0}/{getTranslatedText("kg")}
+                  {(() => {
+                    const info = marketPrices[cat.name];
+                    if (info && (info.minPrice || info.maxPrice)) {
+                      return `₹${info.minPrice || info.pricePerKg} - ₹${info.maxPrice || info.pricePerKg}`;
+                    }
+                    const price = info?.pricePerKg || cat.price || 0;
+                    return `₹${price}`;
+                  })()}/{getTranslatedText("kg")}
                 </span>
               </div>
             ))}

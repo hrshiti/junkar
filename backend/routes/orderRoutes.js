@@ -10,7 +10,8 @@ import {
   updateOrderStatus,
   cancelOrder,
   updateOrder,
-  forwardToBigScrapper
+  forwardToBigScrapper,
+  getTargetedOrders
 } from '../controllers/orderController.js';
 import { protect, isUser, isScrapper } from '../middleware/auth.js';
 import { validate } from '../middleware/validator.js';
@@ -30,6 +31,7 @@ router.use(protect);
 router.get('/available', isScrapper, getAvailableOrders);
 router.get('/my-assigned', isScrapper, getMyAssignedOrders);
 router.get('/my-forwarded', isScrapper, getMyForwardedOrders);
+router.get('/targeted', isScrapper, getTargetedOrders);
 
 // User routes & Generic ID routes
 // User routes & Generic ID routes

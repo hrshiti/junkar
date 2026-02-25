@@ -30,7 +30,11 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
     "Approve",
     "Cancel",
     "Confirm Rejection",
-    "Close"
+    "Close",
+    "PAN Number",
+    "PAN Photo",
+    "Shop License",
+    "Driving License"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
@@ -150,6 +154,22 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
                     <p className="font-semibold" style={{ color: '#2d3748' }}>{kyc.vehicleInfo}</p>
                   </div>
                 </div>
+                <div className="flex items-center gap-3">
+                  <FaIdCard style={{ color: '#64946e' }} />
+                  <div>
+                    <p className="text-xs" style={{ color: '#718096' }}>{getTranslatedText("PAN Number")}</p>
+                    <p className="font-semibold" style={{ color: '#2d3748' }}>{kyc.panNumber || getTranslatedText('N/A')}</p>
+                  </div>
+                </div>
+                {kyc.scrapperType === 'big' && kyc.businessLocation && (
+                  <div className="flex items-start gap-3 md:col-span-2">
+                    <FaUserShield style={{ color: '#64946e', marginTop: '4px' }} />
+                    <div>
+                      <p className="text-xs" style={{ color: '#718096' }}>{getTranslatedText("Business Location")}</p>
+                      <p className="font-semibold" style={{ color: '#2d3748' }}>{kyc.businessLocation.address || getTranslatedText('N/A')}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -189,9 +209,61 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
                       onError={(e) => {
                         e.target.src = 'https://via.placeholder.com/400x400?text=Selfie';
                       }}
+                      onClick={() => window.open(kyc.selfieUrl, '_blank')}
                     />
                   </div>
                 </div>
+
+                {/* Driving License */}
+                {kyc.licenseUrl && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold" style={{ color: '#2d3748' }}>
+                      {getTranslatedText("Driving License")}
+                    </label>
+                    <div className="relative rounded-xl overflow-hidden border-2" style={{ borderColor: '#e2e8f0' }}>
+                      <img
+                        src={getImageUrl(kyc.licenseUrl)}
+                        alt="Driving License"
+                        className="w-full h-64 object-contain bg-gray-50"
+                        onClick={() => window.open(kyc.licenseUrl, '_blank')}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* PAN Photo */}
+                {kyc.panPhotoUrl && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold" style={{ color: '#2d3748' }}>
+                      {getTranslatedText("PAN Photo")}
+                    </label>
+                    <div className="relative rounded-xl overflow-hidden border-2" style={{ borderColor: '#e2e8f0' }}>
+                      <img
+                        src={getImageUrl(kyc.panPhotoUrl)}
+                        alt="PAN Card"
+                        className="w-full h-64 object-contain bg-gray-50"
+                        onClick={() => window.open(kyc.panPhotoUrl, '_blank')}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Shop License */}
+                {kyc.shopLicenseUrl && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold" style={{ color: '#2d3748' }}>
+                      {getTranslatedText("Shop License")}
+                    </label>
+                    <div className="relative rounded-xl overflow-hidden border-2" style={{ borderColor: '#e2e8f0' }}>
+                      <img
+                        src={getImageUrl(kyc.shopLicenseUrl)}
+                        alt="Shop License"
+                        className="w-full h-64 object-contain bg-gray-50"
+                        onClick={() => window.open(kyc.shopLicenseUrl, '_blank')}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

@@ -97,7 +97,12 @@ export const register = asyncHandler(async (req, res) => {
         email,
         services: req.body.services || ['scrap_pickup'],
         scrapperType: req.body.scrapperType || 'small',
-        vehicleInfo: defaultVehicleInfo
+        vehicleInfo: defaultVehicleInfo,
+        businessLocation: req.body.businessLocation || {
+          type: 'Point',
+          coordinates: [0, 0],
+          address: ''
+        }
       });
     } catch (scrapperError) {
       // If scrapper creation fails, log error but don't block registration

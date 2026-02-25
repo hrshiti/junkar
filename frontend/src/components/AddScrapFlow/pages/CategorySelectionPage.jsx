@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
-import plasticImage from '../../../assets/plastic.jpg';
-import metalImage from '../../../assets/metal.jpg';
+import plasticImage from '../../../modules/user/assets/plastic.jpg';
+import metalImage from '../../../modules/user/assets/metal1.jpg';
+import copperImage from '../../../modules/user/assets/metal.jpg';
+import aluminiumImage from '../../../modules/user/assets/Aluminium.jpg';
+import brassImage from '../../../modules/user/assets/brass.jpg';
+import steelImage from '../../../modules/user/assets/metal2.jpg';
 import scrapImage2 from '../../../modules/user/assets/scrab.png';
 import electronicImage from '../../../modules/user/assets/electronicbg.png';
 
@@ -12,7 +17,7 @@ import { usePageTranslation } from '../../../hooks/usePageTranslation';
 const CategorySelectionPage = () => {
   const staticTexts = [
     "Select Scrap Category",
-    "Step 1 of 4",
+    "Step 1 of 5",
     "Continue with",
     "Category",
     "Categories",
@@ -35,46 +40,48 @@ const CategorySelectionPage = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Helper to get image based on category name
-  const getCategoryImage = (name) => {
-    const lowerName = name.toLowerCase();
-    if (lowerName.includes('plastic')) return plasticImage;
-    if (lowerName.includes('metal') || lowerName.includes('iron') || lowerName.includes('steel') || lowerName.includes('copper') || lowerName.includes('brass') || lowerName.includes('aluminium') || lowerName.includes('gold') || lowerName.includes('silver')) return metalImage;
-    if (lowerName.includes('paper') || lowerName.includes('book') || lowerName.includes('cardboard') || lowerName.includes('newspaper')) return scrapImage2;
-    if (lowerName.includes('electron') || lowerName.includes('device') || lowerName.includes('computer') || lowerName.includes('phone') || lowerName.includes('wire')) return electronicImage;
-    if (lowerName.includes('glass')) return scrapImage2; // Use a default or specific if available
-    return scrapImage2; // Default fallback
-  };
-
   useEffect(() => {
     const fetchCategories = async () => {
       setLoading(true);
+
+      // 1. Start with the fixed 8 static categories
+      const staticCategories = [
+        { id: 'plastic', name: 'Plastic', image: plasticImage, price: 45 },
+        { id: 'metal', name: 'Metal', image: metalImage, price: 180 },
+        { id: 'paper', name: 'Paper', image: scrapImage2, price: 12 },
+        { id: 'electronics', name: 'Electronics', image: electronicImage, price: 85 },
+        { id: 'copper', name: 'Copper', image: copperImage, price: 650 },
+        { id: 'aluminium', name: 'Aluminium', image: aluminiumImage, price: 180 },
+        { id: 'steel', name: 'Steel', image: steelImage, price: 35 },
+        { id: 'brass', name: 'Brass', image: brassImage, price: 420 },
+      ];
+
       try {
-        // Try to fetch from API first
+        // 2. Fetch latest prices from API
         const response = await publicAPI.getPrices();
 
-        if (response.success && response.data?.prices && response.data.prices.length > 0) {
-          const mappedCategories = response.data.prices.map(price => ({
-            id: price.category.toLowerCase().replace(/\s+/g, '-'),
-            name: price.category.charAt(0).toUpperCase() + price.category.slice(1).toLowerCase(),
-            image: price.image || getCategoryImage(price.category),
-            price: price.pricePerKg
+        if (response.success && response.data?.prices) {
+          // 3. Create a map for easy lookup
+          const apiPrices = {};
+          response.data.prices.forEach(p => {
+            apiPrices[p.category.toLowerCase()] = p.pricePerKg;
+          });
+
+          // 4. Update only the prices in our static list
+          const updatedCategories = staticCategories.map(cat => ({
+            ...cat,
+            price: apiPrices[cat.name.toLowerCase()] !== undefined
+              ? apiPrices[cat.name.toLowerCase()]
+              : cat.price
           }));
-          setCategories(mappedCategories);
+
+          setCategories(updatedCategories);
         } else {
-          throw new Error('No prices from API');
+          setCategories(staticCategories);
         }
       } catch (error) {
-        console.error('Failed to fetch categories from API, using default:', error);
-        // Fallback to local default feed
-        const defaultFeed = getEffectivePriceFeed();
-        const mappedCategories = defaultFeed.map(item => ({
-          id: item.category.toLowerCase().replace(/\s+/g, '-'),
-          name: item.category.charAt(0).toUpperCase() + item.category.slice(1).toLowerCase(),
-          image: getCategoryImage(item.category),
-          price: item.pricePerKg
-        }));
-        setCategories(mappedCategories);
+        console.error('Failed to fetch prices from API, using defaults:', error);
+        setCategories(staticCategories);
       } finally {
         setLoading(false);
       }
@@ -97,7 +104,31 @@ const CategorySelectionPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state, categories]);
 
+  // Optimized Categories Grid
+  const [expandedCategoryId, setExpandedCategoryId] = useState(null);
+
+  const subCategoriesMap = {
+    'electronics': [
+      { id: 'elec_comp', name: 'Computer Items', image: electronicImage, price: 85 },
+      { id: 'elec_mob', name: 'Laptops/Mobiles', image: electronicImage, price: 150 },
+      { id: 'elec_mb', name: 'Motherboard', image: electronicImage, price: 400 },
+      { id: 'elec_cable', name: 'Cables/Wires', image: electronicImage, price: 80 },
+      { id: 'elec_batt', name: 'Batteries', image: electronicImage, price: 60 },
+      { id: 'elec_other', name: 'Other Electronics', image: electronicImage, price: 50 },
+    ]
+  };
+
+  const currentLevelCategories = expandedCategoryId
+    ? subCategoriesMap[expandedCategoryId] || []
+    : categories;
+
   const handleCategoryClick = (category) => {
+    // If it's a main category that has subcategories, drill down
+    if (!expandedCategoryId && subCategoriesMap[category.id]) {
+      setExpandedCategoryId(category.id);
+      return;
+    }
+
     setSelectedCategories(prev => {
       // Toggle selection: if already selected, remove it; otherwise add it
       const isSelected = prev.some(cat => cat.id === category.id);
@@ -114,7 +145,7 @@ const CategorySelectionPage = () => {
       // Store selected categories in sessionStorage for next step
       sessionStorage.setItem('selectedCategories', JSON.stringify(selectedCategories));
       // Navigate to next step (will be Stage 2: Image Upload)
-      navigate('/add-scrap/upload');
+      navigate('/add-scrap/weight');
     }
   };
 
@@ -130,19 +161,27 @@ const CategorySelectionPage = () => {
       {/* Compact Header */}
       <div className="flex items-center justify-between p-3 md:p-4 border-b shadow-sm" style={{ borderColor: '#e0f2fe', backgroundColor: '#ffffff' }}>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => expandedCategoryId ? setExpandedCategoryId(null) : navigate('/')}
           className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-50 transition-colors shadow-sm"
           style={{ backgroundColor: '#ffffff', border: '1.5px solid #e0f2fe' }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ color: '#000000' }}>
-            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
+          {expandedCategoryId ? (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ color: '#000000' }}>
+              <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ color: '#000000' }}>
+              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          )}
         </button>
         <h2
           className="text-lg md:text-xl font-bold"
           style={{ color: '#1e293b' }}
         >
-          {getTranslatedText("Select Scrap Category")}
+          {expandedCategoryId
+            ? getTranslatedText(categories.find(c => c.id === expandedCategoryId)?.name || "Sub Categories")
+            : getTranslatedText("Select Scrap Category")}
         </h2>
         <div className="w-9"></div>
       </div>
@@ -151,19 +190,30 @@ const CategorySelectionPage = () => {
       <div className="px-3 md:px-4 pt-3 bg-white">
         <div className="flex items-center gap-2">
           <div className="flex-1 h-1.5 rounded-full" style={{ backgroundColor: '#e0f2fe' }}>
-            <div
-              className="h-full rounded-full transition-all duration-500"
-              style={{ backgroundColor: '#0ea5e9', width: '25%' }}
+            <motion.div
+              initial={{ width: '0%' }}
+              animate={{ width: '20%' }}
+              transition={{ duration: 0.5 }}
+              className="h-full rounded-full"
+              style={{ backgroundColor: '#0ea5e9' }}
             />
           </div>
-          <span className="text-xs font-bold" style={{ color: '#1e293b' }}>{getTranslatedText("Step 1 of 4")}</span>
+          <span className="text-xs font-bold" style={{ color: '#1e293b' }}>{getTranslatedText("Step 1 of 5")}</span>
         </div>
       </div>
 
       {/* Optimized Categories Grid */}
       <div className="flex-1 overflow-y-auto p-3 md:p-4 pb-24 md:pb-6">
+        {expandedCategoryId && (
+          <p className="text-xs font-bold mb-3 text-sky-600 flex items-center gap-1" onClick={() => setExpandedCategoryId(null)}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Back to All Categories
+          </p>
+        )}
         <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-          {categories.map((category, index) => (
+          {currentLevelCategories.map((category, index) => (
             <div
               key={category.id}
               onClick={() => handleCategoryClick(category)}
@@ -198,6 +248,16 @@ const CategorySelectionPage = () => {
                     </div>
                   </div>
                 )}
+                {!expandedCategoryId && subCategoriesMap[category.id] && (
+                  <div
+                    className="absolute bottom-1 right-1 w-5 h-5 rounded-full flex items-center justify-center shadow-sm"
+                    style={{ backgroundColor: '#0ea5e9' }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-white">
+                      <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                )}
               </div>
 
               {/* Compact Category Info */}
@@ -210,7 +270,7 @@ const CategorySelectionPage = () => {
                 </p>
                 <p
                   className="text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded-md inline-block"
-                  style={{ 
+                  style={{
                     color: '#000000',
                     backgroundColor: '#f1f5f9'
                   }}

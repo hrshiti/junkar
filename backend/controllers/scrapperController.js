@@ -143,3 +143,53 @@ export const updateFcmToken = asyncHandler(async (req, res) => {
 
     sendSuccess(res, 'FCM token updated successfully');
 });
+
+/**
+ * @desc    Get nearby big scrappers for B2B discovery
+ * @route   GET /api/scrappers/nearby-big
+ * @access  Private (Scrapper - Retailer)
+ */
+export const getNearbyBigScrappers = asyncHandler(async (req, res) => {
+    const { lat, lng, radius = 20 } = req.query; // radius in km
+
+    if (!lat || !lng) {
+        return sendError(res, 'Latitude and Longitude are required', 400);
+    }
+
+    const latitude = parseFloat(lat);
+    const longitude = parseFloat(lng);
+    const radiusInMeters = parseFloat(radius || 500) * 1000; // Default to 500km if not provided
+
+    const nearbyBigScrappers = await Scrapper.aggregate([
+        {
+            $geoNear: {
+                near: {
+                    type: 'Point',
+                    coordinates: [longitude, latitude]
+                },
+                distanceField: 'distance',
+                // maxDistance removed to allow infinite radius discovery
+                key: 'businessLocation',
+                query: {
+                    scrapperType: 'big',
+                    'kyc.status': 'verified'
+                    // isOnline: true removed to show offline scrappers as well
+                },
+                spherical: true
+            }
+        },
+        {
+            $project: {
+                name: 1,
+                phone: 1,
+                businessLocation: 1,
+                rating: 1,
+                services: 1,
+                isOnline: 1, // Include online status for UI badging
+                distance: { $divide: ['$distance', 1000] } // Convert to KM
+            }
+        }
+    ]);
+
+    sendSuccess(res, 'Nearby big scrappers retrieved successfully', { scrappers: nearbyBigScrappers });
+});

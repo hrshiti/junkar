@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
 const WeightInputPage = () => {
   const staticTexts = [
     "Enter Weight",
-    "Step 3 of 4",
+    "Step 1 of 5",
     "Uploaded Images",
     "Auto Detect",
     "Manual Input",
@@ -30,10 +30,12 @@ const WeightInputPage = () => {
     "Copper",
     "Aluminium",
     "Steel",
-    "Brass"
+    "Brass",
+    "Note: The final payout will be determined by the scrap partner after inspection based on the material’s quality, quantity, and condition. The displayed amount is only an estimate and may vary."
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
+  const location = useLocation();
   const [uploadedImages, setUploadedImages] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [weightMode, setWeightMode] = useState('manual'); // 'auto' or 'manual'
@@ -47,17 +49,21 @@ const WeightInputPage = () => {
   // Load data from sessionStorage
   useEffect(() => {
     const storedImages = sessionStorage.getItem('uploadedImages');
-    const storedCategories = sessionStorage.getItem('selectedCategories');
+    let storedCategories = sessionStorage.getItem('selectedCategories');
 
     if (storedImages) {
       setUploadedImages(JSON.parse(storedImages));
     }
-    if (storedCategories) {
+
+    // Check for pre-selected category from navigation state
+    if (location.state?.preSelectedCategory) {
+      const cat = { id: location.state.preSelectedCategory.toLowerCase(), name: location.state.preSelectedCategory };
+      setSelectedCategories([cat]);
+      sessionStorage.setItem('selectedCategories', JSON.stringify([cat]));
+    } else if (storedCategories) {
       setSelectedCategories(JSON.parse(storedCategories));
-    } else {
-      navigate('/add-scrap/category');
     }
-  }, [navigate]);
+  }, [navigate, location.state]);
 
   // Fetch market prices from backend
   useEffect(() => {
@@ -129,7 +135,11 @@ const WeightInputPage = () => {
       if (currentWeight > 0) {
         // Calculate average price from selected categories
         const totalPrice = selectedCategories.reduce((sum, cat) => {
-          return sum + (marketPrices[cat.name] || 0);
+          const apiInfo = marketPrices[cat.name];
+          const apiPrice = typeof apiInfo === 'object' ? apiInfo.pricePerKg : (apiInfo || 0);
+          // Use API price if available, otherwise use price from category object
+          const priceToUse = apiPrice || cat.price || 0;
+          return sum + priceToUse;
         }, 0);
         const avgPrice = totalPrice / selectedCategories.length;
         const payout = currentWeight * avgPrice;
@@ -167,7 +177,7 @@ const WeightInputPage = () => {
         quantityType: requestType === 'commercial' ? 'large' : 'small'
       };
       sessionStorage.setItem('weightData', JSON.stringify(weightData));
-      navigate('/add-scrap/address');
+      navigate('/add-scrap/upload');
     }
   };
 
@@ -189,7 +199,7 @@ const WeightInputPage = () => {
       {/* Header */}
       <div className="flex items-center justify-between p-3 md:p-6 border-b" style={{ borderColor: 'rgba(100, 148, 110, 0.2)' }}>
         <button
-          onClick={() => navigate('/add-scrap/upload')}
+          onClick={() => navigate('/')}
           className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white transition-colors"
           style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}
         >
@@ -211,14 +221,14 @@ const WeightInputPage = () => {
         <div className="flex items-center gap-2">
           <div className="flex-1 h-2 rounded-full" style={{ backgroundColor: 'rgba(100, 148, 110, 0.2)' }}>
             <motion.div
-              initial={{ width: '50%' }}
-              animate={{ width: '75%' }}
+              initial={{ width: '0%' }}
+              animate={{ width: '20%' }}
               transition={{ duration: 0.5 }}
               className="h-full rounded-full"
               style={{ backgroundColor: '#38bdf8' }}
             />
           </div>
-          <span className="text-xs md:text-sm" style={{ color: '#718096' }}>{getTranslatedText("Step 3 of 4")}</span>
+          <span className="text-xs md:text-sm" style={{ color: '#718096' }}>{getTranslatedText("Step 1 of 5")}</span>
         </div>
       </div>
 
@@ -358,8 +368,8 @@ const WeightInputPage = () => {
             <button
               onClick={() => setRequestType('household')}
               className={`flex-1 p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-2 ${requestType === 'household'
-                  ? 'border-sky-600 bg-sky-50 text-sky-700 shadow-md transform scale-[1.02]'
-                  : 'border-slate-200 bg-white text-slate-500 hover:border-sky-200'
+                ? 'border-sky-600 bg-sky-50 text-sky-700 shadow-md transform scale-[1.02]'
+                : 'border-slate-200 bg-white text-slate-500 hover:border-sky-200'
                 }`}
             >
               <span className="text-2xl">🏠</span>
@@ -370,8 +380,8 @@ const WeightInputPage = () => {
             <button
               onClick={() => setRequestType('commercial')}
               className={`flex-1 p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-2 ${requestType === 'commercial'
-                  ? 'border-sky-600 bg-sky-50 text-sky-700 shadow-md transform scale-[1.02]'
-                  : 'border-slate-200 bg-white text-slate-500 hover:border-sky-200'
+                ? 'border-sky-600 bg-sky-50 text-sky-700 shadow-md transform scale-[1.02]'
+                : 'border-slate-200 bg-white text-slate-500 hover:border-sky-200'
                 }`}
             >
               <span className="text-2xl">🏭</span>
@@ -466,15 +476,43 @@ const WeightInputPage = () => {
               </span>
             </div>
             <div className="text-xs md:text-sm" style={{ color: '#718096' }}>
-              {selectedCategories.map((cat, idx) => (
-                <span key={cat.id}>
-                  {getTranslatedText(cat.name)} @ ₹{marketPrices[cat.name] || 0}/{getTranslatedText("kg")}
-                  {idx < selectedCategories.length - 1 && ' • '}
-                </span>
-              ))}
+              {selectedCategories.map((cat, idx) => {
+                const apiInfo = marketPrices[cat.name];
+                const price = (typeof apiInfo === 'object' ? apiInfo.pricePerKg : (apiInfo || 0)) || cat.price || 0;
+                return (
+                  <span key={cat.id}>
+                    {getTranslatedText(cat.name)} @ ₹{price}/{getTranslatedText("kg")}
+                    {idx < selectedCategories.length - 1 && ' • '}
+                  </span>
+                );
+              })}
             </div>
           </motion.div>
         )}
+
+        {/* Disclaimer Note */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-4 p-4 rounded-xl border-l-4 shadow-sm"
+          style={{
+            backgroundColor: 'rgba(56, 189, 248, 0.08)',
+            borderColor: '#38bdf8'
+          }}
+        >
+          <div className="flex gap-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+            </div>
+            <p className="text-xs md:text-sm leading-relaxed" style={{ color: '#4a5568', fontWeight: '500' }}>
+              <span style={{ color: '#38bdf8', fontWeight: '700' }}>Note:</span> {getTranslatedText("Note: The final payout will be determined by the scrap partner after inspection based on the material’s quality, quantity, and condition. The displayed amount is only an estimate and may vary.")}
+            </p>
+          </div>
+        </motion.div>
       </div>
 
       {/* Footer with Continue Button - Fixed on Mobile */}

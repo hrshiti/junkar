@@ -5,13 +5,16 @@ import { orderAPI, uploadAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
 const SellScrapPage = () => {
-    const { getTranslatedText } = usePageTranslation(["Sell Bulk Scrap", "Select Categories", "Approx Weight (kg)", "Upload Images", "Pickup Address", "Create Request", "Processing...", "Request Created Successfully!"]);
+    const { getTranslatedText } = usePageTranslation(["Sell Bulk Scrap", "Select Categories", "Approx Weight (kg)", "Upload Images", "Self-delivery to Partner's Location", "Create Request", "Processing...", "Request Created Successfully!"]);
     const navigate = useNavigate();
     const [categories, setCategories] = useState([]);
     const [weight, setWeight] = useState('');
     const [images, setImages] = useState([]);
-    const [address, setAddress] = useState('');
     const [loading, setLoading] = useState(false);
+    const [nearbyPartners, setNearbyPartners] = useState([]);
+    const [selectedPartnerIds, setSelectedPartnerIds] = useState([]);
+    const [userLocation, setUserLocation] = useState(null);
+    const [isLocating, setIsLocating] = useState(false);
 
     // Pre-defined categories matching backend constants
     const availableCategories = [
@@ -48,10 +51,53 @@ const SellScrapPage = () => {
         }
     };
 
+    // Discovery Logic: Get nearby partners
+    useEffect(() => {
+        const fetchNearbyPartners = async (lat, lng) => {
+            try {
+                const { scrapperProfileAPI } = await import('../../shared/utils/api');
+                const response = await scrapperProfileAPI.getNearbyBig(lat, lng);
+                if (response.success) {
+                    setNearbyPartners(response.data.scrappers);
+                }
+            } catch (error) {
+                console.error("Failed to fetch nearby partners", error);
+            }
+        };
+
+        if (navigator.geolocation) {
+            setIsLocating(true);
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    setUserLocation({ latitude, longitude });
+                    fetchNearbyPartners(latitude, longitude);
+                    setIsLocating(false);
+                },
+                (error) => {
+                    console.error("Geolocation error", error);
+                    setIsLocating(false);
+                }
+            );
+        }
+    }, []);
+
+    const handlePartnerToggle = (partnerId) => {
+        if (selectedPartnerIds.includes(partnerId)) {
+            setSelectedPartnerIds(selectedPartnerIds.filter(id => id !== partnerId));
+        } else {
+            setSelectedPartnerIds([...selectedPartnerIds, partnerId]);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (categories.length === 0 || !weight || !address) {
-            alert("Please fill all required fields");
+        if (categories.length === 0) {
+            alert("Please select at least one category (Plastic, Metal, etc.) at the top.");
+            return;
+        }
+        if (!weight || weight <= 0) {
+            alert("Please enter a valid weight.");
             return;
         }
 
@@ -65,9 +111,10 @@ const SellScrapPage = () => {
                     total: 0
                 })),
                 totalWeight: Number(weight),
-                pickupAddress: { street: address }, // Simplified address
+                pickupAddress: { street: 'Self-delivery' }, // Default for scrapper delivery
                 images: images,
-                quantityType: 'large', // FORCE LARGE
+                quantityType: 'large',
+                targetScrapperIds: selectedPartnerIds,
                 notes: 'Scrapper Bulk Request'
             };
 
@@ -127,15 +174,96 @@ const SellScrapPage = () => {
                     />
                 </section>
 
-                {/* Address */}
+                {/* Self Delivery Notice Box */}
+                <section className="bg-sky-50 p-4 rounded-xl border-l-4 border-sky-500 shadow-sm flex items-start gap-3">
+                    <div className="mt-0.5">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 className="text-sm font-bold text-sky-900 leading-tight">
+                            {getTranslatedText("Self-delivery to Partner's Location")}
+                        </h2>
+                        <p className="text-[11px] text-sky-700 mt-1 font-medium italic">
+                            Note: No pickup will be provided. You (Retailer) must deliver scrap to the partner after acceptance.
+                        </p>
+                    </div>
+                </section>
+
+                {/* Nearby Partners Discovery */}
                 <section className="bg-white p-3.5 rounded-xl shadow-sm">
-                    <h2 className="text-sm font-semibold mb-2.5 text-slate-700">{getTranslatedText("Pickup Address")}</h2>
-                    <textarea
-                        value={address}
-                        onChange={(e) => setAddress(e.target.value)}
-                        placeholder="Enter full address..."
-                        className="w-full p-3 border-2 border-slate-200 rounded-lg focus:border-sky-500 outline-none h-20 text-sm text-slate-700 placeholder:text-slate-400"
-                    />
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-sm font-semibold text-slate-700">{getTranslatedText("Nearby Partners")}</h2>
+                        {isLocating && <span className="text-[10px] text-sky-500 animate-pulse">Locating...</span>}
+                    </div>
+
+                    {nearbyPartners.length > 0 ? (
+                        <div className="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                            {nearbyPartners.map(partner => (
+                                <div
+                                    key={partner._id}
+                                    onClick={() => handlePartnerToggle(partner._id)}
+                                    className={`p-3 rounded-lg border-2 transition-all flex items-center justify-between cursor-pointer ${selectedPartnerIds.includes(partner._id)
+                                        ? 'border-sky-500 bg-sky-50'
+                                        : 'border-slate-100 bg-slate-50'
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-xl shadow-sm relative">
+                                            🏢
+                                            <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white shadow-sm ${partner.isOnline ? 'bg-green-500' : 'bg-slate-300'}`}></span>
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-1.5">
+                                                <p className="text-xs font-bold text-slate-800">{partner.name || 'Big Scrapper'}</p>
+                                                {!partner.isOnline && (
+                                                    <span className="text-[9px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded font-medium uppercase tracking-tight">Offline</span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                                <span className="text-[10px] text-slate-500 flex items-center gap-0.5">
+                                                    ⭐ {partner.rating?.average || '0.0'}
+                                                </span>
+                                                <span className="text-[10px] text-sky-600 font-semibold">{partner.distance?.toFixed(1) || '0.0'} km (Store)</span>
+                                            </div>
+                                            {partner.businessLocation?.address && (
+                                                <p className="text-[10px] text-slate-400 mt-1 line-clamp-1 italic max-w-[200px]">
+                                                    📍 {partner.businessLocation.address}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${selectedPartnerIds.includes(partner._id)
+                                        ? 'border-sky-500 bg-sky-500'
+                                        : 'border-slate-300 bg-white'
+                                        }`}>
+                                        {selectedPartnerIds.includes(partner._id) && (
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="py-6 text-center border-2 border-dashed border-slate-100 rounded-lg">
+                            <p className="text-xs text-slate-400 italic">
+                                {isLocating ? 'Searching for nearby partners...' : 'No partners found nearby yet.'}
+                            </p>
+                        </div>
+                    )}
+                    {selectedPartnerIds.length > 0 && (
+                        <p className="mt-2.5 text-[11px] text-green-600 font-medium flex items-center gap-1">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            Direct request will be sent to {selectedPartnerIds.length} partner(s)
+                        </p>
+                    )}
                 </section>
 
                 {/* Images */}

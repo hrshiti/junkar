@@ -16,37 +16,55 @@ const PriceTicker = () => {
 
   useEffect(() => {
     const fetchPrices = async () => {
+      // 1. Static list of 8 categories
+      const staticPrices = [
+        { type: "Plastic", originalType: "Plastic", price: 45, unit: "kg" },
+        { type: "Metal", originalType: "Metal", price: 180, unit: "kg" },
+        { type: "Paper", originalType: "Paper", price: 12, unit: "kg" },
+        { type: "Electronics", originalType: "Electronics", price: 85, unit: "kg" },
+        { type: "Copper", originalType: "Copper", price: 650, unit: "kg" },
+        { type: "Aluminium", originalType: "Aluminium", price: 180, unit: "kg" },
+        { type: "Steel", originalType: "Steel", price: 35, unit: "kg" },
+        { type: "Brass", originalType: "Brass", price: 420, unit: "kg" },
+      ];
+
       try {
         const response = await publicAPI.getPrices();
-        if (response.success && Array.isArray(response.data?.prices) && response.data.prices.length > 0) {
-          const mapped = await Promise.all(
-            response.data.prices.map(async (item) => ({
-              type: await translate(item.category),
-              price: item.pricePerKg,
-              unit: "kg",
-              change: null,
+        if (response.success && response.data?.prices) {
+          const apiPrices = {};
+          response.data.prices.forEach(p => {
+            apiPrices[p.category.toLowerCase()] = p.pricePerKg;
+          });
+
+          const updated = await Promise.all(
+            staticPrices.map(async (item) => ({
+              ...item,
+              type: await translate(item.originalType),
+              price: apiPrices[item.originalType.toLowerCase()] !== undefined
+                ? apiPrices[item.originalType.toLowerCase()]
+                : item.price,
+              change: null
             }))
           );
-          setPrices(mapped);
+          setPrices(updated);
         } else {
-          throw new Error(getTranslatedText("No prices found"));
+          const translated = await Promise.all(
+            staticPrices.map(async (item) => ({
+              ...item,
+              type: await translate(item.originalType)
+            }))
+          );
+          setPrices(translated);
         }
       } catch (error) {
-        console.error(
-          getTranslatedText("Failed to fetch live prices, using default:"),
-          error
-        );
-        // Fallback to default
-        const feed = getEffectivePriceFeed();
-        const mapped = await Promise.all(
-          feed.map(async (item) => ({
-            type: await translate(item.category),
-            price: item.pricePerKg,
-            unit: "kg",
-            change: null,
+        console.error(getTranslatedText("Failed to fetch live prices, using default:"), error);
+        const translated = await Promise.all(
+          staticPrices.map(async (item) => ({
+            ...item,
+            type: await translate(item.originalType)
           }))
         );
-        setPrices(mapped);
+        setPrices(translated);
       }
     };
 
@@ -65,15 +83,15 @@ const PriceTicker = () => {
             {getTranslatedText("Price")}
           </h3>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border" 
-          style={{ 
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border"
+          style={{
             backgroundColor: "#ffffff",
             borderColor: "#e0f2fe",
             boxShadow: "0 1px 3px rgba(0,0,0,0.05)"
           }}>
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-          <span 
-            className="text-xs font-medium" 
+          <span
+            className="text-xs font-medium"
             style={{ color: "#64748b" }}>
             Live Rates
           </span>
@@ -100,7 +118,7 @@ const PriceTicker = () => {
                 style={{ color: "#94a3b8" }}>
                 {item.type}
               </p>
-              
+
               {/* Price */}
               <p
                 className="text-sm md:text-base font-bold"

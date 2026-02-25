@@ -70,6 +70,19 @@ const scrapperSchema = new mongoose.Schema({
       type: String,
       default: null
     },
+    panNumber: {
+      type: String,
+      select: false
+    },
+    panPhotoUrl: {
+      type: String,
+      default: null
+    },
+    shopLicenseUrl: {
+      type: String,
+      default: null
+    },
+
     status: {
       type: String,
       enum: ['pending', 'verified', 'rejected'],
@@ -182,6 +195,21 @@ const scrapperSchema = new mongoose.Schema({
     updatedAt: {
       type: Date,
       default: null
+    }
+  },
+  businessLocation: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
+    },
+    coordinates: {
+      type: [Number], // [longitude, latitude]
+      default: [0, 0]
+    },
+    address: {
+      type: String,
+      default: ''
     }
   },
   availableSlots: [{
@@ -311,6 +339,7 @@ const scrapperSchema = new mongoose.Schema({
 
 // Geospatial index for location queries
 scrapperSchema.index({ liveLocation: '2dsphere' });
+scrapperSchema.index({ businessLocation: '2dsphere' });
 scrapperSchema.index({ isOnline: 1, 'kyc.status': 1, 'subscription.status': 1, 'marketSubscription.status': 1 });
 
 // Hash password before saving

@@ -4,7 +4,8 @@ import {
     createTicket,
     getAllTickets,
     getMyTickets,
-    updateTicketStatus
+    updateTicketStatus,
+    respondToTicket
 } from '../controllers/supportController.js';
 
 const router = express.Router();
@@ -16,5 +17,6 @@ router.get('/my-tickets', protect, getMyTickets);
 // Admin routes
 router.get('/admin/all', protect, isAdmin, getAllTickets);
 router.patch('/:id/status', protect, isAdmin, updateTicketStatus);
+router.post('/:id/respond', protect, respondToTicket);
 
 export default router;

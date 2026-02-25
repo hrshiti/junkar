@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
-import { kycAPI, subscriptionAPI, reviewAPI, scrapperProfileAPI } from '../../shared/utils/api';
+import { kycAPI, subscriptionAPI, reviewAPI, scrapperProfileAPI, earningsAPI } from '../../shared/utils/api';
 import RatingDisplay from '../../shared/components/RatingDisplay';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import EditProfileModal from './EditProfileModal';
@@ -47,7 +47,12 @@ const ScrapperProfile = () => {
     "Read how Scrapto works for scrappers",
     "Terms & Conditions screen will be added later.",
     "Help & Support",
-    "Get help for any issue"
+    "Get help for any issue",
+    "My Scrap Statistics",
+    "Total Weight Purchased",
+    "Category-wise Breakdown",
+    "No scrap purchased yet",
+    "Weight"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -59,6 +64,8 @@ const ScrapperProfile = () => {
   const [rating, setRating] = useState({ average: 0, count: 0, breakdown: null });
   const [showKycInfo, setShowKycInfo] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [scrapStats, setScrapStats] = useState({ totalWeight: 0, categoryStats: [] });
+  const [showStats, setShowStats] = useState(false);
 
   const handleProfileUpdate = (updatedScrapper) => {
     // 1. Update local state
@@ -145,6 +152,19 @@ const ScrapperProfile = () => {
           }
         } catch (profileError) {
           console.error('Error fetching scrapper profile:', profileError);
+        }
+
+        // Fetch Scrap Statistics
+        try {
+          const statsResponse = await earningsAPI.getScrapStats();
+          if (statsResponse.success) {
+            setScrapStats({
+              totalWeight: statsResponse.data.totalWeight || 0,
+              categoryStats: statsResponse.data.categoryStats || []
+            });
+          }
+        } catch (statsError) {
+          console.error('Error fetching scrap stats:', statsError);
         }
       } catch (error) {
         console.error('Error fetching scrapper data:', error);
@@ -330,6 +350,14 @@ const ScrapperProfile = () => {
                   ? <span className="capitalize">{scrapperUser.vehicleInfo.type} • {scrapperUser.vehicleInfo.number || 'NA'}</span>
                   : getTranslatedText('Not provided')}
               </span>
+              {scrapperUser?.scrapperType === 'big' && scrapperUser?.businessLocation?.address && (
+                <>
+                  <span className="text-slate-600">{getTranslatedText("Business Address")}</span>
+                  <span className="font-semibold text-right text-slate-900">
+                    {scrapperUser.businessLocation.address}
+                  </span>
+                </>
+              )}
               {scrapperUser?.heardFrom && (
                 <>
                   <span className="text-slate-600">{getTranslatedText("Heard about Scrapto")}</span>
@@ -443,6 +471,58 @@ const ScrapperProfile = () => {
               </span>
             </button>
 
+            {/* Scrap Statistics */}
+            <div className="flex flex-col border-b border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowStats(!showStats)}
+                className="w-full flex items-center justify-between px-3.5 py-3 text-left hover:bg-slate-50 transition-colors"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">
+                    {getTranslatedText("My Scrap Statistics")}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    {getTranslatedText("Total Weight Purchased")}: {scrapStats.totalWeight.toFixed(2)} kg
+                  </p>
+                </div>
+                <span className="text-slate-400 transform transition-transform" style={{ rotate: showStats ? '90deg' : '0deg' }}>
+                  ›
+                </span>
+              </button>
+
+              <AnimatePresence>
+                {showStats && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="px-4 pb-4 bg-slate-50/50 overflow-hidden"
+                  >
+                    <div className="p-3 mt-1 bg-white rounded-xl border border-slate-200 shadow-sm space-y-3">
+                      <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">
+                        {getTranslatedText("Category-wise Breakdown")}
+                      </p>
+                      {scrapStats.categoryStats.length > 0 ? (
+                        <div className="space-y-2">
+                          {scrapStats.categoryStats.map((item, idx) => (
+                            <div key={idx} className="flex justify-between items-center text-xs">
+                              <span className="text-slate-600 font-medium">{getTranslatedText(item.category)}</span>
+                              <span className="font-bold text-slate-800">{item.weight.toFixed(2)} kg</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-slate-400 italic text-center py-2">
+                          {getTranslatedText("No scrap purchased yet")}
+                        </p>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* Requests & history */}
             <button
               type="button"
@@ -548,7 +628,7 @@ const ScrapperProfile = () => {
       <div className="md:hidden">
         <ScrapperBottomNav />
       </div>
-    </motion.div>
+    </motion.div >
   );
 };
 
