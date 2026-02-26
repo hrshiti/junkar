@@ -350,7 +350,7 @@ const ScrapperProfile = () => {
                   ? <span className="capitalize">{scrapperUser.vehicleInfo.type} • {scrapperUser.vehicleInfo.number || 'NA'}</span>
                   : getTranslatedText('Not provided')}
               </span>
-              {scrapperUser?.scrapperType === 'big' && scrapperUser?.businessLocation?.address && (
+              {['big', 'dukandaar', 'wholesaler'].includes(scrapperUser?.scrapperType) && scrapperUser?.businessLocation?.address && (
                 <>
                   <span className="text-slate-600">{getTranslatedText("Business Address")}</span>
                   <span className="font-semibold text-right text-slate-900">

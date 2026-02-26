@@ -83,7 +83,7 @@ const KYCQueue = () => {
             panPhotoUrl: scrapper.kyc?.panPhotoUrl || null,
             shopLicenseUrl: scrapper.kyc?.shopLicenseUrl || null,
             businessLocation: scrapper.businessLocation || null,
-            scrapperType: scrapper.scrapperType || 'small',
+            scrapperType: scrapper.scrapperType || 'feri_wala',
             status: scrapper.kyc?.status || 'not_submitted',
             submittedAt: scrapper.createdAt || new Date().toISOString(),
             verifiedAt: scrapper.kyc?.verifiedAt || null,

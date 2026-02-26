@@ -90,7 +90,7 @@ const ScrapperLogin = () => {
   const [heardFrom, setHeardFrom] = useState('');
   const [heardFromOther, setHeardFromOther] = useState('');
   const [selectedServices, setSelectedServices] = useState(['scrap_pickup']);
-  const [scrapperType, setScrapperType] = useState('small'); // 'small' or 'big'
+  const [scrapperType, setScrapperType] = useState('feri_wala'); // 'feri_wala', 'dukandaar', or 'wholesaler'
   const [businessAddress, setBusinessAddress] = useState('');
   const [businessCoordinates, setBusinessCoordinates] = useState(null);
   const [isLocatingBusiness, setIsLocatingBusiness] = useState(false);
@@ -206,7 +206,7 @@ const ScrapperLogin = () => {
             if (profileRes.success && profileRes.data) {
               const scrapperData = profileRes.data.scrapper || profileRes.data;
               const currentUser = JSON.parse(localStorage.getItem('scrapperUser') || '{}');
-              currentUser.scrapperType = scrapperData.scrapperType || 'small';
+              currentUser.scrapperType = scrapperData.scrapperType || 'feri_wala';
               localStorage.setItem('scrapperUser', JSON.stringify(currentUser));
             }
           } catch (err) {
@@ -329,7 +329,7 @@ const ScrapperLogin = () => {
           scrapperType: scrapperType
         };
 
-        if (scrapperType === 'big' && businessCoordinates) {
+        if ((scrapperType === 'dukandaar' || scrapperType === 'wholesaler') && businessCoordinates) {
           registrationData.businessLocation = {
             type: 'Point',
             coordinates: businessCoordinates,
@@ -762,9 +762,9 @@ const ScrapperLogin = () => {
                       <label className="block text-sm font-semibold mb-2 text-white">
                         {getTranslatedText("Scrapper Category")}
                       </label>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-3 gap-2">
                         <label
-                          className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 cursor-pointer transition-all ${scrapperType === 'small'
+                          className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 cursor-pointer transition-all ${scrapperType === 'feri_wala'
                             ? 'border-sky-500 bg-sky-900/20'
                             : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
                             }`}
@@ -772,18 +772,18 @@ const ScrapperLogin = () => {
                           <input
                             type="radio"
                             name="scrapperType"
-                            value="small"
-                            checked={scrapperType === 'small'}
-                            onChange={() => setScrapperType('small')}
+                            value="feri_wala"
+                            checked={scrapperType === 'feri_wala'}
+                            onChange={() => setScrapperType('feri_wala')}
                             className="hidden"
                           />
-                          <img src="https://cdn-icons-png.flaticon.com/512/2972/2972185.png" alt="Small Scrapper" className="w-10 h-10 mb-2 object-contain" />
-                          <span className="text-sm font-bold text-white text-center">Small</span>
-                          <span className="text-[10px] text-gray-500 text-center leading-tight">(Individual)</span>
+                          <span className="text-xl mb-1">🚲</span>
+                          <span className="text-xs font-bold text-white text-center">फेरी वाला</span>
+                          <span className="text-[9px] text-gray-500 text-center leading-tight">(Feri Wala)</span>
                         </label>
 
                         <label
-                          className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 cursor-pointer transition-all ${scrapperType === 'big'
+                          className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 cursor-pointer transition-all ${scrapperType === 'dukandaar'
                             ? 'border-sky-500 bg-sky-900/20'
                             : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
                             }`}
@@ -791,19 +791,38 @@ const ScrapperLogin = () => {
                           <input
                             type="radio"
                             name="scrapperType"
-                            value="big"
-                            checked={scrapperType === 'big'}
-                            onChange={() => setScrapperType('big')}
+                            value="dukandaar"
+                            checked={scrapperType === 'dukandaar'}
+                            onChange={() => setScrapperType('dukandaar')}
                             className="hidden"
                           />
-                          <img src="https://cdn-icons-png.flaticon.com/512/1355/1355463.png" alt="Big Scrapper" className="w-10 h-10 mb-2 object-contain" />
-                          <span className="text-sm font-bold text-white text-center">Big</span>
-                          <span className="text-[10px] text-gray-500 text-center leading-tight">(Dealer)</span>
+                          <span className="text-xl mb-1">🏪</span>
+                          <span className="text-xs font-bold text-white text-center">दुकानदार</span>
+                          <span className="text-[9px] text-gray-500 text-center leading-tight">(Shopkeeper)</span>
+                        </label>
+
+                        <label
+                          className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 cursor-pointer transition-all ${scrapperType === 'wholesaler'
+                            ? 'border-sky-500 bg-sky-900/20'
+                            : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
+                            }`}
+                        >
+                          <input
+                            type="radio"
+                            name="scrapperType"
+                            value="wholesaler"
+                            checked={scrapperType === 'wholesaler'}
+                            onChange={() => setScrapperType('wholesaler')}
+                            className="hidden"
+                          />
+                          <span className="text-xl mb-1">🏭</span>
+                          <span className="text-xs font-bold text-white text-center">थोक व्यापारी</span>
+                          <span className="text-[9px] text-gray-500 text-center leading-tight">(Wholesaler)</span>
                         </label>
                       </div>
 
                       <AnimatePresence>
-                        {scrapperType === 'big' && (
+                        {(scrapperType === 'dukandaar' || scrapperType === 'wholesaler') && (
                           <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
@@ -812,7 +831,7 @@ const ScrapperLogin = () => {
                           >
                             <div>
                               <label className="block text-xs font-semibold mb-1 text-gray-400">
-                                {getTranslatedText("Shop / Warehouse Address")}
+                                {scrapperType === 'dukandaar' ? getTranslatedText("Shop / Warehouse Address") : getTranslatedText("Godown / Factory Address")}
                               </label>
                               {isLoaded ? (
                                 <Autocomplete
@@ -826,7 +845,7 @@ const ScrapperLogin = () => {
                                       onChange={(e) => setBusinessAddress(e.target.value)}
                                       placeholder={getTranslatedText("Search shop location (e.g. Bhopal)")}
                                       className="w-full px-4 py-3 pr-10 rounded-xl border-2 border-zinc-700 focus:border-sky-500 bg-black/50 text-white text-sm outline-none transition-all"
-                                      required={scrapperType === 'big'}
+                                      required={scrapperType === 'dukandaar' || scrapperType === 'wholesaler'}
                                     />
                                     <FaSearchLocation className="absolute right-4 top-1/2 -translate-y-1/2 text-sky-500" />
                                   </div>
@@ -838,7 +857,7 @@ const ScrapperLogin = () => {
                                   placeholder={getTranslatedText("Enter full business address")}
                                   className="w-full px-4 py-2 rounded-xl border-2 border-zinc-700 focus:border-sky-500 bg-black text-white text-sm resize-none"
                                   rows="2"
-                                  required={scrapperType === 'big'}
+                                  required={scrapperType === 'dukandaar' || scrapperType === 'wholesaler'}
                                 />
                               )}
                               {businessCoordinates && (

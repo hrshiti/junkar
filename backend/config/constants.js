@@ -6,6 +6,25 @@ export const USER_ROLES = {
   ADMIN: 'admin'
 };
 
+export const SCRAPPER_TYPES = {
+  FERI_WALA: 'feri_wala',
+  DUKANDAAR: 'dukandaar',
+  WHOLESALER: 'wholesaler',
+  // Legacy types (backward compatibility)
+  SMALL: 'small',
+  BIG: 'big'
+};
+
+export const VEHICLE_TYPES = {
+  CYCLE: 'cycle',
+  THELA: 'thela',
+  E_RICKSHAW: 'e_rickshaw',
+  TEMPO: 'tempo',
+  BIKE: 'bike',
+  AUTO: 'auto',
+  TRUCK: 'truck'
+};
+
 export const ORDER_STATUS = {
   PENDING: 'pending',
   CONFIRMED: 'confirmed',

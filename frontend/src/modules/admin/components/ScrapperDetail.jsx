@@ -129,7 +129,7 @@ const ScrapperDetail = () => {
           ? `${backendScrapper.vehicleInfo.type || ''} - ${backendScrapper.vehicleInfo.number || ''}`
           : getTranslatedText('Not provided'),
         businessLocation: backendScrapper.businessLocation || null,
-        scrapperType: backendScrapper.scrapperType || 'small',
+        scrapperType: backendScrapper.scrapperType || 'feri_wala',
         joinedAt: backendScrapper.createdAt || new Date().toISOString(),
         earnings: earningsData,
         status: backendScrapper.status || 'active'
@@ -335,7 +335,7 @@ const ScrapperDetail = () => {
                   <p className="font-semibold" style={{ color: '#2d3748' }}>{getTranslatedText(scrapper.vehicleInfo)}</p>
                 </div>
               </div>
-              {scrapper.scrapperType === 'big' && scrapper.businessLocation && (
+              {['big', 'dukandaar', 'wholesaler'].includes(scrapper.scrapperType) && scrapper.businessLocation && (
                 <div className="flex items-start gap-3 md:col-span-2">
                   <FaMapMarkerAlt style={{ color: '#64946e', marginTop: '4px' }} />
                   <div>

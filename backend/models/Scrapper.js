@@ -32,14 +32,23 @@ const scrapperSchema = new mongoose.Schema({
   },
   scrapperType: {
     type: String,
-    enum: ['small', 'big'],
-    default: 'small'
+    enum: ['small', 'big', 'feri_wala', 'dukandaar', 'wholesaler'],
+    default: 'feri_wala'
+  },
+  // Categories this scrapper deals in (e.g., only PAT bottles for a wholesaler)
+  dealCategories: {
+    type: [String],
+    default: []
   },
   vehicleInfo: {
     type: {
       type: String,
-      enum: ['bike', 'auto', 'truck'],
+      enum: ['cycle', 'thela', 'e_rickshaw', 'tempo', 'bike', 'auto', 'truck'],
       required: true
+    },
+    photoUrl: {
+      type: String,
+      default: null
     },
     number: {
       type: String,
@@ -80,6 +89,24 @@ const scrapperSchema = new mongoose.Schema({
     },
     shopLicenseUrl: {
       type: String,
+      default: null
+    },
+    shopPhotoUrl: {
+      type: String,
+      default: null
+    },
+    gstNumber: {
+      type: String,
+      trim: true,
+      default: null
+    },
+    gstCertificateUrl: {
+      type: String,
+      default: null
+    },
+    udyamAadhaarNumber: {
+      type: String,
+      trim: true,
       default: null
     },
 

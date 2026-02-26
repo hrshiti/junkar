@@ -1150,7 +1150,7 @@ const ActiveRequestDetailsPage = () => {
               >
                 {/* Scrap Picked Up Button - Primary Action */}
                 {/* FORWARD BUTTON (Small Scrappers Only) */}
-                {currentUser?.scrapperType === 'small' && !isPickedUp && (
+                {['small', 'feri_wala'].includes(currentUser?.scrapperType) && !isPickedUp && (
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}

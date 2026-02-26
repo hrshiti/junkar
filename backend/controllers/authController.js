@@ -96,7 +96,8 @@ export const register = asyncHandler(async (req, res) => {
         name,
         email,
         services: req.body.services || ['scrap_pickup'],
-        scrapperType: req.body.scrapperType || 'small',
+        scrapperType: req.body.scrapperType || 'feri_wala',
+        dealCategories: req.body.dealCategories || [],
         vehicleInfo: defaultVehicleInfo,
         businessLocation: req.body.businessLocation || {
           type: 'Point',

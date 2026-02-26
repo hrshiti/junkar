@@ -44,7 +44,7 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
     const [error, setError] = useState('');
 
     // vehicle types options
-    const vehicleTypes = ['bike', 'truck'];
+    const vehicleTypes = ['cycle', 'thela', 'e_rickshaw', 'tempo', 'bike', 'auto', 'truck'];
 
     useEffect(() => {
         if (initialData) {
@@ -100,7 +100,7 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                 }
             };
 
-            if (initialData?.scrapperType === 'big') {
+            if (['big', 'dukandaar', 'wholesaler'].includes(initialData?.scrapperType)) {
                 payload.businessLocation = {
                     type: 'Point',
                     coordinates: formData.businessCoordinates || [0, 0],
@@ -220,7 +220,7 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                                 </div>
 
                                 {/* Business Location (B2B Only) */}
-                                {initialData?.scrapperType === 'big' && (
+                                {['big', 'dukandaar', 'wholesaler'].includes(initialData?.scrapperType) && (
                                     <div className="pt-2 border-t border-slate-100 space-y-3">
                                         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Business Details (B2B)</p>
 

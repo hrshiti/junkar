@@ -10,7 +10,7 @@ import logger from '../utils/logger.js';
 export const submitKyc = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { aadhaarNumber, panNumber } = req.body;
+    const { aadhaarNumber, panNumber, gstNumber, udyamAadhaarNumber } = req.body;
 
     logger.info(`Starting KYC submission for user: ${userId}`);
     logger.info(`Files received: ${req.files ? Object.keys(req.files).join(',') : 'None'}`);
@@ -44,13 +44,21 @@ export const submitKyc = async (req, res) => {
     const selfieFile = files['selfie'] ? files['selfie'][0] : null;
     const panFile = files['pan'] ? files['pan'][0] : null;
     const shopLicenseFile = files['shopLicense'] ? files['shopLicense'][0] : null;
+    const shopPhotoFile = files['shopPhoto'] ? files['shopPhoto'][0] : null;
+    const gstCertificateFile = files['gstCertificate'] ? files['gstCertificate'][0] : null;
 
-    if (!aadhaarFile || !selfieFile || !panFile || !shopLicenseFile) {
-      return sendError(res, 'Aadhaar, Selfie, PAN and Shop License photos are required.', 400);
+    // Only aadhaar + selfie are mandatory for all types
+    if (!aadhaarFile || !selfieFile) {
+      return sendError(res, 'Aadhaar and Selfie photos are required.', 400);
     }
 
-    if (!aadhaarNumber || !panNumber) {
-      return sendError(res, 'Aadhaar number and PAN number are required.', 400);
+    if (!aadhaarNumber) {
+      return sendError(res, 'Aadhaar number is required.', 400);
+    }
+
+    // Dukandaar must upload shop photo
+    if (scrapper.scrapperType === 'dukandaar' && !shopPhotoFile && !scrapper.kyc?.shopPhotoUrl) {
+      return sendError(res, 'Shop photo is required for Dukandaar (shopkeeper).', 400);
     }
 
     // 3. Upload to Cloudinary
@@ -59,6 +67,8 @@ export const submitKyc = async (req, res) => {
     let selfieUrl = scrapper.kyc?.selfieUrl;
     let panUrl = scrapper.kyc?.panPhotoUrl;
     let shopLicenseUrl = scrapper.kyc?.shopLicenseUrl;
+    let shopPhotoUrl = scrapper.kyc?.shopPhotoUrl;
+    let gstCertificateUrl = scrapper.kyc?.gstCertificateUrl;
 
     try {
       if (aadhaarFile) {
@@ -80,6 +90,16 @@ export const submitKyc = async (req, res) => {
         const result = await uploadFile(shopLicenseFile, { folder: 'scrapto/kyc/shopLicense' });
         shopLicenseUrl = result.secure_url;
       }
+
+      if (shopPhotoFile) {
+        const result = await uploadFile(shopPhotoFile, { folder: 'scrapto/kyc/shopPhoto' });
+        shopPhotoUrl = result.secure_url;
+      }
+
+      if (gstCertificateFile) {
+        const result = await uploadFile(gstCertificateFile, { folder: 'scrapto/kyc/gst' });
+        gstCertificateUrl = result.secure_url;
+      }
     } catch (uploadError) {
       logger.error('Error uploading KYC documents:', uploadError);
       return sendError(res, `Failed to upload documents: ${uploadError.message}`, 500);
@@ -90,9 +110,13 @@ export const submitKyc = async (req, res) => {
       aadhaarNumber: aadhaarNumber,
       aadhaarPhotoUrl: aadhaarUrl,
       selfieUrl: selfieUrl,
-      panNumber: panNumber,
+      panNumber: panNumber || scrapper.kyc?.panNumber || null,
       panPhotoUrl: panUrl,
       shopLicenseUrl: shopLicenseUrl,
+      shopPhotoUrl: shopPhotoUrl,
+      gstNumber: gstNumber || scrapper.kyc?.gstNumber || null,
+      gstCertificateUrl: gstCertificateUrl,
+      udyamAadhaarNumber: udyamAadhaarNumber || scrapper.kyc?.udyamAadhaarNumber || null,
       status: 'pending',
       submittedAt: new Date(),
       rejectionReason: null,
@@ -217,7 +241,7 @@ export const getAllScrappersWithKyc = async (req, res) => {
 
     // Get scrappers with KYC info
     const scrappers = await Scrapper.find(query)
-      .select('name phone email scrapperType businessLocation subscription status totalPickups earnings rating createdAt vehicleInfo kyc.aadhaarNumber kyc.aadhaarPhotoUrl kyc.selfieUrl kyc.panNumber kyc.panPhotoUrl kyc.shopLicenseUrl kyc.status kyc.verifiedAt kyc.rejectionReason')
+      .select('name phone email scrapperType dealCategories businessLocation subscription status totalPickups earnings rating createdAt vehicleInfo kyc.aadhaarNumber kyc.aadhaarPhotoUrl kyc.selfieUrl kyc.panNumber kyc.panPhotoUrl kyc.shopLicenseUrl kyc.shopPhotoUrl kyc.gstNumber kyc.gstCertificateUrl kyc.udyamAadhaarNumber kyc.status kyc.verifiedAt kyc.rejectionReason')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))

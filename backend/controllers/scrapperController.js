@@ -171,7 +171,7 @@ export const getNearbyBigScrappers = asyncHandler(async (req, res) => {
                 // maxDistance removed to allow infinite radius discovery
                 key: 'businessLocation',
                 query: {
-                    scrapperType: 'big',
+                    scrapperType: { $in: ['big', 'wholesaler', 'dukandaar'] },
                     'kyc.status': 'verified'
                     // isOnline: true removed to show offline scrappers as well
                 },

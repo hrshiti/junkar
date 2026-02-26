@@ -101,17 +101,24 @@ export const getAvailableOrders = asyncHandler(async (req, res) => {
   query.orderType = { $in: allowedOrderTypes };
 
   // Filter based on Scrapper Type
-  if (scrapper.scrapperType === 'big') {
-    // Big scrappers see Large requests OR forwarded requests
-    // Using $and to combine with previous filters
+  // wholesaler & dukandaar act like 'big', feri_wala acts like 'small'
+  const isBigType = ['big', 'wholesaler', 'dukandaar'].includes(scrapper.scrapperType);
+
+  if (isBigType) {
+    // Big scrappers / wholesalers / dukandaars see Large requests OR forwarded requests
     query.$or = [
       { quantityType: 'large' },
       { forwardedBy: { $ne: null } }
     ];
   } else {
-    // Small scrappers see Small requests (default) AND NOT forwarded requests
+    // Feri wala / small scrappers see Small requests (default) AND NOT forwarded requests
     query.quantityType = 'small';
     query.forwardedBy = null;
+  }
+
+  // Filter by scrapper's deal categories if they have specified any
+  if (scrapper.dealCategories && scrapper.dealCategories.length > 0) {
+    query['scrapItems.category'] = { $in: scrapper.dealCategories };
   }
 
   const orders = await Order.find(query)

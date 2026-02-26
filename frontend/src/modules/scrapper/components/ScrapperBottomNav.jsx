@@ -5,11 +5,11 @@ import { FaHome, FaBolt, FaWallet, FaUser } from 'react-icons/fa';
 const ScrapperBottomNav = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [scrapperType, setScrapperType] = React.useState('small');
+    const [scrapperType, setScrapperType] = React.useState('feri_wala');
 
     React.useEffect(() => {
         const user = JSON.parse(localStorage.getItem('scrapperUser') || '{}');
-        setScrapperType(user.scrapperType || 'small');
+        setScrapperType(user.scrapperType || 'feri_wala');
     }, []);
 
     const navItems = [
@@ -19,7 +19,7 @@ const ScrapperBottomNav = () => {
         { id: 'profile', icon: FaUser, label: 'Profile', path: '/scrapper/profile' },
     ];
 
-    if (scrapperType === 'small') {
+    if (scrapperType === 'small' || scrapperType === 'feri_wala') {
         // Insert Sell button in the middle
         navItems.splice(2, 0, {
             id: 'sell',

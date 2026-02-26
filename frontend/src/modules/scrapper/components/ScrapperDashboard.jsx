@@ -221,7 +221,7 @@ const ScrapperDashboard = () => {
     }
 
     // Load targeted requests for big scrappers
-    if (user?.scrapperType === 'big') {
+    if (['big', 'wholesaler', 'dukandaar'].includes(user?.scrapperType)) {
       try {
         const targetedResponse = await scrapperOrdersAPI.getTargeted();
         if (targetedResponse.success && targetedResponse.data?.orders) {
@@ -730,7 +730,7 @@ const ScrapperDashboard = () => {
         </div>
 
         {/* Targeted B2B Requests (For Big Scrappers) */}
-        {user?.scrapperType === 'big' && targetedRequests.length > 0 && (
+        {['big', 'wholesaler', 'dukandaar'].includes(user?.scrapperType) && targetedRequests.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

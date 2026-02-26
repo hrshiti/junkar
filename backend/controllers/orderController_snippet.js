@@ -14,8 +14,8 @@ export const forwardOrder = asyncHandler(async (req, res) => {
 
     // Check if user is a scrapper
     const scrapper = await Scrapper.findById(scrapperId);
-    if (!scrapper || scrapper.scrapperType !== 'small') {
-        return sendError(res, 'Only small scrappers can forward orders', 403);
+    if (!scrapper || !['small', 'feri_wala'].includes(scrapper.scrapperType)) {
+        return sendError(res, 'Only feri wala / small scrappers can forward orders', 403);
     }
 
     // Check if order is available or assigned to this scrapper

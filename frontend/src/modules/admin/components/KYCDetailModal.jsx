@@ -161,7 +161,7 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
                     <p className="font-semibold" style={{ color: '#2d3748' }}>{kyc.panNumber || getTranslatedText('N/A')}</p>
                   </div>
                 </div>
-                {kyc.scrapperType === 'big' && kyc.businessLocation && (
+                {['big', 'dukandaar', 'wholesaler'].includes(kyc.scrapperType) && kyc.businessLocation && (
                   <div className="flex items-start gap-3 md:col-span-2">
                     <FaUserShield style={{ color: '#64946e', marginTop: '4px' }} />
                     <div>
