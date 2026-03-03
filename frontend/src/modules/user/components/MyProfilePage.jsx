@@ -3,7 +3,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
 import { walletService } from '../../shared/services/wallet.service';
-import { orderAPI } from '../../shared/utils/api';
+import { orderAPI, authAPI, uploadAPI } from '../../shared/utils/api';
+import { Autocomplete, useJsApiLoader } from '@react-google-maps/api';
+import { useRef } from 'react';
 import { usePageTranslation } from "../../../hooks/usePageTranslation";
 import ReferAndEarn from './ReferAndEarn';
 import UserBottomNav from './UserBottomNav';
@@ -98,12 +100,23 @@ const MyProfilePage = () => {
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, login } = useAuth();
   const [activeTab, setActiveTab] = useState("overview"); // overview, activity, analysis
   const [isEditMode, setIsEditMode] = useState(false);
+  const autocompleteRef = useRef(null);
+
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    libraries: ['places']
+  });
+
   const [formData, setFormData] = useState({
     name: user?.name || getTranslatedText("User Name"),
     phone: user?.phone || getTranslatedText("+91 98765 43210"),
+    street: user?.address?.street || "",
+    city: user?.address?.city || "",
+    state: user?.address?.state || "",
+    pincode: user?.address?.pincode || "",
     profilePicture: null,
   });
   const [walletBalance, setWalletBalance] = useState(0);
@@ -117,6 +130,10 @@ const MyProfilePage = () => {
       setFormData({
         name: user.name || 'User Name',
         phone: user.phone || '+91 98765 43210',
+        street: user.address?.street || "",
+        city: user.address?.city || "",
+        state: user.address?.state || "",
+        pincode: user.address?.pincode || "",
         profilePicture: null,
       });
 
@@ -283,9 +300,56 @@ const MyProfilePage = () => {
     }
   }, [user]);
 
-  const handleSave = () => {
-    console.log('Saving profile:', formData);
-    setIsEditMode(false);
+  const handleSave = async () => {
+    try {
+      const payload = {
+        name: formData.name,
+        phone: formData.phone,
+        address: {
+          street: formData.street,
+          city: formData.city,
+          state: formData.state,
+          pincode: formData.pincode
+        }
+      };
+
+      const response = await authAPI.updateProfile(payload);
+      if (response.success) {
+        login(response.data.user, localStorage.getItem('token'));
+        setIsEditMode(false);
+      } else {
+        alert(response.message || "Failed to update profile");
+      }
+    } catch (error) {
+      console.error('Update profile error:', error);
+      alert(error.message || "Something went wrong while updating profile");
+    }
+  };
+
+  const handlePlaceSelect = () => {
+    if (autocompleteRef.current) {
+      const place = autocompleteRef.current.getPlace();
+      if (place.geometry) {
+        const components = place.address_components || [];
+        let city = '';
+        let state = '';
+        let pincode = '';
+
+        components.forEach(c => {
+          if (c.types.includes('locality')) city = c.long_name;
+          if (c.types.includes('administrative_area_level_1')) state = c.long_name;
+          if (c.types.includes('postal_code')) pincode = c.long_name;
+        });
+
+        setFormData({
+          ...formData,
+          street: place.formatted_address,
+          city,
+          state,
+          pincode
+        });
+      }
+    }
   };
 
   // Activity feed is now managing state 'activities'
@@ -407,10 +471,16 @@ const MyProfilePage = () => {
                       {formData.name}
                     </h2>
                     <p
-                      className="text-xs md:text-base mb-1"
+                      className="text-xs md:text-base mb-0.5"
                       style={{ color: "#64748b" }}>
                       {formData.phone}
                     </p>
+                    {(formData.city || formData.state) && (
+                      <p className="items-center gap-1 text-[10px] md:text-xs mb-1 font-medium" style={{ color: "#94a3b8" }}>
+                        <HiLocationMarker className="inline mr-0.5" />
+                        {formData.city}{formData.city && formData.state ? ', ' : ''}{formData.state}
+                      </p>
+                    )}
                     <div className="flex items-center gap-2">
                       <span
                         className="text-[10px] md:text-xs px-2 py-0.5 rounded-full font-medium"
@@ -544,6 +614,74 @@ const MyProfilePage = () => {
                     />
                   </div>
 
+                  {/* Address Section */}
+                  <div className="pt-2 border-t border-slate-100">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Location Details</p>
+
+                    {/* Search Address */}
+                    <div className="mb-3">
+                      <label className="block text-xs md:text-sm font-medium mb-1" style={{ color: "#475569" }}>{getTranslatedText("Search Address")}</label>
+                      {isLoaded ? (
+                        <Autocomplete
+                          onLoad={(ref) => autocompleteRef.current = ref}
+                          onPlaceChanged={handlePlaceSelect}
+                        >
+                          <input
+                            type="text"
+                            value={formData.street}
+                            onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                            placeholder="Search or enter locality"
+                            className="w-full px-3 py-2 md:px-4 md:py-2.5 rounded-lg text-xs md:text-base border transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                            style={{ borderColor: '#e2e8f0', color: '#1e293b', backgroundColor: '#ffffff' }}
+                          />
+                        </Autocomplete>
+                      ) : (
+                        <input
+                          type="text"
+                          value={formData.street}
+                          onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                          placeholder="Enter locality"
+                          className="w-full px-3 py-2 md:px-4 md:py-2.5 rounded-lg text-xs md:text-base border transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                          style={{ borderColor: '#e2e8f0', color: '#1e293b', backgroundColor: '#ffffff' }}
+                        />
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 uppercase">City</label>
+                        <input
+                          type="text"
+                          value={formData.city}
+                          onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                          className="w-full px-3 py-2 rounded-lg text-xs border focus:outline-none"
+                          style={{ borderColor: '#e2e8f0', color: '#1e293b', backgroundColor: '#ffffff' }}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 uppercase">Pincode</label>
+                        <input
+                          type="text"
+                          value={formData.pincode}
+                          onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
+                          className="w-full px-3 py-2 rounded-lg text-xs border focus:outline-none"
+                          style={{ borderColor: '#e2e8f0', color: '#1e293b', backgroundColor: '#ffffff' }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-3">
+                      <label className="block text-[10px] font-semibold text-slate-500 uppercase">State</label>
+                      <input
+                        type="text"
+                        value={formData.state}
+                        onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                        className="w-full px-3 py-2 rounded-lg text-xs border focus:outline-none"
+                        style={{ borderColor: '#e2e8f0', color: '#1e293b', backgroundColor: '#ffffff' }}
+                      />
+                    </div>
+                  </div>
+
                   {/* Action Buttons */}
                   <div className="flex gap-2 md:gap-3 pt-2">
                     <button
@@ -614,7 +752,7 @@ const MyProfilePage = () => {
                   <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500 rounded-full -translate-y-1/2 translate-x-1/2"></div>
                   <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-500 rounded-full translate-y-1/2 -translate-x-1/2"></div>
                 </div>
-                
+
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-bold text-base text-slate-800">
@@ -623,7 +761,7 @@ const MyProfilePage = () => {
                     <button
                       onClick={() => navigate('/wallet')}
                       className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
-                      style={{ 
+                      style={{
                         backgroundColor: "#f0f9ff",
                         color: "#0ea5e9"
                       }}
@@ -631,11 +769,11 @@ const MyProfilePage = () => {
                       {getTranslatedText("View All")}
                     </button>
                   </div>
-                  
+
                   <div className="flex items-center gap-3">
                     <div
                       className="w-12 h-12 rounded-xl flex items-center justify-center shadow-md"
-                      style={{ 
+                      style={{
                         background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)"
                       }}
                     >
@@ -676,7 +814,7 @@ const MyProfilePage = () => {
                     >
                       <div
                         className="w-11 h-11 rounded-xl flex items-center justify-center shadow-sm"
-                        style={{ 
+                        style={{
                           background: "linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)",
                           color: "#0284c7"
                         }}
@@ -740,7 +878,7 @@ const MyProfilePage = () => {
                         <div className="mt-3">
                           <div
                             className="w-full px-4 py-3 rounded-xl flex items-center justify-center gap-2 shadow-md"
-                            style={{ 
+                            style={{
                               background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)"
                             }}>
                             <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -759,7 +897,7 @@ const MyProfilePage = () => {
                 <div className="text-center py-12 px-4">
                   <div
                     className="w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg"
-                    style={{ 
+                    style={{
                       backgroundColor: "#f0f9ff",
                       border: "3px solid #e0f2fe"
                     }}>

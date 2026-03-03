@@ -7,6 +7,7 @@ import {
 } from 'react-icons/fa';
 import { adminAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import { INDIAN_STATES } from './locationConstants';
 
 const ScrappersList = () => {
   const navigate = useNavigate();
@@ -15,6 +16,9 @@ const ScrappersList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [locations, setLocations] = useState({ states: [], cities: [] });
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
   const staticTexts = [
     "Failed to load scrappers",
     "Blocked",
@@ -55,7 +59,23 @@ const ScrappersList = () => {
 
   useEffect(() => {
     loadScrappersData();
-  }, [filter]);
+  }, [filter, selectedState, selectedCity]);
+
+  useEffect(() => {
+    fetchLocations();
+  }, [selectedState]);
+
+  const fetchLocations = async () => {
+    try {
+      const query = selectedState ? `state=${selectedState}` : '';
+      const response = await adminAPI.getLocations(query);
+      if (response.success) {
+        setLocations(response.data);
+      }
+    } catch (err) {
+      console.error('Error fetching locations:', err);
+    }
+  };
 
   const loadScrappersData = async () => {
     setLoading(true);
@@ -65,6 +85,12 @@ const ScrappersList = () => {
       const queryParams = new URLSearchParams();
       if (filter !== 'all' && ['pending', 'verified', 'rejected'].includes(filter)) {
         queryParams.append('status', filter);
+      }
+      if (selectedState) {
+        queryParams.append('state', selectedState);
+      }
+      if (selectedCity) {
+        queryParams.append('city', selectedCity);
       }
       queryParams.append('page', '1');
       queryParams.append('limit', '100');
@@ -249,6 +275,35 @@ const ScrappersList = () => {
               </button>
             ))}
           </div>
+
+          {/* Location Filters */}
+          <div className="flex gap-2 flex-wrap">
+            <select
+              value={selectedState}
+              onChange={(e) => {
+                setSelectedState(e.target.value);
+                setSelectedCity('');
+              }}
+              className="px-2.5 py-1.5 md:px-4 md:py-3 rounded-lg md:rounded-xl font-semibold text-xs md:text-sm border-2 focus:outline-none transition-all"
+              style={{ borderColor: '#e2e8f0', color: '#2d3748', backgroundColor: '#f7fafc' }}
+            >
+              <option value="">State: All</option>
+              {INDIAN_STATES.map(state => (
+                <option key={state} value={state}>{state}</option>
+              ))}
+            </select>
+            <select
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              className="px-2.5 py-1.5 md:px-4 md:py-3 rounded-lg md:rounded-xl font-semibold text-xs md:text-sm border-2 focus:outline-none transition-all"
+              style={{ borderColor: '#e2e8f0', color: '#2d3748', backgroundColor: '#f7fafc' }}
+            >
+              <option value="">City: All</option>
+              {locations.cities.map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </motion.div>
 
@@ -352,6 +407,14 @@ const ScrappersList = () => {
                               <span className="truncate">{scrapper.phone}</span>
                             </div>
                             <div className="flex items-center gap-1.5 md:gap-2">
+                              <FaMapMarkerAlt className="text-xs" />
+                              <span className="truncate">
+                                {scrapper.businessLocation?.city || scrapper.businessLocation?.state
+                                  ? `${scrapper.businessLocation.city}${scrapper.businessLocation.city && scrapper.businessLocation.state ? ', ' : ''}${scrapper.businessLocation.state}`
+                                  : getTranslatedText("No Location")}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 md:gap-2">
                               <FaStar className="text-xs" style={{ color: '#fbbf24' }} />
                               <span>{scrapper.rating > 0 ? scrapper.rating.toFixed(1) : 'N/A'}</span>
                             </div>
@@ -361,15 +424,15 @@ const ScrappersList = () => {
                             </div>
                             <div className="flex items-center gap-1.5 md:gap-2">
                               <FaRupeeSign className="text-xs" />
-                              <span>₹{scrapper.totalEarnings.toLocaleString()}</span>
+                              <span>₹{scrapper.totalEarnings?.toLocaleString()}</span>
                             </div>
                           </div>
                           <p className="text-xs mt-1 md:mt-2" style={{ color: '#718096' }}>
-                            🚗 {scrapper.vehicleInfo}
+                            🚗 {scrapper.vehicleInfo} {scrapper.businessLocation?.address ? ` | 📍 ${scrapper.businessLocation.address.substring(0, 30)}...` : ''}
                           </p>
                           <p className="text-xs mt-0.5">
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ backgroundColor: '#e0f2fe', color: '#0369a1' }}>
-                              {scrapper.scrapperType === 'feri_wala' ? '🚲 फेरी वाला' : scrapper.scrapperType === 'dukandaar' ? '🏪 दुकानदार' : scrapper.scrapperType === 'wholesaler' ? '🏭 थोक व्यापारी' : scrapper.scrapperType === 'big' ? '🏭 Dealer' : '🚲 Small'}
+                              {scrapper.scrapperType === 'feri_wala' ? '🚲 फेरी वाला' : scrapper.scrapperType === 'dukandaar' ? '🏪 दुकानदार' : scrapper.scrapperType === 'wholesaler' ? '🏭 थोk व्यापारी' : scrapper.scrapperType === 'industrial' ? '🏭 औद्योगिक' : scrapper.scrapperType === 'big' ? '🏭 Dealer' : '🚲 Small'}
                             </span>
                           </p>
                         </div>

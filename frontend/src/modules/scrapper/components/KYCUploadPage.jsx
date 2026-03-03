@@ -52,7 +52,12 @@ const KYCUploadPage = () => {
     "Your KYC documents have been submitted for verification.",
     "Verification Time:",
     "Usually takes 24-48 hours. You'll be notified once verification is complete.",
-    "File is too large (Max 5MB)"
+    "File is too large (Max 5MB)",
+    "GST Number",
+    "Enter 15-digit GST number",
+    "GST Certificate Photo",
+    "gst certificate photo",
+    "Remove GST Certificate"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -64,12 +69,15 @@ const KYCUploadPage = () => {
   const [panPhoto, setPanPhoto] = useState(null);
   const [shopLicenseFile, setShopLicenseFile] = useState(null);
   const [shopPhotoFile, setShopPhotoFile] = useState(null);
+  const [gstNumber, setGstNumber] = useState('');
+  const [gstCertificate, setGstCertificate] = useState(null);
   const [scrapperType, setScrapperType] = useState(null);
   const [aadhaarPreview, setAadhaarPreview] = useState(null);
   const [selfiePreview, setSelfiePreview] = useState(null);
   const [panPreview, setPanPreview] = useState(null);
   const [shopLicensePreview, setShopLicensePreview] = useState(null);
   const [shopPhotoPreview, setShopPhotoPreview] = useState(null);
+  const [gstPreview, setGstPreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isLoadingCheck, setIsLoadingCheck] = useState(true);
@@ -220,6 +228,27 @@ const KYCUploadPage = () => {
     }
   };
 
+  const handleGstNumberChange = (e) => {
+    const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 15);
+    setGstNumber(value);
+  };
+
+  const handleGstCertificateChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert(getTranslatedText('File is too large (Max 5MB)'));
+        return;
+      }
+      setGstCertificate(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setGstPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -258,6 +287,17 @@ const KYCUploadPage = () => {
       return;
     }
 
+    if (['wholesaler', 'industrial'].includes(scrapperType)) {
+      if (!gstNumber || gstNumber.length !== 15) {
+        alert(getTranslatedText('Please enter a valid 15-digit GST number'));
+        return;
+      }
+      if (!gstCertificate) {
+        alert(getTranslatedText('Please upload GST Certificate photo'));
+        return;
+      }
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -270,6 +310,10 @@ const KYCUploadPage = () => {
       formData.append('shopLicense', shopLicenseFile);
       if (scrapperType === 'dukandaar' && shopPhotoFile) {
         formData.append('shopPhoto', shopPhotoFile);
+      }
+      if (['wholesaler', 'industrial'].includes(scrapperType)) {
+        formData.append('gstNumber', gstNumber);
+        if (gstCertificate) formData.append('gstCertificate', gstCertificate);
       }
 
       const res = await kycAPI.submit(formData);
@@ -622,6 +666,76 @@ const KYCUploadPage = () => {
             </div>
           )}
 
+          {/* GST Details (Wholesaler/Industrial only) */}
+          {['wholesaler', 'industrial'].includes(scrapperType) && (
+            <div className="space-y-6 pt-4 border-t border-zinc-800">
+              <h3 className="text-lg font-bold text-sky-500">
+                {getTranslatedText("Business Details (GST)")}
+              </h3>
+
+              {/* GST Number */}
+              <div>
+                <label className="block text-sm font-semibold mb-2 text-white">
+                  {getTranslatedText("GST Number")} <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={gstNumber}
+                  onChange={handleGstNumberChange}
+                  placeholder={getTranslatedText("Enter 15-digit GST number")}
+                  maxLength={15}
+                  className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${gstNumber.length === 15 ? 'border-sky-500' : 'border-zinc-700'}`}
+                  required={['wholesaler', 'industrial'].includes(scrapperType)}
+                />
+              </div>
+
+              {/* GST Certificate Photo */}
+              <div>
+                <label className="block text-sm font-semibold mb-2 text-white">
+                  {getTranslatedText("GST Certificate Photo")} <span className="text-red-500">*</span>
+                </label>
+                <div className="space-y-3">
+                  <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all hover:border-sky-500 bg-black ${gstCertificate ? 'border-sky-500' : 'border-zinc-700'}`}
+                  >
+                    {gstPreview ? (
+                      <img src={gstPreview} alt="GST preview" className="w-full h-full object-cover rounded-xl" />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <svg className="w-10 h-10 mb-3 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p className="mb-2 text-sm text-gray-400">
+                          <span className="font-semibold">{getTranslatedText("Click to upload")}</span> {getTranslatedText("gst certificate photo")}
+                        </p>
+                        <p className="text-xs text-gray-500">{getTranslatedText("PNG, JPG or JPEG (MAX. 5MB)")}</p>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleGstCertificateChange}
+                      required={['wholesaler', 'industrial'].includes(scrapperType)}
+                    />
+                  </label>
+                  {gstCertificate && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setGstCertificate(null);
+                        setGstPreview(null);
+                      }}
+                      className="text-xs font-semibold"
+                      style={{ color: '#ef4444' }}
+                    >
+                      {getTranslatedText("Remove GST Certificate")}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Info Box */}
           <div className="p-4 rounded-xl bg-zinc-800/50">
             <div className="flex items-start gap-3">
@@ -647,7 +761,7 @@ const KYCUploadPage = () => {
             type="submit"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            disabled={isSubmitting || !aadhaarNumber || aadhaarNumber.length !== 12 || !aadhaarPhoto || !selfiePhoto || !panNumber || panNumber.length !== 10 || !panPhoto || !shopLicenseFile || (scrapperType === 'dukandaar' && !shopPhotoFile)}
+            disabled={isSubmitting || !aadhaarNumber || aadhaarNumber.length !== 12 || !aadhaarPhoto || !selfiePhoto || !panNumber || panNumber.length !== 10 || !panPhoto || !shopLicenseFile || (scrapperType === 'dukandaar' && !shopPhotoFile) || (['wholesaler', 'industrial'].includes(scrapperType) && (!gstNumber || gstNumber.length !== 15 || !gstCertificate))}
             className="w-full py-4 md:py-5 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-sky-600 text-white hover:bg-sky-700"
           >
             {isSubmitting ? (

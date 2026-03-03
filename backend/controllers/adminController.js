@@ -23,6 +23,32 @@ import { sendNotificationToUser } from '../utils/pushNotificationHelper.js';
 // @access  Private (Admin)
 export const getDashboardStats = asyncHandler(async (req, res) => {
   try {
+    const { state, city } = req.query;
+
+    // Build filters for location-based stats
+    const userFilter = { role: USER_ROLES.USER };
+    const orderFilter = {};
+    const scrapperFilter = {};
+    const paymentFilter = { status: PAYMENT_STATUS.COMPLETED };
+
+    if (state) {
+      userFilter['address.state'] = state;
+      orderFilter['pickupAddress.state'] = state;
+      scrapperFilter['businessLocation.state'] = state;
+      // Payments are linked to orders, so we need to filter payments by order location
+      const matchingOrders = await Order.find({ 'pickupAddress.state': state }).select('_id');
+      paymentFilter.order = { $in: matchingOrders.map(o => o._id) };
+    }
+
+    if (city) {
+      userFilter['address.city'] = city;
+      orderFilter['pickupAddress.city'] = city;
+      scrapperFilter['businessLocation.city'] = city;
+
+      const matchingOrders = await Order.find({ 'pickupAddress.city': city }).select('_id');
+      paymentFilter.order = { $in: matchingOrders.map(o => o._id) };
+    }
+
     const [
       totalUsers,
       totalScrappers,
@@ -34,13 +60,14 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
       todayRevenue,
       monthlyRevenue
     ] = await Promise.all([
-      User.countDocuments({ role: USER_ROLES.USER }),
-      Scrapper.countDocuments(),
-      Order.countDocuments(),
-      Payment.countDocuments({ status: PAYMENT_STATUS.COMPLETED }),
-      Scrapper.countDocuments({ 'subscription.status': 'active' }),
-      Scrapper.countDocuments({ 'kyc.status': 'pending' }),
+      User.countDocuments(userFilter),
+      Scrapper.countDocuments(scrapperFilter),
+      Order.countDocuments(orderFilter),
+      Payment.countDocuments(paymentFilter),
+      Scrapper.countDocuments({ ...scrapperFilter, 'subscription.status': 'active' }),
+      Scrapper.countDocuments({ ...scrapperFilter, 'kyc.status': 'pending' }),
       Order.countDocuments({
+        ...orderFilter,
         createdAt: {
           $gte: new Date(new Date().setHours(0, 0, 0, 0))
         }
@@ -48,7 +75,7 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
       Payment.aggregate([
         {
           $match: {
-            status: PAYMENT_STATUS.COMPLETED,
+            ...paymentFilter,
             paidAt: {
               $gte: new Date(new Date().setHours(0, 0, 0, 0))
             }
@@ -64,7 +91,7 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
       Payment.aggregate([
         {
           $match: {
-            status: PAYMENT_STATUS.COMPLETED,
+            ...paymentFilter,
             paidAt: {
               $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
             }
@@ -82,19 +109,19 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
     const stats = {
       users: {
         total: totalUsers,
-        active: await User.countDocuments({ role: USER_ROLES.USER, isActive: true })
+        active: await User.countDocuments({ ...userFilter, isActive: true })
       },
       scrappers: {
         total: totalScrappers,
-        active: await Scrapper.countDocuments({ status: 'active' }),
-        verified: await Scrapper.countDocuments({ 'kyc.status': 'verified' }),
+        active: await Scrapper.countDocuments({ ...scrapperFilter, status: 'active' }),
+        verified: await Scrapper.countDocuments({ ...scrapperFilter, 'kyc.status': 'verified' }),
         pendingKyc
       },
       orders: {
         total: totalOrders,
-        pending: await Order.countDocuments({ status: ORDER_STATUS.PENDING }),
-        inProgress: await Order.countDocuments({ status: ORDER_STATUS.IN_PROGRESS }),
-        completed: await Order.countDocuments({ status: ORDER_STATUS.COMPLETED }),
+        pending: await Order.countDocuments({ ...orderFilter, status: ORDER_STATUS.PENDING }),
+        inProgress: await Order.countDocuments({ ...orderFilter, status: ORDER_STATUS.IN_PROGRESS }),
+        completed: await Order.countDocuments({ ...orderFilter, status: ORDER_STATUS.COMPLETED }),
         today: todayOrders
       },
       payments: {
@@ -104,7 +131,25 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
       },
       subscriptions: {
         active: activeSubscriptions
-      }
+      },
+      stateDistribution: await Order.aggregate([
+        {
+          $match: { 'pickupAddress.state': { $exists: true, $ne: '' } }
+        },
+        {
+          $group: {
+            _id: '$pickupAddress.state',
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $project: {
+            state: '$_id',
+            count: 1,
+            _id: 0
+          }
+        }
+      ])
     };
 
     sendSuccess(res, 'Dashboard statistics retrieved successfully', { stats });
@@ -135,6 +180,15 @@ export const getAllUsers = asyncHandler(async (req, res) => {
     if (req.query.isActive !== undefined) {
       filter.isActive = req.query.isActive === 'true';
     }
+
+    // Location Filters
+    if (req.query.state) {
+      filter['address.state'] = req.query.state;
+    }
+    if (req.query.city) {
+      filter['address.city'] = req.query.city;
+    }
+
     if (req.query.search) {
       filter.$or = [
         { name: { $regex: req.query.search, $options: 'i' } },
@@ -353,6 +407,15 @@ export const getAllScrappers = asyncHandler(async (req, res) => {
     if (req.query.subscriptionStatus) {
       filter['subscription.status'] = req.query.subscriptionStatus;
     }
+
+    // Location Filters
+    if (req.query.state) {
+      filter['businessLocation.state'] = req.query.state;
+    }
+    if (req.query.city) {
+      filter['businessLocation.city'] = req.query.city;
+    }
+
     if (req.query.search) {
       filter.$or = [
         { name: { $regex: req.query.search, $options: 'i' } },
@@ -616,6 +679,15 @@ export const getAllOrders = asyncHandler(async (req, res) => {
     if (req.query.scrapperId) {
       filter.scrapper = req.query.scrapperId;
     }
+
+    // Location Filters
+    if (req.query.state) {
+      filter['pickupAddress.state'] = req.query.state;
+    }
+    if (req.query.city) {
+      filter['pickupAddress.city'] = req.query.city;
+    }
+
     if (req.query.dateFrom || req.query.dateTo) {
       filter.createdAt = {};
       if (req.query.dateFrom) {
@@ -1662,5 +1734,47 @@ export const updateWithdrawalStatus = asyncHandler(async (req, res) => {
     sendError(res, error.message, 500);
   } finally {
     session.endSession();
+  }
+});
+
+// @desc    Get unique states and cities for filters
+// @route   GET /api/admin/locations
+// @access  Private (Admin)
+export const getLocations = asyncHandler(async (req, res) => {
+  try {
+    const { state } = req.query;
+
+    // Filters for Cities based on selected State
+    const userFilter = state ? { 'address.state': state } : {};
+    const orderFilter = state ? { 'pickupAddress.state': state } : {};
+
+    const [states, cities] = await Promise.all([
+      // Fetch from Users, Orders and Scrappers for maximum coverage
+      Promise.all([
+        User.distinct('address.state', { 'address.state': { $exists: true, $ne: '' } }),
+        Order.distinct('pickupAddress.state', { 'pickupAddress.state': { $exists: true, $ne: '' } }),
+        Scrapper.distinct('businessLocation.state', { 'businessLocation.state': { $exists: true, $ne: '' } })
+      ]),
+      Promise.all([
+        User.distinct('address.city', { ...userFilter, 'address.city': { $exists: true, $ne: '' } }),
+        Order.distinct('pickupAddress.city', { ...orderFilter, 'pickupAddress.city': { $exists: true, $ne: '' } }),
+        Scrapper.distinct('businessLocation.city', {
+          ...(state ? { 'businessLocation.state': state } : {}),
+          'businessLocation.city': { $exists: true, $ne: '' }
+        })
+      ])
+    ]);
+
+    // Merge and deduplicate
+    const uniqueStates = [...new Set([...states[0], ...states[1], ...states[2]])].sort();
+    const uniqueCities = [...new Set([...cities[0], ...cities[1], ...cities[2]])].sort();
+
+    sendSuccess(res, 'Locations retrieved successfully', {
+      states: uniqueStates,
+      cities: uniqueCities
+    });
+  } catch (error) {
+    logger.error('[Admin] Error fetching locations:', error);
+    sendError(res, 'Failed to fetch locations', 500);
   }
 });

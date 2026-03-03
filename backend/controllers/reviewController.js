@@ -9,7 +9,7 @@ export const createReview = asyncHandler(async (req, res) => {
     return sendError(res, error.details[0].message, 400);
   }
 
-  const review = await reviewService.createReview(req.user._id, value);
+  const review = await reviewService.createReview(req.user.id, value);
   return sendSuccess(res, 'Review created successfully', review, 201);
 });
 
@@ -20,7 +20,7 @@ export const getScrapperReviews = asyncHandler(async (req, res) => {
 });
 
 export const getMyReviews = asyncHandler(async (req, res) => {
-  const result = await reviewService.getMyReviews(req.user._id, req.query);
+  const result = await reviewService.getMyReviews(req.user.id, req.query);
   return sendSuccess(res, 'My reviews fetched successfully', result);
 });
 
@@ -37,13 +37,13 @@ export const updateReview = asyncHandler(async (req, res) => {
     return sendError(res, error.details[0].message, 400);
   }
 
-  const review = await reviewService.updateReview(id, req.user._id, value);
+  const review = await reviewService.updateReview(id, req.user.id, value);
   return sendSuccess(res, 'Review updated successfully', review);
 });
 
 export const deleteReview = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  await reviewService.deleteReview(id, req.user._id, req.user.role);
+  await reviewService.deleteReview(id, req.user.id, req.user.role);
   return sendSuccess(res, 'Review deleted successfully');
 });
 
@@ -74,7 +74,7 @@ export const rejectReview = asyncHandler(async (req, res) => {
 
 export const deleteAdminReview = asyncHandler(async (req, res) => {
   const { reviewId } = req.params;
-  await reviewService.deleteReview(reviewId, req.user._id, 'admin');
+  await reviewService.deleteReview(reviewId, req.user.id, 'admin');
   return sendSuccess(res, 'Review deleted successfully');
 });
 

@@ -87,12 +87,15 @@ const ScrapperLogin = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [vehicleInfo, setVehicleInfo] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
   const [heardFrom, setHeardFrom] = useState('');
   const [heardFromOther, setHeardFromOther] = useState('');
   const [selectedServices, setSelectedServices] = useState(['scrap_pickup']);
   const [scrapperType, setScrapperType] = useState('feri_wala'); // 'feri_wala', 'dukandaar', or 'wholesaler'
   const [businessAddress, setBusinessAddress] = useState('');
   const [businessCoordinates, setBusinessCoordinates] = useState(null);
+  const [dealCategories, setDealCategories] = useState([]);
   const [isLocatingBusiness, setIsLocatingBusiness] = useState(false);
   const [referralCode, setReferralCode] = useState('');
   const [referralCodeError, setReferralCodeError] = useState('');
@@ -158,6 +161,19 @@ const ScrapperLogin = () => {
           place.geometry.location.lng(),
           place.geometry.location.lat()
         ]);
+
+        // Extract City and State from address components
+        const components = place.address_components || [];
+        let city = '';
+        let state = '';
+
+        components.forEach(c => {
+          if (c.types.includes('locality')) city = c.long_name;
+          if (c.types.includes('administrative_area_level_1')) state = c.long_name;
+        });
+
+        setCity(city);
+        setState(state);
       }
     }
   };
@@ -301,6 +317,15 @@ const ScrapperLogin = () => {
       return;
     }
 
+    if (
+      !isLogin &&
+      (scrapperType === 'dukandaar' || scrapperType === 'wholesaler') &&
+      dealCategories.length === 0
+    ) {
+      setError(getTranslatedText('Please select at least one deal category'));
+      return;
+    }
+
     if (!isLogin && selectedServices.length === 0) {
       setError(getTranslatedText('Please select at least one service'));
       return;
@@ -335,8 +360,11 @@ const ScrapperLogin = () => {
           password,
           role: 'scrapper',
           services: selectedServices,
+          dealCategories: dealCategories,
           referralCode: referralCode,
-          scrapperType: scrapperType
+          scrapperType: scrapperType,
+          city: city || '',
+          state: state || ''
         };
 
         if ((scrapperType === 'dukandaar' || scrapperType === 'wholesaler') && businessCoordinates) {
@@ -877,6 +905,31 @@ const ScrapperLogin = () => {
                               )}
                             </div>
 
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="space-y-1">
+                                <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider">City</label>
+                                <input
+                                  type="text"
+                                  value={city}
+                                  onChange={(e) => setCity(e.target.value)}
+                                  placeholder="City"
+                                  className="w-full px-4 py-3 rounded-xl border-2 border-zinc-700 focus:border-sky-500 bg-black/50 text-white text-sm outline-none transition-all"
+                                  required={scrapperType === 'dukandaar' || scrapperType === 'wholesaler'}
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider">State</label>
+                                <input
+                                  type="text"
+                                  value={state}
+                                  onChange={(e) => setState(e.target.value)}
+                                  placeholder="State"
+                                  className="w-full px-4 py-3 rounded-xl border-2 border-zinc-700 focus:border-sky-500 bg-black/50 text-white text-sm outline-none transition-all"
+                                  required={scrapperType === 'dukandaar' || scrapperType === 'wholesaler'}
+                                />
+                              </div>
+                            </div>
+
                             <button
                               type="button"
                               onClick={() => {
@@ -916,6 +969,44 @@ const ScrapperLogin = () => {
                                 </>
                               )}
                             </button>
+
+                            {/* Deal Categories - Only for Wholesalers/Shopkeepers */}
+                            <div className="pt-2">
+                              <label className="block text-xs font-semibold mb-2 text-gray-400">
+                                {getTranslatedText("Deal Categories (What do you buy?)")}
+                              </label>
+                              <div className="grid grid-cols-2 gap-2">
+                                {[
+                                  { id: 'Paper', label: 'Paper / Raddi', icon: '📄' },
+                                  { id: 'Plastic', label: 'Plastic', icon: '♻️' },
+                                  { id: 'Metal', label: 'Metal', icon: '⛓️' },
+                                  { id: 'Electronics', label: 'Electronics', icon: '💻' },
+                                  { id: 'Others', label: 'Furniture / Others', icon: '🪑' }
+                                ].map((cat) => (
+                                  <button
+                                    key={cat.id}
+                                    type="button"
+                                    onClick={() => {
+                                      if (dealCategories.includes(cat.id)) {
+                                        setDealCategories(dealCategories.filter(c => c !== cat.id));
+                                      } else {
+                                        setDealCategories([...dealCategories, cat.id]);
+                                      }
+                                    }}
+                                    className={`flex items-center gap-2 px-3 py-2 rounded-xl border-2 transition-all ${dealCategories.includes(cat.id)
+                                      ? 'border-sky-500 bg-sky-900/20 text-sky-400'
+                                      : 'border-zinc-700 bg-zinc-800/30 text-gray-400 hover:border-zinc-600'
+                                      }`}
+                                  >
+                                    <span className="text-base">{cat.icon}</span>
+                                    <span className="text-xs font-medium truncate">{cat.label}</span>
+                                  </button>
+                                ))}
+                              </div>
+                              <p className="mt-2 text-[10px] text-gray-500 italic">
+                                * {getTranslatedText("You will only see orders containing these categories.")}
+                              </p>
+                            </div>
                           </motion.div>
                         )}
                       </AnimatePresence>

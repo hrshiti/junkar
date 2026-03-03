@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaCheckCircle, FaSearch, FaDownload, FaCalendarAlt, FaUser, FaTruck, FaRupeeSign, FaEye } from 'react-icons/fa';
 import { adminOrdersAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import { INDIAN_STATES } from './locationConstants';
 
 const CompletedOrders = () => {
   const navigate = useNavigate();
@@ -12,6 +13,9 @@ const CompletedOrders = () => {
   const [filter, setFilter] = useState('all'); // all, today, week, month
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState(null);
+  const [locations, setLocations] = useState({ states: [], cities: [] });
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
   const staticTexts = [
     "Failed to load completed orders",
     "Completed Orders",
@@ -43,7 +47,23 @@ const CompletedOrders = () => {
 
   useEffect(() => {
     loadOrders();
-  }, [filter]);
+  }, [filter, selectedState, selectedCity]);
+
+  useEffect(() => {
+    fetchLocations();
+  }, [selectedState]);
+
+  const fetchLocations = async () => {
+    try {
+      const query = selectedState ? `state=${selectedState}` : '';
+      const response = await adminOrdersAPI.request(`/admin/locations?${query}`, { method: 'GET' });
+      if (response.success) {
+        setLocations(response.data);
+      }
+    } catch (err) {
+      console.error('Error fetching locations:', err);
+    }
+  };
 
   const loadOrders = async () => {
     setLoading(true);
@@ -63,6 +83,9 @@ const CompletedOrders = () => {
         const lastMonth = new Date(now.setMonth(now.getMonth() - 1)).toISOString();
         query += `&dateFrom=${lastMonth}`;
       }
+
+      if (selectedState) query += `&state=${selectedState}`;
+      if (selectedCity) query += `&city=${selectedCity}`;
 
       const response = await adminOrdersAPI.getAll(query);
       if (response.success && response.data?.orders) {
@@ -206,6 +229,35 @@ const CompletedOrders = () => {
                 {getTranslatedText(period.charAt(0).toUpperCase() + period.slice(1))}
               </button>
             ))}
+          </div>
+
+          {/* Location Filters */}
+          <div className="flex gap-2 flex-wrap">
+            <select
+              value={selectedState}
+              onChange={(e) => {
+                setSelectedState(e.target.value);
+                setSelectedCity('');
+              }}
+              className="px-2.5 py-1.5 md:px-4 md:py-3 rounded-lg md:rounded-xl font-semibold text-xs md:text-sm border-2 focus:outline-none transition-all"
+              style={{ borderColor: '#e2e8f0', color: '#2d3748', backgroundColor: '#f7fafc' }}
+            >
+              <option value="">State: All</option>
+              {INDIAN_STATES.map(state => (
+                <option key={state} value={state}>{state}</option>
+              ))}
+            </select>
+            <select
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              className="px-2.5 py-1.5 md:px-4 md:py-3 rounded-lg md:rounded-xl font-semibold text-xs md:text-sm border-2 focus:outline-none transition-all"
+              style={{ borderColor: '#e2e8f0', color: '#2d3748', backgroundColor: '#f7fafc' }}
+            >
+              <option value="">City: All</option>
+              {locations.cities.map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
           </div>
         </div>
       </motion.div>

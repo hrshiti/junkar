@@ -82,7 +82,7 @@ const ReviewOrderPage = () => {
       try {
         const response = await orderAPI.getById(orderId);
         if (response.success && response.data) {
-          setOrder(response.data);
+          setOrder(response.data.order);
           // If already reviewed, maybe redirect to view review?
           // For now, let's assume we are creating a new one.
           // In a real app, we check if response.data.review exists.

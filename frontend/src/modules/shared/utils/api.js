@@ -466,8 +466,13 @@ export const adminAPI = {
       body: JSON.stringify({ reason }),
     });
   },
-  getDashboardStats: async () => {
-    return apiRequest(API_ENDPOINTS.admin.dashboardStats, { method: 'GET' });
+  getDashboardStats: async (query = '') => {
+    const endPoint = query ? `${API_ENDPOINTS.admin.dashboardStats}?${query}` : API_ENDPOINTS.admin.dashboardStats;
+    return apiRequest(endPoint, { method: 'GET' });
+  },
+  getLocations: async (query = '') => {
+    const endPoint = query ? `${API_ENDPOINTS.admin.locations}?${query}` : API_ENDPOINTS.admin.locations;
+    return apiRequest(endPoint, { method: 'GET' });
   },
   getPaymentAnalytics: async () => {
     return apiRequest(API_ENDPOINTS.admin.analyticsPayments, { method: 'GET' });

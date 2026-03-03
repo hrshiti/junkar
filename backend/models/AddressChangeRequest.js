@@ -14,6 +14,14 @@ const addressChangeRequestSchema = new mongoose.Schema({
     type: [Number], // [lng, lat]
     default: [0, 0]
   },
+  requestedCity: {
+    type: String,
+    default: ''
+  },
+  requestedState: {
+    type: String,
+    default: ''
+  },
   status: {
     type: String,
     enum: ['pending', 'approved', 'rejected'],

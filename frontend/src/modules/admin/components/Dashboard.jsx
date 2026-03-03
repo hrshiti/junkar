@@ -14,6 +14,8 @@ import {
 } from 'react-icons/fa';
 import { adminAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import { INDIAN_STATES } from './locationConstants';
+import IndiaMap from './IndiaMap';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -29,6 +31,10 @@ const Dashboard = () => {
   const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [locations, setLocations] = useState({ states: [], cities: [] });
+  const [stateDistribution, setStateDistribution] = useState([]); // For Heatmap
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
   const staticTexts = [
     "Failed to load dashboard stats",
     "Failed to load dashboard data",
@@ -59,16 +65,36 @@ const Dashboard = () => {
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
-  // Load dashboard data from backend
+  // Load dashboard data and locations from backend
   useEffect(() => {
     loadDashboardData();
-  }, []);
+  }, [selectedState, selectedCity]);
+
+  useEffect(() => {
+    fetchLocations();
+  }, [selectedState]);
+
+  const fetchLocations = async () => {
+    try {
+      const query = selectedState ? `state=${selectedState}` : '';
+      const response = await adminAPI.getLocations(query);
+      if (response.success) {
+        setLocations(response.data);
+      }
+    } catch (err) {
+      console.error('Error fetching locations:', err);
+    }
+  };
 
   const loadDashboardData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await adminAPI.getDashboardStats();
+      const queryParams = new URLSearchParams();
+      if (selectedState) queryParams.append('state', selectedState);
+      if (selectedCity) queryParams.append('city', selectedCity);
+
+      const response = await adminAPI.getDashboardStats(queryParams.toString());
 
       if (response.success && response.data?.stats) {
         const backendStats = response.data.stats;
@@ -90,6 +116,10 @@ const Dashboard = () => {
           { id: 4, type: 'scrapper', message: getTranslatedText("{count} scrappers registered", { count: backendStats.scrappers?.total || 0 }), time: 'Just now', icon: FaTruck }
         ];
         setRecentActivity(activity);
+
+        if (response.data.stats.stateDistribution) {
+          setStateDistribution(response.data.stats.stateDistribution);
+        }
       } else {
         throw new Error(response.message || getTranslatedText('Failed to load dashboard stats'));
       }
@@ -218,6 +248,65 @@ const Dashboard = () => {
         <p className="text-xs md:text-sm lg:text-base" style={{ color: '#718096' }}>
           {getTranslatedText("Here's what's happening with your platform today")}
         </p>
+
+        {/* Location Filters */}
+        <div className="mt-4 flex flex-wrap gap-2 md:gap-4">
+          <div className="flex-1 min-w-[120px] md:min-w-[200px]">
+            <label className="block text-[10px] md:text-xs font-bold uppercase mb-1" style={{ color: '#718096' }}>
+              State
+            </label>
+            <select
+              value={selectedState}
+              onChange={(e) => {
+                setSelectedState(e.target.value);
+                setSelectedCity(''); // Reset city when state changes
+              }}
+              className="w-full px-2 py-1.5 md:px-3 md:py-2 rounded-lg border focus:outline-none transition-all text-xs md:text-sm"
+              style={{ borderColor: '#e2e8f0', color: '#2d3748' }}
+            >
+              <option value="">All States</option>
+              {INDIAN_STATES.map(state => (
+                <option key={state} value={state}>{state}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex-1 min-w-[120px] md:min-w-[200px]">
+            <label className="block text-[10px] md:text-xs font-bold uppercase mb-1" style={{ color: '#718096' }}>
+              City
+            </label>
+            <select
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              className="w-full px-2 py-1.5 md:px-3 md:py-2 rounded-lg border focus:outline-none transition-all text-xs md:text-sm"
+              style={{ borderColor: '#e2e8f0', color: '#2d3748' }}
+            >
+              <option value="">All Cities</option>
+              {locations.cities.map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Heatmap Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
+        <IndiaMap
+          stateDistribution={stateDistribution}
+          selectedState={selectedState}
+          onStateClick={(state) => {
+            if (selectedState === state) {
+              setSelectedState(''); // Toggle off
+            } else {
+              setSelectedState(state);
+            }
+            setSelectedCity('');
+          }}
+        />
       </motion.div>
 
       {/* Stats Grid */}

@@ -4,6 +4,59 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { sendSuccess, sendError } from '../utils/responseHandler.js';
 import logger from '../utils/logger.js';
 
+// Normalize scrapper deal categories so they align with scrapItems.category values
+const normalizeDealCategories = (rawCategories) => {
+    if (!Array.isArray(rawCategories)) return [];
+
+    const normalized = new Set();
+
+    rawCategories.forEach((cat) => {
+        if (!cat) return;
+        const value = String(cat).toLowerCase().trim();
+
+        switch (value) {
+            case 'paper':
+            case 'raddi':
+            case 'paper / raddi':
+                normalized.add('paper');
+                break;
+
+            case 'plastic':
+                normalized.add('plastic');
+                break;
+
+            case 'metal':
+                normalized.add('metal');
+                break;
+
+            case 'electronics':
+            case 'electronic':
+            case 'e-waste':
+            case 'e_waste':
+                normalized.add('electronic');
+                normalized.add('e_waste');
+                break;
+
+            case 'others':
+            case 'furniture':
+            case 'furniture / others':
+            case 'vehicle scrap':
+            case 'vehicle_scrap':
+            case 'home appliance':
+            case 'home_appliance':
+                normalized.add('furniture');
+                normalized.add('vehicle_scrap');
+                normalized.add('home_appliance');
+                break;
+
+            default:
+                normalized.add(value);
+        }
+    });
+
+    return Array.from(normalized);
+};
+
 export const getMyProfile = asyncHandler(async (req, res) => {
     let scrapper = await Scrapper.findById(req.user.id);
 
@@ -34,7 +87,7 @@ export const getMyProfile = asyncHandler(async (req, res) => {
 });
 
 export const updateMyProfile = asyncHandler(async (req, res) => {
-    const { name, vehicleInfo, availability, isOnline } = req.body;
+    const { name, vehicleInfo, availability, isOnline, dealCategories, city, state } = req.body;
     const userId = req.user.id || req.user._id;
 
     // 1. Update Scrapper Document
@@ -49,7 +102,8 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
                 phone: user.phone,
                 name: user.name || name || 'Scrapper',
                 email: user.email,
-                vehicleInfo: vehicleInfo || { type: 'bike', number: 'NA', capacity: 0 }
+                vehicleInfo: vehicleInfo || { type: 'bike', number: 'NA', capacity: 0 },
+                dealCategories: normalizeDealCategories(dealCategories || [])
             });
         } else {
             return sendError(res, 'Scrapper profile not found', 404);
@@ -71,6 +125,17 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
                 requiresReverification = true;
             }
             scrapper.vehicleInfo = { ...scrapper.vehicleInfo, ...vehicleInfo };
+        }
+
+        if (dealCategories) {
+            scrapper.dealCategories = normalizeDealCategories(dealCategories);
+        }
+
+        if (city) {
+            scrapper.businessLocation.city = city;
+        }
+        if (state) {
+            scrapper.businessLocation.state = state;
         }
 
         // Update Online Status

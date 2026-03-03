@@ -16,6 +16,7 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
     phone: kyc.scrapperPhone || '',
     aadhaarNumber: kyc.aadhaarNumber && kyc.aadhaarNumber !== 'N/A' ? kyc.aadhaarNumber.replace(/[^0-9]/g, '') : '',
     panNumber: kyc.panNumber === 'N/A' || !kyc.panNumber ? '' : kyc.panNumber,
+    gstNumber: kyc.gstNumber === 'N/A' || !kyc.gstNumber ? '' : kyc.gstNumber,
   });
   const staticTexts = [
     "Error: Scrapper ID is missing",
@@ -45,7 +46,9 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
     "PAN Photo",
     "Shop License",
     "Shop Photo",
-    "Driving License"
+    "Driving License",
+    "GST Number",
+    "GST Certificate"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
@@ -111,7 +114,8 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
           aadhaarNumber: editForm.aadhaarNumber,
           panNumber: editForm.panNumber,
           panPhotoUrl,
-          shopLicenseUrl
+          shopLicenseUrl,
+          gstNumber: editForm.gstNumber
         }
       };
 
@@ -275,7 +279,20 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
                     )}
                   </div>
                 </div>
-                {['big', 'dukandaar', 'wholesaler'].includes(kyc.scrapperType) && kyc.businessLocation && (
+                {['wholesaler', 'industrial'].includes(kyc.scrapperType) && (
+                  <div className="flex items-center gap-3">
+                    <FaIdCard style={{ color: '#64946e' }} />
+                    <div className="w-full">
+                      <p className="text-xs" style={{ color: '#718096' }}>{getTranslatedText("GST Number")}</p>
+                      {isEditing ? (
+                        <input type="text" value={editForm.gstNumber} onChange={e => setEditForm({ ...editForm, gstNumber: e.target.value })} className="mt-1 w-full px-2 py-1 border rounded" />
+                      ) : (
+                        <p className="font-semibold" style={{ color: '#2d3748' }}>{kyc.gstNumber || getTranslatedText('N/A')}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {['big', 'dukandaar', 'wholesaler', 'industrial'].includes(kyc.scrapperType) && kyc.businessLocation && (
                   <div className="flex items-start gap-3 md:col-span-2">
                     <FaUserShield style={{ color: '#64946e', marginTop: '4px' }} />
                     <div>
@@ -434,6 +451,23 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
                           onClick={() => {
                             if (kyc.shopPhotoUrl) window.open(kyc.shopPhotoUrl, '_blank');
                           }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* GST Certificate */}
+                  {['wholesaler', 'industrial'].includes(kyc.scrapperType) && kyc.gstCertificateUrl && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold" style={{ color: '#2d3748' }}>
+                        {getTranslatedText("GST Certificate")}
+                      </label>
+                      <div className="relative rounded-xl overflow-hidden border-2" style={{ borderColor: '#e2e8f0' }}>
+                        <img
+                          src={getImageUrl(kyc.gstCertificateUrl)}
+                          alt="GST Certificate"
+                          className="w-full h-64 object-contain bg-gray-50 cursor-pointer"
+                          onClick={() => window.open(kyc.gstCertificateUrl, '_blank')}
                         />
                       </div>
                     </div>

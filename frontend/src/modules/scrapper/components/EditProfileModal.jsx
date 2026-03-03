@@ -50,7 +50,10 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
         vehicleNumber: '',
         vehiclePhotoUrl: '',
         businessAddress: '',
-        businessCoordinates: null
+        city: '',
+        state: '',
+        businessCoordinates: null,
+        dealCategories: []
     });
     const [vehiclePhotoFile, setVehiclePhotoFile] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -58,6 +61,8 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
     const [showRequestForm, setShowRequestForm] = useState(false);
     const [requestAddress, setRequestAddress] = useState('');
     const [requestCoordinates, setRequestCoordinates] = useState(null);
+    const [requestCity, setRequestCity] = useState('');
+    const [requestState, setRequestState] = useState('');
     const [requestLoading, setRequestLoading] = useState(false);
     const requestAutocompleteRef = useRef(null);
 
@@ -72,7 +77,10 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                 vehicleNumber: initialData.vehicleInfo?.number || '',
                 vehiclePhotoUrl: initialData.vehicleInfo?.photoUrl || '',
                 businessAddress: initialData.businessLocation?.address || '',
-                businessCoordinates: initialData.businessLocation?.coordinates || null
+                city: initialData.businessLocation?.city || '',
+                state: initialData.businessLocation?.state || '',
+                businessCoordinates: initialData.businessLocation?.coordinates || null,
+                dealCategories: initialData.dealCategories || []
             });
             setVehiclePhotoFile(null);
         }
@@ -82,9 +90,20 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
         if (autocompleteRef.current) {
             const place = autocompleteRef.current.getPlace();
             if (place.geometry) {
+                // Extract City and State
+                const components = place.address_components || [];
+                let city = '';
+                let state = '';
+                components.forEach(c => {
+                    if (c.types.includes('locality')) city = c.long_name;
+                    if (c.types.includes('administrative_area_level_1')) state = c.long_name;
+                });
+
                 setFormData({
                     ...formData,
                     businessAddress: place.formatted_address,
+                    city: city,
+                    state: state,
                     businessCoordinates: [
                         place.geometry.location.lng(),
                         place.geometry.location.lat()
@@ -125,7 +144,10 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                     type: formData.vehicleType,
                     number: formData.vehicleNumber.toUpperCase(), // Standardize to uppercase
                     photoUrl: photoUrl ?? null
-                }
+                },
+                dealCategories: formData.dealCategories,
+                city: formData.city,
+                state: formData.state
             };
 
             // Only big can update businessLocation from here; dukandaar/wholesaler use "Request Address Change"
@@ -193,258 +215,337 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                             {/* Body - scrollable */}
                             <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
                                 <div className="flex-1 min-h-0 min-w-0 overflow-y-auto p-6 space-y-4">
-                                {error && (
-                                    <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm">
-                                        {error}
-                                    </div>
-                                )}
+                                    {error && (
+                                        <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm">
+                                            {error}
+                                        </div>
+                                    )}
 
-                                {/* Name */}
-                                <div className="space-y-1.5 min-w-0">
-                                    <label className="text-sm font-medium text-slate-700 block">
-                                        {getTranslatedText("Name")}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 outline-none transition-all text-slate-800"
-                                        placeholder="John Doe"
-                                    />
-                                </div>
-
-                                {/* Vehicle Type */}
-                                <div className="space-y-1.5 min-w-0">
-                                    <label className="text-sm font-medium text-slate-700 block">
-                                        {getTranslatedText("Vehicle Type")}
-                                    </label>
-                                    <div className="grid gap-2 min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-                                        {vehicleTypes.map(type => (
-                                            <button
-                                                key={type}
-                                                type="button"
-                                                onClick={() => setFormData({ ...formData, vehicleType: type })}
-                                                className={`min-w-0 px-2 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border truncate ${formData.vehicleType === type
-                                                    ? 'bg-sky-50 border-sky-500 text-sky-700'
-                                                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                                                    }`}
-                                            >
-                                                <span className="capitalize block truncate">{type.replace('_', ' ')}</span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Vehicle Number */}
-                                <div className="space-y-1.5 min-w-0">
-                                    <label className="text-sm font-medium text-slate-700 block">
-                                        {getTranslatedText("Vehicle Number")}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.vehicleNumber}
-                                        onChange={(e) => setFormData({ ...formData, vehicleNumber: e.target.value })}
-                                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 outline-none transition-all text-slate-800 uppercase"
-                                        placeholder="UP14 AB 1234"
-                                    />
-                                </div>
-
-                                {/* Vehicle Photo */}
-                                <div className="space-y-1.5 min-w-0">
-                                    <label className="text-sm font-medium text-slate-700 block">
-                                        {getTranslatedText("Vehicle photo")}
-                                    </label>
-                                    <div className="flex items-center gap-3">
-                                        <label className="flex-shrink-0 w-20 h-20 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors overflow-hidden">
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                className="hidden"
-                                                onChange={(e) => {
-                                                    const f = e.target.files?.[0];
-                                                    if (f) setVehiclePhotoFile(f);
-                                                }}
-                                            />
-                                            {(vehiclePhotoFile || formData.vehiclePhotoUrl) ? (
-                                                <img
-                                                    src={vehiclePhotoFile ? URL.createObjectURL(vehiclePhotoFile) : formData.vehiclePhotoUrl}
-                                                    alt="Vehicle"
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <span className="text-slate-400 text-xs text-center px-1">{getTranslatedText("Click to upload vehicle photo")}</span>
-                                            )}
+                                    {/* Name */}
+                                    <div className="space-y-1.5 min-w-0">
+                                        <label className="text-sm font-medium text-slate-700 block">
+                                            {getTranslatedText("Name")}
                                         </label>
-                                        {(vehiclePhotoFile || formData.vehiclePhotoUrl) && (
-                                            <button
-                                                type="button"
-                                                onClick={() => { setVehiclePhotoFile(null); setFormData(prev => ({ ...prev, vehiclePhotoUrl: '' })); }}
-                                                className="text-xs text-slate-500 hover:text-red-600"
-                                            >
-                                                Remove
-                                            </button>
-                                        )}
+                                        <input
+                                            type="text"
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 outline-none transition-all text-slate-800"
+                                            placeholder="John Doe"
+                                        />
                                     </div>
-                                </div>
 
-                                {/* Business Location (B2B): dukandaar/wholesaler = read-only + Request; big = editable */}
-                                {['big', 'dukandaar', 'wholesaler'].includes(initialData?.scrapperType) && (
-                                    <div className="pt-2 border-t border-slate-100 space-y-3 min-w-0">
-                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Business Details (B2B)</p>
+                                    {/* Vehicle Type */}
+                                    <div className="space-y-1.5 min-w-0">
+                                        <label className="text-sm font-medium text-slate-700 block">
+                                            {getTranslatedText("Vehicle Type")}
+                                        </label>
+                                        <div className="grid gap-2 min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                                            {vehicleTypes.map(type => (
+                                                <button
+                                                    key={type}
+                                                    type="button"
+                                                    onClick={() => setFormData({ ...formData, vehicleType: type })}
+                                                    className={`min-w-0 px-2 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border truncate ${formData.vehicleType === type
+                                                        ? 'bg-sky-50 border-sky-500 text-sky-700'
+                                                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                                        }`}
+                                                >
+                                                    <span className="capitalize block truncate">{type.replace('_', ' ')}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
 
-                                        {['dukandaar', 'wholesaler'].includes(initialData?.scrapperType) ? (
-                                            <>
-                                                <div className="space-y-1.5">
-                                                    <label className="text-sm font-medium text-slate-700 block">{getTranslatedText("Business Address")}</label>
-                                                    <p className="text-sm text-slate-600 bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200">
-                                                        {formData.businessAddress || '—'}
-                                                    </p>
-                                                    <p className="text-xs text-slate-500">{getTranslatedText("Address can only be changed via request. Admin will review.")}</p>
-                                                </div>
-                                                {!showRequestForm ? (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setShowRequestForm(true)}
-                                                        className="w-full py-2.5 rounded-xl border-2 border-sky-500 bg-sky-50 text-sky-700 font-medium flex items-center justify-center gap-2"
-                                                    >
-                                                        {getTranslatedText("Request Address Change")}
-                                                    </button>
+                                    {/* Vehicle Number */}
+                                    <div className="space-y-1.5 min-w-0">
+                                        <label className="text-sm font-medium text-slate-700 block">
+                                            {getTranslatedText("Vehicle Number")}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.vehicleNumber}
+                                            onChange={(e) => setFormData({ ...formData, vehicleNumber: e.target.value })}
+                                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 outline-none transition-all text-slate-800 uppercase"
+                                            placeholder="UP14 AB 1234"
+                                        />
+                                    </div>
+
+                                    {/* Vehicle Photo */}
+                                    <div className="space-y-1.5 min-w-0">
+                                        <label className="text-sm font-medium text-slate-700 block">
+                                            {getTranslatedText("Vehicle photo")}
+                                        </label>
+                                        <div className="flex items-center gap-3">
+                                            <label className="flex-shrink-0 w-20 h-20 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors overflow-hidden">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    className="hidden"
+                                                    onChange={(e) => {
+                                                        const f = e.target.files?.[0];
+                                                        if (f) setVehiclePhotoFile(f);
+                                                    }}
+                                                />
+                                                {(vehiclePhotoFile || formData.vehiclePhotoUrl) ? (
+                                                    <img
+                                                        src={vehiclePhotoFile ? URL.createObjectURL(vehiclePhotoFile) : formData.vehiclePhotoUrl}
+                                                        alt="Vehicle"
+                                                        className="w-full h-full object-cover"
+                                                    />
                                                 ) : (
-                                                    <div className="space-y-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
-                                                        <label className="text-sm font-medium text-slate-700 block">{getTranslatedText("New address (required)")}</label>
-                                                        {isLoaded ? (
-                                                            <Autocomplete
-                                                                onLoad={(ref) => { requestAutocompleteRef.current = ref; }}
-                                                                onPlaceChanged={() => {
-                                                                    const place = requestAutocompleteRef.current?.getPlace();
-                                                                    if (place?.geometry) {
-                                                                        setRequestAddress(place.formatted_address || '');
-                                                                        setRequestCoordinates([place.geometry.location.lng(), place.geometry.location.lat()]);
-                                                                    }
-                                                                }}
-                                                            >
+                                                    <span className="text-slate-400 text-xs text-center px-1">{getTranslatedText("Click to upload vehicle photo")}</span>
+                                                )}
+                                            </label>
+                                            {(vehiclePhotoFile || formData.vehiclePhotoUrl) && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => { setVehiclePhotoFile(null); setFormData(prev => ({ ...prev, vehiclePhotoUrl: '' })); }}
+                                                    className="text-xs text-slate-500 hover:text-red-600"
+                                                >
+                                                    Remove
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Business Location (B2B): dukandaar/wholesaler/industrial = read-only + Request; big = editable */}
+                                    {['big', 'dukandaar', 'wholesaler', 'industrial'].includes(initialData?.scrapperType) && (
+                                        <div className="pt-2 border-t border-slate-100 space-y-3 min-w-0">
+                                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Business Details (B2B)</p>
+
+                                            {['dukandaar', 'wholesaler', 'industrial'].includes(initialData?.scrapperType) ? (
+                                                <>
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-sm font-medium text-slate-700 block">{getTranslatedText("Business Address")}</label>
+                                                        <p className="text-sm text-slate-600 bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200">
+                                                            {formData.businessAddress || '—'}
+                                                        </p>
+                                                        <p className="text-xs text-slate-500">{getTranslatedText("Address can only be changed via request. Admin will review.")}</p>
+                                                    </div>
+                                                    {!showRequestForm ? (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setShowRequestForm(true)}
+                                                            className="w-full py-2.5 rounded-xl border-2 border-sky-500 bg-sky-50 text-sky-700 font-medium flex items-center justify-center gap-2"
+                                                        >
+                                                            {getTranslatedText("Request Address Change")}
+                                                        </button>
+                                                    ) : (
+                                                        <div className="space-y-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                                                            <label className="text-sm font-medium text-slate-700 block">{getTranslatedText("New address (required)")}</label>
+                                                            {isLoaded ? (
+                                                                <Autocomplete
+                                                                    onLoad={(ref) => { requestAutocompleteRef.current = ref; }}
+                                                                    onPlaceChanged={() => {
+                                                                        const place = requestAutocompleteRef.current?.getPlace();
+                                                                        if (place?.geometry) {
+                                                                            setRequestAddress(place.formatted_address || '');
+                                                                            setRequestCoordinates([place.geometry.location.lng(), place.geometry.location.lat()]);
+
+                                                                            const components = place.address_components || [];
+                                                                            let city = '';
+                                                                            let state = '';
+                                                                            components.forEach(c => {
+                                                                                if (c.types.includes('locality')) city = c.long_name;
+                                                                                if (c.types.includes('administrative_area_level_1')) state = c.long_name;
+                                                                            });
+                                                                            setRequestCity(city);
+                                                                            setRequestState(state);
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <input
+                                                                        type="text"
+                                                                        value={requestAddress}
+                                                                        onChange={(e) => setRequestAddress(e.target.value)}
+                                                                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-800"
+                                                                        placeholder="Search new address"
+                                                                    />
+                                                                </Autocomplete>
+                                                            ) : (
                                                                 <input
                                                                     type="text"
                                                                     value={requestAddress}
                                                                     onChange={(e) => setRequestAddress(e.target.value)}
                                                                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-800"
-                                                                    placeholder="Search new address"
+                                                                    placeholder="Enter new address"
+                                                                />
+                                                            )}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    if (navigator.geolocation) {
+                                                                        navigator.geolocation.getCurrentPosition(
+                                                                            (pos) => setRequestCoordinates([pos.coords.longitude, pos.coords.latitude]),
+                                                                            () => alert('Failed to get location')
+                                                                        );
+                                                                    }
+                                                                }}
+                                                                className="w-full py-2 rounded-xl border border-slate-300 bg-white text-slate-700 text-sm"
+                                                            >
+                                                                Use current location
+                                                            </button>
+                                                            <div className="flex gap-2">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => { setShowRequestForm(false); setRequestAddress(''); setRequestCoordinates(null); }}
+                                                                    className="flex-1 py-2 rounded-xl border border-slate-300 text-slate-700"
+                                                                >
+                                                                    Cancel
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    disabled={requestLoading || !requestAddress.trim()}
+                                                                    onClick={async () => {
+                                                                        setRequestLoading(true);
+                                                                        try {
+                                                                            const res = await scrapperProfileAPI.requestAddressChange({
+                                                                                address: requestAddress.trim(),
+                                                                                coordinates: requestCoordinates || [0, 0],
+                                                                                city: requestCity,
+                                                                                state: requestState
+                                                                            });
+                                                                            if (res.success) {
+                                                                                alert(getTranslatedText("Request submitted. Admin will review and update your location."));
+                                                                                setShowRequestForm(false);
+                                                                                setRequestAddress('');
+                                                                                setRequestCoordinates(null);
+                                                                            } else {
+                                                                                alert(res.message || getTranslatedText("Failed to submit request"));
+                                                                            }
+                                                                        } catch (err) {
+                                                                            alert(err.message || getTranslatedText("Failed to submit request"));
+                                                                            if (err.message && err.message.includes('pending')) {
+                                                                                setShowRequestForm(false);
+                                                                            }
+                                                                        } finally {
+                                                                            setRequestLoading(false);
+                                                                        }
+                                                                    }}
+                                                                    className="flex-1 py-2 rounded-xl bg-sky-600 text-white font-medium disabled:opacity-50"
+                                                                >
+                                                                    {requestLoading ? '...' : getTranslatedText("Submit Request")}
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-sm font-medium text-slate-700 block">{getTranslatedText("Business Address")}</label>
+                                                        {isLoaded ? (
+                                                            <Autocomplete onLoad={(ref) => autocompleteRef.current = ref} onPlaceChanged={handlePlaceSelect}>
+                                                                <input
+                                                                    type="text"
+                                                                    value={formData.businessAddress || ''}
+                                                                    onChange={(e) => setFormData({ ...formData, businessAddress: e.target.value })}
+                                                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 outline-none transition-all text-slate-800"
+                                                                    placeholder="Search shop location"
                                                                 />
                                                             </Autocomplete>
                                                         ) : (
-                                                            <input
-                                                                type="text"
-                                                                value={requestAddress}
-                                                                onChange={(e) => setRequestAddress(e.target.value)}
-                                                                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-800"
-                                                                placeholder="Enter new address"
-                                                            />
-                                                        )}
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                                if (navigator.geolocation) {
-                                                                    navigator.geolocation.getCurrentPosition(
-                                                                        (pos) => setRequestCoordinates([pos.coords.longitude, pos.coords.latitude]),
-                                                                        () => alert('Failed to get location')
-                                                                    );
-                                                                }
-                                                            }}
-                                                            className="w-full py-2 rounded-xl border border-slate-300 bg-white text-slate-700 text-sm"
-                                                        >
-                                                            Use current location
-                                                        </button>
-                                                        <div className="flex gap-2">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => { setShowRequestForm(false); setRequestAddress(''); setRequestCoordinates(null); }}
-                                                                className="flex-1 py-2 rounded-xl border border-slate-300 text-slate-700"
-                                                            >
-                                                                Cancel
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                disabled={requestLoading || !requestAddress.trim()}
-                                                                onClick={async () => {
-                                                                    setRequestLoading(true);
-                                                                    try {
-                                                                        const res = await scrapperProfileAPI.requestAddressChange({
-                                                                            address: requestAddress.trim(),
-                                                                            coordinates: requestCoordinates || [0, 0]
-                                                                        });
-                                                                        if (res.success) {
-                                                                            alert(getTranslatedText("Request submitted. Admin will review and update your location."));
-                                                                            setShowRequestForm(false);
-                                                                            setRequestAddress('');
-                                                                            setRequestCoordinates(null);
-                                                                        } else {
-                                                                            alert(res.message || getTranslatedText("Failed to submit request"));
-                                                                        }
-                                                                    } catch (err) {
-                                                                        alert(err.message || getTranslatedText("Failed to submit request"));
-                                                                        if (err.message && err.message.includes('pending')) {
-                                                                            setShowRequestForm(false);
-                                                                        }
-                                                                    } finally {
-                                                                        setRequestLoading(false);
-                                                                    }
-                                                                }}
-                                                                className="flex-1 py-2 rounded-xl bg-sky-600 text-white font-medium disabled:opacity-50"
-                                                            >
-                                                                {requestLoading ? '...' : getTranslatedText("Submit Request")}
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </>
-                                        ) : (
-                                            <>
-                                                <div className="space-y-1.5">
-                                                    <label className="text-sm font-medium text-slate-700 block">{getTranslatedText("Business Address")}</label>
-                                                    {isLoaded ? (
-                                                        <Autocomplete onLoad={(ref) => autocompleteRef.current = ref} onPlaceChanged={handlePlaceSelect}>
-                                                            <input
-                                                                type="text"
+                                                            <textarea
                                                                 value={formData.businessAddress || ''}
                                                                 onChange={(e) => setFormData({ ...formData, businessAddress: e.target.value })}
-                                                                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 outline-none transition-all text-slate-800"
-                                                                placeholder="Search shop location"
+                                                                className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:border-sky-500 bg-slate-50 text-slate-800 text-sm resize-none"
+                                                                rows="2"
+                                                                placeholder="Enter full shop/warehouse address"
                                                             />
-                                                        </Autocomplete>
-                                                    ) : (
-                                                        <textarea
-                                                            value={formData.businessAddress || ''}
-                                                            onChange={(e) => setFormData({ ...formData, businessAddress: e.target.value })}
-                                                            className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:border-sky-500 bg-slate-50 text-slate-800 text-sm resize-none"
-                                                            rows="2"
-                                                            placeholder="Enter full shop/warehouse address"
-                                                        />
-                                                    )}
+                                                        )}
+                                                    </div>
+
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div className="space-y-1.5">
+                                                            <label className="text-xs font-medium text-slate-500 block">City</label>
+                                                            <input
+                                                                type="text"
+                                                                value={formData.city || ''}
+                                                                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                                                                className="w-full px-4 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-100 outline-none"
+                                                                placeholder="e.g. Patna"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-1.5">
+                                                            <label className="text-xs font-medium text-slate-500 block">State</label>
+                                                            <input
+                                                                type="text"
+                                                                value={formData.state || ''}
+                                                                onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                                                                className="w-full px-4 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-100 outline-none"
+                                                                placeholder="e.g. Bihar"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            if (navigator.geolocation) {
+                                                                navigator.geolocation.getCurrentPosition(
+                                                                    (position) => {
+                                                                        setFormData({
+                                                                            ...formData,
+                                                                            businessCoordinates: [position.coords.longitude, position.coords.latitude]
+                                                                        });
+                                                                    },
+                                                                    (error) => alert("Failed to get location")
+                                                                );
+                                                            }
+                                                        }}
+                                                        className={`w-full py-2.5 rounded-xl border-2 flex items-center justify-center gap-2 transition-all ${formData.businessCoordinates ? 'border-emerald-500/50 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-50 text-slate-600'}`}
+                                                    >
+                                                        <span className="text-base">📍</span>
+                                                        {formData.businessCoordinates ? "Location Set" : "Update Shop Location"}
+                                                    </button>
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {['dukandaar', 'wholesaler', 'industrial'].includes(initialData?.scrapperType) && (
+                                        <>
+                                            {/* Deal Categories Selection */}
+                                            <div className="pt-2 border-t border-slate-100 space-y-3">
+                                                <label className="text-sm font-medium text-slate-700 block">
+                                                    {getTranslatedText("Deal Categories (Specialties)")}
+                                                </label>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    {[
+                                                        { id: 'Paper', label: 'Paper / Raddi', icon: '📄' },
+                                                        { id: 'Plastic', label: 'Plastic', icon: '♻️' },
+                                                        { id: 'Metal', label: 'Metal', icon: '⛓️' },
+                                                        { id: 'Electronics', label: 'Electronics', icon: '💻' },
+                                                        { id: 'Others', label: 'Furniture / Others', icon: '🪑' }
+                                                    ].map((cat) => (
+                                                        <button
+                                                            key={cat.id}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const current = formData.dealCategories || [];
+                                                                if (current.includes(cat.id)) {
+                                                                    setFormData({ ...formData, dealCategories: current.filter(c => c !== cat.id) });
+                                                                } else {
+                                                                    setFormData({ ...formData, dealCategories: [...current, cat.id] });
+                                                                }
+                                                            }}
+                                                            className={`flex items-center gap-2 px-3 py-2 rounded-xl border-2 transition-all ${formData.dealCategories?.includes(cat.id)
+                                                                ? 'border-sky-500 bg-sky-50 text-sky-700 shadow-sm'
+                                                                : 'border-slate-100 bg-slate-50/50 text-slate-500 hover:border-slate-200'
+                                                                }`}
+                                                        >
+                                                            <span className="text-base">{cat.icon}</span>
+                                                            <span className="text-xs font-medium truncate">{cat.label}</span>
+                                                        </button>
+                                                    ))}
                                                 </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        if (navigator.geolocation) {
-                                                            navigator.geolocation.getCurrentPosition(
-                                                                (position) => {
-                                                                    setFormData({
-                                                                        ...formData,
-                                                                        businessCoordinates: [position.coords.longitude, position.coords.latitude]
-                                                                    });
-                                                                },
-                                                                (error) => alert("Failed to get location")
-                                                            );
-                                                        }
-                                                    }}
-                                                    className={`w-full py-2.5 rounded-xl border-2 flex items-center justify-center gap-2 transition-all ${formData.businessCoordinates ? 'border-emerald-500/50 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-50 text-slate-600'}`}
-                                                >
-                                                    <span className="text-base">📍</span>
-                                                    {formData.businessCoordinates ? "Location Set" : "Update Shop Location"}
-                                                </button>
-                                            </>
-                                        )}
-                                    </div>
-                                )}
+                                                <p className="text-[10px] text-slate-400 italic">
+                                                    * {getTranslatedText("Selection will filter available orders in your area.")}
+                                                </p>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
 
                                 {/* Footer Actions - fixed at bottom */}

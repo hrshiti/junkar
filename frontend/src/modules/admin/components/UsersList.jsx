@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaUsers, FaSearch, FaFilter, FaUserCheck, FaUserTimes, FaEye, FaPhone, FaMapMarkerAlt, FaRupeeSign } from 'react-icons/fa';
 import { adminAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import { INDIAN_STATES } from './locationConstants';
 
 const UsersList = () => {
   const navigate = useNavigate();
@@ -12,6 +13,9 @@ const UsersList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [locations, setLocations] = useState({ states: [], cities: [] });
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
   const { login, isAuthenticated } = { login: () => { }, isAuthenticated: true }; // Placeholder or use context if needed
   const staticTexts = [
     "Failed to load users",
@@ -53,7 +57,23 @@ const UsersList = () => {
 
   useEffect(() => {
     loadUsersData();
-  }, [filter]);
+  }, [filter, selectedState, selectedCity]);
+
+  useEffect(() => {
+    fetchLocations();
+  }, [selectedState]);
+
+  const fetchLocations = async () => {
+    try {
+      const query = selectedState ? `state=${selectedState}` : '';
+      const response = await adminAPI.getLocations(query);
+      if (response.success) {
+        setLocations(response.data);
+      }
+    } catch (err) {
+      console.error('Error fetching locations:', err);
+    }
+  };
 
   const loadUsersData = async () => {
     setLoading(true);
@@ -67,6 +87,12 @@ const UsersList = () => {
       }
       if (searchQuery) {
         queryParams.append('search', searchQuery);
+      }
+      if (selectedState) {
+        queryParams.append('state', selectedState);
+      }
+      if (selectedCity) {
+        queryParams.append('city', selectedCity);
       }
       queryParams.append('page', '1');
       queryParams.append('limit', '100');
@@ -277,6 +303,35 @@ const UsersList = () => {
               </button>
             ))}
           </div>
+
+          {/* Location Filters */}
+          <div className="flex gap-2 flex-wrap">
+            <select
+              value={selectedState}
+              onChange={(e) => {
+                setSelectedState(e.target.value);
+                setSelectedCity('');
+              }}
+              className="px-2.5 py-1.5 md:px-4 md:py-3 rounded-lg md:rounded-xl font-semibold text-xs md:text-sm border-2 focus:outline-none transition-all"
+              style={{ borderColor: '#e2e8f0', color: '#2d3748', backgroundColor: '#f7fafc' }}
+            >
+              <option value="">State: All</option>
+              {INDIAN_STATES.map(state => (
+                <option key={state} value={state}>{state}</option>
+              ))}
+            </select>
+            <select
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              className="px-2.5 py-1.5 md:px-4 md:py-3 rounded-lg md:rounded-xl font-semibold text-xs md:text-sm border-2 focus:outline-none transition-all"
+              style={{ borderColor: '#e2e8f0', color: '#2d3748', backgroundColor: '#f7fafc' }}
+            >
+              <option value="">City: All</option>
+              {locations.cities.map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </motion.div>
 
@@ -377,6 +432,14 @@ const UsersList = () => {
                             </div>
                             <div className="flex items-center gap-1.5 md:gap-2">
                               <FaMapMarkerAlt className="text-xs" />
+                              <span className="truncate">
+                                {user.address?.city || user.address?.state
+                                  ? `${user.address.city}${user.address.city && user.address.state ? ', ' : ''}${user.address.state}`
+                                  : getTranslatedText("No Location")}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 md:gap-2">
+                              <FaBox className="text-xs" />
                               <span>{getTranslatedText("{count} Requests", { count: user.totalRequests })}</span>
                             </div>
                             <div className="flex items-center gap-1.5 md:gap-2">

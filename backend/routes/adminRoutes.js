@@ -4,6 +4,7 @@ import { adminRateLimiter } from '../middleware/rateLimiter.js';
 import {
   // Dashboard & Analytics
   getDashboardStats,
+  getLocations,
   getPaymentAnalytics,
   getBusinessAnalytics,
 
@@ -97,6 +98,7 @@ router.use(isAdmin);
 // DASHBOARD & ANALYTICS
 // ============================================
 router.get('/dashboard/stats', getDashboardStats);
+router.get('/locations', getLocations);
 router.get('/analytics/payments', getPaymentAnalytics);
 router.get('/analytics/business', getBusinessAnalytics);
 

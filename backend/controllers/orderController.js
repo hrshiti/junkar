@@ -14,6 +14,59 @@ import { PAYMENT_STATUS } from '../config/constants.js';
 import { sendNotificationToUser } from '../utils/pushNotificationHelper.js';
 import notificationService from '../services/notificationService.js';
 
+// Normalize scrapper deal categories so they align with scrapItems.category values
+const normalizeDealCategories = (rawCategories) => {
+  if (!Array.isArray(rawCategories)) return [];
+
+  const normalized = new Set();
+
+  rawCategories.forEach((cat) => {
+    if (!cat) return;
+    const value = String(cat).toLowerCase().trim();
+
+    switch (value) {
+      case 'paper':
+      case 'raddi':
+      case 'paper / raddi':
+        normalized.add('paper');
+        break;
+
+      case 'plastic':
+        normalized.add('plastic');
+        break;
+
+      case 'metal':
+        normalized.add('metal');
+        break;
+
+      case 'electronics':
+      case 'electronic':
+      case 'e-waste':
+      case 'e_waste':
+        normalized.add('electronic');
+        normalized.add('e_waste');
+        break;
+
+      case 'others':
+      case 'furniture':
+      case 'furniture / others':
+      case 'vehicle scrap':
+      case 'vehicle_scrap':
+      case 'home appliance':
+      case 'home_appliance':
+        normalized.add('furniture');
+        normalized.add('vehicle_scrap');
+        normalized.add('home_appliance');
+        break;
+
+      default:
+        normalized.add(value);
+    }
+  });
+
+  return Array.from(normalized);
+};
+
 // Order State Machine - Valid Status Transitions
 const ORDER_STATUS_TRANSITIONS = {
   [ORDER_STATUS.PENDING]: [ORDER_STATUS.CONFIRMED, ORDER_STATUS.CANCELLED],
@@ -120,7 +173,10 @@ export const getAvailableOrders = asyncHandler(async (req, res) => {
 
   // Filter by scrapper's deal categories if they have specified any
   if (scrapper.dealCategories && scrapper.dealCategories.length > 0) {
-    query['scrapItems.category'] = { $in: scrapper.dealCategories };
+    const normalizedCategories = normalizeDealCategories(scrapper.dealCategories);
+    if (normalizedCategories.length > 0) {
+      query['scrapItems.category'] = { $in: normalizedCategories };
+    }
   }
 
   const orders = await Order.find(query)

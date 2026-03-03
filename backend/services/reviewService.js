@@ -15,7 +15,7 @@ class ReviewService {
       throw error;
     }
 
-    if (order.user.toString() !== userId.toString()) {
+    if (!order.user || !userId || order.user.toString() !== userId.toString()) {
       const error = new Error('Not authorized to review this order');
       error.statusCode = 403;
       throw error;
@@ -29,7 +29,7 @@ class ReviewService {
     }
 
     // 3. Check if scrapper matches
-    if (order.scrapper.toString() !== scrapperId) {
+    if (!order.scrapper || order.scrapper.toString() !== scrapperId?.toString()) {
       const error = new Error('Scrapper does not match order');
       error.statusCode = 400;
       throw error;
@@ -139,7 +139,7 @@ class ReviewService {
       throw error;
     }
 
-    if (review.user.toString() !== userId.toString()) {
+    if (!review.user || !userId || review.user.toString() !== userId.toString()) {
       const error = new Error('Not authorized to update this review');
       error.statusCode = 403;
       throw error;
@@ -166,7 +166,7 @@ class ReviewService {
       throw error;
     }
 
-    if (role !== 'admin' && review.user.toString() !== userId.toString()) {
+    if (role !== 'admin' && (!review.user || !userId || review.user.toString() !== userId.toString())) {
       const error = new Error('Not authorized to delete this review');
       error.statusCode = 403;
       throw error;

@@ -7,7 +7,7 @@ import logger from '../utils/logger.js';
 // Scrapper: create address change request (dukandaar/wholesaler only)
 export const createRequest = asyncHandler(async (req, res) => {
   const scrapperId = req.user.id || req.user._id;
-  const { address, coordinates } = req.body;
+  const { address, coordinates, city, state } = req.body;
 
   const scrapper = await Scrapper.findById(scrapperId).select('scrapperType businessLocation');
   if (!scrapper) return sendError(res, 'Scrapper not found', 404);
@@ -21,6 +21,8 @@ export const createRequest = asyncHandler(async (req, res) => {
   const reqCoords = Array.isArray(coordinates) && coordinates.length >= 2
     ? [Number(coordinates[0]), Number(coordinates[1])]
     : [0, 0];
+  const reqCity = (city && typeof city === 'string') ? city.trim() : '';
+  const reqState = (state && typeof state === 'string') ? state.trim() : '';
 
   if (!reqAddress) return sendError(res, 'Address is required.', 400);
 
@@ -36,6 +38,8 @@ export const createRequest = asyncHandler(async (req, res) => {
     scrapper: scrapperId,
     requestedAddress: reqAddress,
     requestedCoordinates: reqCoords,
+    requestedCity: reqCity,
+    requestedState: reqState,
     status: 'pending'
   });
 
@@ -81,6 +85,8 @@ export const approveRequest = asyncHandler(async (req, res) => {
   const finalCoords = Array.isArray(coordinates) && coordinates.length >= 2
     ? [Number(coordinates[0]), Number(coordinates[1])]
     : request.requestedCoordinates;
+  const finalCity = request.requestedCity || '';
+  const finalState = request.requestedState || '';
 
   const scrapper = await Scrapper.findById(request.scrapper._id);
   if (!scrapper) return sendError(res, 'Scrapper not found', 404);
@@ -88,7 +94,9 @@ export const approveRequest = asyncHandler(async (req, res) => {
   scrapper.businessLocation = {
     type: 'Point',
     coordinates: finalCoords,
-    address: finalAddress
+    address: finalAddress,
+    city: finalCity,
+    state: finalState
   };
   await scrapper.save();
 

@@ -56,6 +56,7 @@ export const API_ENDPOINTS = {
   // Admin management endpoints
   admin: {
     dashboardStats: '/admin/dashboard/stats',
+    locations: '/admin/locations',
     analyticsPayments: '/admin/analytics/payments',
     users: '/admin/users',
     userById: (id) => `/admin/users/${id}`,

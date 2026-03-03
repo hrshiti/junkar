@@ -83,6 +83,8 @@ const KYCQueue = () => {
             panPhotoUrl: scrapper.kyc?.panPhotoUrl || null,
             shopLicenseUrl: scrapper.kyc?.shopLicenseUrl || null,
             shopPhotoUrl: scrapper.kyc?.shopPhotoUrl || null,
+            gstNumber: scrapper.kyc?.gstNumber || 'N/A',
+            gstCertificateUrl: scrapper.kyc?.gstCertificateUrl || null,
             businessLocation: scrapper.businessLocation || null,
             scrapperType: scrapper.scrapperType || 'feri_wala',
             status: scrapper.kyc?.status || 'not_submitted',
@@ -348,7 +350,7 @@ const KYCQueue = () => {
                             <p>🚗 {kyc.vehicleInfo}</p>
                             <p>
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ backgroundColor: '#e0f2fe', color: '#0369a1' }}>
-                                {kyc.scrapperType === 'feri_wala' ? '🚲 फेरी वाला' : kyc.scrapperType === 'dukandaar' ? '🏪 दुकानदार' : kyc.scrapperType === 'wholesaler' ? '🏭 थोक व्यापारी' : kyc.scrapperType === 'big' ? '🏭 Dealer' : '🚲 Small'}
+                                {kyc.scrapperType === 'feri_wala' ? '🚲 फेरी वाला' : kyc.scrapperType === 'dukandaar' ? '🏪 दुकानदार' : kyc.scrapperType === 'wholesaler' ? '🏭 थोक व्यापारी' : kyc.scrapperType === 'industrial' ? '🏭 औद्योगिक' : kyc.scrapperType === 'big' ? '🏭 Dealer' : '🚲 Small'}
                               </span>
                             </p>
                             <p className="text-xs">{getTranslatedText("Submitted {time}", { time: getTimeAgo(kyc.submittedAt) })}</p>

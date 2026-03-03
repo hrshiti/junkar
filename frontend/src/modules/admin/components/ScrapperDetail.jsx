@@ -70,7 +70,9 @@ const ScrapperDetail = () => {
     "PAN Number",
     "PAN Photo",
     "Shop License",
-    "Coordinates"
+    "Coordinates",
+    "GST Number",
+    "GST Certificate"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
@@ -301,7 +303,7 @@ const ScrapperDetail = () => {
               </h1>
               {getKYCStatusBadge(scrapper.kycStatus)}
               <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: '#e0f2fe', color: '#0369a1' }}>
-                {scrapper.scrapperType === 'feri_wala' ? '🚲 फेरी वाला' : scrapper.scrapperType === 'dukandaar' ? '🏪 दुकानदार' : scrapper.scrapperType === 'wholesaler' ? '🏭 थोक व्यापारी' : scrapper.scrapperType === 'big' ? '🏭 Dealer' : '🚲 Small'}
+                {scrapper.scrapperType === 'feri_wala' ? '🚲 फेरी wala' : scrapper.scrapperType === 'dukandaar' ? '🏪 दुकानदार' : scrapper.scrapperType === 'wholesaler' ? '🏭 थोक व्यापारी' : scrapper.scrapperType === 'industrial' ? '🏭 औद्योगिक' : scrapper.scrapperType === 'big' ? '🏭 Dealer' : '🚲 Small'}
               </span>
             </div>
 
@@ -354,7 +356,7 @@ const ScrapperDetail = () => {
                   )}
                 </div>
               </div>
-              {['big', 'dukandaar', 'wholesaler'].includes(scrapper.scrapperType) && scrapper.businessLocation && (
+              {['big', 'dukandaar', 'wholesaler', 'industrial'].includes(scrapper.scrapperType) && scrapper.businessLocation && (
                 <div className="flex items-start gap-3 md:col-span-2">
                   <FaMapMarkerAlt style={{ color: '#64946e', marginTop: '4px' }} />
                   <div>
@@ -464,6 +466,12 @@ const ScrapperDetail = () => {
                 {scrapper.kycData.verifiedAt ? new Date(scrapper.kycData.verifiedAt).toLocaleDateString() : getTranslatedText('N/A')}
               </p>
             </div>
+            {['wholesaler', 'industrial'].includes(scrapper.scrapperType) && (
+              <div>
+                <p className="text-xs mb-1" style={{ color: '#718096' }}>{getTranslatedText("GST Number")}</p>
+                <p className="font-semibold" style={{ color: '#2d3748' }}>{scrapper.kycData.gstNumber || getTranslatedText('Not provided')}</p>
+              </div>
+            )}
             {scrapper.kycData.rejectionReason && (
               <div className="md:col-span-2 bg-red-50 p-3 rounded-lg border border-red-100">
                 <p className="text-xs mb-1 text-red-600 font-semibold">{getTranslatedText("Rejection Reason")}</p>
@@ -525,7 +533,17 @@ const ScrapperDetail = () => {
                 </div>
               </div>
             )}
-            {!scrapper.kycData.aadhaarPhotoUrl && !scrapper.kycData.licenseUrl && !scrapper.kycData.selfieUrl && !scrapper.kycData.panPhotoUrl && !scrapper.kycData.shopLicenseUrl && (
+            {scrapper.kycData.gstCertificateUrl && (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold" style={{ color: '#718096' }}>{getTranslatedText("GST Certificate")}</p>
+                <div className="border rounded-lg overflow-hidden h-40 bg-gray-50 flex items-center justify-center">
+                  <img src={scrapper.kycData.gstCertificateUrl} alt={getTranslatedText("GST Certificate")} className="max-w-full max-h-full object-contain cursor-pointer hover:scale-105 transition-transform"
+                    onClick={() => window.open(scrapper.kycData.gstCertificateUrl, '_blank')}
+                  />
+                </div>
+              </div>
+            )}
+            {!scrapper.kycData.aadhaarPhotoUrl && !scrapper.kycData.licenseUrl && !scrapper.kycData.selfieUrl && !scrapper.kycData.panPhotoUrl && !scrapper.kycData.shopLicenseUrl && !scrapper.kycData.gstCertificateUrl && (
               <p className="text-sm text-gray-500 italic">{getTranslatedText("No documents uploaded.")}</p>
             )}
           </div>

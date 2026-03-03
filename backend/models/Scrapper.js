@@ -32,7 +32,7 @@ const scrapperSchema = new mongoose.Schema({
   },
   scrapperType: {
     type: String,
-    enum: ['small', 'big', 'feri_wala', 'dukandaar', 'wholesaler'],
+    enum: ['small', 'big', 'feri_wala', 'dukandaar', 'wholesaler', 'industrial'],
     default: 'feri_wala'
   },
   // Categories this scrapper deals in (e.g., only PAT bottles for a wholesaler)
@@ -235,6 +235,14 @@ const scrapperSchema = new mongoose.Schema({
       default: [0, 0]
     },
     address: {
+      type: String,
+      default: ''
+    },
+    city: {
+      type: String,
+      default: ''
+    },
+    state: {
       type: String,
       default: ''
     }

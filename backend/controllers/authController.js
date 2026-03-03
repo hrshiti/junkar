@@ -98,13 +98,15 @@ export const register = asyncHandler(async (req, res) => {
         email,
         services: req.body.services || ['scrap_pickup'],
         scrapperType: req.body.scrapperType || 'feri_wala',
-        dealCategories: req.body.dealCategories || [],
-        vehicleInfo: defaultVehicleInfo,
-        businessLocation: req.body.businessLocation || {
+        businessLocation: {
           type: 'Point',
-          coordinates: [0, 0],
-          address: ''
-        }
+          coordinates: req.body.businessCoordinates || (req.body.businessLocation?.coordinates) || [0, 0],
+          address: req.body.businessAddress || (req.body.businessLocation?.address) || '',
+          city: req.body.city || '',
+          state: req.body.state || ''
+        },
+        dealCategories: req.body.dealCategories || [],
+        vehicleInfo: defaultVehicleInfo
       });
 
       // Pahla Mahina Free: auto-activate first month trial (no payment). Dusre mahine se paid plan.
