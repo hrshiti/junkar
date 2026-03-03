@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import { sendSuccess, sendError } from '../utils/responseHandler.js';
 import { deleteFile as deleteFromCloudinary, uploadFile } from '../services/uploadService.js';
 import logger from '../utils/logger.js';
+import { sendNotificationToUser } from '../utils/pushNotificationHelper.js';
 
 // @desc Submit or update KYC
 // @route POST /api/kyc
@@ -202,6 +203,13 @@ export const verifyKyc = async (req, res) => {
     scrapper.kyc.rejectionReason = null;
     await scrapper.save();
 
+    // [NOTIFICATION-1] KYC approved -> Scrapper ko push notification (non-blocking)
+    sendNotificationToUser(id, {
+      title: '🎉 KYC Verified!',
+      body: 'Badhai ho! Tumhari KYC verify ho gayi. Ab tum orders accept kar sakte ho.',
+      data: { type: 'kyc_verified', scrapperId: id }
+    }, 'scrapper').catch(err => logger.error('[Notification] KYC verify notification failed:', err));
+
     return sendSuccess(res, 'KYC verified', { kyc: scrapper.kyc });
   } catch (error) {
     logger.error('KYC verification error:', error);
@@ -224,6 +232,14 @@ export const rejectKyc = async (req, res) => {
     scrapper.kyc.verifiedAt = null;
     scrapper.kyc.verifiedBy = req.user.id;
     await scrapper.save();
+
+    // [NOTIFICATION-1] KYC rejected -> Scrapper ko push notification (non-blocking)
+    const rejectionMsg = reason ? `Reason: ${reason}` : 'Reason: Not specified';
+    sendNotificationToUser(id, {
+      title: '❌ KYC Rejected',
+      body: `Tumhari KYC reject ho gayi. ${rejectionMsg}. Dobara documents submit karo.`,
+      data: { type: 'kyc_rejected', scrapperId: id, reason: reason || '' }
+    }, 'scrapper').catch(err => logger.error('[Notification] KYC reject notification failed:', err));
 
     return sendSuccess(res, 'KYC rejected', { kyc: scrapper.kyc });
   } catch (error) {

@@ -15,6 +15,7 @@ import Scrapper from '../models/Scrapper.js';
 import SubscriptionPlan from '../models/SubscriptionPlan.js';
 import { PAYMENT_STATUS } from '../config/constants.js';
 import logger from '../utils/logger.js';
+import { sendNotificationToUser } from '../utils/pushNotificationHelper.js';
 
 // @desc    Get all active subscription plans (excludes First Month Free trial – not selectable for payment)
 // @route   GET /api/subscriptions/plans
@@ -214,6 +215,14 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     const subscriptionResult = await activateSubscription(scrapperId, payment._id);
 
     logger.info(`[Subscription] Subscription activated for scrapper ${scrapperId}`);
+
+    // [NOTIFICATION-9] Subscription activate -> Scrapper ko notification (non-blocking)
+    const planName = subscriptionResult.plan?.name || 'Subscription';
+    sendNotificationToUser(scrapperId, {
+      title: '🎉 Subscription Active Ho Gayi!',
+      body: `${planName} successfully activate ho gayi. Ab tum orders receive kar sakte ho!`,
+      data: { type: 'subscription_activated', planName }
+    }, 'scrapper').catch(err => logger.error('[Notification] Subscription activated notification failed:', err));
 
     sendSuccess(res, 'Subscription activated successfully', {
       subscription: subscriptionResult.subscription,

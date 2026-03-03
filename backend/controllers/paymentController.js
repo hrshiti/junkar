@@ -14,6 +14,7 @@ import {
 import { PAYMENT_STATUS, ORDER_STATUS } from '../config/constants.js';
 import logger from '../utils/logger.js';
 import Scrapper from '../models/Scrapper.js';
+import { sendNotificationToUser } from '../utils/pushNotificationHelper.js';
 
 // @desc    Create Razorpay order for payment
 // @route   POST /api/payments/create-order
@@ -264,6 +265,13 @@ export const verifyPayment = asyncHandler(async (req, res) => {
 
       await payment.populate('order', 'status paymentStatus totalAmount');
       await payment.populate('user', 'name email');
+
+      // [NOTIFICATION-11] Payment verified -> User ko notification (non-blocking)
+      sendNotificationToUser(userId, {
+        title: '✅ Payment Successful!',
+        body: `₹${payment.amount} ka payment successfully complete ho gaya. Order update ho gaya.`,
+        data: { type: 'payment_verified', orderId: orderId, amount: payment.amount.toString() }
+      }, 'user').catch(err => logger.error('[Notification] Payment verified notification failed:', err));
 
       return sendSuccess(res, 'Payment verified successfully', { payment, order });
     } else {

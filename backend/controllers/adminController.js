@@ -12,6 +12,7 @@ import logger from '../utils/logger.js';
 import mongoose from 'mongoose';
 import { createContact, createFundAccount, initiatePayout } from '../services/payoutService.js';
 import WithdrawalRequest from '../models/WithdrawalRequest.js';
+import { sendNotificationToUser } from '../utils/pushNotificationHelper.js';
 
 // ============================================
 // DASHBOARD & ANALYTICS
@@ -798,6 +799,23 @@ export const cancelOrder = asyncHandler(async (req, res) => {
     order.cancellationReason = reason || 'Cancelled by admin';
 
     await order.save();
+
+    // [NOTIFICATION-3] Admin ne order cancel kiya -> User + Scrapper dono ko notify (non-blocking)
+    const adminCancelBody = reason ? `Reason: ${reason}` : 'Admin ne order cancel kar diya.';
+    if (order.user) {
+      sendNotificationToUser(order.user.toString(), {
+        title: '❌ Order Cancel Ho Gaya',
+        body: `Aapka order admin ne cancel kar diya. ${adminCancelBody}`,
+        data: { type: 'order_cancelled', orderId: orderId }
+      }, 'user').catch(err => logger.error('[Notification] Admin cancel->User failed:', err));
+    }
+    if (order.scrapper) {
+      sendNotificationToUser(order.scrapper.toString(), {
+        title: '❌ Order Cancel Ho Gaya',
+        body: `Order admin ne cancel kar diya. ${adminCancelBody}`,
+        data: { type: 'order_cancelled', orderId: orderId }
+      }, 'scrapper').catch(err => logger.error('[Notification] Admin cancel->Scrapper failed:', err));
+    }
 
     sendSuccess(res, 'Order cancelled successfully', {
       order: order.toObject()
@@ -1617,6 +1635,24 @@ export const updateWithdrawalStatus = asyncHandler(async (req, res) => {
     }
 
     await session.commitTransaction();
+
+    // [NOTIFICATION-6] Admin ne withdrawal process ki -> User/Scrapper ko notify (non-blocking)
+    const withdrawalUserType = withdrawal.userType === 'Scrapper' ? 'scrapper' : 'user';
+    const withdrawalUserId = withdrawal.user.toString();
+    if (status === 'APPROVED' || status === 'PROCESSED') {
+      sendNotificationToUser(withdrawalUserId, {
+        title: '✅ Withdrawal Approved!',
+        body: `₹${withdrawal.amount} ki withdrawal approve ho gayi. Bank transfer process ho raha hai.`,
+        data: { type: 'withdrawal_approved', amount: withdrawal.amount.toString(), status }
+      }, withdrawalUserType).catch(err => logger.error('[Notification] Withdrawal approved notification failed:', err));
+    } else if (status === 'REJECTED') {
+      const rejectMsg = remarks ? `Reason: ${remarks}` : '';
+      sendNotificationToUser(withdrawalUserId, {
+        title: '❌ Withdrawal Rejected',
+        body: `₹${withdrawal.amount} ki withdrawal reject ho gayi. ${rejectMsg} Amount wapas wallet mein credit ho gaya.`,
+        data: { type: 'withdrawal_rejected', amount: withdrawal.amount.toString(), reason: remarks || '' }
+      }, withdrawalUserType).catch(err => logger.error('[Notification] Withdrawal rejected notification failed:', err));
+    }
 
     sendSuccess(res, 'Withdrawal status updated', withdrawal);
 

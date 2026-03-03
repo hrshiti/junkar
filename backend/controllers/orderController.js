@@ -11,6 +11,8 @@ import walletService from '../services/walletService.js';
 import WalletTransaction from '../models/WalletTransaction.js';
 import Analytics from '../models/Analytics.js';
 import { PAYMENT_STATUS } from '../config/constants.js';
+import { sendNotificationToUser } from '../utils/pushNotificationHelper.js';
+import notificationService from '../services/notificationService.js';
 
 // Order State Machine - Valid Status Transitions
 const ORDER_STATUS_TRANSITIONS = {
@@ -480,6 +482,26 @@ export const cancelOrder = asyncHandler(async (req, res) => {
 
   logger.info(`Order ${id} cancelled by ${userRole} ${userId}`);
 
+  // [NOTIFICATION-3] Order cancel -> Dono parties ko notification (non-blocking)
+  const cancelBody = reason ? `Reason: ${reason}` : 'Order cancel ho gaya.';
+  // User ko notify karo agar scrapper ne cancel kiya
+  if (userRole === 'scrapper' && order.user) {
+    sendNotificationToUser(order.user.toString(), {
+      title: '❌ Order Cancel Ho Gaya',
+      body: `Aapka order scrapper ne cancel kar diya. ${cancelBody}`,
+      data: { type: 'order_cancelled', orderId: id }
+    }, 'user').catch(err => logger.error('[Notification] Cancel->User notification failed:', err));
+  }
+  // Scrapper ko notify karo agar user ne cancel kiya
+  if (userRole === 'user' && order.scrapper) {
+    const scrapperId = order.scrapper.toString();
+    sendNotificationToUser(scrapperId, {
+      title: '❌ Order Cancel Ho Gaya',
+      body: `User ne order cancel kar diya. ${cancelBody}`,
+      data: { type: 'order_cancelled', orderId: id }
+    }, 'scrapper').catch(err => logger.error('[Notification] Cancel->Scrapper notification failed:', err));
+  }
+
   sendSuccess(res, 'Order cancelled successfully', { order });
 });
 
@@ -578,6 +600,11 @@ export const forwardToBigScrapper = asyncHandler(async (req, res) => {
   await order.save();
 
   logger.info(`Order ${id} forwarded to Big Scrapper pool by ${scrapperId}`);
+
+  // [NOTIFICATION-7] Forward hone par Big Scrappers ko notification (non-blocking)
+  notificationService.notifyBigScrappers(order).catch(err => {
+    logger.error('[Notification] Forward->BigScrappers notification failed:', err);
+  });
 
   sendSuccess(res, 'Order forwarded to Big Scrappers successfully', { order });
 });

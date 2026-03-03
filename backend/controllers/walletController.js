@@ -10,6 +10,7 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { sendSuccess, sendError } from '../utils/responseHandler.js';
 import { getRazorpayClient } from '../services/paymentService.js';
 import logger from '../utils/logger.js';
+import { sendNotificationToUser } from '../utils/pushNotificationHelper.js';
 
 const getUserModel = (role) => {
     return role === 'scrapper' ? Scrapper : User;
@@ -178,6 +179,13 @@ export const verifyRecharge = asyncHandler(async (req, res) => {
         }], { session });
 
         await session.commitTransaction();
+
+        // [NOTIFICATION-4] Wallet recharge successful -> User/Scrapper ko notification (non-blocking)
+        sendNotificationToUser(userId, {
+            title: '💰 Wallet Recharge Successful!',
+            body: `₹${creditAmount} aapke wallet mein add ho gaye. New Balance: ₹${user.wallet.balance}`,
+            data: { type: 'wallet_recharged', amount: creditAmount.toString(), newBalance: user.wallet.balance.toString() }
+        }, role === 'scrapper' ? 'scrapper' : 'user').catch(err => logger.error('[Notification] Recharge notification failed:', err));
 
         sendSuccess(res, 'Wallet recharged successfully', {
             newBalance: user.wallet.balance,
@@ -436,6 +444,13 @@ export const requestWithdrawal = asyncHandler(async (req, res) => {
         }], { session });
 
         await session.commitTransaction();
+
+        // [NOTIFICATION-5] Withdrawal request submitted -> User/Scrapper ko notification (non-blocking)
+        sendNotificationToUser(userId, {
+            title: '📤 Withdrawal Request Submitted',
+            body: `₹${amount} ki withdrawal request submit ho gayi. Admin jald process karega.`,
+            data: { type: 'withdrawal_requested', amount: amount.toString(), requestId: withdrawal[0].request_id }
+        }, role === 'scrapper' ? 'scrapper' : 'user').catch(err => logger.error('[Notification] Withdrawal request notification failed:', err));
 
         sendSuccess(res, 'Withdrawal request submitted successfully', {
             requestId: withdrawal[0].request_id,

@@ -237,6 +237,38 @@ class NotificationService {
             logger.error('Failed to notify order status change:', error);
         }
     }
+    /**
+     * Notify scrapper about subscription expiry warning
+     * @param {String} scrapperId - Scrapper ID
+     * @param {Number} daysLeft - Days remaining before expiry
+     * @returns {Promise<void>}
+     */
+    async notifySubscriptionExpiry(scrapperId, daysLeft) {
+        try {
+            let title, body;
+            if (daysLeft <= 1) {
+                title = '\uD83D\uDEA8 Subscription Kal Expire Hogi!';
+                body = 'Teri subscription kal expire ho jaayegi. Abhi renew karo warna orders band ho jaayenge!';
+            } else {
+                title = `\u23F0 Subscription ${daysLeft} Din Mein Expire Hogi`;
+                body = `Teri subscription ${daysLeft} din mein expire hogi. Samay par renew karo!`;
+            }
+
+            await sendNotificationToUser(scrapperId, {
+                title,
+                body,
+                data: {
+                    type: 'subscription_expiry_warning',
+                    scrapperId: scrapperId.toString(),
+                    daysLeft: daysLeft.toString()
+                }
+            }, 'scrapper');
+
+            logger.info(`[Notification-10] Subscription expiry warning sent to scrapper ${scrapperId} (${daysLeft} days left)`);
+        } catch (error) {
+            logger.error(`Failed to send subscription expiry warning to scrapper ${scrapperId}:`, error);
+        }
+    }
 }
 
 export default new NotificationService();
