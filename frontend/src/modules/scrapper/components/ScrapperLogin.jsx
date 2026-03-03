@@ -252,6 +252,16 @@ const ScrapperLogin = () => {
             }
 
             if (isActuallyActive) {
+              // So guard (RequireKycAndSubscription) sees active subscription – e.g. First Month Free trial
+              localStorage.setItem('scrapperSubscriptionStatus', 'active');
+              localStorage.setItem('scrapperSubscription', JSON.stringify({
+                status: subscription.status,
+                planId: subscription.planId?._id || subscription.planId,
+                planName: subscription.planId?.name || 'First Month Free',
+                startDate: subscription.startDate,
+                expiryDate: subscription.expiryDate,
+                autoRenew: subscription.autoRenew || false
+              }));
               navigate('/scrapper', { replace: true });
             } else {
               navigate('/scrapper/subscription', { replace: true });

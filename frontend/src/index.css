@@ -166,3 +166,48 @@ svg {
 .react-clock__mark__body {
   background-color: #d1d5db !important;
 }
+
+/* Google Places Autocomplete Dark Theme Customization */
+.pac-container {
+  background-color: #18181b !important; /* matches zinc-900 */
+  border: 1px solid #3f3f46 !important; /* matches zinc-700 */
+  border-radius: 0.75rem !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
+  margin-top: 5px;
+  font-family: inherit !important;
+  z-index: 99999 !important; /* High z-index to stay above modals */
+}
+
+.pac-item {
+  color: #a1a1aa !important; /* matches zinc-400 */
+  border-top: 1px solid #27272a !important; /* single separator line */
+  padding: 10px 16px !important;
+  cursor: pointer;
+  font-size: 14px !important;
+  transition: background-color 0.2s;
+}
+
+.pac-item:first-child {
+  border-top: none !important;
+}
+
+.pac-item:hover, .pac-item.pac-item-selected {
+  background-color: #27272a !important; /* matched zinc-800 on hover */
+}
+
+.pac-item-query {
+  color: #f4f4f5 !important; /* matches zinc-100 (white-ish) */
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  padding-right: 4px;
+}
+
+/* Make icons visible in dark mode by inverting their colors */
+.pac-icon {
+  filter: invert(1) opacity(0.7) !important;
+}
+
+/* The 'powered by Google' watermark inverting for dark background */
+.pac-logo::after {
+  filter: invert(1) opacity(0.6) !important;
+}

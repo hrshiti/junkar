@@ -1,5 +1,5 @@
 import { body, param, query } from 'express-validator';
-import { ORDER_STATUS, PAYMENT_STATUS } from '../config/constants.js';
+import { ORDER_STATUS, PAYMENT_STATUS, VEHICLE_TYPES } from '../config/constants.js';
 
 // User Management Validators
 export const userIdValidator = [
@@ -35,9 +35,10 @@ export const updateScrapperValidator = [
   body('phone').optional().trim().isLength({ min: 10, max: 15 }).withMessage('Invalid phone number'),
   body('status').optional().isIn(['active', 'blocked', 'suspended']).withMessage('Invalid status'),
   body('vehicleInfo').optional().isObject().withMessage('Vehicle info must be an object'),
-  body('vehicleInfo.type').optional().isIn(['bike', 'auto', 'truck']).withMessage('Invalid vehicle type'),
+  body('vehicleInfo.type').optional().isIn(Object.values(VEHICLE_TYPES)).withMessage('Invalid vehicle type'),
   body('vehicleInfo.number').optional().trim(),
   body('vehicleInfo.capacity').optional().isInt({ min: 0 }).withMessage('Capacity must be a positive integer'),
+  body('vehicleInfo.photoUrl').optional().trim(),
   body('address').optional().isObject().withMessage('Address must be an object')
 ];
 

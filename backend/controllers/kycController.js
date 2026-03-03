@@ -1,4 +1,4 @@
-import Scrapper from '../models/Scrapper.js';
+import Scrapper, { getComputedBadges } from '../models/Scrapper.js';
 import User from '../models/User.js';
 import { sendSuccess, sendError } from '../utils/responseHandler.js';
 import { deleteFile as deleteFromCloudinary, uploadFile } from '../services/uploadService.js';
@@ -174,8 +174,15 @@ export const getMyKyc = async (req, res) => {
     });
   }
 
+  // Option B: effective status – if no docs submitted, treat as not_submitted for client
+  const kycRaw = scrapper.kyc || {};
+  const kycObj = kycRaw.toObject ? kycRaw.toObject() : { ...kycRaw };
+  const hasDocs = !!(kycObj.aadhaarPhotoUrl || kycObj.selfieUrl || kycObj.panPhotoUrl ||
+    kycObj.shopLicenseUrl || kycObj.shopPhotoUrl || kycObj.gstCertificateUrl);
+  const effectiveStatus = !hasDocs ? 'not_submitted' : (kycObj.status || 'pending');
+
   return sendSuccess(res, 'KYC status retrieved', {
-    kyc: scrapper.kyc,
+    kyc: { ...kycObj, status: effectiveStatus },
     subscription: scrapper.subscription
   });
 };
@@ -237,20 +244,25 @@ export const getAllScrappersWithKyc = async (req, res) => {
     const query = {};
     if (status && ['pending', 'verified', 'rejected'].includes(status)) {
       query['kyc.status'] = status;
+      // Pending queue: only show scrappers who actually submitted docs (have aadhaar photo)
+      if (status === 'pending') {
+        query['kyc.aadhaarPhotoUrl'] = { $exists: true, $ne: null };
+      }
     }
 
     // Get scrappers with KYC info
     const scrappers = await Scrapper.find(query)
-      .select('name phone email scrapperType dealCategories businessLocation subscription status totalPickups earnings rating createdAt vehicleInfo kyc.aadhaarNumber kyc.aadhaarPhotoUrl kyc.selfieUrl kyc.panNumber kyc.panPhotoUrl kyc.shopLicenseUrl kyc.shopPhotoUrl kyc.gstNumber kyc.gstCertificateUrl kyc.udyamAadhaarNumber kyc.status kyc.verifiedAt kyc.rejectionReason')
+      .select('name phone email scrapperType dealCategories businessLocation subscription status totalPickups earnings rating badges createdAt vehicleInfo kyc.aadhaarNumber kyc.aadhaarPhotoUrl kyc.selfieUrl kyc.panNumber kyc.panPhotoUrl kyc.shopLicenseUrl kyc.shopPhotoUrl kyc.gstNumber kyc.gstCertificateUrl kyc.udyamAadhaarNumber kyc.status kyc.verifiedAt kyc.rejectionReason')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
       .lean();
 
     const total = await Scrapper.countDocuments(query);
+    const scrappersWithBadges = scrappers.map(s => ({ ...s, badges: getComputedBadges(s) }));
 
     return sendSuccess(res, 'Scrappers retrieved', {
-      scrappers,
+      scrappers: scrappersWithBadges,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),

@@ -1,7 +1,7 @@
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { sendSuccess, sendError } from '../utils/responseHandler.js';
 import User from '../models/User.js';
-import Scrapper from '../models/Scrapper.js';
+import Scrapper, { getComputedBadges } from '../models/Scrapper.js';
 import Order from '../models/Order.js';
 import Payment from '../models/Payment.js';
 import SubscriptionPlan from '../models/SubscriptionPlan.js';
@@ -460,6 +460,8 @@ export const getScrapperById = asyncHandler(async (req, res) => {
       return sendError(res, 'Scrapper not found', 404);
     }
 
+    scrapper.badges = getComputedBadges(scrapper);
+
     // Get scrapper's orders count
     const ordersCount = await Order.countDocuments({ scrapper: scrapper._id });
 
@@ -480,7 +482,7 @@ export const getScrapperById = asyncHandler(async (req, res) => {
 // @access  Private (Admin)
 export const updateScrapper = asyncHandler(async (req, res) => {
   try {
-    const { name, email, phone, status, vehicleInfo, address } = req.body;
+    const { name, email, phone, status, vehicleInfo, address, kyc } = req.body;
     const scrapperId = req.params.id;
 
     const scrapper = await Scrapper.findById(scrapperId);
@@ -495,6 +497,7 @@ export const updateScrapper = asyncHandler(async (req, res) => {
     if (status) scrapper.status = status;
     if (vehicleInfo) scrapper.vehicleInfo = { ...scrapper.vehicleInfo, ...vehicleInfo };
     if (address) scrapper.address = { ...scrapper.address, ...address };
+    if (kyc) scrapper.kyc = { ...scrapper.kyc, ...kyc };
 
     await scrapper.save();
 

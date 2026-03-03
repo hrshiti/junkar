@@ -13,6 +13,8 @@ const SubscriptionPlanPage = () => {
     "Retry",
     "Manage Your Subscription",
     "Choose Your Plan",
+    "Subscription flow: First month is free! It gets auto-activated when you register. From the second month, choose a paid plan here and complete payment to continue.",
+    "You are on First Month Free trial. After trial ends, select a paid plan below to continue.",
     "Your subscription is active. You can renew or change your plan below.",
     "Select a subscription plan to start receiving pickup requests",
     "Current Subscription: {plan}",
@@ -37,7 +39,8 @@ const SubscriptionPlanPage = () => {
     "years",
     "days",
     "Platform Access",
-    "Market Prices"
+    "Market Prices",
+    "Go to Dashboard"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -97,10 +100,17 @@ const SubscriptionPlanPage = () => {
               market_price: marketSubscription
             });
 
-            // Update localStorage - storing generic status might be tricky now
-            // For backward compatibility, store general status
-            if (subscription?.status === 'active') {
+            // So guard sees active subscription (e.g. First Month Free trial) and scrapper can go to dashboard
+            if (subscription?.status === 'active' && subscription?.expiryDate && new Date(subscription.expiryDate) > new Date()) {
               localStorage.setItem('scrapperSubscriptionStatus', 'active');
+              localStorage.setItem('scrapperSubscription', JSON.stringify({
+                status: subscription.status,
+                planId: subscription.planId?._id || subscription.planId,
+                planName: subscription.planId?.name || 'First Month Free',
+                startDate: subscription.startDate,
+                expiryDate: subscription.expiryDate,
+                autoRenew: subscription.autoRenew || false
+              }));
             }
           }
         } catch (subError) {
@@ -298,6 +308,20 @@ const SubscriptionPlanPage = () => {
       className="min-h-screen w-full p-4 md:p-6 bg-gradient-to-br from-zinc-900 via-gray-900 to-black"
     >
       <div className="max-w-4xl mx-auto">
+        {/* Subscription flow note – Pehla Mahina Free */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="mb-6 rounded-xl p-4 bg-sky-500/10 border border-sky-500/30"
+        >
+          <p className="text-sm text-sky-200 leading-relaxed">
+            {isTabActive && (activeSubForTab?.planId?.name === 'First Month Free' || activeSubForTab?.planId?.price === 0)
+              ? getTranslatedText("You are on First Month Free trial. After trial ends, select a paid plan below to continue.")
+              : getTranslatedText("Subscription flow: First month is free! It gets auto-activated when you register. From the second month, choose a paid plan here and complete payment to continue.")}
+          </p>
+        </motion.div>
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -326,25 +350,43 @@ const SubscriptionPlanPage = () => {
 
         {/* Current Subscription Info */}
         {isTabActive && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6 rounded-2xl p-6 shadow-lg bg-zinc-900 border-2 border-sky-500/50"
-          >
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <h3 className="text-lg font-bold mb-1 text-white">
-                  {getTranslatedText("Current Subscription: {plan}", { plan: activeSubForTab.planId?.name || 'Active Plan' })}
-                </h3>
-                <p className="text-sm text-gray-400">
-                  {getTranslatedText("Expires: {date}", { date: activeSubForTab.expiryDate ? new Date(activeSubForTab.expiryDate).toLocaleDateString() : 'N/A' })}
-                </p>
+          <>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4 rounded-2xl p-6 shadow-lg bg-zinc-900 border-2 border-sky-500/50"
+            >
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                  <h3 className="text-lg font-bold mb-1 text-white">
+                    {getTranslatedText("Current Subscription: {plan}", { plan: activeSubForTab.planId?.name || 'Active Plan' })}
+                  </h3>
+                  <p className="text-sm text-gray-400">
+                    {getTranslatedText("Expires: {date}", { date: activeSubForTab.expiryDate ? new Date(activeSubForTab.expiryDate).toLocaleDateString() : 'N/A' })}
+                  </p>
+                </div>
+                <div className="px-4 py-2 rounded-lg font-semibold bg-sky-900/30 text-sky-400">
+                  {getTranslatedText("Active")}
+                </div>
               </div>
-              <div className="px-4 py-2 rounded-lg font-semibold bg-sky-900/30 text-sky-400">
-                {getTranslatedText("Active")}
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
+
+            {/* When subscription is active (including First Month Free), allow scrapper to continue to dashboard directly */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="mb-6"
+            >
+              <button
+                type="button"
+                onClick={() => navigate('/scrapper')}
+                className="w-full md:w-auto px-4 py-3 rounded-xl font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-colors"
+              >
+                {getTranslatedText("Go to Dashboard")}
+              </button>
+            </motion.div>
+          </>
         )}
 
         {/* Plans Grid */}

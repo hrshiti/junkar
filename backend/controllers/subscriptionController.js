@@ -16,12 +16,13 @@ import SubscriptionPlan from '../models/SubscriptionPlan.js';
 import { PAYMENT_STATUS } from '../config/constants.js';
 import logger from '../utils/logger.js';
 
-// @desc    Get all active subscription plans
+// @desc    Get all active subscription plans (excludes First Month Free trial – not selectable for payment)
 // @route   GET /api/subscriptions/plans
 // @access  Public (or Private for scrappers)
 export const getPlans = asyncHandler(async (req, res) => {
   const result = await getActivePlans();
-  sendSuccess(res, 'Plans retrieved successfully', { plans: result.plans });
+  const plans = (result.plans || []).filter(p => p.price > 0);
+  sendSuccess(res, 'Plans retrieved successfully', { plans });
 });
 
 // @desc    Get plan by ID

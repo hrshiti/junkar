@@ -128,11 +128,13 @@ const ScrapperDetail = () => {
         vehicleInfo: backendScrapper.vehicleInfo
           ? `${backendScrapper.vehicleInfo.type || ''} - ${backendScrapper.vehicleInfo.number || ''}`
           : getTranslatedText('Not provided'),
+        vehicleInfoPhotoUrl: backendScrapper.vehicleInfo?.photoUrl || null,
         businessLocation: backendScrapper.businessLocation || null,
         scrapperType: backendScrapper.scrapperType || 'feri_wala',
         joinedAt: backendScrapper.createdAt || new Date().toISOString(),
         earnings: earningsData,
-        status: backendScrapper.status || 'active'
+        status: backendScrapper.status || 'active',
+        badges: Array.isArray(backendScrapper.badges) ? backendScrapper.badges : []
       };
 
       setScrapper(transformedScrapper);
@@ -298,6 +300,9 @@ const ScrapperDetail = () => {
                 {scrapper.name}
               </h1>
               {getKYCStatusBadge(scrapper.kycStatus)}
+              <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: '#e0f2fe', color: '#0369a1' }}>
+                {scrapper.scrapperType === 'feri_wala' ? '🚲 फेरी वाला' : scrapper.scrapperType === 'dukandaar' ? '🏪 दुकानदार' : scrapper.scrapperType === 'wholesaler' ? '🏭 थोक व्यापारी' : scrapper.scrapperType === 'big' ? '🏭 Dealer' : '🚲 Small'}
+              </span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -328,11 +333,25 @@ const ScrapperDetail = () => {
                   </p>
                 </div>
               </div>
+              {scrapper.badges?.includes('TRUSTED_DEALER') && (
+                <div className="flex items-center gap-3 md:col-span-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: '#fef3c7', color: '#b45309' }}>
+                    🛡️ Jodhpur Trusted Scrap Dealer
+                  </span>
+                </div>
+              )}
               <div className="flex items-center gap-3">
                 <FaCar style={{ color: '#64946e' }} />
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-xs" style={{ color: '#718096' }}>{getTranslatedText("Vehicle")}</p>
                   <p className="font-semibold" style={{ color: '#2d3748' }}>{getTranslatedText(scrapper.vehicleInfo)}</p>
+                  {scrapper.vehicleInfoPhotoUrl && (
+                    <img
+                      src={scrapper.vehicleInfoPhotoUrl.startsWith('http') ? scrapper.vehicleInfoPhotoUrl : `${window.location.origin}${scrapper.vehicleInfoPhotoUrl}`}
+                      alt="Vehicle"
+                      className="mt-1.5 max-w-full max-h-20 w-20 h-20 rounded-lg object-contain border border-slate-200"
+                    />
+                  )}
                 </div>
               </div>
               {['big', 'dukandaar', 'wholesaler'].includes(scrapper.scrapperType) && scrapper.businessLocation && (

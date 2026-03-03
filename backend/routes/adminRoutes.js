@@ -75,6 +75,16 @@ import {
   deleteCoupon
 } from '../controllers/couponController.js';
 
+import {
+  getAllForAdmin as getAddressChangeRequests,
+  approveRequest as approveAddressChangeRequest,
+  rejectRequest as rejectAddressChangeRequest
+} from '../controllers/addressChangeRequestController.js';
+import {
+  getReportedLeads,
+  markReportReviewed
+} from '../controllers/fakeLeadReportController.js';
+
 const router = express.Router();
 
 // All admin routes require authentication and admin role
@@ -107,6 +117,15 @@ router.get('/scrappers/:id', getScrapperById);
 router.put('/scrappers/:id', updateScrapper);
 router.patch('/scrappers/:id/status', updateScrapperStatus);
 router.delete('/scrappers/:id', deleteScrapper);
+
+// Address change requests (dukandaar/wholesaler)
+router.get('/address-change-requests', getAddressChangeRequests);
+router.put('/address-change-requests/:id/approve', approveAddressChangeRequest);
+router.put('/address-change-requests/:id/reject', rejectAddressChangeRequest);
+
+// Reported fake leads (scrapper reports)
+router.get('/reported-leads', getReportedLeads);
+router.patch('/reported-leads/:id/review', markReportReviewed);
 
 // ============================================
 // ORDER MANAGEMENT

@@ -126,9 +126,13 @@ reviewSchema.statics.calculateAverageRating = async function (scrapperId) {
     }
   ]);
 
+  const TRUSTED_DEALER_BADGE = 'TRUSTED_DEALER';
+  const BADGE_RATING_THRESHOLD = 4.5;
+
   try {
     if (stats.length > 0) {
-      await mongoose.model('Scrapper').findByIdAndUpdate(scrapperId, {
+      const avg = stats[0].avgRating;
+      const ratingUpdate = {
         'rating.average': stats[0].avgRating.toFixed(1),
         'rating.count': stats[0].nRating,
         'rating.breakdown': {
@@ -139,12 +143,17 @@ reviewSchema.statics.calculateAverageRating = async function (scrapperId) {
           1: stats[0].breakdown_1
         },
         'rating.lastUpdated': new Date()
-      });
+      };
+      const badgeOp = avg >= BADGE_RATING_THRESHOLD
+        ? { $addToSet: { badges: TRUSTED_DEALER_BADGE } }
+        : { $pull: { badges: TRUSTED_DEALER_BADGE } };
+      await mongoose.model('Scrapper').findByIdAndUpdate(scrapperId, { ...ratingUpdate, ...badgeOp });
     } else {
       await mongoose.model('Scrapper').findByIdAndUpdate(scrapperId, {
         'rating.average': 0,
         'rating.count': 0,
-        'rating.breakdown': { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+        'rating.breakdown': { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+        $pull: { badges: TRUSTED_DEALER_BADGE }
       });
     }
   } catch (err) {

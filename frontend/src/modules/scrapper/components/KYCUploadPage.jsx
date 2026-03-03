@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
-import { kycAPI } from '../../shared/utils/api';
+import { kycAPI, scrapperProfileAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
 const KYCUploadPage = () => {
@@ -37,6 +37,10 @@ const KYCUploadPage = () => {
     "Shop License Photo",
     "shop license photo",
     "Remove License",
+    "Shop Photo",
+    "Shop Photo (required for shopkeeper)",
+    "shop photo",
+    "Remove Shop Photo",
     "Important Information",
     "Your KYC documents will be verified by our admin team",
     "Verification usually takes 24-48 hours",
@@ -59,24 +63,31 @@ const KYCUploadPage = () => {
   const [panNumber, setPanNumber] = useState('');
   const [panPhoto, setPanPhoto] = useState(null);
   const [shopLicenseFile, setShopLicenseFile] = useState(null);
+  const [shopPhotoFile, setShopPhotoFile] = useState(null);
+  const [scrapperType, setScrapperType] = useState(null);
   const [aadhaarPreview, setAadhaarPreview] = useState(null);
   const [selfiePreview, setSelfiePreview] = useState(null);
   const [panPreview, setPanPreview] = useState(null);
   const [shopLicensePreview, setShopLicensePreview] = useState(null);
+  const [shopPhotoPreview, setShopPhotoPreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isLoadingCheck, setIsLoadingCheck] = useState(true);
 
-  // Check current status on mount
+  // Check current status on mount and fetch scrapperType for dukandaar Shop Photo field
   useEffect(() => {
     const checkStatus = async () => {
       try {
-        const res = await kycAPI.getMy();
+        const [res, profileRes] = await Promise.all([
+          kycAPI.getMy(),
+          scrapperProfileAPI.getMyProfile().catch(() => ({ data: { scrapper: {} } }))
+        ]);
         const kyc = res.data?.kyc;
         const status = kyc?.status || 'not_submitted';
+        const type = profileRes?.data?.scrapper?.scrapperType || 'feri_wala';
+        setScrapperType(type);
 
         if (status === 'pending') {
-          // Only redirect if documents are present
           if (kyc?.aadhaarPhotoUrl) {
             navigate('/scrapper/kyc-status', { replace: true });
           }
@@ -193,6 +204,22 @@ const KYCUploadPage = () => {
     }
   };
 
+  const handleShopPhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert(getTranslatedText('File is too large (Max 5MB)'));
+        return;
+      }
+      setShopPhotoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setShopPhotoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -226,6 +253,11 @@ const KYCUploadPage = () => {
       return;
     }
 
+    if (scrapperType === 'dukandaar' && !shopPhotoFile) {
+      alert(getTranslatedText('Shop Photo (required for shopkeeper)'));
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -236,6 +268,9 @@ const KYCUploadPage = () => {
       formData.append('panNumber', panNumber);
       formData.append('pan', panPhoto);
       formData.append('shopLicense', shopLicenseFile);
+      if (scrapperType === 'dukandaar' && shopPhotoFile) {
+        formData.append('shopPhoto', shopPhotoFile);
+      }
 
       const res = await kycAPI.submit(formData);
       const kyc = res.data?.kyc;
@@ -539,6 +574,54 @@ const KYCUploadPage = () => {
             </div>
           </div>
 
+          {/* Shop Photo (Dukandaar only) - backend expects key "shopPhoto" and saves to kyc.shopPhotoUrl */}
+          {scrapperType === 'dukandaar' && (
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-white">
+                {getTranslatedText("Shop Photo")} <span className="text-red-500">*</span>
+              </label>
+              <div className="space-y-3">
+                <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all hover:border-sky-500 bg-black ${shopPhotoFile ? 'border-sky-500' : 'border-zinc-700'}`}
+                >
+                  {shopPhotoPreview ? (
+                    <img src={shopPhotoPreview} alt="Shop photo preview" className="w-full h-full object-cover rounded-xl" />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <svg className="w-10 h-10 mb-3 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" />
+                      </svg>
+                      <p className="mb-2 text-sm text-gray-400">
+                        <span className="font-semibold">{getTranslatedText("Click to upload")}</span> {getTranslatedText("shop photo")}
+                      </p>
+                      <p className="text-xs text-gray-500">{getTranslatedText("Shop Photo (required for shopkeeper)")}</p>
+                      <p className="text-xs text-gray-500 mt-1">{getTranslatedText("PNG, JPG or JPEG (MAX. 5MB)")}</p>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleShopPhotoChange}
+                    required={scrapperType === 'dukandaar'}
+                  />
+                </label>
+                {shopPhotoFile && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShopPhotoFile(null);
+                      setShopPhotoPreview(null);
+                    }}
+                    className="text-xs font-semibold"
+                    style={{ color: '#ef4444' }}
+                  >
+                    {getTranslatedText("Remove Shop Photo")}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Info Box */}
           <div className="p-4 rounded-xl bg-zinc-800/50">
             <div className="flex items-start gap-3">
@@ -564,7 +647,7 @@ const KYCUploadPage = () => {
             type="submit"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            disabled={isSubmitting || !aadhaarNumber || aadhaarNumber.length !== 12 || !aadhaarPhoto || !selfiePhoto || !panNumber || panNumber.length !== 10 || !panPhoto || !shopLicenseFile}
+            disabled={isSubmitting || !aadhaarNumber || aadhaarNumber.length !== 12 || !aadhaarPhoto || !selfiePhoto || !panNumber || panNumber.length !== 10 || !panPhoto || !shopLicenseFile || (scrapperType === 'dukandaar' && !shopPhotoFile)}
             className="w-full py-4 md:py-5 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-sky-600 text-white hover:bg-sky-700"
           >
             {isSubmitting ? (

@@ -285,6 +285,11 @@ const scrapperSchema = new mongoose.Schema({
       default: null
     }
   },
+  // Badges (e.g. TRUSTED_DEALER when rating >= 4.5) – synced on rating update; also computed in toJSON
+  badges: {
+    type: [String],
+    default: []
+  },
   totalPickups: {
     type: Number,
     default: 0
@@ -409,6 +414,19 @@ scrapperSchema.methods.verifyOTP = function (otp) {
   return this.phoneVerificationOTP === otp;
 };
 
+// Compute badges for response (e.g. TRUSTED_DEALER when rating >= 4.5) without mutating stored badges
+const TRUSTED_DEALER_BADGE = 'TRUSTED_DEALER';
+const BADGE_RATING_THRESHOLD = 4.5;
+
+export function getComputedBadges(scrapper) {
+  const raw = scrapper && (Array.isArray(scrapper.badges) ? scrapper.badges : []);
+  const avg = scrapper?.rating?.average != null ? parseFloat(scrapper.rating.average) : 0;
+  const hasTrusted = raw.includes(TRUSTED_DEALER_BADGE);
+  if (avg >= BADGE_RATING_THRESHOLD && !hasTrusted) return [...raw, TRUSTED_DEALER_BADGE];
+  if (avg < BADGE_RATING_THRESHOLD && hasTrusted) return raw.filter(b => b !== TRUSTED_DEALER_BADGE);
+  return [...raw];
+}
+
 // Remove sensitive data from JSON output
 scrapperSchema.methods.toJSON = function () {
   const obj = this.toObject();
@@ -417,6 +435,7 @@ scrapperSchema.methods.toJSON = function () {
   if (obj.kyc) {
     delete obj.kyc.aadhaarNumber;
   }
+  obj.badges = getComputedBadges(obj);
   return obj;
 };
 

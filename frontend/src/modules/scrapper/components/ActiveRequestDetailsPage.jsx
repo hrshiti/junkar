@@ -72,7 +72,19 @@ const ActiveRequestDetailsPage = () => {
     "of",
     "Yes, Confirm",
     "Processing...",
-    "Pay ₹{amount} to User?"
+    "Pay ₹{amount} to User?",
+    "Report Fake Lead",
+    "Reason",
+    "Wrong item",
+    "Wrong address",
+    "Not available",
+    "Customer not available",
+    "Other",
+    "Notes (optional)",
+    "Submit Report",
+    "Fake lead reported. Admin will review.",
+    "This order was already reported.",
+    "Failed to submit report."
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -100,6 +112,10 @@ const ActiveRequestDetailsPage = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [isNegotiated, setIsNegotiated] = useState(false);
   const [dealType, setDealType] = useState('Cash');
+  const [showFakeLeadModal, setShowFakeLeadModal] = useState(false);
+  const [fakeLeadReason, setFakeLeadReason] = useState('wrong_item');
+  const [fakeLeadNotes, setFakeLeadNotes] = useState('');
+  const [fakeLeadSubmitting, setFakeLeadSubmitting] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('scrapperUser');
@@ -1201,11 +1217,99 @@ const ActiveRequestDetailsPage = () => {
                     {getTranslatedText("Chat")}
                   </motion.button>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowFakeLeadModal(true)}
+                  className="mt-3 py-2 rounded-lg text-xs font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors w-full"
+                >
+                  {getTranslatedText("Report Fake Lead")}
+                </button>
               </div>
             </motion.div>
           </>
         )
       }
+
+      {/* Report Fake Lead Modal */}
+      <AnimatePresence>
+        {showFakeLeadModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="w-full max-w-sm rounded-2xl p-6 bg-white shadow-2xl"
+            >
+              <h3 className="text-lg font-bold mb-4 text-slate-800">
+                {getTranslatedText("Report Fake Lead")}
+              </h3>
+              <div className="space-y-3 mb-4">
+                <label className="block text-sm font-medium text-slate-700">{getTranslatedText("Reason")}</label>
+                <select
+                  value={fakeLeadReason}
+                  onChange={(e) => setFakeLeadReason(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-slate-800 text-sm"
+                >
+                  <option value="wrong_item">{getTranslatedText("Wrong item")}</option>
+                  <option value="wrong_address">{getTranslatedText("Wrong address")}</option>
+                  <option value="not_available">{getTranslatedText("Not available")}</option>
+                  <option value="customer_not_available">{getTranslatedText("Customer not available")}</option>
+                  <option value="other">{getTranslatedText("Other")}</option>
+                </select>
+                <label className="block text-sm font-medium text-slate-700">{getTranslatedText("Notes (optional)")}</label>
+                <textarea
+                  value={fakeLeadNotes}
+                  onChange={(e) => setFakeLeadNotes(e.target.value)}
+                  placeholder="..."
+                  rows={2}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-slate-800 text-sm resize-none"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => { setShowFakeLeadModal(false); setFakeLeadNotes(''); }}
+                  className="flex-1 py-2.5 rounded-xl font-semibold bg-slate-100 text-slate-700"
+                >
+                  {getTranslatedText("Cancel")}
+                </button>
+                <button
+                  type="button"
+                  disabled={fakeLeadSubmitting}
+                  onClick={async () => {
+                    const orderId = requestData?._id || requestData?.id;
+                    if (!orderId) return;
+                    setFakeLeadSubmitting(true);
+                    try {
+                      const res = await orderAPI.reportFakeLead(orderId, { reason: fakeLeadReason, notes: fakeLeadNotes.trim() });
+                      if (res.success) {
+                        alert(getTranslatedText("Fake lead reported. Admin will review."));
+                        setShowFakeLeadModal(false);
+                        setFakeLeadNotes('');
+                      } else {
+                        alert(res.message || getTranslatedText("Failed to submit report."));
+                      }
+                    } catch (err) {
+                      const msg = err?.message || '';
+                      alert(msg.includes('already') ? getTranslatedText("This order was already reported.") : (msg || getTranslatedText("Failed to submit report.")));
+                    } finally {
+                      setFakeLeadSubmitting(false);
+                    }
+                  }}
+                  className="flex-1 py-2.5 rounded-xl font-bold bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-60"
+                >
+                  {fakeLeadSubmitting ? getTranslatedText("Processing...") : getTranslatedText("Submit Report")}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Confirmation Modal */}
       <AnimatePresence>

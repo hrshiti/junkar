@@ -15,6 +15,7 @@ router.post(
     { name: 'selfie', maxCount: 1 },
     { name: 'pan', maxCount: 1 },
     { name: 'shopLicense', maxCount: 1 },
+    { name: 'shopPhoto', maxCount: 1 },
   ]),
   submitKyc
 );

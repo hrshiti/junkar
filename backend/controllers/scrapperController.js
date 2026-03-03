@@ -55,12 +55,33 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
             return sendError(res, 'Scrapper profile not found', 404);
         }
     } else {
-        if (name) scrapper.name = name;
-        if (vehicleInfo) scrapper.vehicleInfo = { ...scrapper.vehicleInfo, ...vehicleInfo };
+        let requiresReverification = false;
+
+        if (name && scrapper.name !== name) {
+            scrapper.name = name;
+            requiresReverification = true;
+        }
+
+        if (vehicleInfo) {
+            // Check if vehicle info actually changed to prevent false triggers
+            if (
+                (vehicleInfo.type && scrapper.vehicleInfo?.type !== vehicleInfo.type) ||
+                (vehicleInfo.number && scrapper.vehicleInfo?.number !== vehicleInfo.number)
+            ) {
+                requiresReverification = true;
+            }
+            scrapper.vehicleInfo = { ...scrapper.vehicleInfo, ...vehicleInfo };
+        }
 
         // Update Online Status
         if (availability !== undefined) scrapper.isOnline = availability;
         if (isOnline !== undefined) scrapper.isOnline = isOnline;
+
+        // Re-verification Trigger Logic: Mark KYC as pending if critical info changes
+        if (requiresReverification && scrapper.kyc && scrapper.kyc.status === 'verified') {
+            scrapper.kyc.status = 'pending';
+            scrapper.kyc.verifiedAt = null;
+        }
 
         await scrapper.save();
     }

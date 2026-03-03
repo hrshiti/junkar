@@ -18,7 +18,9 @@ import {
   FaBars,
   FaTimes,
   FaGift,
-  FaBullhorn
+  FaBullhorn,
+  FaMapMarkerAlt,
+  FaFlag
 } from 'react-icons/fa';
 const siteLogo = '/junker.png';
 
@@ -51,7 +53,9 @@ const AdminLayout = () => {
     "Admin Panel",
     "Scrapto",
     "Logout",
-    "Administrator"
+    "Administrator",
+    "Address Change Requests",
+    "Reported Leads"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -73,11 +77,13 @@ const AdminLayout = () => {
     {
       icon: FaTruck, label: getTranslatedText('Scrappers'), path: '/admin/scrappers', submenu: [
         { label: getTranslatedText('All Scrappers'), path: '/admin/scrappers' },
-        { label: getTranslatedText('Leads'), path: '/admin/scrappers/leads' }
+        { label: getTranslatedText('Leads'), path: '/admin/scrappers/leads' },
+        { label: getTranslatedText('Address Change Requests'), path: '/admin/address-change-requests' }
       ]
     },
     { icon: FaRupeeSign, label: getTranslatedText('Price Feed'), path: '/admin/prices' },
     { icon: FaFileInvoice, label: getTranslatedText('Requests'), path: '/admin/requests' },
+    { icon: FaFlag, label: getTranslatedText('Reported Leads'), path: '/admin/reported-leads' },
     { icon: FaRupeeSign, label: getTranslatedText('Earnings'), path: '/admin/earnings' },
     { icon: FaMoneyCheckAlt, label: getTranslatedText('Withdrawals'), path: '/admin/withdrawals' },
     {

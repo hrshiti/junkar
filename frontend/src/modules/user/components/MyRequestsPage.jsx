@@ -798,7 +798,6 @@ const MyRequestsPage = () => {
                       <div
                         className="flex gap-2 mt-3 pt-3 border-t"
                         style={{ borderColor: "rgba(100, 148, 110, 0.15)" }}>
-                        {/* Rating option hidden as per user request
                         {request.hasReview ? (
                           <button
                             disabled
@@ -823,8 +822,7 @@ const MyRequestsPage = () => {
                             <FaStar size={14} />
                             {getTranslatedText("Rate & Review")}
                           </button>
-                        )} 
-                        */}
+                        )}
                         <button
                           onClick={() =>
                             navigate(`/chat`, {

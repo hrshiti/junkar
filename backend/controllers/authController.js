@@ -4,6 +4,7 @@ import { generateToken } from '../utils/generateToken.js';
 import User from '../models/User.js';
 import Scrapper from '../models/Scrapper.js';
 import { sendOTP, sendWelcomeSMS } from '../utils/otpService.js';
+import { activateFirstMonthTrial } from '../services/subscriptionService.js';
 import logger from '../utils/logger.js';
 import { USER_ROLES } from '../config/constants.js';
 
@@ -12,7 +13,7 @@ const isBypassEnabled = process.env.ENABLE_BYPASS_OTP !== 'false' && process.env
 // User test numbers
 const userBypassList = new Set(['9685974247', '9876543210', '9999999999', '7610416911', '6260491554']);
 // Scrapper test numbers (dedicated for scrapper testing)
-const scrapperBypassList = new Set(['8888888888', '7777777777', '6666666666', '5555555555', '1234512345']);
+const scrapperBypassList = new Set(['8888888888', '7777777777', '6666666666', '5555555555', '1234512345', '9000000001', '9000000002', '9000000003', '9000000004', '9000000005', '9000000006', '9000000007', '9000000008', '9000000009']);
 // Combined bypass list
 const bypassList = new Set([...userBypassList, ...scrapperBypassList]);
 const isBypassOtpNumber = (phone) => isBypassEnabled && bypassList.has(phone);
@@ -105,6 +106,13 @@ export const register = asyncHandler(async (req, res) => {
           address: ''
         }
       });
+
+      // Pahla Mahina Free: auto-activate first month trial (no payment). Dusre mahine se paid plan.
+      try {
+        await activateFirstMonthTrial(user._id);
+      } catch (trialError) {
+        logger.warn('First month trial activation failed (registration succeeded):', { userId: user._id, error: trialError.message });
+      }
     } catch (scrapperError) {
       // If scrapper creation fails, log error but don't block registration
       logger.error('❌ Failed to create scrapper profile during registration:', {

@@ -29,6 +29,8 @@ import HelpSupport from './components/HelpSupport';
 import BannerManagement from './components/BannerManagement';
 import CouponsList from './components/CouponsList';
 import WithdrawalRequests from './components/WithdrawalRequests';
+import AddressChangeRequests from './components/AddressChangeRequests';
+import ReportedLeads from './components/ReportedLeads';
 import { usePageTranslation } from '../../hooks/usePageTranslation';
 
 // Protected Route Component
@@ -102,6 +104,9 @@ const AdminModuleRoutes = () => {
         <Route path="coupons" element={<CouponsList />} />
         {/* Withdrawals */}
         <Route path="withdrawals" element={<WithdrawalRequests />} />
+        {/* Address Change Requests (dukandaar/wholesaler) */}
+        <Route path="address-change-requests" element={<AddressChangeRequests />} />
+        <Route path="reported-leads" element={<ReportedLeads />} />
         {/* Help & Support */}
         <Route path="help-support" element={<HelpSupport />} />
         {/* Profile */}

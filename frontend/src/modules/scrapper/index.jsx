@@ -53,6 +53,22 @@ const getSubscriptionStatus = () => {
   return 'not_subscribed';
 };
 
+// Guard: redirect to KYC/subscription if not allowed; else render children (Option B – protect all app panels)
+const RequireKycAndSubscription = ({ children }) => {
+  const kycStatus = getKYCStatus();
+  const subscriptionStatus = getSubscriptionStatus();
+  if (kycStatus === 'not_submitted' || kycStatus === 'rejected') {
+    return <Navigate to="/scrapper/kyc" replace />;
+  }
+  if (kycStatus === 'pending') {
+    return <Navigate to="/scrapper/kyc-status" replace />;
+  }
+  if (kycStatus === 'verified' && subscriptionStatus !== 'active') {
+    return <Navigate to="/scrapper/subscription" replace />;
+  }
+  return children;
+};
+
 const ScrapperModule = () => {
   const { isAuthenticated, user, login, logout } = useAuth();
   const [isVerifying, setIsVerifying] = useState(true);
@@ -232,42 +248,22 @@ const ScrapperModule = () => {
         {/* Subscription Plan Route */}
         <Route path="/subscription" element={<SubscriptionPlanPage />} />
 
-        {/* Dashboard Route */}
-        <Route path="/" element={<ScrapperDashboard />} />
-        <Route path="/dashboard" element={<ScrapperDashboard />} />
-
-        {/* Active Requests Route - for when scrapper is online */}
-        <Route path="/active-requests" element={<ActiveRequestsPage />} />
-
-        {/* My Active Requests List Route - shows all active requests */}
-        <Route path="/my-active-requests" element={<RequestManagementPage />} />
-
-        {/* Active Request Details Route - after accepting a request */}
-        <Route path="/active-request/:requestId" element={<ActiveRequestDetailsPage />} />
-
-        {/* Help & Support */}
-        <Route path="/help" element={<ScrapperHelpSupport />} />
-
-        {/* Profile */}
-        <Route path="/profile" element={<ScrapperProfile />} />
+        {/* Protected routes – require KYC verified + subscription active (Option B guard) */}
+        <Route path="/" element={<RequireKycAndSubscription><ScrapperDashboard /></RequireKycAndSubscription>} />
+        <Route path="/dashboard" element={<RequireKycAndSubscription><ScrapperDashboard /></RequireKycAndSubscription>} />
+        <Route path="/active-requests" element={<RequireKycAndSubscription><ActiveRequestsPage /></RequireKycAndSubscription>} />
+        <Route path="/my-active-requests" element={<RequireKycAndSubscription><RequestManagementPage /></RequireKycAndSubscription>} />
+        <Route path="/active-request/:requestId" element={<RequireKycAndSubscription><ActiveRequestDetailsPage /></RequireKycAndSubscription>} />
+        <Route path="/help" element={<RequireKycAndSubscription><ScrapperHelpSupport /></RequireKycAndSubscription>} />
+        <Route path="/profile" element={<RequireKycAndSubscription><ScrapperProfile /></RequireKycAndSubscription>} />
         <Route path="/terms" element={<ScrapperTerms />} />
-
-        {/* Refer & Earn Route */}
-        <Route path="/refer" element={<ReferAndEarn />} />
-
-        {/* Chat Routes */}
-        <Route path="/chats" element={<ChatListPage />} />
-        <Route path="/chat/:chatId" element={<ChatPage />} />
-        <Route path="/chat" element={<ChatPage />} />
-
-        {/* Wallet Route */}
-        <Route path="/wallet" element={<ScrapperWallet />} />
-
-        {/* Earnings Route */}
-        <Route path="/earnings" element={<ScrapperEarningsPage />} />
-
-        {/* Sell Scrap Route */}
-        <Route path="/sell-scrap" element={<SellScrapPage />} />
+        <Route path="/refer" element={<RequireKycAndSubscription><ReferAndEarn /></RequireKycAndSubscription>} />
+        <Route path="/chats" element={<RequireKycAndSubscription><ChatListPage /></RequireKycAndSubscription>} />
+        <Route path="/chat/:chatId" element={<RequireKycAndSubscription><ChatPage /></RequireKycAndSubscription>} />
+        <Route path="/chat" element={<RequireKycAndSubscription><ChatPage /></RequireKycAndSubscription>} />
+        <Route path="/wallet" element={<RequireKycAndSubscription><ScrapperWallet /></RequireKycAndSubscription>} />
+        <Route path="/earnings" element={<RequireKycAndSubscription><ScrapperEarningsPage /></RequireKycAndSubscription>} />
+        <Route path="/sell-scrap" element={<RequireKycAndSubscription><SellScrapPage /></RequireKycAndSubscription>} />
 
         {/* Redirect logic based on KYC and Subscription status */}
         <Route path="*" element={

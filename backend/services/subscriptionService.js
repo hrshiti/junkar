@@ -342,6 +342,74 @@ export const getSubscriptionHistory = async (scrapperId) => {
   }
 };
 
+/**
+ * First Month Free (Pehla Mahina Free): Activate trial subscription for new scrappers on registration.
+ * No payment required. After 30 days, subscription expires and scrapper must choose a paid plan.
+ */
+const FIRST_MONTH_FREE_PLAN_NAME = 'First Month Free';
+
+export const activateFirstMonthTrial = async (scrapperId) => {
+  try {
+    const scrapper = await Scrapper.findById(scrapperId);
+    if (!scrapper) {
+      throw new Error('Scrapper not found');
+    }
+
+    if (scrapper.subscription.status === 'active') {
+      return { success: true, subscription: scrapper.subscription, message: 'Already has active subscription' };
+    }
+
+    let trialPlan = await SubscriptionPlan.findOne({
+      name: FIRST_MONTH_FREE_PLAN_NAME,
+      isActive: true
+    });
+
+    if (!trialPlan) {
+      trialPlan = await SubscriptionPlan.create({
+        name: FIRST_MONTH_FREE_PLAN_NAME,
+        description: 'Pehla mahina free – Registration ke baad auto-activate. Dusre mahine se paid plan select karein.',
+        price: 0,
+        currency: 'INR',
+        duration: 1,
+        durationType: 'monthly',
+        type: 'general',
+        isActive: true,
+        isPopular: false,
+        sortOrder: 0,
+        features: ['First month free access', 'Full platform access for 30 days']
+      });
+      logger.info('[Subscription] Created First Month Free trial plan');
+    }
+
+    const startDate = new Date();
+    const durationDays = trialPlan.getDurationInDays ? trialPlan.getDurationInDays() : 30;
+    const expiryDate = calculateExpiryDate(startDate, durationDays);
+
+    scrapper.subscription.status = 'active';
+    scrapper.subscription.planId = trialPlan._id;
+    scrapper.subscription.startDate = startDate;
+    scrapper.subscription.expiryDate = expiryDate;
+    scrapper.subscription.razorpaySubscriptionId = null;
+    scrapper.subscription.razorpayPaymentId = null;
+    scrapper.subscription.autoRenew = false;
+    scrapper.subscription.cancelledAt = null;
+    scrapper.subscription.cancellationReason = null;
+
+    await scrapper.save();
+
+    logger.info(`[Subscription] First month free trial activated for scrapper ${scrapperId}, expires ${expiryDate.toISOString()}`);
+
+    return {
+      success: true,
+      subscription: scrapper.subscription,
+      plan: trialPlan
+    };
+  } catch (error) {
+    logger.error('[Subscription] Error activating first month trial:', error);
+    throw error;
+  }
+};
+
 
 
 

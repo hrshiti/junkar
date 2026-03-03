@@ -13,6 +13,7 @@ import {
   forwardToBigScrapper,
   getTargetedOrders
 } from '../controllers/orderController.js';
+import { reportFakeLead } from '../controllers/fakeLeadReportController.js';
 import { protect, isUser, isScrapper } from '../middleware/auth.js';
 import { validate } from '../middleware/validator.js';
 import {
@@ -46,6 +47,7 @@ router.put('/:id/status', updateOrderStatusValidator, validate, updateOrderStatu
 router.post('/:id/cancel', cancelOrderValidator, validate, cancelOrder);
 router.post('/:id/accept', isScrapper, acceptOrder);
 router.post('/:id/forward', isScrapper, forwardToBigScrapper);
+router.post('/:id/report-fake-lead', isScrapper, reportFakeLead);
 
 export default router;
 

@@ -80,15 +80,17 @@ const ScrappersList = () => {
           kycStatus: scrapper.kyc?.status || 'not_submitted',
           status: scrapper.status || 'active',
           subscriptionStatus: scrapper.subscription?.status || 'expired',
-          rating: scrapper.rating || 0,
+          rating: scrapper.rating?.average ?? scrapper.rating ?? 0,
           totalPickups: scrapper.totalPickups || 0,
           totalEarnings: scrapper.earnings?.total || 0,
           vehicleInfo: scrapper.vehicleInfo ?
             `${scrapper.vehicleInfo.type || ''} - ${scrapper.vehicleInfo.number || ''}` :
             getTranslatedText('Not provided'),
+          scrapperType: scrapper.scrapperType || 'feri_wala',
           joinedAt: scrapper.createdAt || new Date().toISOString(),
           kycData: scrapper.kyc || null,
-          subscriptionData: scrapper.subscription || null
+          subscriptionData: scrapper.subscription || null,
+          badges: Array.isArray(scrapper.badges) ? scrapper.badges : []
         }));
         setScrappers(transformedScrappers);
       } else {
@@ -338,6 +340,11 @@ const ScrappersList = () => {
                             </h3>
                             {getKYCStatusBadge(scrapper.kycStatus, scrapper.status)}
                             {getSubscriptionBadge(scrapper.subscriptionStatus)}
+                            {scrapper.badges?.includes('TRUSTED_DEALER') && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold" style={{ backgroundColor: '#fef3c7', color: '#b45309' }} title="Jodhpur Trusted Scrap Dealer (rating 4.5+)">
+                                🛡️ Jodhpur Trusted Scrap Dealer
+                              </span>
+                            )}
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1.5 md:gap-2 text-xs md:text-sm" style={{ color: '#718096' }}>
                             <div className="flex items-center gap-1.5 md:gap-2">
@@ -359,6 +366,11 @@ const ScrappersList = () => {
                           </div>
                           <p className="text-xs mt-1 md:mt-2" style={{ color: '#718096' }}>
                             🚗 {scrapper.vehicleInfo}
+                          </p>
+                          <p className="text-xs mt-0.5">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ backgroundColor: '#e0f2fe', color: '#0369a1' }}>
+                              {scrapper.scrapperType === 'feri_wala' ? '🚲 फेरी वाला' : scrapper.scrapperType === 'dukandaar' ? '🏪 दुकानदार' : scrapper.scrapperType === 'wholesaler' ? '🏭 थोक व्यापारी' : scrapper.scrapperType === 'big' ? '🏭 Dealer' : '🚲 Small'}
+                            </span>
                           </p>
                         </div>
                       </div>

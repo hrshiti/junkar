@@ -28,6 +28,7 @@ const ScrapperProfile = () => {
     "Name",
     "Phone",
     "Vehicle",
+    "Vehicle photo",
     "Not provided",
     "Heard about Scrapto",
     "Profile editing will be available soon.",
@@ -299,6 +300,10 @@ const ScrapperProfile = () => {
                   >
                     {getTranslatedText("KYC:")} {kycConfig.label}
                   </span>
+                  {/* Scrapper Type badge */}
+                  <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: '#e0f2fe', color: '#0369a1' }}>
+                    {scrapperUser?.scrapperType === 'feri_wala' ? '🚲 फेरी वाला' : scrapperUser?.scrapperType === 'dukandaar' ? '🏪 दुकानदार' : scrapperUser?.scrapperType === 'wholesaler' ? '🏭 थोक व्यापारी' : scrapperUser?.scrapperType === 'big' ? '🏭 Dealer' : '🚲 Feri Wala'}
+                  </span>
                   {/* Subscription badge */}
                   <span
                     className={`text-xs px-2 py-0.5 rounded-full ${subscription ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-500'}`}
@@ -313,6 +318,13 @@ const ScrapperProfile = () => {
                       ? `${scrapperUser.vehicleInfo.type} • ${scrapperUser.vehicleInfo.number || 'NA'}`
                       : getTranslatedText('Vehicle not set')}
                   </span>
+                  {/* Jodhpur Trusted Scrap Dealer badge – rating 4.5+ */}
+                  {rating.average >= 4.5 && rating.count > 0 && (
+                    <span className="text-xs px-2 py-0.5 rounded-full font-semibold inline-flex items-center gap-1" style={{ backgroundColor: '#fef3c7', color: '#b45309' }} title="Rating 4.5+">
+                      <span aria-hidden>🛡️</span>
+                      Jodhpur Trusted Scrap Dealer
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -350,6 +362,18 @@ const ScrapperProfile = () => {
                   ? <span className="capitalize">{scrapperUser.vehicleInfo.type} • {scrapperUser.vehicleInfo.number || 'NA'}</span>
                   : getTranslatedText('Not provided')}
               </span>
+              {scrapperUser?.vehicleInfo?.photoUrl && (
+                <>
+                  <span className="text-slate-600">{getTranslatedText("Vehicle photo")}</span>
+                  <span className="text-right min-w-0 flex justify-end">
+                    <img
+                      src={scrapperUser.vehicleInfo.photoUrl.startsWith('http') ? scrapperUser.vehicleInfo.photoUrl : `${window.location.origin}${scrapperUser.vehicleInfo.photoUrl}`}
+                      alt="Vehicle"
+                      className="max-w-full max-h-14 w-14 h-14 rounded-lg object-contain border border-slate-200 inline-block"
+                    />
+                  </span>
+                </>
+              )}
               {['big', 'dukandaar', 'wholesaler'].includes(scrapperUser?.scrapperType) && scrapperUser?.businessLocation?.address && (
                 <>
                   <span className="text-slate-600">{getTranslatedText("Business Address")}</span>

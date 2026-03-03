@@ -1,12 +1,22 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import { FaTimes, FaCheckCircle, FaTimesCircle, FaUserShield, FaPhone, FaIdCard, FaCar } from 'react-icons/fa';
+import { FaTimes, FaCheckCircle, FaTimesCircle, FaUserShield, FaPhone, FaIdCard, FaCar, FaEdit, FaSave } from 'react-icons/fa';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import { adminAPI, uploadAPI } from '../../shared/utils/api';
 
 const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [panPhotoFile, setPanPhotoFile] = useState(null);
+  const [shopLicenseFile, setShopLicenseFile] = useState(null);
+  const [editForm, setEditForm] = useState({
+    name: kyc.scrapperName || '',
+    phone: kyc.scrapperPhone || '',
+    aadhaarNumber: kyc.aadhaarNumber && kyc.aadhaarNumber !== 'N/A' ? kyc.aadhaarNumber.replace(/[^0-9]/g, '') : '',
+    panNumber: kyc.panNumber === 'N/A' || !kyc.panNumber ? '' : kyc.panNumber,
+  });
   const staticTexts = [
     "Error: Scrapper ID is missing",
     "Please provide a reason for rejection",
@@ -34,6 +44,7 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
     "PAN Number",
     "PAN Photo",
     "Shop License",
+    "Shop Photo",
     "Driving License"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
@@ -69,6 +80,51 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
     onReject(scrapperId, rejectionReason).finally(() => {
       setIsProcessing(false);
     });
+  };
+
+  const handleSaveDetails = async () => {
+    try {
+      setIsProcessing(true);
+      const scrapperId = kyc.scrapperId || kyc.id;
+
+      let panPhotoUrl = kyc.panPhotoUrl;
+      let shopLicenseUrl = kyc.shopLicenseUrl;
+
+      if (panPhotoFile) {
+        const panRes = await uploadAPI.uploadOrderImages([panPhotoFile]);
+        if (panRes.success && panRes.data.files && panRes.data.files.length > 0) {
+          panPhotoUrl = panRes.data.files[0].url;
+        }
+      }
+
+      if (shopLicenseFile) {
+        const shopRes = await uploadAPI.uploadOrderImages([shopLicenseFile]);
+        if (shopRes.success && shopRes.data.files && shopRes.data.files.length > 0) {
+          shopLicenseUrl = shopRes.data.files[0].url;
+        }
+      }
+
+      const payload = {
+        name: editForm.name,
+        phone: editForm.phone,
+        kyc: {
+          aadhaarNumber: editForm.aadhaarNumber,
+          panNumber: editForm.panNumber,
+          panPhotoUrl,
+          shopLicenseUrl
+        }
+      };
+
+      await adminAPI.updateScrapper(scrapperId, payload);
+      alert(getTranslatedText("Details updated successfully."));
+      setIsEditing(false);
+      window.location.reload();
+    } catch (error) {
+      console.error('Update error:', error);
+      alert(error.message || 'Failed to update details');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const getImageUrl = (url) => {
@@ -122,43 +178,101 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
           <div className="p-4 md:p-6 space-y-6">
             {/* Scrapper Information */}
             <div className="bg-gray-50 rounded-xl p-4 md:p-6 space-y-4">
-              <h3 className="text-lg font-bold" style={{ color: '#2d3748' }}>
-                {getTranslatedText("Scrapper Information")}
-              </h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-bold" style={{ color: '#2d3748' }}>
+                  {getTranslatedText("Scrapper Information")}
+                </h3>
+                {!isEditing ? (
+                  <button
+                    type="button"
+                    onClick={(e) => { e.preventDefault(); setIsEditing(true); }}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors bg-white border"
+                    style={{ color: '#0369a1', borderColor: '#bae6fd' }}
+                  >
+                    <FaEdit />
+                    {getTranslatedText("Edit Details")}
+                  </button>
+                ) : (
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); setIsEditing(false); }}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors bg-white border"
+                      style={{ color: '#718096', borderColor: '#e2e8f0' }}
+                    >
+                      <FaTimes />
+                      {getTranslatedText("Cancel")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveDetails}
+                      disabled={isProcessing}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors bg-sky-600 text-white border"
+                      style={{ borderColor: '#0284c7' }}
+                    >
+                      <FaSave />
+                      {getTranslatedText("Save")}
+                    </button>
+                  </div>
+                )}
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center gap-3">
                   <FaUserShield style={{ color: '#64946e' }} />
-                  <div>
+                  <div className="w-full">
                     <p className="text-xs" style={{ color: '#718096' }}>{getTranslatedText("Name")}</p>
-                    <p className="font-semibold" style={{ color: '#2d3748' }}>{kyc.scrapperName}</p>
+                    {isEditing ? (
+                      <input type="text" value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} className="mt-1 w-full px-2 py-1 border rounded" />
+                    ) : (
+                      <p className="font-semibold" style={{ color: '#2d3748' }}>{kyc.scrapperName}</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <FaPhone style={{ color: '#64946e' }} />
-                  <div>
+                  <div className="w-full">
                     <p className="text-xs" style={{ color: '#718096' }}>{getTranslatedText("Phone")}</p>
-                    <p className="font-semibold" style={{ color: '#2d3748' }}>{kyc.scrapperPhone}</p>
+                    {isEditing ? (
+                      <input type="text" value={editForm.phone} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} className="mt-1 w-full px-2 py-1 border rounded" />
+                    ) : (
+                      <p className="font-semibold" style={{ color: '#2d3748' }}>{kyc.scrapperPhone}</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <FaIdCard style={{ color: '#64946e' }} />
-                  <div>
+                  <div className="w-full">
                     <p className="text-xs" style={{ color: '#718096' }}>{getTranslatedText("Aadhaar Number")}</p>
-                    <p className="font-semibold" style={{ color: '#2d3748' }}>{kyc.aadhaarNumber}</p>
+                    {isEditing ? (
+                      <input type="text" value={editForm.aadhaarNumber} onChange={e => setEditForm({ ...editForm, aadhaarNumber: e.target.value })} className="mt-1 w-full px-2 py-1 border rounded" />
+                    ) : (
+                      <p className="font-semibold" style={{ color: '#2d3748' }}>{kyc.aadhaarNumber}</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <FaCar style={{ color: '#64946e' }} />
-                  <div>
+                  <div className="w-full min-w-0">
                     <p className="text-xs" style={{ color: '#718096' }}>{getTranslatedText("Vehicle Info")}</p>
                     <p className="font-semibold" style={{ color: '#2d3748' }}>{kyc.vehicleInfo}</p>
+                    {kyc.vehiclePhotoUrl && (
+                      <img
+                        src={kyc.vehiclePhotoUrl.startsWith('http') ? kyc.vehiclePhotoUrl : `${window.location.origin}${kyc.vehiclePhotoUrl}`}
+                        alt="Vehicle"
+                        className="mt-1.5 max-w-full max-h-20 w-20 h-20 rounded-lg object-contain border border-slate-200"
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <FaIdCard style={{ color: '#64946e' }} />
-                  <div>
+                  <div className="w-full">
                     <p className="text-xs" style={{ color: '#718096' }}>{getTranslatedText("PAN Number")}</p>
-                    <p className="font-semibold" style={{ color: '#2d3748' }}>{kyc.panNumber || getTranslatedText('N/A')}</p>
+                    {isEditing ? (
+                      <input type="text" value={editForm.panNumber} onChange={e => setEditForm({ ...editForm, panNumber: e.target.value })} className="mt-1 w-full px-2 py-1 border rounded" />
+                    ) : (
+                      <p className="font-semibold" style={{ color: '#2d3748' }}>{kyc.panNumber || getTranslatedText('N/A')}</p>
+                    )}
                   </div>
                 </div>
                 {['big', 'dukandaar', 'wholesaler'].includes(kyc.scrapperType) && kyc.businessLocation && (
@@ -173,97 +287,158 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
               </div>
             </div>
 
-            {/* Documents */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold" style={{ color: '#2d3748' }}>
-                {getTranslatedText("Documents")}
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Aadhaar Photo */}
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold" style={{ color: '#2d3748' }}>
-                    {getTranslatedText("Aadhaar Card Photo")}
-                  </label>
-                  <div className="relative rounded-xl overflow-hidden border-2" style={{ borderColor: '#e2e8f0' }}>
-                    <img
-                      src={getImageUrl(kyc.aadhaarPhotoUrl)}
-                      alt="Aadhaar Card"
-                      className="w-full h-64 object-contain bg-gray-50"
-                      onError={(e) => {
-                        e.target.src = 'https://via.placeholder.com/400x300?text=Aadhaar+Card';
-                      }}
-                    />
-                  </div>
+            {/* Documents Section */}
+            <div className="space-y-8">
+              {/* Photo & Aadhaar Match Verification (Side-by-Side View) */}
+              <div className="bg-sky-50/60 border border-sky-200 rounded-2xl p-4 md:p-6 shadow-sm">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-2">
+                  <h3 className="text-lg font-bold" style={{ color: '#0369a1' }}>
+                    📸 {getTranslatedText("Photo & Aadhaar Match Verification")}
+                  </h3>
+                  <span className="text-xs font-semibold px-3 py-1 bg-yellow-100 text-yellow-800 rounded-lg inline-block text-center border border-yellow-200">
+                    {getTranslatedText("Please verify faces match")}
+                  </span>
                 </div>
 
-                {/* Selfie Photo */}
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold" style={{ color: '#2d3748' }}>
-                    {getTranslatedText("Selfie Photo")}
-                  </label>
-                  <div className="relative rounded-xl overflow-hidden border-2" style={{ borderColor: '#e2e8f0' }}>
-                    <img
-                      src={getImageUrl(kyc.selfieUrl)}
-                      alt="Selfie"
-                      className="w-full h-64 object-contain bg-gray-50"
-                      onError={(e) => {
-                        e.target.src = 'https://via.placeholder.com/400x400?text=Selfie';
-                      }}
-                      onClick={() => window.open(kyc.selfieUrl, '_blank')}
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Aadhaar Photo (Reference) */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold" style={{ color: '#0c4a6e' }}>
+                      {getTranslatedText("Aadhaar Card Photo")}
+                    </label>
+                    <div className="relative rounded-xl overflow-hidden border-2 hover:border-sky-400 transition-colors" style={{ borderColor: '#bae6fd' }}>
+                      <img
+                        src={getImageUrl(kyc.aadhaarPhotoUrl)}
+                        alt="Aadhaar Card"
+                        className="w-full h-64 object-contain bg-white cursor-pointer hover:scale-105 transition-transform"
+                        onError={(e) => {
+                          e.target.src = 'https://via.placeholder.com/400x300?text=Aadhaar+Card';
+                        }}
+                        onClick={() => window.open(kyc.aadhaarPhotoUrl, '_blank')}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Selfie Photo (Live) */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold" style={{ color: '#0c4a6e' }}>
+                      {getTranslatedText("Scrapper Selfie (Live)")}
+                    </label>
+                    <div className="relative rounded-xl overflow-hidden border-2 hover:border-sky-400 transition-colors" style={{ borderColor: '#bae6fd' }}>
+                      <img
+                        src={getImageUrl(kyc.selfieUrl)}
+                        alt="Selfie"
+                        className="w-full h-64 object-contain bg-white cursor-pointer hover:scale-105 transition-transform"
+                        onError={(e) => {
+                          e.target.src = 'https://via.placeholder.com/400x400?text=Selfie';
+                        }}
+                        onClick={() => window.open(kyc.selfieUrl, '_blank')}
+                      />
+                    </div>
                   </div>
                 </div>
+              </div>
 
-                {/* Driving License */}
-                {kyc.licenseUrl && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold" style={{ color: '#2d3748' }}>
-                      {getTranslatedText("Driving License")}
-                    </label>
-                    <div className="relative rounded-xl overflow-hidden border-2" style={{ borderColor: '#e2e8f0' }}>
-                      <img
-                        src={getImageUrl(kyc.licenseUrl)}
-                        alt="Driving License"
-                        className="w-full h-64 object-contain bg-gray-50"
-                        onClick={() => window.open(kyc.licenseUrl, '_blank')}
-                      />
+              {/* Other Documents */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold" style={{ color: '#2d3748' }}>
+                  {getTranslatedText("Other Documents")}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Driving License */}
+                  {kyc.licenseUrl && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold" style={{ color: '#2d3748' }}>
+                        {getTranslatedText("Driving License")}
+                      </label>
+                      <div className="relative rounded-xl overflow-hidden border-2" style={{ borderColor: '#e2e8f0' }}>
+                        <img
+                          src={getImageUrl(kyc.licenseUrl)}
+                          alt="Driving License"
+                          className="w-full h-64 object-contain bg-gray-50"
+                          onClick={() => window.open(kyc.licenseUrl, '_blank')}
+                        />
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* PAN Photo */}
-                {kyc.panPhotoUrl && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold" style={{ color: '#2d3748' }}>
-                      {getTranslatedText("PAN Photo")}
-                    </label>
-                    <div className="relative rounded-xl overflow-hidden border-2" style={{ borderColor: '#e2e8f0' }}>
-                      <img
-                        src={getImageUrl(kyc.panPhotoUrl)}
-                        alt="PAN Card"
-                        className="w-full h-64 object-contain bg-gray-50"
-                        onClick={() => window.open(kyc.panPhotoUrl, '_blank')}
-                      />
+                  {/* PAN Photo */}
+                  {(kyc.panPhotoUrl || isEditing) && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold" style={{ color: '#2d3748' }}>
+                        {getTranslatedText("PAN Photo")}
+                      </label>
+                      <div className="relative rounded-xl overflow-hidden border-2" style={{ borderColor: '#e2e8f0' }}>
+                        <img
+                          src={panPhotoFile ? URL.createObjectURL(panPhotoFile) : (getImageUrl(kyc.panPhotoUrl) || 'https://via.placeholder.com/400x300?text=No+Image')}
+                          alt="PAN Card"
+                          className="w-full h-64 object-contain bg-gray-50 cursor-pointer"
+                          onClick={() => {
+                            if (!isEditing && kyc.panPhotoUrl) window.open(kyc.panPhotoUrl, '_blank');
+                          }}
+                        />
+                        {isEditing && (
+                          <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                            <label className="cursor-pointer bg-white text-gray-800 font-semibold py-2 px-4 rounded shadow">
+                              {getTranslatedText("Upload New")}
+                              <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                                if (e.target.files[0]) setPanPhotoFile(e.target.files[0]);
+                              }} />
+                            </label>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Shop License */}
-                {kyc.shopLicenseUrl && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold" style={{ color: '#2d3748' }}>
-                      {getTranslatedText("Shop License")}
-                    </label>
-                    <div className="relative rounded-xl overflow-hidden border-2" style={{ borderColor: '#e2e8f0' }}>
-                      <img
-                        src={getImageUrl(kyc.shopLicenseUrl)}
-                        alt="Shop License"
-                        className="w-full h-64 object-contain bg-gray-50"
-                        onClick={() => window.open(kyc.shopLicenseUrl, '_blank')}
-                      />
+                  {/* Shop License */}
+                  {(kyc.shopLicenseUrl || isEditing) && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold" style={{ color: '#2d3748' }}>
+                        {getTranslatedText("Shop License")}
+                      </label>
+                      <div className="relative rounded-xl overflow-hidden border-2" style={{ borderColor: '#e2e8f0' }}>
+                        <img
+                          src={shopLicenseFile ? URL.createObjectURL(shopLicenseFile) : (getImageUrl(kyc.shopLicenseUrl) || 'https://via.placeholder.com/400x300?text=No+Image')}
+                          alt="Shop License"
+                          className="w-full h-64 object-contain bg-gray-50 cursor-pointer"
+                          onClick={() => {
+                            if (!isEditing && kyc.shopLicenseUrl) window.open(kyc.shopLicenseUrl, '_blank');
+                          }}
+                        />
+                        {isEditing && (
+                          <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                            <label className="cursor-pointer bg-white text-gray-800 font-semibold py-2 px-4 rounded shadow">
+                              {getTranslatedText("Upload New")}
+                              <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                                if (e.target.files[0]) setShopLicenseFile(e.target.files[0]);
+                              }} />
+                            </label>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+
+                  {/* Shop Photo (for Dukandaar / shopkeeper) */}
+                  {kyc.scrapperType === 'dukandaar' && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold" style={{ color: '#2d3748' }}>
+                        {getTranslatedText("Shop Photo")}
+                      </label>
+                      <div className="relative rounded-xl overflow-hidden border-2" style={{ borderColor: '#e2e8f0' }}>
+                        <img
+                          src={kyc.shopPhotoUrl ? getImageUrl(kyc.shopPhotoUrl) : 'https://via.placeholder.com/400x300?text=Shop+Photo+not+provided'}
+                          alt="Shop Photo"
+                          className="w-full h-64 object-contain bg-gray-50 cursor-pointer"
+                          onClick={() => {
+                            if (kyc.shopPhotoUrl) window.open(kyc.shopPhotoUrl, '_blank');
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 

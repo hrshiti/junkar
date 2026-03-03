@@ -143,6 +143,12 @@ export const orderAPI = {
       method: 'POST',
     });
   },
+  reportFakeLead: async (orderId, payload) => {
+    return apiRequest(`/orders/${orderId}/report-fake-lead`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
 };
 
 // Payment API
@@ -505,6 +511,27 @@ export const adminAPI = {
   deleteScrapper: async (id) => {
     return apiRequest(API_ENDPOINTS.admin.scrapperById(id), { method: 'DELETE' });
   },
+  getAddressChangeRequests: async (query = '') => {
+    return apiRequest(`/admin/address-change-requests${query ? `?${query}` : ''}`, { method: 'GET' });
+  },
+  approveAddressChangeRequest: async (id, payload) => {
+    return apiRequest(`/admin/address-change-requests/${id}/approve`, {
+      method: 'PUT',
+      body: JSON.stringify(payload || {}),
+    });
+  },
+  rejectAddressChangeRequest: async (id, payload) => {
+    return apiRequest(`/admin/address-change-requests/${id}/reject`, {
+      method: 'PUT',
+      body: JSON.stringify(payload || {}),
+    });
+  },
+  getReportedLeads: async (query = '') => {
+    return apiRequest(`/admin/reported-leads${query ? `?${query}` : ''}`, { method: 'GET' });
+  },
+  markReportedLeadReviewed: async (id) => {
+    return apiRequest(`/admin/reported-leads/${id}/review`, { method: 'PATCH' });
+  },
   getAllPrices: async () => {
     return apiRequest(API_ENDPOINTS.admin.prices, { method: 'GET' });
   },
@@ -605,6 +632,12 @@ export const scrapperProfileAPI = {
   },
   getNearbyBig: async (lat, lng, radius = 1000) => {
     return apiRequest(`/scrappers/nearby-big?lat=${lat}&lng=${lng}&radius=${radius}`, { method: 'GET' });
+  },
+  requestAddressChange: async (payload) => {
+    return apiRequest('/scrappers/me/address-change-request', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   },
 };
 

@@ -172,21 +172,16 @@ Kya Baki Hai:
 
 Admin KYC review mein dono photos side-by-side dikhana (comparison view)
 Agar scrapper photo update karta hai toh re-verification trigger hona chahiye
-2.4 ⚠️ Pahla Mahina Free (Subscription)
+2.4 ✅ Pahla Mahina Free (Subscription) [Implemented]
 Client Chahta Hai: Pehla mahina free, dusre mahine se payment
 
 Current Implementation:
 
-Subscription model hai (
-SubscriptionPlan.js
-) with trial period
-trialDays field hai plan mein
-Lekin registration ke baad auto-trial activate ka logic verify karna hoga
-Kya Baki Hai:
-
-Verify ki registration ke baad pehla plan auto-activate hota hai ya nahi
-Agar nahi hota, toh auto trial logic add karna
-2.5 ⚠️ Location Change Restriction
+Subscription model hai (SubscriptionPlan.js). Registration ke baad "First Month Free" trial auto-activate hota hai (30 days). Dusre mahine se scrapper ko paid plan select karke payment karni hoti hai.
+Backend: authController (scrapper register) → activateFirstMonthTrial; subscriptionService.activateFirstMonthTrial; trial plan (price 0) selectable list me nahi aata.
+Scrapper-facing note: Subscription plan page (/scrapper/subscription) par highlighted note dikhta hai – "First month is free, auto-activated on register; from second month choose a paid plan and pay."
+Note for scrappers: Flow samajhne ke liye subscription page par ye note hamesha dikhega taaki scrapper ko pata rahe ki pehla mahina free hai aur dusre mahine se payment karni hogi.
+2.5 ✅ Location Change Restriction
 Client Chahta Hai:
 
 Feri wala location change kar sake
@@ -201,7 +196,7 @@ Kya Baki Hai:
 scrapperType ke basis par location edit restrict karna
 "Request Address Change" feature for shopkeeper/wholesaler
 Multiple units/branch support (address list)
-2.6 ⚠️ Scrapper Profile mein Vehicle Photo
+2.6 ✅  Scrapper Profile mein Vehicle Photo
 Client Chahta Hai: Profile mein gaadi ki photo aur naam dikhna chahiye
 
 Current Implementation:
@@ -217,7 +212,7 @@ Kya Baki Hai:
 
 vehiclePhotoUrl field add karna Scrapper model mein
 Profile edit mein vehicle photo upload option
-2.7 ⚠️ Unique ID per User
+2.7 ✅ Unique ID per User
 Client Chahta Hai: Har user ki ek unique ID ho
 
 Current Implementation:
@@ -228,7 +223,7 @@ Kya Baki Hai:
 
 Ek readable display ID banana (e.g., JNKR-12345) jo user ko dikhaya ja sake
 Profile section mein dikhana
-❌ 3) NOT DONE YET (Abhi Tak Nahi Bana)
+✅ 3) NOT DONE YET (Abhi Tak Nahi Bana)
 3.1 🔴 Report Fake Lead
 Client Chahta Hai:
 
