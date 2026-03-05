@@ -768,5 +768,8 @@ export const publicAPI = {
   getActivePrices: async () => {
     return apiRequest('/public/prices/active', { method: 'GET' });
   },
+  getHomepageReviews: async () => {
+    return apiRequest('/public/homepage-reviews', { method: 'GET' });
+  },
 };
 

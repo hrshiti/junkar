@@ -244,7 +244,19 @@ export const getNearbyBigScrappers = asyncHandler(async (req, res) => {
 
     const latitude = parseFloat(lat);
     const longitude = parseFloat(lng);
-    const radiusInMeters = parseFloat(radius || 500) * 1000; // Default to 500km if not provided
+    const scrapperId = req.user.id;
+    const currentScrapper = await Scrapper.findById(scrapperId).select('scrapperType');
+
+    let targetRoleTypes = ['big', 'wholesaler', 'dukandaar'];
+    if (currentScrapper) {
+        if (currentScrapper.scrapperType === 'feri_wala') {
+            targetRoleTypes = ['dukandaar'];
+        } else if (currentScrapper.scrapperType === 'dukandaar') {
+            targetRoleTypes = ['wholesaler'];
+        } else if (currentScrapper.scrapperType === 'wholesaler') {
+            targetRoleTypes = ['wholesaler'];
+        }
+    }
 
     const nearbyBigScrappers = await Scrapper.aggregate([
         {
@@ -257,7 +269,7 @@ export const getNearbyBigScrappers = asyncHandler(async (req, res) => {
                 // maxDistance removed to allow infinite radius discovery
                 key: 'businessLocation',
                 query: {
-                    scrapperType: { $in: ['big', 'wholesaler', 'dukandaar'] },
+                    scrapperType: { $in: targetRoleTypes },
                     'kyc.status': 'verified'
                     // isOnline: true removed to show offline scrappers as well
                 },

@@ -30,12 +30,32 @@ class OrderService {
             serviceFee,
             quantityType,
             targetScrapperIds,
-            isNegotiated
+            isNegotiated,
+            isDonation
         } = orderData;
 
         // Wallet validation for cleaning service
         if (orderType === 'cleaning_service') {
             await walletService.validateBalance(userId, 100, 'user');
+        }
+
+        // Role Hierarchy Validation for Targeted Scrappers
+        if (targetScrapperIds && targetScrapperIds.length > 0) {
+            const senderScrapper = await Scrapper.findById(userId);
+            if (senderScrapper) {
+                const targetScrappers = await Scrapper.find({ _id: { $in: targetScrapperIds } });
+                for (const target of targetScrappers) {
+                    if (senderScrapper.scrapperType === 'feri_wala' && target.scrapperType !== 'dukandaar') {
+                        throw new Error('Aap sirf Dukandar ko request bhej sakte hain.');
+                    }
+                    if (senderScrapper.scrapperType === 'dukandaar' && target.scrapperType !== 'wholesaler') {
+                        throw new Error('Dukandar sirf Wholesaler ko request bhej sakte hain.');
+                    }
+                    if (senderScrapper.scrapperType === 'wholesaler' && target.scrapperType !== 'wholesaler') {
+                        throw new Error('Wholesaler sirf Wholesaler ko request bhej sakte hain.');
+                    }
+                }
+            }
         }
 
         // Calculate totals
@@ -77,19 +97,27 @@ class OrderService {
         if (serviceFee) orderPayload.serviceFee = serviceFee;
         if (isNegotiated) orderPayload.isNegotiated = true;
 
-        // Determine quantity type
-        if (quantityType) {
-            orderPayload.quantityType = quantityType;
-        } else if (totalWeight >= 100) {
-            orderPayload.quantityType = 'large';
-        } else {
+        // Handle Donation logic
+        if (isDonation === true) {
+            orderPayload.isDonation = true;
+            orderPayload.totalAmount = 0; // Donations are free
+            // Force donation quantity type to 'small' so big scrappers don't get it by size
             orderPayload.quantityType = 'small';
+        } else {
+            // Determine quantity type normally
+            if (quantityType) {
+                orderPayload.quantityType = quantityType;
+            } else if (totalWeight >= 100) {
+                orderPayload.quantityType = 'large';
+            } else {
+                orderPayload.quantityType = 'small';
+            }
         }
 
         const order = await Order.create(orderPayload);
         await order.populate('user', 'name phone email');
 
-        logger.info(`Order created: ${order._id} by user: ${userId} (Type: ${order.orderType || 'scrap'})`);
+        logger.info(`Order created: ${order._id} by user: ${userId} (Type: ${order.orderType || 'scrap'}, Donation: ${!!orderPayload.isDonation})`);
 
         // Notify scrappers asynchronously (non-blocking)
         if (order.targetedScrappers && order.targetedScrappers.length > 0) {

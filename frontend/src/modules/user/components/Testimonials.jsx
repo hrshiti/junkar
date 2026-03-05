@@ -1,8 +1,10 @@
+import { useState, useEffect } from "react";
 import { FaStar } from "react-icons/fa";
 import { usePageTranslation } from "../../../hooks/usePageTranslation";
+import { publicAPI } from "../../shared/utils/api";
 
 const Testimonials = () => {
-  const testimonials = [
+  const [testimonials, setTestimonials] = useState([
     {
       name: "R.K.",
       rating: 5,
@@ -28,12 +30,28 @@ const Testimonials = () => {
       rating: 5,
       text: "Fast and reliable service. Will use again!",
     },
-  ];
+  ]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchReviews = async () => {
+      try {
+        const response = await publicAPI.getHomepageReviews();
+        if (isMounted && response.success && response.data && response.data.length > 0) {
+          setTestimonials(response.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch homepage reviews", error);
+      }
+    };
+    fetchReviews();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const staticTexts = [
     "What Our Users Say",
-    "50,000+ Pickups Completed",
-    "Join thousands of satisfied users",
     ...testimonials.map((t) => t.text),
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
@@ -100,15 +118,6 @@ const Testimonials = () => {
         </div>
       </div>
 
-      {/* Stats Section - Compact */}
-      <div className="text-center">
-        <p className="text-xl md:text-2xl font-bold mb-1" style={{ color: "#1e293b" }}>
-          {getTranslatedText("50,000+ Pickups Completed")}
-        </p>
-        <p className="text-xs md:text-sm" style={{ color: "#64748b" }}>
-          {getTranslatedText("Join thousands of satisfied users")}
-        </p>
-      </div>
     </div>
   );
 };

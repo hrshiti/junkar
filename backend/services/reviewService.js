@@ -93,6 +93,47 @@ class ReviewService {
     };
   }
 
+  async getHomepageReviews() {
+    const limit = 10;
+
+    const finder = {
+      status: 'approved',
+      rating: { $gte: 4 },
+      $and: [
+        { comment: { $exists: true } },
+        { comment: { $ne: "" } }
+      ]
+    };
+
+    const reviews = await Review.find(finder)
+      .populate('user', 'name')
+      .sort({ createdAt: -1 })
+      .limit(limit);
+
+    const formattedReviews = reviews.map(review => {
+      let nameStr = "User";
+      let initials = "U";
+      if (review.user && review.user.name) {
+        nameStr = review.user.name;
+        const nameParts = review.user.name.split(' ').filter(p => p.trim());
+        if (nameParts.length >= 2) {
+          initials = `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`.toUpperCase();
+        } else if (nameParts.length === 1 && nameParts[0].length > 0) {
+          initials = nameParts[0][0].toUpperCase();
+        }
+      }
+
+      return {
+        name: nameStr,
+        initials: initials,
+        rating: review.rating,
+        text: review.comment
+      };
+    });
+
+    return formattedReviews;
+  }
+
   async getMyReviews(userId, query) {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;

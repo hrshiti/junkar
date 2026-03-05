@@ -65,8 +65,11 @@ const PriceConfirmationPage = () => {
     "Good", "Average", "Damaged",
     "Expected Price:",
     "Vendor will decide",
-    "Negotiation Required",
-    "Apply for Pickup"
+    "Apply for Pickup",
+    "Donate this Scrap",
+    "Yes, I want to donate",
+    "This will be picked up for free to help someone in need.",
+    "Free Donation"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -83,6 +86,7 @@ const PriceConfirmationPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [estimatedPayout, setEstimatedPayout] = useState(0);
   const [addressData, setAddressData] = useState(null);
+  const [isDonation, setIsDonation] = useState(false);
 
   // Load all data from sessionStorage
   useEffect(() => {
@@ -312,7 +316,8 @@ const PriceConfirmationPage = () => {
       images,
       notes,
       quantityType: weightData?.quantityType || 'small',
-      isNegotiated: isNegotiableOrder
+      isNegotiated: isNegotiableOrder,
+      isDonation: isDonation
     };
 
     try {
@@ -337,7 +342,7 @@ const PriceConfirmationPage = () => {
       alert(getTranslatedText(error.message || 'Failed to submit request. Please try again.'));
       setIsSubmitting(false);
     }
-  }, [isSubmitting, selectedDate, selectedSlot, selectedCategories, uploadedImages, weightData, addressData, preferredTime, user, navigate, marketPrices, getTranslatedText, pickupMode]);
+  }, [isSubmitting, selectedDate, selectedSlot, selectedCategories, uploadedImages, weightData, addressData, preferredTime, user, navigate, marketPrices, getTranslatedText, pickupMode, isDonation]);
 
   const timeSlots = [
     '9:00 AM - 11:00 AM',
@@ -553,9 +558,11 @@ const PriceConfirmationPage = () => {
                 </p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-3xl md:text-4xl font-bold" style={{ color: '#38bdf8' }}>
-                    {weightData?.pricingType === 'negotiable'
-                      ? (weightData.expectedPrice ? `₹${weightData.expectedPrice}` : getTranslatedText('Negotiable'))
-                      : `₹${estimatedPayout.toFixed(0)}`}
+                    {isDonation
+                      ? `₹0 (${getTranslatedText('Free Donation')})`
+                      : weightData?.pricingType === 'negotiable'
+                        ? (weightData.expectedPrice ? `₹${weightData.expectedPrice}` : getTranslatedText('Negotiable'))
+                        : `₹${estimatedPayout.toFixed(0)}`}
                   </span>
                   <span className="text-sm md:text-base" style={{ color: '#718096' }}>
                     {weightData?.pricingType === 'negotiable'
@@ -570,11 +577,32 @@ const PriceConfirmationPage = () => {
 
         {/* Additional Options */}
         <div className="space-y-4 md:space-y-6">
-          {/* Notes Section */}
+          {/* Donation Section */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
+            className={`rounded-xl p-4 md:p-6 border-2 transition-all cursor-pointer flex items-start gap-4 ${isDonation ? 'border-sky-500 bg-sky-50 shadow-md' : 'border-transparent bg-white shadow-sm hover:shadow-md'}`}
+            onClick={() => setIsDonation(!isDonation)}
+          >
+            <div className={`mt-1 flex-shrink-0 w-6 h-6 rounded border flex items-center justify-center transition-colors ${isDonation ? 'bg-sky-500 border-sky-500 text-white' : 'bg-gray-50 border-gray-300'}`}>
+              {isDonation && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+            </div>
+            <div>
+              <h4 className={`text-sm md:text-base font-bold ${isDonation ? 'text-sky-700' : 'text-gray-800'}`}>
+                {getTranslatedText("Donate this Scrap")} 🎁
+              </h4>
+              <p className={`text-xs md:text-sm mt-1 leading-relaxed ${isDonation ? 'text-sky-600' : 'text-gray-500'}`}>
+                {getTranslatedText("This will be picked up for free to help someone in need.")}
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Notes Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
             className="rounded-xl p-4 md:p-6"
             style={{ backgroundColor: '#ffffff' }}
           >

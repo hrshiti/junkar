@@ -15,11 +15,18 @@ class NotificationService {
      */
     async notifyOnlineScrappers(order) {
         try {
-            const onlineScrappers = await Scrapper.find({
+            const query = {
                 isOnline: true,
                 status: 'active',
                 'kyc.status': 'verified'
-            }).select('_id fcmTokens fcmTokenMobile');
+            };
+
+            // Only feri_wala and small scrappers get donation orders
+            if (order.isDonation) {
+                query.scrapperType = { $in: ['feri_wala', 'small'] };
+            }
+
+            const onlineScrappers = await Scrapper.find(query).select('_id fcmTokens fcmTokenMobile');
 
             if (onlineScrappers.length === 0) {
                 logger.info(`No online scrappers found for Order ${order._id}`);
@@ -27,11 +34,11 @@ class NotificationService {
             }
 
             const notificationPayload = {
-                title: 'New Order Request 🔔',
-                body: 'A new pickup request is available near you!',
+                title: order.isDonation ? '🎁 Donation Pickup Request!' : 'New Order Request 🔔',
+                body: order.isDonation ? 'Someone wants to donate scrap nearby. It is completely free!' : 'A new pickup request is available near you!',
                 data: {
                     orderId: order._id.toString(),
-                    type: 'new_order'
+                    type: order.isDonation ? 'donation_order' : 'new_order'
                 }
             };
 

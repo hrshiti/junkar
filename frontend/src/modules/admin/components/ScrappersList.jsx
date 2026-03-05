@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FaTruck, FaSearch, FaUserCheck, FaUserTimes, FaEye, FaPhone,
-  FaIdCard, FaStar, FaRupeeSign, FaCheckCircle, FaClock, FaTimesCircle
+  FaIdCard, FaStar, FaRupeeSign, FaCheckCircle, FaClock, FaTimesCircle, FaMapMarkerAlt
 } from 'react-icons/fa';
 import { adminAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';

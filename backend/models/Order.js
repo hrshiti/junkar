@@ -152,6 +152,10 @@ const orderSchema = new mongoose.Schema({
       default: [0, 0]
     }
   },
+  isDonation: {
+    type: Boolean,
+    default: false
+  },
   isNegotiated: {
     type: Boolean,
     default: false

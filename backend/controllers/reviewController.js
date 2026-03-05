@@ -13,6 +13,11 @@ export const createReview = asyncHandler(async (req, res) => {
   return sendSuccess(res, 'Review created successfully', review, 201);
 });
 
+export const getHomepageReviews = asyncHandler(async (req, res) => {
+  const result = await reviewService.getHomepageReviews();
+  return sendSuccess(res, 'Homepage reviews fetched successfully', result);
+});
+
 export const getScrapperReviews = asyncHandler(async (req, res) => {
   const { scrapperId } = req.params;
   const result = await reviewService.getReviewsByScrapper(scrapperId, req.query);
