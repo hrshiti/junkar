@@ -15,7 +15,7 @@ let io = null;
 export const initializeSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: (process.env.FRONTEND_URL || 'http://localhost:5173')
+      origin: (process.env.FRONTEND_URL || 'http://localhost:5173,https://junkar.vercel.app,https://www.junkar.in,https://junkar.in')
         .split(',')
         .map(o => o.trim().replace(/\/$/, "")),
       methods: ['GET', 'POST'],
