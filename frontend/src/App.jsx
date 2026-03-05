@@ -4,7 +4,8 @@ import UserModule from './modules/user';
 import AdminModule from './modules/admin';
 import ScrapperModule from './modules/scrapper';
 import { initializePushNotifications, setupForegroundNotificationHandler } from './services/pushNotificationService';
-import LandingPage from './landing pages/LandingPage';
+import UserLanding from './landing pages/pages/UserLanding/UserLanding';
+import VendorLanding from './landing pages/pages/VendorLanding/VendorLanding';
 import './App.css';
 
 function App() {
@@ -18,8 +19,9 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Landing Page */}
-        <Route path="/" element={<LandingPage />} />
+        {/* Landing Pages */}
+        <Route path="/" element={<UserLanding />} />
+        <Route path="/vendor" element={<VendorLanding />} />
 
         {/* Scrapper Module Routes - Must come before catch-all */}
         <Route path="/scrapper/*" element={<ScrapperModule />} />
