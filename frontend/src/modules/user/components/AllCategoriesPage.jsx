@@ -127,7 +127,7 @@ const AllCategoriesPage = () => {
 
   const handleCategoryClick = (item) => {
     // Navigate to category selection to handle subcategories
-    navigate("/add-scrap/category", {
+    navigate("/user/add-scrap/category", {
       state: { preSelectedCategory: item.name },
     });
   };
@@ -142,7 +142,7 @@ const AllCategoriesPage = () => {
         style={{ backgroundColor: "rgba(125, 211, 252, 0.9)" }}>
         <div className="max-w-7xl mx-auto flex items-center gap-4">
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/user")}
             className="p-3 rounded-xl hover:opacity-80 transition-all flex-shrink-0 shadow-lg"
             style={{
               backgroundColor: "#ffffff",

@@ -371,42 +371,42 @@ const MyProfilePage = () => {
       icon: <HiLocationMarker />,
       title: getTranslatedText("Saved Addresses"),
       desc: getTranslatedText("Manage pickup locations"),
-      action: () => navigate("/saved-addresses"),
+      action: () => navigate("/user/saved-addresses"),
       color: "#0ea5e9"
     },
     {
       icon: <MdAssignment />,
       title: getTranslatedText("My Requests"),
       desc: getTranslatedText("View pickup history & status"),
-      action: () => navigate("/my-requests"),
+      action: () => navigate("/user/my-requests"),
       color: "#0ea5e9"
     },
     {
       icon: <FaCommentAlt />,
       title: getTranslatedText("Chat"),
       desc: getTranslatedText("Messages with scrappers"),
-      action: () => navigate("/chats"),
+      action: () => navigate("/user/chats"),
       color: "#0ea5e9"
     },
     {
       icon: <FaBell />,
       title: getTranslatedText("Notifications"),
       desc: getTranslatedText("Manage notification settings"),
-      action: () => navigate("/notifications"),
+      action: () => navigate("/user/notifications"),
       color: "#0ea5e9"
     },
     {
       icon: <FaQuestionCircle />,
       title: getTranslatedText("Help & Support"),
       desc: getTranslatedText("FAQ, contact support"),
-      action: () => navigate("/help"),
+      action: () => navigate("/user/help"),
       color: "#0ea5e9"
     },
     {
       icon: <FaCog />,
       title: getTranslatedText("Terms & Conditions"),
       desc: getTranslatedText("Read platform terms & conditions"),
-      action: () => navigate("/terms"),
+      action: () => navigate("/user/terms"),
       color: "#0ea5e9"
     }
   ];
@@ -759,7 +759,7 @@ const MyProfilePage = () => {
                       {getTranslatedText("Wallet Balance")}
                     </h3>
                     <button
-                      onClick={() => navigate('/wallet')}
+                      onClick={() => navigate('/user/wallet')}
                       className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
                       style={{
                         backgroundColor: "#f0f9ff",

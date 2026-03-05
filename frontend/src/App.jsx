@@ -1,9 +1,10 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import UserModule from './modules/user';
 import AdminModule from './modules/admin';
 import ScrapperModule from './modules/scrapper';
 import { initializePushNotifications, setupForegroundNotificationHandler } from './services/pushNotificationService';
+import LandingPage from './landing pages/LandingPage';
 import './App.css';
 
 function App() {
@@ -17,14 +18,26 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Landing Page */}
+        <Route path="/" element={<LandingPage />} />
+
         {/* Scrapper Module Routes - Must come before catch-all */}
         <Route path="/scrapper/*" element={<ScrapperModule />} />
 
         {/* Admin Module Routes */}
         <Route path="/admin/*" element={<AdminModule />} />
 
-        {/* User Module Routes - Catch-all for everything else */}
-        <Route path="/*" element={<UserModule />} />
+        {/* User Module Routes */}
+        <Route path="/user/*" element={<UserModule />} />
+
+        {/* Legacy Redirects for User Module */}
+        <Route path="/my-profile" element={<Navigate to="/user/my-profile" replace />} />
+        <Route path="/my-requests" element={<Navigate to="/user/my-requests" replace />} />
+        <Route path="/chats" element={<Navigate to="/user/chats" replace />} />
+        <Route path="/add-scrap/*" element={<Navigate to="/user/add-scrap/category" replace />} />
+
+        {/* Catch-all for unknown routes */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

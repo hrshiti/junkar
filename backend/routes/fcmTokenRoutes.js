@@ -27,7 +27,7 @@ router.post('/save', protect, async (req, res) => {
                 // Limit to 10
                 if (user.fcmTokens.length > 10) user.fcmTokens = user.fcmTokens.slice(-10);
             }
-        } else if (platform === 'mobile') {
+        } else if (platform === 'app') {
             if (!user.fcmTokenMobile) user.fcmTokenMobile = [];
             if (!user.fcmTokenMobile.includes(token)) {
                 user.fcmTokenMobile.push(token);
@@ -48,7 +48,7 @@ router.post('/save', protect, async (req, res) => {
                             scrapper.fcmTokens.push(token);
                             if (scrapper.fcmTokens.length > 10) scrapper.fcmTokens = scrapper.fcmTokens.slice(-10);
                         }
-                    } else if (platform === 'mobile') {
+                    } else if (platform === 'app') {
                         if (!scrapper.fcmTokenMobile) scrapper.fcmTokenMobile = [];
                         if (!scrapper.fcmTokenMobile.includes(token)) {
                             scrapper.fcmTokenMobile.push(token);
@@ -95,7 +95,7 @@ router.delete('/remove', protect, async (req, res) => {
         if (user) {
             if (platform === 'web' && user.fcmTokens) {
                 user.fcmTokens = user.fcmTokens.filter(t => t !== token);
-            } else if (platform === 'mobile' && user.fcmTokenMobile) {
+            } else if (platform === 'app' && user.fcmTokenMobile) {
                 user.fcmTokenMobile = user.fcmTokenMobile.filter(t => t !== token);
             }
             await user.save();
@@ -107,7 +107,7 @@ router.delete('/remove', protect, async (req, res) => {
                 if (scrapper) {
                     if (platform === 'web' && scrapper.fcmTokens) {
                         scrapper.fcmTokens = scrapper.fcmTokens.filter(t => t !== token);
-                    } else if (platform === 'mobile' && scrapper.fcmTokenMobile) {
+                    } else if (platform === 'app' && scrapper.fcmTokenMobile) {
                         scrapper.fcmTokenMobile = scrapper.fcmTokenMobile.filter(t => t !== token);
                     }
                     await scrapper.save();

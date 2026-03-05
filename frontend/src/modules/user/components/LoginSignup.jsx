@@ -125,12 +125,12 @@ const LoginSignup = () => {
   // Redirect after authentication state updates
   useEffect(() => {
     if (isAuthenticated && shouldRedirect) {
-      navigate("/", { replace: true });
+      navigate("/user", { replace: true });
       setShouldRedirect(false);
     }
   }, [isAuthenticated, shouldRedirect, navigate]);
 
-  if (location.pathname === '/terms') {
+  if (location.pathname === '/user/terms') {
     return <TermsAndConditions />;
   }
 
@@ -971,7 +971,7 @@ const LoginSignup = () => {
                   {getTranslatedText("I agree to the")}{" "}
                   <button
                     type="button"
-                    onClick={() => navigate('/terms')}
+                    onClick={() => navigate('/user/terms')}
                     className="font-semibold text-sky-600 hover:underline"
                   >
                     {getTranslatedText("Terms & Conditions")}

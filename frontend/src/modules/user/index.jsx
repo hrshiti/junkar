@@ -35,14 +35,14 @@ const UserModule = () => {
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
   const navItems = [
-    { label: getTranslatedText("Sell"), path: "/", icon: FaHome },
+    { label: getTranslatedText("Sell"), path: "/user", icon: FaHome },
     {
       label: getTranslatedText("My Requests"),
-      path: "/my-requests",
+      path: "/user/my-requests",
       icon: FaList,
     },
-    { label: getTranslatedText("Chats"), path: "/chats", icon: FaRegComments },
-    { label: getTranslatedText("Profile"), path: "/my-profile", icon: FaUser },
+    { label: getTranslatedText("Chats"), path: "/user/chats", icon: FaRegComments },
+    { label: getTranslatedText("Profile"), path: "/user/my-profile", icon: FaUser },
   ];
 
   if (!isAuthenticated) {
@@ -78,7 +78,7 @@ const UserModule = () => {
         <Route path="/help" element={<HelpSupport />} />
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/notifications" element={<NotificationsPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/user" replace />} />
       </Routes>
     </div>
   );

@@ -44,7 +44,7 @@ const UserHelpSupport = () => {
         )
       );
       const timer = setTimeout(() => {
-        navigate("/", { replace: true });
+        navigate("/user", { replace: true });
       }, 2000);
       return () => clearTimeout(timer);
     }

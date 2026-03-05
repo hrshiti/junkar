@@ -59,7 +59,7 @@ const Header = () => {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                navigate('/notifications');
+                navigate('/user/notifications');
               }}
               className="relative p-2 rounded-full transition-colors cursor-pointer active:scale-95 touch-manipulation"
               style={{

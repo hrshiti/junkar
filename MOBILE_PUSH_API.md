@@ -15,7 +15,7 @@ Use this endpoint to register your mobile app's FCM token. This will save the to
 ```json
 {
   "token": "YOUR_MOBILE_DEVICE_FCM_TOKEN_HERE",
-  "platform": "mobile"
+  "platform": "app"
 }
 ```
 
@@ -30,6 +30,6 @@ curl -X POST http://localhost:7000/api/v1/fcm-tokens/save \
   -H "Authorization: Bearer <YOUR_TOKEN>" \
   -d '{
     "token": "f5a3...",
-    "platform": "mobile"
+    "platform": "app"
   }'
 ```

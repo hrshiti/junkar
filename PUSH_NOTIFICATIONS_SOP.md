@@ -288,7 +288,7 @@ router.post('/save', authenticate, async (req, res) => {
           user.fcmTokens = user.fcmTokens.slice(-10);
         }
       }
-    } else if (platform === 'mobile') {
+    } else if (platform === 'app') {
       if (!user.fcmTokenMobile) user.fcmTokenMobile = [];
       if (!user.fcmTokenMobile.includes(token)) {
         user.fcmTokenMobile.push(token);
@@ -318,7 +318,7 @@ router.delete('/remove', authenticate, async (req, res) => {
     
     if (platform === 'web' && user.fcmTokens) {
       user.fcmTokens = user.fcmTokens.filter(t => t !== token);
-    } else if (platform === 'mobile' && user.fcmTokenMobile) {
+    } else if (platform === 'app' && user.fcmTokenMobile) {
       user.fcmTokenMobile = user.fcmTokenMobile.filter(t => t !== token);
     }
     

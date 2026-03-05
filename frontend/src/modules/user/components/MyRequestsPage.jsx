@@ -312,7 +312,7 @@ const MyRequestsPage = () => {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/user")}
               className="p-2 rounded-full hover:opacity-70 transition-opacity bg-white/20 backdrop-blur-sm shadow-sm"
               style={{ color: "#ffffff" }}>
               <FaTimes size={20} />
@@ -740,7 +740,7 @@ const MyRequestsPage = () => {
                           {request.status === "in_progress" && (
                             <button
                               onClick={() =>
-                                navigate(`/track-order/${request.id}`)
+                                navigate(`/user/track-order/${request.id}`)
                               }
                               className="flex-1 py-2 px-4 rounded-lg text-sm font-semibold text-white text-center transition-all flex items-center justify-center gap-2"
                               style={{ backgroundColor: "#ea580c" }} // Orange for Track
@@ -756,7 +756,7 @@ const MyRequestsPage = () => {
                           )}
                           <button
                             onClick={() =>
-                              navigate(`/chat`, {
+                              navigate(`/user/chat`, {
                                 state: { orderId: request.id },
                               })
                             }
@@ -809,7 +809,7 @@ const MyRequestsPage = () => {
                         ) : (
                           <button
                             onClick={() =>
-                              navigate(`/review-order/${request.id}`)
+                              navigate(`/user/review-order/${request.id}`)
                             }
                             className="flex-1 py-2 px-4 rounded-lg text-sm font-semibold text-white text-center transition-all flex items-center justify-center gap-2"
                             style={{ backgroundColor: "#f59e0b" }}
@@ -825,7 +825,7 @@ const MyRequestsPage = () => {
                         )}
                         <button
                           onClick={() =>
-                            navigate(`/chat`, {
+                            navigate(`/user/chat`, {
                               state: { orderId: request.id },
                             })
                           }

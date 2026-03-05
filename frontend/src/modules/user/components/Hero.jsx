@@ -730,7 +730,7 @@ const Hero = () => {
                   {/* Request Pickup Button - Inside Banner, Centered */}
                   <div className="flex justify-center">
                     <button
-                      onClick={() => navigate("/add-scrap/category")}
+                      onClick={() => navigate("/user/add-scrap/category")}
                       className="relative inline-flex items-center justify-center text-white font-bold py-2.5 px-6 md:py-3 md:px-10 rounded-full text-sm md:text-base shadow-2xl transform hover:-translate-y-1 hover:shadow-3xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-white/30"
                       style={{
                         backgroundColor: "#000000",
@@ -757,7 +757,7 @@ const Hero = () => {
                   {getTranslatedText("Scrap Categories")}
                 </h3>
                 <button
-                  onClick={() => navigate("/categories")}
+                  onClick={() => navigate("/user/categories")}
                   className="text-xs md:text-sm font-semibold hover:opacity-80 transition-opacity"
                   style={{ color: "#2d3748" }}>
                   {getTranslatedText("See all")}
@@ -777,7 +777,7 @@ const Hero = () => {
                       key={category.name}
                       className="cursor-pointer flex flex-col items-center flex-shrink-0 w-[30%] md:w-32"
                       onClick={() =>
-                        navigate("/add-scrap/category", {
+                        navigate("/user/add-scrap/category", {
                           state: { preSelectedCategory: category.originalName },
                         })
                       }>
