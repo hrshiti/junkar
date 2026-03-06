@@ -10,7 +10,7 @@ const translationCache = new Map();
 export const translateText = async (req, res) => {
     try {
         let { text, texts, targetLanguage, targetLang, obj } = req.body;
-
+//fesafkmsglkasnl
         // Handle object translation format
         if (obj && typeof obj === 'object') {
             const target = targetLanguage || targetLang;
