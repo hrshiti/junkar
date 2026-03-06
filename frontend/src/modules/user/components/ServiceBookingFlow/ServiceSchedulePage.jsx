@@ -83,7 +83,7 @@ const ServiceSchedulePage = () => {
     };
 
     sessionStorage.setItem("pickupSlot", JSON.stringify(pickupSlot));
-    navigate(getTranslatedText("/book-service/confirm"));
+    navigate(getTranslatedText("/user/book-service/confirm"));
   };
 
   return (

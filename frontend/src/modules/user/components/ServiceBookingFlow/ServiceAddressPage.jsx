@@ -29,7 +29,7 @@ const ServiceAddressPage = () => {
     // Guard
     const serviceDetails = sessionStorage.getItem("serviceDetails");
     if (!serviceDetails) {
-      navigate(getTranslatedText("/categories"));
+      navigate(getTranslatedText("/user/categories"));
       return;
     }
 
@@ -82,7 +82,7 @@ const ServiceAddressPage = () => {
       timestamp: new Date().toISOString(),
     };
     sessionStorage.setItem("addressData", JSON.stringify(addressData));
-    navigate(getTranslatedText("/book-service/schedule"));
+    navigate(getTranslatedText("/user/book-service/schedule"));
   };
 
   return (

@@ -100,10 +100,29 @@ const KYCStatusPage = () => {
     };
 
     fetchKyc();
-    interval = setInterval(fetchKyc, 5000);
+    // interval = setInterval(fetchKyc, 5000); // REPLACED: Polling stopped to prevent 429 errors. Using Push Notifications now.
 
-    return () => clearInterval(interval);
+    // return () => clearInterval(interval);
   }, [navigate]);
+
+  const handleRefresh = () => {
+    setKycStatus('loading');
+    const fetchKyc = async () => {
+      try {
+        const res = await kycAPI.getMy();
+        const kyc = res.data?.kyc;
+        if (kyc) {
+          setKycData(kyc);
+          setKycStatus(kyc.status || 'pending');
+          localStorage.setItem('scrapperKYCStatus', kyc.status || 'pending');
+          localStorage.setItem('scrapperKYC', JSON.stringify(kyc));
+        }
+      } catch (err) {
+        console.error('Refresh failed', err);
+      }
+    };
+    fetchKyc();
+  };
 
   const getStatusConfig = () => {
     switch (kycStatus) {
@@ -314,13 +333,24 @@ const KYCStatusPage = () => {
             )}
 
             {kycStatus === 'pending' && (
-              <div className="p-4 rounded-xl text-center" style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)' }}>
-                <p className="text-sm font-semibold mb-1" style={{ color: '#f59e0b' }}>
-                  ⏳ {getTranslatedText("Waiting for Verification")}
-                </p>
-                <p className="text-xs text-gray-400">
-                  {getTranslatedText("Your KYC is under review. You'll be automatically redirected to dashboard once verified.")}
-                </p>
+              <div className="space-y-4">
+                <div className="p-4 rounded-xl text-center" style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)' }}>
+                  <p className="text-sm font-semibold mb-1" style={{ color: '#f59e0b' }}>
+                    ⏳ {getTranslatedText("Waiting for Verification")}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {getTranslatedText("Your KYC is under review. You'll receive a push notification once verified.")}
+                  </p>
+                </div>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleRefresh}
+                  className="w-full py-3 rounded-xl font-semibold text-sm border border-white/10 text-gray-400 hover:text-white hover:bg-white/5 transition-all"
+                >
+                  {getTranslatedText("Refresh Status Manually")}
+                </motion.button>
               </div>
             )}
           </div>

@@ -119,7 +119,7 @@ const RequestStatusPage = () => {
   useEffect(() => {
     const initial = location.state?.requestData;
     if (!initial) {
-      navigate('/my-requests');
+      navigate('/user/my-requests');
       return;
     }
 
@@ -334,7 +334,7 @@ const RequestStatusPage = () => {
       {/* Header */}
       <div className="flex items-center justify-between p-3 md:p-6 border-b" style={{ borderColor: 'rgba(100, 148, 110, 0.2)' }}>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/user')}
           className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white transition-colors"
           style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}
         >
@@ -698,7 +698,7 @@ const RequestStatusPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.45 }}
-              onClick={() => navigate(`/track-order/${requestData._id}`)}
+              onClick={() => navigate(`/user/track-order/${requestData._id}`)}
               className="w-full py-3 md:py-4 rounded-xl flex items-center justify-center gap-2 font-semibold text-sm md:text-base shadow-md hover:shadow-lg transition-all duration-300"
               style={{ backgroundColor: '#ffffff', color: '#ea580c', border: '2px solid #ea580c' }}
               onMouseEnter={(e) => {
@@ -722,7 +722,7 @@ const RequestStatusPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/user')}
             className="w-full py-3 md:py-4 rounded-xl border-2 font-semibold text-sm md:text-base transition-all duration-300"
             style={{ borderColor: '#38bdf8', color: '#38bdf8', backgroundColor: 'transparent' }}
             onMouseEnter={(e) => {
@@ -765,7 +765,7 @@ const RequestStatusPage = () => {
               <button
                 onClick={() => {
                   setShowAcceptanceAlert(false); // Close first to avoid stacking issues logic
-                  navigate(`/track-order/${requestData._id}`);
+                  navigate(`/user/track-order/${requestData._id}`);
                 }}
                 className="w-full py-3.5 rounded-xl font-bold text-white shadow-lg flex items-center justify-center gap-2 transition-transform active:scale-95"
                 style={{ backgroundColor: '#38bdf8' }}

@@ -174,7 +174,7 @@ const ReviewOrderPage = () => {
         tags,
         images,
       });
-      navigate("/my-requests"); // Go back to orders
+      navigate("/user/my-requests"); // Go back to orders
     } catch (err) {
       setError(err.message || getTranslatedText("Failed to submit review"));
       setSubmitting(false);
