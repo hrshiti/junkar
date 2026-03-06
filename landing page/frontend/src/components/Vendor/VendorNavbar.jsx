@@ -28,7 +28,7 @@ const VendorNavbar = () => {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 3rem', width: '100%' }}>
                 <div className="flex items-center gap-2 cursor-pointer">
                     <img
-                        src="/src/assets/landing/logo.png"
+                        src="/junker.png"
                         alt="Junkar Vendor"
                         style={{ height: '4rem', width: 'auto', objectFit: 'contain', objectPosition: 'left', marginLeft: '-0.5rem' }}
                     />
