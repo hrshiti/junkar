@@ -53,7 +53,7 @@ const ImageUploadPage = () => {
       setSelectedCategories(JSON.parse(stored));
     } else {
       // If no categories selected, redirect back
-      navigate('/add-scrap/category', { replace: true });
+      navigate('/user/add-scrap/category', { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
@@ -129,7 +129,7 @@ const ImageUploadPage = () => {
       }));
 
       sessionStorage.setItem('uploadedImages', JSON.stringify(imagesData));
-      navigate('/add-scrap/address');
+      navigate('/user/add-scrap/address');
     } catch (error) {
       console.error('Upload failed:', error);
       if (error.status === 401) {
@@ -181,7 +181,7 @@ const ImageUploadPage = () => {
       {/* Header */}
       <div className="flex items-center justify-between p-3 md:p-6 border-b" style={{ borderColor: 'rgba(100, 148, 110, 0.2)' }}>
         <button
-          onClick={() => navigate('/add-scrap/category')}
+          onClick={() => navigate('/user/add-scrap/weight')}
           className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white transition-colors"
           style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}
         >

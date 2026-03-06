@@ -113,7 +113,7 @@ const PriceConfirmationPage = () => {
 
     // Redirect if missing required data
     if (!storedCategories || !storedImages || !storedWeight || !storedAddress) {
-      navigate('/add-scrap/category');
+      navigate('/user/add-scrap/category');
     }
   }, [navigate]);
 
@@ -332,7 +332,7 @@ const PriceConfirmationPage = () => {
         }
       }
 
-      navigate('/request-status', {
+      navigate('/user/request-status', {
         state: { requestData: createdOrder || payload },
         replace: true
       });
@@ -364,7 +364,7 @@ const PriceConfirmationPage = () => {
       {/* Header */}
       <div className="flex items-center justify-between p-3 md:p-6 border-b" style={{ borderColor: 'rgba(100, 148, 110, 0.2)' }}>
         <button
-          onClick={() => navigate('/add-scrap/address')}
+          onClick={() => navigate('/user/add-scrap/address')}
           className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white transition-colors"
           style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}
         >

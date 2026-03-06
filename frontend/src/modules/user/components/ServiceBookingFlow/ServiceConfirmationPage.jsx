@@ -59,7 +59,7 @@ const ServiceConfirmationPage = () => {
     const storedSlot = sessionStorage.getItem("pickupSlot");
 
     if (!storedDetails || !storedAddress || !storedSlot) {
-      navigate(getTranslatedText("/categories"));
+      navigate(getTranslatedText("/user/categories"));
       return;
     }
 
@@ -81,7 +81,7 @@ const ServiceConfirmationPage = () => {
         "Insufficient wallet balance. Minimum ₹100 required to book a cleaning service. Do you want to recharge now?"
       );
       if (confirmRecharge) {
-        navigate('/wallet');
+        navigate('/user/wallet');
       }
       return;
     }
@@ -120,7 +120,7 @@ const ServiceConfirmationPage = () => {
       sessionStorage.removeItem("pickupSlot");
       sessionStorage.removeItem("selectedService");
 
-      navigate(getTranslatedText("/request-status"), {
+      navigate(getTranslatedText("/user/request-status"), {
         state: { requestData: response.data?.order || payload },
         replace: true,
       });
@@ -130,7 +130,7 @@ const ServiceConfirmationPage = () => {
       // Handle backend insufficient balance error gracefully if frontend check is bypassed
       if (error.response && error.response.status === 403) {
         alert("Insufficient wallet balance. Please recharge your wallet to continue.");
-        navigate('/wallet');
+        navigate('/user/wallet');
       } else {
         alert(getTranslatedText("Failed to book service. Please try again."));
       }

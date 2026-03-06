@@ -258,7 +258,7 @@ const CategorySelectionPage = () => {
       // Store selected categories in sessionStorage for next step
       sessionStorage.setItem('selectedCategories', JSON.stringify(selectedCategories));
       // Navigate to next step (will be Stage 2: Image Upload)
-      navigate('/add-scrap/weight');
+      navigate('/user/add-scrap/weight');
     }
   };
 
@@ -274,7 +274,7 @@ const CategorySelectionPage = () => {
       {/* Compact Header */}
       <div className="flex items-center justify-between p-3 md:p-4 border-b shadow-sm" style={{ borderColor: '#e0f2fe', backgroundColor: '#ffffff' }}>
         <button
-          onClick={() => expandedCategoryId ? setExpandedCategoryId(null) : navigate('/')}
+          onClick={() => expandedCategoryId ? setExpandedCategoryId(null) : navigate('/user')}
           className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-50 transition-colors shadow-sm"
           style={{ backgroundColor: '#ffffff', border: '1.5px solid #e0f2fe' }}
         >

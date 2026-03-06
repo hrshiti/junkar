@@ -950,7 +950,7 @@ const Hero = () => {
           {/* Home Tab */}
           <div
             className="flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer active:scale-95 transition-transform duration-200 py-2"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/user')}
           >
             <div className="p-1.5 rounded-xl transition-colors duration-300 bg-gray-800 text-sky-300">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -964,7 +964,7 @@ const Hero = () => {
           {/* Price Tab */}
           <div
             className="flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer active:scale-95 transition-transform duration-200 py-2"
-            onClick={() => navigate('/prices')}
+            onClick={() => navigate('/user/prices')}
           >
             <div className="p-1.5 rounded-xl text-gray-400 hover:text-sky-300 transition-colors duration-300">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -977,7 +977,7 @@ const Hero = () => {
 
           {/* Center Action Button (Floating) - SELL */}
           <div className="flex-1 flex flex-col items-center justify-end relative z-10 -top-5 group"
-            onClick={() => navigate('/add-scrap/category')}>
+            onClick={() => navigate('/user/add-scrap/category')}>
             <div className="w-14 h-14 rounded-full bg-gradient-to-br from-sky-500 to-sky-600 flex items-center justify-center shadow-lg shadow-sky-500/30 transform group-active:scale-95 transition-all duration-300 border-4 border-black">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-white transform group-hover:rotate-180 transition-transform duration-500">
                 <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -989,7 +989,7 @@ const Hero = () => {
           {/* Refer Tab */}
           <div
             className="flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer active:scale-95 transition-transform duration-200 py-2"
-            onClick={() => navigate('/refer-earn')}
+            onClick={() => navigate('/user/refer-earn')}
           >
             <div className="p-1.5 rounded-xl text-gray-400 hover:text-sky-300 transition-colors duration-300">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1006,7 +1006,7 @@ const Hero = () => {
           {/* Profile Tab */}
           <div
             className="flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer active:scale-95 transition-transform duration-200 py-2"
-            onClick={() => navigate('/my-profile')}
+            onClick={() => navigate('/user/my-profile')}
           >
             <div className="p-1.5 rounded-xl text-gray-400 hover:text-sky-300 transition-colors duration-300">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

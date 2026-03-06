@@ -551,7 +551,7 @@ const Hero = () => {
                       className={`flex mb-4 md:mb-8 lg:mb-12 ${isWebView ? "justify-start" : "justify-end"
                         }`}>
                       <button
-                        onClick={() => navigate("/add-scrap/category")}
+                        onClick={() => navigate("/user/add-scrap/category")}
                         className="relative inline-flex items-center justify-center text-white font-semibold py-2 px-6 md:py-4 md:px-8 lg:py-5 lg:px-12 xl:py-6 xl:px-16 rounded-full text-sm md:text-lg lg:text-xl xl:text-2xl bg-gradient-to-r from-green-500 to-emerald-400 shadow-[0_10px_25px_rgba(34,197,94,0.5)] hover:shadow-[0_15px_35px_rgba(34,197,94,0.7)] transform hover:-translate-y-0.5 hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-emerald-300">
                         Request Pickup Now
                       </button>
@@ -938,7 +938,7 @@ const Hero = () => {
                 console.log(
                   "Add Scrap button clicked - navigating to /add-scrap/weight"
                 );
-                navigate("/add-scrap/category");
+                navigate("/user/add-scrap/category");
               }}
               style={{ background: "transparent", border: "none" }}>
               <div className="w-12 h-12 rounded-full flex items-center justify-center -mt-4 shadow-lg bg-white">

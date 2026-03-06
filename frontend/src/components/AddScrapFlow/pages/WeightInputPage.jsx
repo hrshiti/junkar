@@ -196,7 +196,7 @@ const WeightInputPage = () => {
         expectedPrice: expectedPrice ? parseFloat(expectedPrice) : null,
       };
       sessionStorage.setItem('weightData', JSON.stringify(weightData));
-      navigate('/add-scrap/upload');
+      navigate('/user/add-scrap/upload');
     } else {
       // Model A: weight is required
       const finalWeight = weightMode === 'auto' && autoDetectedWeight
@@ -213,7 +213,7 @@ const WeightInputPage = () => {
           pricingType: 'kg_based',
         };
         sessionStorage.setItem('weightData', JSON.stringify(weightData));
-        navigate('/add-scrap/upload');
+        navigate('/user/add-scrap/upload');
       }
     }
   };
@@ -239,7 +239,7 @@ const WeightInputPage = () => {
       {/* Header */}
       <div className="flex items-center justify-between p-3 md:p-6 border-b" style={{ borderColor: 'rgba(100, 148, 110, 0.2)' }}>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/user/add-scrap/category')}
           className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white transition-colors"
           style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}
         >
@@ -373,8 +373,8 @@ const WeightInputPage = () => {
                     key={condition.value}
                     onClick={() => setItemCondition(condition.value)}
                     className={`w-full p-3 rounded-xl border-2 text-left transition-all flex items-center gap-3 ${itemCondition === condition.value
-                        ? 'border-sky-500 bg-sky-50 shadow-md'
-                        : 'border-slate-200 bg-white hover:border-sky-200'
+                      ? 'border-sky-500 bg-sky-50 shadow-md'
+                      : 'border-slate-200 bg-white hover:border-sky-200'
                       }`}
                   >
                     <span className="text-xl">

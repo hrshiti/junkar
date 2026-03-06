@@ -47,7 +47,7 @@ const ServiceDetailsPage = () => {
       if (stored) {
         setService(JSON.parse(stored));
       } else {
-        navigate("/categories", { replace: true });
+        navigate("/user/categories", { replace: true });
       }
     }
   }, [isAuthenticated, location, navigate]);
@@ -118,7 +118,7 @@ const ServiceDetailsPage = () => {
       sessionStorage.setItem("serviceDetails", JSON.stringify(serviceDetails));
 
       // Navigate to Address
-      navigate("/book-service/address");
+      navigate("/user/book-service/address");
     } catch (error) {
       console.error("Upload failed:", error);
       alert(getTranslatedText("Failed to upload images. Please try again."));
@@ -139,7 +139,7 @@ const ServiceDetailsPage = () => {
       {/* Header */}
       <div className="flex items-center gap-4 p-4 border-b border-white/20 bg-white/20 backdrop-blur-sm sticky top-0 z-10">
         <button
-          onClick={() => navigate("/categories")}
+          onClick={() => navigate("/user/categories")}
           className="p-2 rounded-full hover:bg-white/20 text-white transition-colors">
           <FaArrowLeft />
         </button>
