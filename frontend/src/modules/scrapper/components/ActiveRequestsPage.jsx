@@ -519,7 +519,14 @@ const ActiveRequestsPage = () => {
     >
       {/* Header with Back Button and Status */}
       <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center justify-between bg-black/95 backdrop-blur-sm border-b border-white/10">
-
+        <button
+          onClick={() => navigate('/scrapper')}
+          className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-zinc-800 transition-colors bg-zinc-900 border border-white/10"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-white">
+            <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
 
         <div className="flex items-center gap-3">
           {/* Active Requests Button */}
