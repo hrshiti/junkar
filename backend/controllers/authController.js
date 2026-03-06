@@ -203,6 +203,9 @@ export const login = asyncHandler(async (req, res) => {
   let scrapper = null;
   if (user.role === USER_ROLES.SCRAPPER) {
     scrapper = await Scrapper.findById(user._id);
+    if (!scrapper && user.phone) {
+      scrapper = await Scrapper.findOne({ phone: user.phone });
+    }
   }
 
   sendSuccess(res, 'Login successful', {
@@ -226,6 +229,9 @@ export const getMe = asyncHandler(async (req, res) => {
   let scrapper = null;
   if (user.role === USER_ROLES.SCRAPPER) {
     scrapper = await Scrapper.findById(user._id);
+    if (!scrapper && user.phone) {
+      scrapper = await Scrapper.findOne({ phone: user.phone });
+    }
   }
 
   sendSuccess(res, 'User retrieved successfully', {
@@ -400,9 +406,20 @@ export const verifyOTP = asyncHandler(async (req, res) => {
     const finalRole = requestedRole;
     const token = generateToken(user._id, finalRole);
     user.role = finalRole; // Update for response
+
+    // For scrappers, include scrapper profile data
+    let scrapper = null;
+    if (user.role === USER_ROLES.SCRAPPER) {
+      scrapper = await Scrapper.findById(user._id);
+      if (!scrapper && user.phone) {
+        scrapper = await Scrapper.findOne({ phone: user.phone });
+      }
+    }
+
     sendSuccess(res, 'OTP verified successfully', {
       user,
-      token
+      token,
+      ...(scrapper && { scrapper })
     });
     return;
   }
@@ -422,6 +439,9 @@ export const verifyOTP = asyncHandler(async (req, res) => {
   let scrapper = null;
   if (user.role === USER_ROLES.SCRAPPER) {
     scrapper = await Scrapper.findById(user._id);
+    if (!scrapper && user.phone) {
+      scrapper = await Scrapper.findOne({ phone: user.phone });
+    }
   }
 
   sendSuccess(res, 'OTP verified successfully', {
@@ -593,6 +613,9 @@ export const refreshToken = asyncHandler(async (req, res) => {
     let scrapper = null;
     if (user.role === USER_ROLES.SCRAPPER) {
       scrapper = await Scrapper.findById(user._id);
+      if (!scrapper && user.phone) {
+        scrapper = await Scrapper.findOne({ phone: user.phone });
+      }
     }
 
     sendSuccess(res, 'Token refreshed successfully', {
