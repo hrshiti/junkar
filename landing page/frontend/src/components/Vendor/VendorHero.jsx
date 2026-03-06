@@ -12,7 +12,7 @@ const VendorHero = () => {
             alignItems: 'center',
             paddingTop: '60px', // Navbar height
             margin: 0,
-            background: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('/src/assets/landing/vendor_hero.jfif') no-repeat center center/cover`,
+            background: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://i.pinimg.com/1200x/42/0f/3e/420f3e69fe3699748307dccaf902e4eb.jpg') no-repeat center center/cover`,
             color: 'white'
         }}>
             <div className="container" style={{ position: 'relative', zIndex: 1, padding: '0 1.5rem', display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '800px', marginLeft: '0' }}>
