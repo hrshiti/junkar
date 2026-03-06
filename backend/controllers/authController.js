@@ -199,9 +199,16 @@ export const login = asyncHandler(async (req, res) => {
   // Generate token
   const token = generateToken(user._id, user.role);
 
+  // For scrappers, include scrapper profile data
+  let scrapper = null;
+  if (user.role === USER_ROLES.SCRAPPER) {
+    scrapper = await Scrapper.findById(user._id);
+  }
+
   sendSuccess(res, 'Login successful', {
     user,
-    token
+    token,
+    ...(scrapper && { scrapper })
   });
 });
 
@@ -210,7 +217,21 @@ export const login = asyncHandler(async (req, res) => {
 // @access  Private
 export const getMe = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id);
-  sendSuccess(res, 'User retrieved successfully', { user });
+
+  if (!user) {
+    return sendError(res, 'User not found', 404);
+  }
+
+  // For scrappers, include scrapper profile data
+  let scrapper = null;
+  if (user.role === USER_ROLES.SCRAPPER) {
+    scrapper = await Scrapper.findById(user._id);
+  }
+
+  sendSuccess(res, 'User retrieved successfully', {
+    user,
+    ...(scrapper && { scrapper })
+  });
 });
 
 // @desc    Update user profile
@@ -391,15 +412,22 @@ export const verifyOTP = asyncHandler(async (req, res) => {
   // Log token generation for debugging
   logger.info('🔑 Token generated in verifyOTP:', {
     userId: user._id,
-    phone,
+    phone: phone,
     role: tokenRole,
     requestedRole: requestedRole || 'none',
     userRoleInDB: user.role
   });
 
+  // For scrappers, include scrapper profile data
+  let scrapper = null;
+  if (user.role === USER_ROLES.SCRAPPER) {
+    scrapper = await Scrapper.findById(user._id);
+  }
+
   sendSuccess(res, 'OTP verified successfully', {
     user,
-    token
+    token,
+    ...(scrapper && { scrapper })
   });
 });
 
@@ -561,9 +589,16 @@ export const refreshToken = asyncHandler(async (req, res) => {
       newRefreshToken = generateRefreshToken(user._id);
     }
 
+    // For scrappers, include scrapper profile data
+    let scrapper = null;
+    if (user.role === USER_ROLES.SCRAPPER) {
+      scrapper = await Scrapper.findById(user._id);
+    }
+
     sendSuccess(res, 'Token refreshed successfully', {
       token: newAccessToken,
-      ...(newRefreshToken && { refreshToken: newRefreshToken })
+      ...(newRefreshToken && { refreshToken: newRefreshToken }),
+      ...(scrapper && { scrapper })
     });
   } catch (error) {
     if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
