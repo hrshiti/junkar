@@ -97,9 +97,13 @@ const KYCUploadPage = () => {
 
         if (status === 'pending') {
           if (kyc?.aadhaarPhotoUrl) {
+            localStorage.setItem('scrapperKYCStatus', 'pending');
+            localStorage.setItem('scrapperKYC', JSON.stringify(kyc));
             navigate('/scrapper/kyc-status', { replace: true });
           }
         } else if (status === 'verified') {
+          localStorage.setItem('scrapperKYCStatus', 'verified');
+          localStorage.setItem('scrapperKYC', JSON.stringify(kyc));
           navigate('/scrapper', { replace: true });
         }
       } catch (error) {

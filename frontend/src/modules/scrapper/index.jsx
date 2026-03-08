@@ -124,6 +124,19 @@ const ScrapperModule = () => {
             localStorage.setItem('scrapperAuthenticated', 'true');
             localStorage.setItem('scrapperUser', JSON.stringify(userData));
 
+            // Sync KYC and Subscription status if available in userData
+            if (response.data.scrapper) {
+              const scr = response.data.scrapper;
+              if (scr.kyc) {
+                localStorage.setItem('scrapperKYCStatus', scr.kyc.status || 'pending');
+                localStorage.setItem('scrapperKYC', JSON.stringify(scr.kyc));
+              }
+              if (scr.subscription) {
+                localStorage.setItem('scrapperSubscriptionStatus', scr.subscription.status || 'expired');
+                localStorage.setItem('scrapperSubscription', JSON.stringify(scr.subscription));
+              }
+            }
+
             // Check if scrapper is blocked
             const scrapperStatus = localStorage.getItem('scrapperStatus') || 'active';
             if (scrapperStatus === 'blocked') {
