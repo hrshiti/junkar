@@ -4,7 +4,7 @@ import '../../styles/landing-main.css';
 import Navbar from '../../components/Navbar';
 import Hero from '../../components/Hero';
 import Categories from '../../components/Categories';
-import LivePrices from '../../components/LivePrices';
+import Partners from '../../components/Partners';
 import HowItWorks from '../../components/HowItWorks';
 import Features from '../../components/Features';
 import About from '../../components/About';
@@ -20,7 +20,7 @@ const UserLanding = () => {
                 <Navbar />
                 <main>
                     <Hero />
-                    <LivePrices />
+                    <Partners />
                     <Categories />
                     <HowItWorks />
                     <Features />

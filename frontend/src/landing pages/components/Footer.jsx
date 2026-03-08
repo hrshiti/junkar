@@ -1,5 +1,6 @@
 import React from 'react';
-import { Leaf, Facebook, Twitter, Instagram, Linkedin, ArrowRight } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Linkedin, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
     return (
@@ -8,7 +9,7 @@ const Footer = () => {
                 <div className="footer-grid">
                     <div className="footer-brand">
                         <div className="logo footer-logo" style={{ color: 'white' }}>
-                            <img src="/src/assets/landing/logo.png" alt="Junkar" style={{ height: '3rem', filter: 'brightness(0) invert(1)' }} />
+                            <img src="/junker.png" alt="Junkar" style={{ height: '4rem', filter: 'brightness(0) invert(1)' }} />
                         </div>
                         <p className="footer-text">
                             Revolutionizing the scrap industry with transparency, efficiency, and sustainability. Turn your trash into cash and contribute to a greener planet.
@@ -25,18 +26,20 @@ const Footer = () => {
                     <div>
                         <h4 className="footer-heading">Quick Links</h4>
                         <ul className="footer-links">
-                            {['Home', 'About Us', 'How it Works', 'Market Prices'].map((link) => (
-                                <li key={link}><a href="#" className="footer-link">{link}</a></li>
-                            ))}
+                            <li><Link to="/" className="footer-link">Home</Link></li>
+                            <li><a href="/#about" className="footer-link">About Us</a></li>
+                            <li><a href="/#how-it-works" className="footer-link">How it Works</a></li>
+                            <li><a href="/#partners" className="footer-link">Partners</a></li>
                         </ul>
                     </div>
 
                     <div>
                         <h4 className="footer-heading">Support</h4>
                         <ul className="footer-links">
-                            {['FAQ', 'Contact Us', 'Privacy Policy', 'Terms of Service'].map((link) => (
-                                <li key={link}><a href="#" className="footer-link">{link}</a></li>
-                            ))}
+                            <li><Link to="/user/help" className="footer-link">FAQ</Link></li>
+                            <li><a href="/#contact" className="footer-link">Contact Us</a></li>
+                            <li><Link to="/privacy-policy" className="footer-link">Privacy Policy</Link></li>
+                            <li><Link to="/terms-of-service" className="footer-link">Terms of Service</Link></li>
                         </ul>
                     </div>
 
@@ -82,8 +85,8 @@ const Footer = () => {
                 <div className="footer-bottom">
                     <p>© {new Date().getFullYear()} Junkar. All rights reserved.</p>
                     <div style={{ display: 'flex', gap: '2rem' }}>
-                        <a href="#">Privacy</a>
-                        <a href="#">Terms</a>
+                        <Link to="/privacy-policy">Privacy</Link>
+                        <Link to="/terms-of-service">Terms</Link>
                         <a href="#">Cookies</a>
                     </div>
                 </div>

@@ -12,9 +12,10 @@ const VendorHero = () => {
             alignItems: 'center',
             paddingTop: '60px', // Navbar height
             margin: 0,
-            background: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('/src/assets/landing/vendor_hero.jfif') no-repeat center center/cover`,
+            background: `url('/src/assets/landing/vendor_hero_bg_premium.png') no-repeat center center/cover`,
             color: 'white'
         }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(90deg, rgba(15,23,42,0.8) 0%, rgba(15,23,42,0.3) 100%)' }}></div>
             <div className="container" style={{ position: 'relative', zIndex: 1, padding: '0 1.5rem', display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '800px', marginLeft: '0' }}>
                 <div className="hero-content">
                     <motion.div

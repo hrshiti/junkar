@@ -10,7 +10,7 @@ const Hero = () => {
             display: 'flex',
             alignItems: 'flex-start',
             paddingTop: '6rem',
-            background: `url('/src/assets/landing/junkar_hero_bg.png') no-repeat center center/cover`,
+            background: `url('/src/assets/landing/user_hero_bg_premium.png') no-repeat center center/cover`,
             color: 'white' // Assuming we need contrast with background, or dark text depending on the image. Lantan is white on dark.
         }}>
             {/* Adding an overlay to ensure text is readable if image is complex */}

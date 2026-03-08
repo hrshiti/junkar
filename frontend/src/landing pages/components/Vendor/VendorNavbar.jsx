@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Smartphone } from 'lucide-react';
+import { Smartphone } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 const VendorNavbar = () => {
     const [scrolled, setScrolled] = useState(false);
@@ -26,29 +27,19 @@ const VendorNavbar = () => {
             boxShadow: scrolled ? '0 4px 6px -1px rgba(0, 0, 0, 0.05)' : 'none'
         }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 3rem', width: '100%' }}>
-                <div className="flex items-center gap-2 cursor-pointer">
+                <Link to="/" className="flex items-center gap-2 cursor-pointer">
                     <img
-                        src="/src/assets/landing/logo.png"
+                        src="/junker.png"
                         alt="Junkar Vendor"
-                        style={{ height: '4rem', width: 'auto', objectFit: 'contain', objectPosition: 'left', marginLeft: '-0.5rem' }}
+                        style={{ height: '5rem', width: 'auto', objectFit: 'contain', objectPosition: 'left', marginLeft: '-0.5rem' }}
                     />
-                </div>
+                </Link>
 
                 <div className="nav-right-section" style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
                     <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                        {['Home', 'About', 'Contact', 'App'].map((item, i) => (
-                            <motion.a
-                                key={item}
-                                href={`#${item.toLowerCase()}`}
-                                className="nav-link"
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.1 }}
-                                style={{ color: '#64748b', fontWeight: 600, fontFamily: 'Poppins' }}
-                            >
-                                {item}
-                            </motion.a>
-                        ))}
+                        <Link to="/" className="nav-link" style={{ color: '#64748b', fontWeight: 600, fontFamily: 'Poppins' }}>Home</Link>
+                        <a href="/vendor#how-it-works" className="nav-link" style={{ color: '#64748b', fontWeight: 600, fontFamily: 'Poppins' }}>Process</a>
+                        <a href="/vendor#contact" className="nav-link" style={{ color: '#64748b', fontWeight: 600, fontFamily: 'Poppins' }}>Contact</a>
                     </div>
 
                     <motion.div

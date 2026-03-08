@@ -27,39 +27,93 @@ const steps = [
 
 const HowItWorks = () => {
     return (
-        <section id="how-it-works" className="section container">
-            <div className="section-header">
-                <span className="section-tag">Process</span>
-                <h2 className="section-title">How It Works</h2>
-                <p style={{ color: 'var(--text-muted)' }}>Four simple steps to turn your junk into cash.</p>
-            </div>
+        <section id="how-it-works" className="section" style={{ background: '#f8fafc', padding: '6rem 0' }}>
+            <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem' }}>
+                <div className="section-header" style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                    <span className="section-tag" style={{ color: 'var(--primary)', display: 'block', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>Process</span>
+                    <h2 className="section-title" style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1rem', color: '#1e293b' }}>HOW IT WORKS</h2>
+                    <p style={{ color: '#64748b', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>Four simple steps to turn your junk into cash and help the environment.</p>
+                </div>
 
-            <div className="steps-grid">
-                <div style={{ position: 'absolute', top: '25px', left: '10%', right: '10%', height: '2px', background: 'dashed #e2e8f0', zIndex: 0, border: '1px dashed #cbd5e1' }} className="hide-mobile"></div>
-                {steps.map((step, i) => (
-                    <motion.div
-                        key={i}
-                        className="step-card"
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: i * 0.2 }}
-                    >
-                        <div className="step-number">{i + 1}</div>
-                        <div className="category-icon" style={{ marginBottom: '1rem', width: '60px', height: '60px' }}>
-                            {step.icon}
-                        </div>
-                        <h3 className="step-title">{step.title}</h3>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{step.desc}</p>
-                    </motion.div>
-                ))}
+                <div className="steps-grid" style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                    gap: '2rem',
+                    position: 'relative'
+                }}>
+                    {steps.map((step, i) => (
+                        <motion.div
+                            key={i}
+                            className="step-card-modern-user"
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: i * 0.15 }}
+                            style={{
+                                textAlign: 'center',
+                                background: 'white',
+                                padding: '3rem 1.5rem',
+                                borderRadius: '24px',
+                                boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05)',
+                                border: '1px solid #f1f5f9',
+                                position: 'relative',
+                                zIndex: 1,
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                            }}
+                            whileHover={{ y: -10, boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', borderColor: 'var(--primary)' }}
+                        >
+                            <div className="step-number-badge" style={{
+                                position: 'absolute',
+                                top: '-20px',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                background: 'var(--primary)',
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '50%',
+                                color: 'white',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontWeight: 800,
+                                fontSize: '1.1rem',
+                                boxShadow: '0 4px 6px -1px rgba(14, 165, 233, 0.4)'
+                            }}>
+                                {i + 1}
+                            </div>
+
+                            <div className="icon-wrapper" style={{
+                                width: '70px',
+                                height: '70px',
+                                background: '#f0f9ff',
+                                color: 'var(--primary)',
+                                borderRadius: '18px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                margin: '0 auto 1.5rem',
+                                transition: 'all 0.3s ease'
+                            }}>
+                                {step.icon}
+                            </div>
+
+                            <h3 className="step-title" style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.8rem', color: '#1e293b' }}>{step.title}</h3>
+                            <p style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: 1.6 }}>{step.desc}</p>
+                        </motion.div>
+                    ))}
+                </div>
             </div>
 
             <style>{`
-        @media (max-width: 768px) {
-          .hide-mobile { display: none; }
-        }
-      `}</style>
+                .step-card-modern-user:hover .icon-wrapper {
+                    background: var(--primary) !important;
+                    color: white !important;
+                    transform: rotate(12deg);
+                }
+                @media (max-width: 768px) {
+                    .section-title { font-size: 2.25rem !important; }
+                }
+            `}</style>
         </section>
     );
 };
