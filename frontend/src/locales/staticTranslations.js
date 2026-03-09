@@ -311,10 +311,52 @@ export const staticTranslations = {
         "Default": "डिफ़ॉल्ट",
         "Near {landmark}": "{landmark} के पास",
     },
-    // Add other languages here if needed (bn, mr, etc.)
+    mr: {
+        // Navigation & Common
+        "Home": "होम",
+        "About": "बद्दल",
+        "Contact": "संपर्क",
+        "App": "अॅप",
+        "Get App": "अॅप मिळवा",
+        "GET APP": "अॅप मिळवा",
+        "Loading...": "लोड होत आहे...",
+
+        // Hero Section
+        "DIRECT DOORSTEP PICKUP": "थेट डोअरस्टेप पिकअप",
+        "Direct Doorstep Pickup": "थेट डोअरस्टेप पिकअप",
+        "Turn Your": "तुमचा",
+        "Trash": "कचरा",
+        "into": "बदला",
+        "Cash!": "रोख रकमेत!",
+        "Sell your scrap easily with real-time market rates and hassle-free doorstep pickup. Join the green revolution today!": "रिअल-टाइम मार्केट रेट आणि त्रासमुक्त डोअरस्टेप पिकअपसह तुमचा भंगार सहज विका. आजच हरित क्रांतीत सामील व्हा!",
+        "Request Pickup": "पिकअपची विनंती करा",
+        "REQUEST PICKUP": "पिकअपची विनंती करा",
+        "Download App": "अॅप डाउनलोड करा",
+        "DOWNLOAD APP": "अॅप डाउनलोड करा",
+        "Active Sellers": "सक्रिय विक्रेते",
+        "ACTIVE SELLERS": "सक्रिय विक्रेते",
+        "Verified Scrappers": "सत्यापित स्क्रॅपर्स",
+        "VERIFIED SCRAPPERS": "सत्यापित स्क्रॅपर्स",
+        "Cash Paid Out": "रोख रक्कम दिली",
+        "CASH PAID OUT": "रोख रक्कम दिली",
+        "Current Location": "सध्याचे स्थान",
+        "Enter location manually": "स्थान स्वतः प्रविष्ट करा",
+
+        // Other basic words
+        "Sell Scrap": "भंगार विका",
+        "Plastic": "प्लास्टिक",
+        "Metal": "धातू",
+        "Paper": "कागद",
+        "Electronics": "इलेक्ट्रॉनिक्स",
+        "Iron": "लोखंड",
+        "Steel": "स्टील",
+        "Copper": "तांबे",
+        "Aluminium": "अॅल्युमिनियम",
+        "Brass": "पितळ"
+    },
+    // Add other languages here if needed (bn, etc.)
     bn: {
         "Home": "হোম",
         "Sell Scrap": "স্ক্র্যাপ বিক্রি করুন",
-        // ... (partial support for now, users mainly use Hindi/English)
     }
 };
