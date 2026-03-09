@@ -1,8 +1,21 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Recycle, Target, Waves } from 'lucide-react';
+import { usePageTranslation } from '../../hooks/usePageTranslation';
 
 const About = () => {
+    const { getTranslatedText } = usePageTranslation([
+        "Our Mission",
+        "Making Sustainability Simple & Profitable",
+        "Junkar is a digital platform that connects households with verified scrap collectors. Our goal is to make recycling easy, transparent, and profitable while helping the environment.",
+        "Our Vision",
+        "To become the world's most trusted marketplace for scrap and recycling materials.",
+        "Eco-Impact",
+        "Saving thousands of tons of waste from reaching landfills every month.",
+        "Recycling Reimagined",
+        "Leading the way to a circular economy."
+    ]);
+
     return (
         <section id="about" className="section container">
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }}>
@@ -22,9 +35,9 @@ const About = () => {
                     <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', textAlign: 'center' }}>
                         <Recycle size={150} opacity={0.2} />
                     </div>
-                    <div style={{ position: 'absolute', bottom: '40px', left: '40px', color: 'white' }}>
-                        <h3 style={{ fontSize: '2rem' }}>Recycling Reimagined</h3>
-                        <p style={{ opacity: 0.8 }}>Leading the way to a circular economy.</p>
+                    <div style={{ position: 'absolute', bottom: '40px', left: '40px', color: 'white', textAlign: 'left' }}>
+                        <h3 style={{ fontSize: '2rem' }}>{getTranslatedText("Recycling Reimagined")}</h3>
+                        <p style={{ opacity: 0.8 }}>{getTranslatedText("Leading the way to a circular economy.")}</p>
                     </div>
                 </motion.div>
 
@@ -33,10 +46,10 @@ const About = () => {
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                 >
-                    <span className="section-tag">Our Mission</span>
-                    <h2 className="section-title">Making Sustainability Simple & Profitable</h2>
+                    <span className="section-tag">{getTranslatedText("Our Mission")}</span>
+                    <h2 className="section-title">{getTranslatedText("Making Sustainability Simple & Profitable")}</h2>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>
-                        Junkar is a digital platform that connects households with verified scrap collectors. Our goal is to make recycling easy, transparent, and profitable while helping the environment.
+                        {getTranslatedText("Junkar is a digital platform that connects households with verified scrap collectors. Our goal is to make recycling easy, transparent, and profitable while helping the environment.")}
                     </p>
 
                     <div style={{ display: 'grid', gap: '1.5rem' }}>
@@ -45,8 +58,8 @@ const About = () => {
                                 <Target size={20} />
                             </div>
                             <div>
-                                <h4 style={{ fontSize: '1.1rem' }}>Our Vision</h4>
-                                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>To become the world's most trusted marketplace for scrap and recycling materials.</p>
+                                <h4 style={{ fontSize: '1.1rem' }}>{getTranslatedText("Our Vision")}</h4>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{getTranslatedText("To become the world's most trusted marketplace for scrap and recycling materials.")}</p>
                             </div>
                         </div>
 
@@ -55,8 +68,8 @@ const About = () => {
                                 <Waves size={20} />
                             </div>
                             <div>
-                                <h4 style={{ fontSize: '1.1rem' }}>Eco-Impact</h4>
-                                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Saving thousands of tons of waste from reaching landfills every month.</p>
+                                <h4 style={{ fontSize: '1.1rem' }}>{getTranslatedText("Eco-Impact")}</h4>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{getTranslatedText("Saving thousands of tons of waste from reaching landfills every month.")}</p>
                             </div>
                         </div>
                     </div>

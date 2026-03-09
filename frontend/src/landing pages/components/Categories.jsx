@@ -1,5 +1,5 @@
-import React from 'react';
 import { motion } from 'framer-motion';
+import { usePageTranslation } from '../../hooks/usePageTranslation';
 import {
     Dribbble,
     Monitor,
@@ -25,13 +25,20 @@ const categories = [
 ];
 
 const Categories = () => {
+    const { getTranslatedText } = usePageTranslation([
+        'Materials', 'What can you sell?',
+        'We accept a wide range of scrap materials. Select a category to see current market rates and details.',
+        'Select to view rates',
+        'Plastic', 'Metal', 'Paper', 'Electronics', 'Copper', 'Aluminium', 'Steel', 'Brass'
+    ]);
+
     return (
         <section id="categories" className="section container">
             <div className="section-header">
-                <span className="section-tag">Materials</span>
-                <h2 className="section-title">What can you sell?</h2>
+                <span className="section-tag">{getTranslatedText("Materials")}</span>
+                <h2 className="section-title">{getTranslatedText("What can you sell?")}</h2>
                 <p style={{ color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto' }}>
-                    We accept a wide range of scrap materials. Select a category to see current market rates and details.
+                    {getTranslatedText("We accept a wide range of scrap materials. Select a category to see current market rates and details.")}
                 </p>
             </div>
 
@@ -49,9 +56,9 @@ const Categories = () => {
                         <div className="category-icon" style={{ backgroundColor: `${cat.color}15`, color: cat.color }}>
                             {cat.icon}
                         </div>
-                        <h3 className="category-name">{cat.name}</h3>
+                        <h3 className="category-name">{getTranslatedText(cat.name)}</h3>
                         <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-                            Select to view rates
+                            {getTranslatedText("Select to view rates")}
                         </p>
                     </motion.div>
                 ))}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
 const UserBottomNav = () => {
     const navigate = useNavigate();
@@ -11,6 +12,8 @@ const UserBottomNav = () => {
         if (path !== '/user' && location.pathname.startsWith(path)) return true;
         return false;
     };
+
+    const { getTranslatedText } = usePageTranslation(['Home', 'Price', 'Sell', 'Refer', 'Profile']);
 
     return (
         <div className="fixed md:hidden bottom-0 left-0 right-0 z-[9999]">
@@ -29,7 +32,7 @@ const UserBottomNav = () => {
                             <polyline points="9 22 9 12 15 12 15 22"></polyline>
                         </svg>
                     </div>
-                    <span className={`text-[10px] font-semibold tracking-wide ${isActive('/user') ? 'text-sky-300' : 'text-gray-400'}`}>Home</span>
+                    <span className={`text-[10px] font-semibold tracking-wide ${isActive('/user') ? 'text-sky-300' : 'text-gray-400'}`}>{getTranslatedText('Home')}</span>
                 </div>
 
                 {/* Price Tab */}
@@ -43,7 +46,7 @@ const UserBottomNav = () => {
                             <line x1="7" y1="7" x2="7.01" y2="7"></line>
                         </svg>
                     </div>
-                    <span className={`text-[10px] font-semibold tracking-wide ${isActive('/user/prices') ? 'text-sky-300' : 'text-gray-400'}`}>Price</span>
+                    <span className={`text-[10px] font-semibold tracking-wide ${isActive('/user/prices') ? 'text-sky-300' : 'text-gray-400'}`}>{getTranslatedText('Price')}</span>
                 </div>
 
                 {/* Center Action Button (Floating) - SELL */}
@@ -54,7 +57,7 @@ const UserBottomNav = () => {
                             <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                     </div>
-                    <span className="text-[10px] font-bold text-sky-300 mt-1 tracking-wide">Sell</span>
+                    <span className="text-[10px] font-bold text-sky-300 mt-1 tracking-wide">{getTranslatedText('Sell')}</span>
                 </div>
 
                 {/* Refer Tab */}
@@ -71,7 +74,7 @@ const UserBottomNav = () => {
                             <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
                         </svg>
                     </div>
-                    <span className={`text-[10px] font-semibold tracking-wide ${isActive('/user/refer-earn') ? 'text-sky-300' : 'text-gray-400'}`}>Refer</span>
+                    <span className={`text-[10px] font-semibold tracking-wide ${isActive('/user/refer-earn') ? 'text-sky-300' : 'text-gray-400'}`}>{getTranslatedText('Refer')}</span>
                 </div>
 
                 {/* Profile Tab */}
@@ -85,7 +88,7 @@ const UserBottomNav = () => {
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
                     </div>
-                    <span className={`text-[10px] font-semibold tracking-wide ${isActive('/user/my-profile') ? 'text-sky-300' : 'text-gray-400'}`}>Profile</span>
+                    <span className={`text-[10px] font-semibold tracking-wide ${isActive('/user/my-profile') ? 'text-sky-300' : 'text-gray-400'}`}>{getTranslatedText('Profile')}</span>
                 </div>
             </div>
         </div>

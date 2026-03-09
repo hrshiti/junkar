@@ -1,5 +1,5 @@
-import React from 'react';
 import { TrendingUp, ArrowUpRight } from 'lucide-react';
+import { usePageTranslation } from '../../hooks/usePageTranslation';
 
 const prices = [
     { material: 'Plastic', price: '₹55/kg', trend: '+2%' },
@@ -13,12 +13,16 @@ const prices = [
 ];
 
 const LivePrices = () => {
+    const { getTranslatedText } = usePageTranslation([
+        "Live Market Rates", "Plastic", "Metal", "Paper", "Electronics", "Copper", "Aluminium", "Steel", "Brass"
+    ]);
+
     return (
         <div className="market-prices">
             <div className="container">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
                     <div style={{ width: '12px', height: '12px', background: '#ef4444', borderRadius: '50%', animation: 'pulse 1.5s infinite' }}></div>
-                    <span style={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.875rem', letterSpacing: '0.05em' }}>Live Market Rates</span>
+                    <span style={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.875rem', letterSpacing: '0.05em' }}>{getTranslatedText("Live Market Rates")}</span>
                 </div>
             </div>
 
@@ -27,7 +31,7 @@ const LivePrices = () => {
                     {[...prices, ...prices].map((item, i) => (
                         <div key={i} className="price-card">
                             <TrendingUp size={16} color="#10b981" />
-                            <span className="price-label">{item.material}</span>
+                            <span className="price-label">{getTranslatedText(item.material)}</span>
                             <span className="price-value">{item.price}</span>
                             <span className="price-trend">
                                 <ArrowUpRight size={14} />

@@ -1,8 +1,23 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Download, ArrowRight, Play, ShoppingBag } from 'lucide-react';
+import { usePageTranslation } from '../../hooks/usePageTranslation';
 
 const Hero = () => {
+    const { getTranslatedText } = usePageTranslation([
+        "Direct Doorstep Pickup",
+        "Turn Your",
+        "Trash",
+        "into",
+        "Cash!",
+        "Sell your scrap easily with real-time market rates and hassle-free doorstep pickup. Join the green revolution today!",
+        "Request Pickup",
+        "Download App",
+        "Active Sellers",
+        "Verified Scrappers",
+        "Cash Paid Out"
+    ]);
+
     return (
         <section id="home" className="hero" style={{
             position: 'relative',
@@ -24,7 +39,7 @@ const Hero = () => {
                         className="hero-badge"
                         style={{ display: 'inline-flex', background: 'var(--primary)', color: 'white', padding: '0.3rem 0.8rem', borderRadius: '50px', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: '1rem' }}
                     >
-                        <span className="bullet">●</span> Direct Doorstep Pickup
+                        <span className="bullet">●</span> {getTranslatedText("Direct Doorstep Pickup")}
                     </motion.div>
 
                     <motion.h1
@@ -34,8 +49,8 @@ const Hero = () => {
                         transition={{ delay: 0.2 }}
                         style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', lineHeight: 1, marginBottom: '1rem', color: 'white' }}
                     >
-                        Turn Your <span style={{ color: 'var(--primary-light)' }}>Trash</span> <br />
-                        into <span style={{ color: 'var(--primary-light)' }}>Cash!</span>
+                        {getTranslatedText("Turn Your")} <span style={{ color: 'var(--primary-light)' }}>{getTranslatedText("Trash")}</span> <br />
+                        {getTranslatedText("into")} <span style={{ color: 'var(--primary-light)' }}>{getTranslatedText("Cash!")}</span>
                     </motion.h1>
 
                     <motion.p
@@ -45,7 +60,7 @@ const Hero = () => {
                         transition={{ delay: 0.3 }}
                         style={{ fontSize: '1.1rem', maxWidth: '600px', marginBottom: '2rem', color: 'rgba(255,255,255,0.8)' }}
                     >
-                        Sell your scrap easily with real-time market rates and hassle-free doorstep pickup. Join the green revolution today!
+                        {getTranslatedText("Sell your scrap easily with real-time market rates and hassle-free doorstep pickup. Join the green revolution today!")}
                     </motion.p>
 
                     <motion.div
@@ -56,12 +71,12 @@ const Hero = () => {
                         style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}
                     >
                         <button className="btn btn-primary" style={{ padding: '0.8rem 2rem' }}>
-                            Request Pickup <ArrowRight size={20} />
+                            {getTranslatedText("Request Pickup")} <ArrowRight size={20} />
                         </button>
                         <a href="#app">
                             <button className="btn" style={{ background: 'transparent', border: '2px solid white', color: 'white', padding: '0.8rem 2rem' }}>
                                 <Download size={20} />
-                                Download App
+                                {getTranslatedText("Download App")}
                             </button>
                         </a>
                     </motion.div>
@@ -75,17 +90,17 @@ const Hero = () => {
                     >
                         <div>
                             <h3 style={{ fontSize: '1.8rem', color: 'white' }}>10k+</h3>
-                            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>Active Sellers</p>
+                            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>{getTranslatedText("Active Sellers")}</p>
                         </div>
                         <div style={{ width: '1px', background: 'rgba(255,255,255,0.2)' }}></div>
                         <div>
                             <h3 style={{ fontSize: '1.8rem', color: 'white' }}>50+</h3>
-                            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>Verified Scrappers</p>
+                            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>{getTranslatedText("Verified Scrappers")}</p>
                         </div>
                         <div style={{ width: '1px', background: 'rgba(255,255,255,0.2)' }}></div>
                         <div>
                             <h3 style={{ fontSize: '1.8rem', color: 'white' }}>₹1.2Cr+</h3>
-                            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>Cash Paid Out</p>
+                            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>{getTranslatedText("Cash Paid Out")}</p>
                         </div>
                     </motion.div>
                 </div>

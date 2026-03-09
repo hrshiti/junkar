@@ -96,7 +96,14 @@ const MyProfilePage = () => {
     "FAQ, contact support",
     "Settings",
     "Terms & Conditions",
-    "Quick Actions"
+    "Quick Actions",
+    "Location Details",
+    "City",
+    "Pincode",
+    "State",
+    "Search Address",
+    "View Offers",
+    "No Data"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -616,7 +623,7 @@ const MyProfilePage = () => {
 
                   {/* Address Section */}
                   <div className="pt-2 border-t border-slate-100">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Location Details</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{getTranslatedText("Location Details")}</p>
 
                     {/* Search Address */}
                     <div className="mb-3">
@@ -649,7 +656,7 @@ const MyProfilePage = () => {
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-[10px] font-semibold text-slate-500 uppercase">City</label>
+                        <label className="block text-[10px] font-semibold text-slate-500 uppercase">{getTranslatedText("City")}</label>
                         <input
                           type="text"
                           value={formData.city}
@@ -659,7 +666,7 @@ const MyProfilePage = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-semibold text-slate-500 uppercase">Pincode</label>
+                        <label className="block text-[10px] font-semibold text-slate-500 uppercase">{getTranslatedText("Pincode")}</label>
                         <input
                           type="text"
                           value={formData.pincode}
@@ -671,7 +678,7 @@ const MyProfilePage = () => {
                     </div>
 
                     <div className="mt-3">
-                      <label className="block text-[10px] font-semibold text-slate-500 uppercase">State</label>
+                      <label className="block text-[10px] font-semibold text-slate-500 uppercase">{getTranslatedText("State")}</label>
                       <input
                         type="text"
                         value={formData.state}

@@ -1,14 +1,21 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { usePageTranslation } from '../../hooks/usePageTranslation';
 
 const Contact = () => {
+    const { getTranslatedText } = usePageTranslation([
+        "Get in Touch", "Support & Inquiries", "Have questions? Our team is here to help you.",
+        "Full Name", "Email Address", "Subject", "How can we help?", "Message", "Tell us more about your inquiry...",
+        "Send Message", "Call Us", "Mon-Fri from 9am to 6pm.", "Email Us", "Our team is here to help.",
+        "Visit Us", "Come say hello at our office."
+    ]);
+
     return (
         <section id="contact" className="section container">
             <div className="section-header">
-                <span className="section-tag">Get in Touch</span>
-                <h2 className="section-title">Support & Inquiries</h2>
-                <p style={{ color: 'var(--text-muted)' }}>Have questions? Our team is here to help you.</p>
+                <span className="section-tag">{getTranslatedText("Get in Touch")}</span>
+                <h2 className="section-title">{getTranslatedText("Support & Inquiries")}</h2>
+                <p style={{ color: 'var(--text-muted)' }}>{getTranslatedText("Have questions? Our team is here to help you.")}</p>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '4rem' }}>
@@ -22,7 +29,7 @@ const Contact = () => {
                     <form style={{ display: 'grid', gap: '1.5rem' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                             <div style={{ display: 'grid', gap: '0.5rem' }}>
-                                <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Full Name</label>
+                                <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>{getTranslatedText("Full Name")}</label>
                                 <input
                                     type="text"
                                     placeholder="John Doe"
@@ -30,7 +37,7 @@ const Contact = () => {
                                 />
                             </div>
                             <div style={{ display: 'grid', gap: '0.5rem' }}>
-                                <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Email Address</label>
+                                <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>{getTranslatedText("Email Address")}</label>
                                 <input
                                     type="email"
                                     placeholder="john@example.com"
@@ -40,26 +47,26 @@ const Contact = () => {
                         </div>
 
                         <div style={{ display: 'grid', gap: '0.5rem' }}>
-                            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Subject</label>
+                            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>{getTranslatedText("Subject")}</label>
                             <input
                                 type="text"
-                                placeholder="How can we help?"
+                                placeholder={getTranslatedText("How can we help?")}
                                 style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none' }}
                             />
                         </div>
 
                         <div style={{ display: 'grid', gap: '0.5rem' }}>
-                            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Message</label>
+                            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>{getTranslatedText("Message")}</label>
                             <textarea
                                 rows="5"
-                                placeholder="Tell us more about your inquiry..."
+                                placeholder={getTranslatedText("Tell us more about your inquiry...")}
                                 style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none', resize: 'none' }}
                             ></textarea>
                         </div>
 
                         <button className="btn btn-primary" type="button" style={{ width: '100%' }}>
                             <Send size={18} />
-                            Send Message
+                            {getTranslatedText("Send Message")}
                         </button>
                     </form>
                 </motion.div>
@@ -75,8 +82,8 @@ const Contact = () => {
                             <Phone size={24} />
                         </div>
                         <div>
-                            <h4 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Call Us</h4>
-                            <p style={{ color: 'var(--text-muted)' }}>Mon-Fri from 9am to 6pm.</p>
+                            <h4 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{getTranslatedText("Call Us")}</h4>
+                            <p style={{ color: 'var(--text-muted)' }}>{getTranslatedText("Mon-Fri from 9am to 6pm.")}</p>
                             <p style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '0.5rem' }}>+1 (555) 000-0000</p>
                         </div>
                     </div>
@@ -86,8 +93,8 @@ const Contact = () => {
                             <Mail size={24} />
                         </div>
                         <div>
-                            <h4 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Email Us</h4>
-                            <p style={{ color: 'var(--text-muted)' }}>Our team is here to help.</p>
+                            <h4 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{getTranslatedText("Email Us")}</h4>
+                            <p style={{ color: 'var(--text-muted)' }}>{getTranslatedText("Our team is here to help.")}</p>
                             <p style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '0.5rem' }}>support@junkar.com</p>
                         </div>
                     </div>
@@ -97,8 +104,8 @@ const Contact = () => {
                             <MapPin size={24} />
                         </div>
                         <div>
-                            <h4 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Visit Us</h4>
-                            <p style={{ color: 'var(--text-muted)' }}>Come say hello at our office.</p>
+                            <h4 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{getTranslatedText("Visit Us")}</h4>
+                            <p style={{ color: 'var(--text-muted)' }}>{getTranslatedText("Come say hello at our office.")}</p>
                             <p style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '0.5rem' }}>123 Recycling Way, Green City, ECO 54321</p>
                         </div>
                     </div>

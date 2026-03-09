@@ -32,7 +32,9 @@ const PriceListPage = () => {
         "Price",
         "Unit",
         "No prices found",
-        "Try a different search term"
+        "Try a different search term",
+        "Loading...",
+        "Per"
     ];
 
     const { getTranslatedText } = usePageTranslation(staticTexts);
@@ -159,7 +161,7 @@ const PriceListPage = () => {
             {/* Optimized Price List */}
             <div className="px-4 md:px-6 max-w-7xl mx-auto pb-6">
                 {loading ? (
-                    <div className="text-center py-8 text-slate-600 font-medium text-sm">Loading...</div>
+                    <div className="text-center py-8 text-slate-600 font-medium text-sm">{getTranslatedText("Loading...")}</div>
                 ) : filteredPrices.length > 0 ? (
                     <div className="grid grid-cols-1 gap-2.5">
                         {filteredPrices.map((item, index) => (
@@ -182,9 +184,9 @@ const PriceListPage = () => {
                                         className="font-bold text-sm mb-0.5 truncate"
                                         style={{ color: "#1e293b" }}
                                     >
-                                        {item.name}
+                                        {getTranslatedText(item.name)}
                                     </h3>
-                                    <p className="text-xs text-slate-500">Per {item.unit}</p>
+                                    <p className="text-xs text-slate-500">{getTranslatedText("Per")} {getTranslatedText(item.unit)}</p>
                                 </div>
 
                                 <div

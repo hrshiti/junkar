@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ShieldCheck, Zap, BarChart3, Clock, CreditCard } from 'lucide-react';
+import { usePageTranslation } from '../../hooks/usePageTranslation';
 
 const features = [
     {
@@ -31,13 +32,29 @@ const features = [
 ];
 
 const Features = () => {
+    const { getTranslatedText } = usePageTranslation([
+        'Free Pickup',
+        'No hidden charges for doorstep scrap collection.',
+        'Best Market Rates',
+        'Get the most competitive prices based on live market data.',
+        'Verified Scrappers',
+        'Safety first! All our collectors are background checked.',
+        'Safe & Reliable',
+        'Transparent weighing and secure transaction process.',
+        'Instant Cash',
+        'Receive your payment immediately upon pickup completion.',
+        'Benefits',
+        'Why Choose Junkar?',
+        'Providing a seamless and trustworthy scrap selling experience.'
+    ]);
+
     return (
         <section className="section" style={{ background: '#f8fafc' }}>
             <div className="container">
                 <div className="section-header">
-                    <span className="section-tag">Benefits</span>
-                    <h2 className="section-title">Why Choose Junkar?</h2>
-                    <p style={{ color: 'var(--text-muted)' }}>Providing a seamless and trustworthy scrap selling experience.</p>
+                    <span className="section-tag">{getTranslatedText("Benefits")}</span>
+                    <h2 className="section-title">{getTranslatedText("Why Choose Junkar?")}</h2>
+                    <p style={{ color: 'var(--text-muted)' }}>{getTranslatedText("Providing a seamless and trustworthy scrap selling experience.")}</p>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
@@ -65,8 +82,8 @@ const Features = () => {
                                 {f.icon}
                             </div>
                             <div>
-                                <h3 style={{ marginBottom: '0.5rem', fontSize: '1.25rem' }}>{f.title}</h3>
-                                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>{f.desc}</p>
+                                <h3 style={{ marginBottom: '0.5rem', fontSize: '1.25rem' }}>{getTranslatedText(f.title)}</h3>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>{getTranslatedText(f.desc)}</p>
                             </div>
                         </motion.div>
                     ))}

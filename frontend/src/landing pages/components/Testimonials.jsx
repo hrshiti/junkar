@@ -1,6 +1,6 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
+import { usePageTranslation } from '../../hooks/usePageTranslation';
 
 const testimonials = [
     {
@@ -27,12 +27,20 @@ const testimonials = [
 ];
 
 const Testimonials = () => {
+    const { getTranslatedText } = usePageTranslation([
+        "Reviews", "What Our Users Say", "Join thousands of happy customers who trust Junkar.",
+        "Home Owner", "Regular User", "Business Owner",
+        "Junkar made selling my old electronics so easy. The scrapper was polite, and I got a great price!",
+        "I love how transparent the prices are. No more haggling with local scrap dealers. Highly recommended!",
+        "We use Junkar for our office scrap. It is reliable, fast, and the digital payment is very convenient."
+    ]);
+
     return (
         <section id="testimonials" className="section container">
             <div className="section-header">
-                <span className="section-tag">Reviews</span>
-                <h2 className="section-title">What Our Users Say</h2>
-                <p style={{ color: 'var(--text-muted)' }}>Join thousands of happy customers who trust Junkar.</p>
+                <span className="section-tag">{getTranslatedText("Reviews")}</span>
+                <h2 className="section-title">{getTranslatedText("What Our Users Say")}</h2>
+                <p style={{ color: 'var(--text-muted)' }}>{getTranslatedText("Join thousands of happy customers who trust Junkar.")}</p>
             </div>
 
             <div className="testimonials-grid">
@@ -48,7 +56,7 @@ const Testimonials = () => {
                         <div style={{ color: 'var(--primary)', marginBottom: '1rem' }}>
                             <Quote size={32} opacity={0.3} />
                         </div>
-                        <p className="testimonial-text">"{t.text}"</p>
+                        <p className="testimonial-text">"{getTranslatedText(t.text)}"</p>
                         <div style={{ display: 'flex', gap: '2px', marginBottom: '1.5rem' }}>
                             {[...Array(5)].map((_, index) => (
                                 <Star
@@ -63,7 +71,7 @@ const Testimonials = () => {
                             <img src={t.avatar} alt={t.name} className="user-avatar" />
                             <div>
                                 <h4 style={{ fontSize: '1rem' }}>{t.name}</h4>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{t.role}</p>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{getTranslatedText(t.role)}</p>
                             </div>
                         </div>
                     </motion.div>

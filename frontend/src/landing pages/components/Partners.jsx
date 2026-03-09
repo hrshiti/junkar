@@ -1,4 +1,5 @@
 import React from 'react';
+import { usePageTranslation } from '../../hooks/usePageTranslation';
 
 import afriLogo from '../../assets/afri.jpeg';
 import airLogo from '../../assets/all india radio.png';
@@ -30,14 +31,19 @@ const partners = [
 ];
 
 const Partners = () => {
+  const { getTranslatedText } = usePageTranslation([
+    "Our Partners & Clients",
+    "TRUSTED BY INDUSTRY LEADERS"
+  ]);
+
   return (
     <section id="partners" className="partners-section">
       <div className="container">
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
           <div style={{ width: '12px', height: '12px', background: '#38bdf8', borderRadius: '50%', animation: 'pulse-blue 1.5s infinite' }}></div>
-          <span style={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.875rem', letterSpacing: '0.05em', color: 'var(--text-main)' }}>Our Partners & Clients</span>
+          <span style={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.875rem', letterSpacing: '0.05em', color: 'var(--text-main)' }}>{getTranslatedText("Our Partners & Clients")}</span>
         </div>
-        <h2 style={{ fontSize: '2rem', marginBottom: '2.5rem', fontWeight: 800 }}>TRUSTED BY INDUSTRY LEADERS</h2>
+        <h2 style={{ fontSize: '2rem', marginBottom: '2.5rem', fontWeight: 800 }}>{getTranslatedText("TRUSTED BY INDUSTRY LEADERS")}</h2>
       </div>
 
       <div className="partners-ticker-container">

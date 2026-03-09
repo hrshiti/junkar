@@ -1,6 +1,6 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { MousePointerClick, CalendarCheck, Truck, Wallet } from 'lucide-react';
+import { usePageTranslation } from '../../hooks/usePageTranslation';
 
 const steps = [
     {
@@ -26,13 +26,21 @@ const steps = [
 ];
 
 const HowItWorks = () => {
+    const { getTranslatedText } = usePageTranslation([
+        "Process", "HOW IT WORKS", "Four simple steps to turn your junk into cash and help the environment.",
+        "Select Scrap Type", "Choose from various categories like plastic, metal, electronics, etc.",
+        "Schedule Pickup", "Pick a date and time that works best for you.",
+        "Doorstep Collection", "Our verified scrapper will arrive at your location for collection.",
+        "Get Paid Instantly", "Receive immediate payment via cash or UPI after weighing."
+    ]);
+
     return (
         <section id="how-it-works" className="section" style={{ background: '#f8fafc', padding: '6rem 0' }}>
             <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem' }}>
                 <div className="section-header" style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                    <span className="section-tag" style={{ color: 'var(--primary)', display: 'block', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>Process</span>
-                    <h2 className="section-title" style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1rem', color: '#1e293b' }}>HOW IT WORKS</h2>
-                    <p style={{ color: '#64748b', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>Four simple steps to turn your junk into cash and help the environment.</p>
+                    <span className="section-tag" style={{ color: 'var(--primary)', display: 'block', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>{getTranslatedText("Process")}</span>
+                    <h2 className="section-title" style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1rem', color: '#1e293b' }}>{getTranslatedText("HOW IT WORKS")}</h2>
+                    <p style={{ color: '#64748b', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>{getTranslatedText("Four simple steps to turn your junk into cash and help the environment.")}</p>
                 </div>
 
                 <div className="steps-grid" style={{
@@ -97,8 +105,8 @@ const HowItWorks = () => {
                                 {step.icon}
                             </div>
 
-                            <h3 className="step-title" style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.8rem', color: '#1e293b' }}>{step.title}</h3>
-                            <p style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: 1.6 }}>{step.desc}</p>
+                            <h3 className="step-title" style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.8rem', color: '#1e293b' }}>{getTranslatedText(step.title)}</h3>
+                            <p style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: 1.6 }}>{getTranslatedText(step.desc)}</p>
                         </motion.div>
                     ))}
                 </div>

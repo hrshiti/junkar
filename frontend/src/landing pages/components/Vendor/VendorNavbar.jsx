@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Smartphone } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import LanguageSelector from '../../../modules/shared/components/LanguageSelector';
 
 const VendorNavbar = () => {
     const [scrolled, setScrolled] = useState(false);
+    const { getTranslatedText } = usePageTranslation(["Home", "Process", "Contact", "Get App"]);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -37,9 +40,9 @@ const VendorNavbar = () => {
 
                 <div className="nav-right-section" style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
                     <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                        <Link to="/" className="nav-link" style={{ color: '#64748b', fontWeight: 600, fontFamily: 'Poppins' }}>Home</Link>
-                        <a href="/vendor#how-it-works" className="nav-link" style={{ color: '#64748b', fontWeight: 600, fontFamily: 'Poppins' }}>Process</a>
-                        <a href="/vendor#contact" className="nav-link" style={{ color: '#64748b', fontWeight: 600, fontFamily: 'Poppins' }}>Contact</a>
+                        <Link to="/" className="nav-link" style={{ color: '#64748b', fontWeight: 600, fontFamily: 'Poppins' }}>{getTranslatedText("Home")}</Link>
+                        <a href="/vendor#how-it-works" className="nav-link" style={{ color: '#64748b', fontWeight: 600, fontFamily: 'Poppins' }}>{getTranslatedText("Process")}</a>
+                        <a href="/vendor#contact" className="nav-link" style={{ color: '#64748b', fontWeight: 600, fontFamily: 'Poppins' }}>{getTranslatedText("Contact")}</a>
                     </div>
 
                     <motion.div
@@ -50,8 +53,9 @@ const VendorNavbar = () => {
                     >
                         <a href="#app" className="btn btn-primary" style={{ padding: '0.6rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#10b981', textDecoration: 'none', color: 'white' }}>
                             <Smartphone size={18} />
-                            Get App
+                            {getTranslatedText("Get App")}
                         </a>
+                        <LanguageSelector variant="light" />
                     </motion.div>
                 </div>
             </div>

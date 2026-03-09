@@ -46,7 +46,13 @@ const UserWallet = () => {
         "Request Submitted Successfully",
         "Failed to submit request",
         "Payment Successful",
-        "Failed to initiate payment"
+        "Failed to initiate payment",
+        "Account Holder Name",
+        "Account Number",
+        "IFSC Code",
+        "Coupon Applied",
+        "Transaction",
+        "Available"
     ];
 
     const { getTranslatedText } = usePageTranslation(staticTexts);
@@ -462,7 +468,7 @@ const UserWallet = () => {
 
                                 switch (tx.category) {
                                     case 'COUPON_CREDIT':
-                                        label = `Coupon Applied${tx.couponCode ? ': ' + tx.couponCode : ''}`;
+                                        label = `${getTranslatedText("Coupon Applied")}${tx.couponCode ? ': ' + tx.couponCode : ''}`;
                                         icon = (
                                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
@@ -627,7 +633,7 @@ const UserWallet = () => {
 
                                 <div className="space-y-4 mb-6">
                                     <div>
-                                        <label className="block text-sm text-slate-500 mb-2">Account Holder Name</label>
+                                        <label className="block text-sm text-slate-500 mb-2">{getTranslatedText("Account Holder Name")}</label>
                                         <input
                                             type="text"
                                             value={withdrawDetails.accountHolderName}
@@ -637,7 +643,7 @@ const UserWallet = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm text-slate-500 mb-2">Account Number</label>
+                                        <label className="block text-sm text-slate-500 mb-2">{getTranslatedText("Account Number")}</label>
                                         <input
                                             type="text"
                                             value={withdrawDetails.accountNumber}
@@ -647,7 +653,7 @@ const UserWallet = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm text-slate-500 mb-2">IFSC Code</label>
+                                        <label className="block text-sm text-slate-500 mb-2">{getTranslatedText("IFSC Code")}</label>
                                         <input
                                             type="text"
                                             value={withdrawDetails.ifscCode}

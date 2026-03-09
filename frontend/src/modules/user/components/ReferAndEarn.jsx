@@ -71,6 +71,11 @@ const ReferAndEarn = () => {
     "Your friend signs up using your code",
     "You Both Earn",
     "Your Referrals",
+    "more referrals to reach {tier}",
+    "You get ₹{amount} and they get ₹{bonus} welcome bonus",
+    "Active",
+    "Pending",
+    "Referred User"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const { translateText: translateDynamic } = useDynamicTranslation();
@@ -160,7 +165,7 @@ const ReferAndEarn = () => {
     <div className="space-y-6">
       {/* Header */}
       <div
-        className="rounded-2xl shadow-xl p-4 backdrop-blur-sm border-2 border-emerald-100" 
+        className="rounded-2xl shadow-xl p-4 backdrop-blur-sm border-2 border-emerald-100"
         style={{ backgroundColor: "rgba(255, 255, 255, 0.98)" }}>
         <div className="flex items-center gap-3">
           <div
@@ -200,8 +205,9 @@ const ReferAndEarn = () => {
           <div className="mt-3">
             <div className="flex items-center justify-between text-xs mb-1.5">
               <span className="font-medium" style={{ color: "#64748b" }}>
-                {tierInfo.nextTier.referralsNeeded} more referrals to reach{" "}
-                {tierInfo.nextTier.name}
+                {getTranslatedText("more referrals to reach {tier}", {
+                  tier: tierInfo.nextTier.name
+                })}
               </span>
               <span className="font-bold" style={{ color: "#1e293b" }}>
                 {tierInfo.totalReferrals}/{tierInfo.nextTier.minReferrals}
@@ -212,7 +218,7 @@ const ReferAndEarn = () => {
               style={{ backgroundColor: "rgba(100, 148, 110, 0.15)" }}>
               <div
                 className="h-full rounded-full shadow-md transition-all duration-300"
-                style={{ 
+                style={{
                   backgroundColor: tierInfo.color,
                   width: `${(tierInfo.totalReferrals / tierInfo.nextTier.minReferrals) * 100}%`
                 }}
@@ -224,7 +230,7 @@ const ReferAndEarn = () => {
 
       {/* Referral Code Card */}
       <div
-        className="rounded-2xl shadow-xl p-4 backdrop-blur-sm border-2 border-emerald-100 transition-shadow hover:shadow-2xl" 
+        className="rounded-2xl shadow-xl p-4 backdrop-blur-sm border-2 border-emerald-100 transition-shadow hover:shadow-2xl"
         style={{ backgroundColor: "rgba(255, 255, 255, 0.98)" }}>
         <h2
           className="text-base md:text-lg font-bold mb-3"
@@ -372,7 +378,7 @@ const ReferAndEarn = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-3">
         <div
-          className="rounded-2xl shadow-xl p-3 backdrop-blur-sm border-2 border-emerald-100 transition-shadow hover:shadow-2xl" 
+          className="rounded-2xl shadow-xl p-3 backdrop-blur-sm border-2 border-emerald-100 transition-shadow hover:shadow-2xl"
           style={{ backgroundColor: "rgba(255, 255, 255, 0.98)" }}>
           <div className="flex items-center gap-2">
             <div
@@ -384,8 +390,8 @@ const ReferAndEarn = () => {
               <p className="text-xs font-semibold leading-tight" style={{ color: "#64748b" }}>
                 {getTranslatedText("Total Referrals")}
               </p>
-              <p 
-                className="text-2xl font-bold leading-tight" 
+              <p
+                className="text-2xl font-bold leading-tight"
                 style={{ color: "#1e293b" }}>
                 {stats.totalReferrals}
               </p>
@@ -394,7 +400,7 @@ const ReferAndEarn = () => {
         </div>
 
         <div
-          className="rounded-2xl shadow-xl p-3 backdrop-blur-sm border-2 border-emerald-100 transition-shadow hover:shadow-2xl" 
+          className="rounded-2xl shadow-xl p-3 backdrop-blur-sm border-2 border-emerald-100 transition-shadow hover:shadow-2xl"
           style={{ backgroundColor: "rgba(255, 255, 255, 0.98)" }}>
           <div className="flex items-center gap-2">
             <div
@@ -406,8 +412,8 @@ const ReferAndEarn = () => {
               <p className="text-xs font-semibold leading-tight" style={{ color: "#64748b" }}>
                 {getTranslatedText("Total Earnings")}
               </p>
-              <p 
-                className="text-2xl font-bold leading-tight" 
+              <p
+                className="text-2xl font-bold leading-tight"
                 style={{ color: "#1e293b" }}>
                 ₹{stats.totalEarnings}
               </p>
@@ -449,7 +455,7 @@ const ReferAndEarn = () => {
 
       {/* How It Works */}
       <div
-        className="rounded-2xl shadow-xl p-4 backdrop-blur-sm border-2 border-emerald-100 transition-shadow hover:shadow-2xl" 
+        className="rounded-2xl shadow-xl p-4 backdrop-blur-sm border-2 border-emerald-100 transition-shadow hover:shadow-2xl"
         style={{ backgroundColor: "rgba(255, 255, 255, 0.98)" }}>
         <h2
           className="text-lg font-bold mb-4"
@@ -460,14 +466,14 @@ const ReferAndEarn = () => {
           {/* Step 1 */}
           <div className="flex items-start gap-3">
             <div className="relative flex-shrink-0">
-              <div 
+              <div
                 className="w-8 h-8 rounded-full flex items-center justify-center shadow-md"
                 style={{ background: "linear-gradient(135deg, #10b981 0%, #059669 100%)" }}>
                 <span className="font-bold text-sm text-white">1</span>
               </div>
-              <div 
+              <div
                 className="absolute top-8 left-1/2 w-0.5 h-6"
-                style={{ 
+                style={{
                   transform: "translateX(-50%)",
                   background: "linear-gradient(to bottom, rgba(16, 185, 129, 0.3), transparent)"
                 }}></div>
@@ -485,14 +491,14 @@ const ReferAndEarn = () => {
           {/* Step 2 */}
           <div className="flex items-start gap-3">
             <div className="relative flex-shrink-0">
-              <div 
+              <div
                 className="w-8 h-8 rounded-full flex items-center justify-center shadow-md"
                 style={{ background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)" }}>
                 <span className="font-bold text-sm text-white">2</span>
               </div>
-              <div 
+              <div
                 className="absolute top-8 left-1/2 w-0.5 h-6"
-                style={{ 
+                style={{
                   transform: "translateX(-50%)",
                   background: "linear-gradient(to bottom, rgba(59, 130, 246, 0.3), transparent)"
                 }}></div>
@@ -510,7 +516,7 @@ const ReferAndEarn = () => {
           {/* Step 3 */}
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0">
-              <div 
+              <div
                 className="w-8 h-8 rounded-full flex items-center justify-center shadow-md"
                 style={{ background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)" }}>
                 <span className="font-bold text-sm text-white">3</span>
@@ -521,8 +527,10 @@ const ReferAndEarn = () => {
                 {getTranslatedText("You Both Earn")}
               </h3>
               <p className="text-xs leading-relaxed" style={{ color: "#64748b" }}>
-                You get ₹{settings.userRewards.signupBonus} and they get ₹
-                {settings.userRewards.refereeWelcomeBonus} welcome bonus
+                {getTranslatedText("You get ₹{amount} and they get ₹{bonus} welcome bonus", {
+                  amount: settings.userRewards.signupBonus,
+                  bonus: settings.userRewards.refereeWelcomeBonus
+                })}
               </p>
             </div>
           </div>
@@ -566,7 +574,7 @@ const ReferAndEarn = () => {
                         <p
                           className="font-semibold text-sm"
                           style={{ color: "#2d3748" }}>
-                          Referred User
+                          {getTranslatedText("Referred User")}
                         </p>
                         <p className="text-xs" style={{ color: "#718096" }}>
                           {new Date(referral.createdAt).toLocaleDateString()}
@@ -583,12 +591,12 @@ const ReferAndEarn = () => {
                         {referral.status === "active" ? (
                           <span className="flex items-center gap-1">
                             <FaCheckCircle />
-                            Active
+                            {getTranslatedText("Active")}
                           </span>
                         ) : (
                           <span className="flex items-center gap-1">
                             <FaClock />
-                            Pending
+                            {getTranslatedText("Pending")}
                           </span>
                         )}
                       </p>

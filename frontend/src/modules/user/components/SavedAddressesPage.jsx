@@ -40,6 +40,12 @@ const staticTexts = [
   "Add your first address to get started",
   "Are you sure you want to delete this address?",
   "Please fill all required fields",
+  "Set as Default",
+  "Edit",
+  "Delete",
+  "Add Address",
+  "Default",
+  "Near {landmark}"
 ];
 
 const SavedAddressesPage = () => {
@@ -516,7 +522,7 @@ const SavedAddressesPage = () => {
                 className="px-6 py-3 rounded-lg font-semibold text-white transition-all shadow-md hover:shadow-lg hover:bg-emerald-600"
                 style={{ backgroundColor: "#0284c7" }}>
                 <FaPlus className="inline mr-2" />
-                Add Address
+                {getTranslatedText("Add Address")}
               </button>
             </motion.div>
           ) : (
@@ -565,7 +571,7 @@ const SavedAddressesPage = () => {
                                   backgroundColor: "#e0f2fe",
                                   color: "#047857",
                                 }}>
-                                Default
+                                {getTranslatedText("Default")}
                               </span>
                             )}
                           </div>
@@ -601,7 +607,7 @@ const SavedAddressesPage = () => {
                               color: "#0284c7",
                             }}
                           >
-                            Set as Default
+                            {getTranslatedText("Set as Default")}
                           </button>
                         )}
                         <button
@@ -614,7 +620,7 @@ const SavedAddressesPage = () => {
                           }}
                         >
                           <FaEdit size={12} />
-                          Edit
+                          {getTranslatedText("Edit")}
                         </button>
                         <button
                           onClick={() => handleDelete(address.id)}
@@ -626,7 +632,7 @@ const SavedAddressesPage = () => {
                           }}
                         >
                           <FaTrash size={12} />
-                          Delete
+                          {getTranslatedText("Delete")}
                         </button>
                       </div>
                     </div>

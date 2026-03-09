@@ -31,6 +31,7 @@ const AllCategoriesPage = () => {
     "Browse all available scrap categories",
     "Scrap Materials",
     "Sell your {category} scrap",
+    "Go back"
   ];
 
   const { getTranslatedText } = usePageTranslation(staticTexts);
@@ -200,13 +201,13 @@ const AllCategoriesPage = () => {
                     <p
                       className="text-sm md:text-base font-bold text-center mb-1"
                       style={{ color: "#1e293b" }}>
-                      {category.name}
+                      {getTranslatedText(category.name)}
                     </p>
                     <p
-                      className="text-xs text-center font-medium"
+                      className="text-sm md:text-center font-medium"
                       style={{ color: "#64748b" }}>
                       {getTranslatedText("Sell your {category} scrap", {
-                        category: category.name,
+                        category: getTranslatedText(category.name),
                       })}
                     </p>
                   </div>

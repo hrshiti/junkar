@@ -1,6 +1,5 @@
-import React from 'react';
-import { motion } from 'framer-motion';
 import { Users, LayoutDashboard, Wallet } from 'lucide-react';
+import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
 const vendorBenefits = [
     {
@@ -21,13 +20,20 @@ const vendorBenefits = [
 ];
 
 const VendorLanding = () => {
+    const { getTranslatedText } = usePageTranslation([
+        "Benefits", "Grow with Junkar", "We provide the tools you need to modernize your scrap business.",
+        "More Customers", "Access a wider network of recurring scrap sellers in your local area.",
+        "Easy Pickup Management", "Manage all your collection requests through our intuitive vendor dashboard.",
+        "Secure Payments", "Transparent transactions and guaranteed timely payments for all collections."
+    ]);
+
     return (
         <section className="section" style={{ background: '#f0fdf4' }}>
             <div className="container">
                 <div className="section-header">
-                    <span className="section-tag" style={{ color: '#059669' }}>Benefits</span>
-                    <h2 className="section-title">Grow with Junkar</h2>
-                    <p style={{ color: 'var(--text-muted)' }}>We provide the tools you need to modernize your scrap business.</p>
+                    <span className="section-tag" style={{ color: '#059669' }}>{getTranslatedText("Benefits")}</span>
+                    <h2 className="section-title">{getTranslatedText("Grow with Junkar")}</h2>
+                    <p style={{ color: 'var(--text-muted)' }}>{getTranslatedText("We provide the tools you need to modernize your scrap business.")}</p>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
@@ -44,8 +50,8 @@ const VendorLanding = () => {
                             <div className="category-icon" style={{ background: '#d1fae5', color: '#059669' }}>
                                 {benefit.icon}
                             </div>
-                            <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>{benefit.title}</h3>
-                            <p style={{ color: 'var(--text-muted)', lineHeight: 1.6 }}>{benefit.desc}</p>
+                            <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>{getTranslatedText(benefit.title)}</h3>
+                            <p style={{ color: 'var(--text-muted)', lineHeight: 1.6 }}>{getTranslatedText(benefit.desc)}</p>
                         </motion.div>
                     ))}
                 </div>
