@@ -33,7 +33,11 @@ const PriceTicker = () => {
         if (response.success && response.data?.prices) {
           const apiPrices = {};
           response.data.prices.forEach(p => {
-            apiPrices[p.category.toLowerCase()] = p.pricePerKg;
+            apiPrices[p.category.toLowerCase()] = {
+              price: p.pricePerKg,
+              minPrice: p.minPrice,
+              maxPrice: p.maxPrice
+            };
           });
 
           const updated = await Promise.all(
@@ -41,8 +45,10 @@ const PriceTicker = () => {
               ...item,
               type: await translate(item.originalType),
               price: apiPrices[item.originalType.toLowerCase()] !== undefined
-                ? apiPrices[item.originalType.toLowerCase()]
+                ? apiPrices[item.originalType.toLowerCase()].price
                 : item.price,
+              minPrice: apiPrices[item.originalType.toLowerCase()]?.minPrice,
+              maxPrice: apiPrices[item.originalType.toLowerCase()]?.maxPrice,
               change: null
             }))
           );
@@ -123,7 +129,9 @@ const PriceTicker = () => {
               <p
                 className="text-sm md:text-base font-bold"
                 style={{ color: "#1e293b" }}>
-                ₹{item.price.toFixed(0)}/{item.unit}
+                {item.minPrice && item.maxPrice
+                  ? `₹${item.minPrice}-${item.maxPrice}/${item.unit}`
+                  : `₹${item.price.toFixed(0)}/${item.unit}`}
               </p>
             </div>
           ))}

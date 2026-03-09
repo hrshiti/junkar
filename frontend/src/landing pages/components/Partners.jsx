@@ -1,20 +1,32 @@
 import React from 'react';
 
+import afriLogo from '../../assets/afri.jpeg';
+import airLogo from '../../assets/all india radio.png';
+import hpLogo from '../../assets/hindustan petrolium.jpeg';
+import ioclLogo from '../../assets/indian oil.png';
+import madhyamikLogo from '../../assets/madhyamik sikshksha ajmer.jpeg';
+import nfcLogo from '../../assets/nfc.jpeg';
+import niftLogo from '../../assets/nift.jpeg';
+import sangamLogo from '../../assets/sangam india private limited.jpeg';
+import tataLogo from '../../assets/tata project.png';
+import tplLogo from '../../assets/tpl.png';
+import uttariLogo from '../../assets/uttari rajasthan sahakari dudgdh.jpeg';
+
 const partners = [
   { name: 'MNIT', logo: 'https://mnit.ac.in/images/mnit_logo.png' },
-  { name: 'NIFT', logo: 'https://nift.ac.in/sites/default/files/nift_logo_0.png' },
+  { name: 'NIFT', logo: niftLogo },
   { name: 'Kazari', logo: '' },
-  { name: 'ICFRE - AFRI', logo: '' },
-  { name: 'TATA Project Limited', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Tata_logo.svg/1200px-Tata_logo.svg.png' },
-  { name: 'Nuclear Fuel Complex (NFC)', logo: 'https://www.nfc.gov.in/images/nfc_logo.png' },
+  { name: 'ICFRE - AFRI', logo: afriLogo },
+  { name: 'TATA Project Limited', logo: tataLogo },
+  { name: 'Nuclear Fuel Complex (NFC)', logo: nfcLogo },
   { name: 'Saras Dairy', logo: 'https://rajsaras.rajasthan.gov.in/Template/Default/Default/images/logo.png' },
-  { name: 'Indian Oil (IOCL)', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/8/8e/Indian_Oil_Corporation_logo.svg/1200px-Indian_Oil_Corporation_logo.svg.png' },
-  { name: 'Uttari Rajasthan Sahakari Dugdh Utpadak Sangh Ltd.', logo: '' },
-  { name: 'TPL-SUCG Consortium', logo: '' },
-  { name: 'Hindustan Petroleum Corporation Ltd.', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/3/30/Hindustan_Petroleum_Logo.svg/1200px-Hindustan_Petroleum_Logo.svg.png' },
-  { name: 'All India Radio', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/All_India_Radio_logo.svg/1200px-All_India_Radio_logo.svg.png' },
-  { name: 'Sangam India Private Limited', logo: '' },
-  { name: 'Madhyamik Shiksha Board Ajmer', logo: 'https://rajeduboard.rajasthan.gov.in/images/logo.png' },
+  { name: 'Indian Oil (IOCL)', logo: ioclLogo },
+  { name: 'Uttari Rajasthan Sahakari Dugdh Utpadak Sangh Ltd.', logo: uttariLogo },
+  { name: 'TPL-SUCG Consortium', logo: tplLogo },
+  { name: 'Hindustan Petroleum Corporation Ltd.', logo: hpLogo },
+  { name: 'All India Radio', logo: airLogo },
+  { name: 'Sangam India Private Limited', logo: sangamLogo },
+  { name: 'Madhyamik Shiksha Board Ajmer', logo: madhyamikLogo },
 ];
 
 const Partners = () => {
@@ -123,14 +135,12 @@ const Partners = () => {
           max-width: 160px;
           max-height: 60px;
           object-fit: contain;
-          filter: grayscale(100%);
-          opacity: 0.6;
+          opacity: 1;
           transition: all 0.3s ease;
         }
 
         .partner-card:hover .partner-logo {
-          filter: grayscale(0%);
-          opacity: 1;
+          transform: scale(1.05);
         }
 
         .partner-name {

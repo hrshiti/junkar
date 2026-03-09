@@ -20,7 +20,7 @@ const PriceFeedEditor = () => {
   const [activeTab, setActiveTab] = useState(PRICE_TYPES.MATERIAL);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // 'add' | 'edit'
-  const [currentPriceData, setCurrentPriceData] = useState({ id: null, category: '', price: '', image: '', description: '' });
+  const [currentPriceData, setCurrentPriceData] = useState({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '' });
   const [isSaving, setIsSaving] = useState(false);
   const [showCSVModal, setShowCSVModal] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -135,6 +135,8 @@ const PriceFeedEditor = () => {
           pricePerKg: apiPriceMap[cat.category.toLowerCase()]?.price !== undefined
             ? apiPriceMap[cat.category.toLowerCase()].price
             : cat.pricePerKg,
+          minPrice: apiPriceMap[cat.category.toLowerCase()]?.minPrice || 0,
+          maxPrice: apiPriceMap[cat.category.toLowerCase()]?.maxPrice || 0,
           updatedAt: apiPriceMap[cat.category.toLowerCase()]?.updatedAt || new Date().toISOString(),
           region: 'IN-DL'
         }));
@@ -166,7 +168,7 @@ const PriceFeedEditor = () => {
 
   const handleAddClick = () => {
     setModalMode('add');
-    setCurrentPriceData({ id: null, category: '', price: '', image: '', description: '' });
+    setCurrentPriceData({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '' });
     setShowModal(true);
   };
 
@@ -178,6 +180,8 @@ const PriceFeedEditor = () => {
       category: price.category,
       price: val ? val.toString() : '0',
       image: price.image || '',
+      minPrice: price.minPrice ? price.minPrice.toString() : '0',
+      maxPrice: price.maxPrice ? price.maxPrice.toString() : '0',
       description: ''
     });
     setShowModal(true);
@@ -233,7 +237,9 @@ const PriceFeedEditor = () => {
         regionCode: 'IN-DL',
         effectiveDate: new Date().toISOString(),
         isActive: true,
-        type: activeTab
+        type: activeTab,
+        minPrice: parseFloat(currentPriceData.minPrice) || 0,
+        maxPrice: parseFloat(currentPriceData.maxPrice) || 0
       };
 
       let response;
@@ -249,7 +255,7 @@ const PriceFeedEditor = () => {
       if (response.success) {
         await loadPrices();
         setShowModal(false);
-        setCurrentPriceData({ id: null, category: '', price: '', image: '', description: '' });
+        setCurrentPriceData({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '' });
         alert(modalMode === 'add' ? getTranslatedText('Item saved successfully!') : getTranslatedText('Item updated successfully!'));
       } else {
         throw new Error(response.message || getTranslatedText('Failed to save item. Please try again.'));
@@ -276,7 +282,9 @@ const PriceFeedEditor = () => {
           regionCode: price.region || 'IN-DL',
           effectiveDate: price.effectiveDate || new Date().toISOString(),
           type: price.type || PRICE_TYPES.MATERIAL,
-          isActive: true
+          isActive: true,
+          minPrice: price.minPrice || 0,
+          maxPrice: price.maxPrice || 0
         };
 
         if (price.id && price.id.startsWith('price_')) {
@@ -483,8 +491,8 @@ const PriceFeedEditor = () => {
                       {getTranslatedText("Image")}
                     </th>
                     <th className="px-2 py-2 md:px-6 md:py-4 text-left text-xs md:text-sm font-semibold" style={{ color: '#2d3748' }}>
-                      <span className="hidden sm:inline">{activeTab === PRICE_TYPES.MATERIAL ? getTranslatedText('Price per Kg (₹)') : getTranslatedText('Service Fee (₹)')}</span>
-                      <span className="sm:hidden">{activeTab === PRICE_TYPES.MATERIAL ? getTranslatedText('Price') : getTranslatedText('Fee')}</span>
+                      <span className="hidden sm:inline">{activeTab === PRICE_TYPES.MATERIAL ? getTranslatedText('Price Range (₹)') : getTranslatedText('Service Fee (₹)')}</span>
+                      <span className="sm:hidden">{activeTab === PRICE_TYPES.MATERIAL ? getTranslatedText('Range') : getTranslatedText('Fee')}</span>
                     </th>
                     <th className="px-2 py-2 md:px-6 md:py-4 text-left text-xs md:text-sm font-semibold hidden md:table-cell" style={{ color: '#2d3748' }}>
                       {getTranslatedText("Region")}
@@ -521,7 +529,11 @@ const PriceFeedEditor = () => {
                         <div className="flex items-center gap-2">
                           <FaRupeeSign style={{ color: '#64946e' }} />
                           <span className="font-semibold" style={{ color: '#2d3748' }}>
-                            {price.type === PRICE_TYPES.SERVICE ? (price.price || price.pricePerKg) : price.pricePerKg}
+                            {price.type === PRICE_TYPES.SERVICE
+                              ? (price.price || price.pricePerKg)
+                              : (price.minPrice && price.maxPrice
+                                ? `${price.minPrice} - ${price.maxPrice}`
+                                : price.pricePerKg)}
                           </span>
                         </div>
                       </td>
@@ -632,8 +644,8 @@ const PriceFeedEditor = () => {
             >
               <h2 className="text-xl font-bold mb-4" style={{ color: '#2d3748' }}>
                 {modalMode === 'add'
-                  ? getTranslatedText("Add New {type}", { type: activeTab === PRICE_TYPES.SERVICE ? getTranslatedText('Service') : getTranslatedText('Material') })
-                  : getTranslatedText("Edit {type}", { type: activeTab === PRICE_TYPES.SERVICE ? getTranslatedText('Service') : getTranslatedText('Material') })
+                  ? getTranslatedText("Add New {type}", { type: activeTab === 'service' ? getTranslatedText('Service') : getTranslatedText('Material') })
+                  : getTranslatedText("Edit {type}", { type: activeTab === 'service' ? getTranslatedText('Service') : getTranslatedText('Material') })
                 }
               </h2>
               <form onSubmit={handleModalSubmit} className="space-y-4">
@@ -665,9 +677,43 @@ const PriceFeedEditor = () => {
                     style={{ borderColor: '#e2e8f0', focusRingColor: '#64946e' }}
                     required
                     min="0"
-                    step="0.01"
+                    step="0.1"
                   />
                 </div>
+                {activeTab !== 'service' && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1" style={{ color: '#4a5568' }}>
+                        Min Price (₹)
+                      </label>
+                      <input
+                        type="number"
+                        value={currentPriceData.minPrice}
+                        onChange={(e) => setCurrentPriceData(prev => ({ ...prev, minPrice: e.target.value }))}
+                        placeholder="e.g. 40"
+                        className="w-full px-4 py-2 rounded-xl border-2 focus:outline-none focus:ring-2 focus:border-transparent transition-all"
+                        style={{ borderColor: '#e2e8f0' }}
+                        min="0"
+                        step="0.1"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1" style={{ color: '#4a5568' }}>
+                        Max Price (₹)
+                      </label>
+                      <input
+                        type="number"
+                        value={currentPriceData.maxPrice}
+                        onChange={(e) => setCurrentPriceData(prev => ({ ...prev, maxPrice: e.target.value }))}
+                        placeholder="e.g. 50"
+                        className="w-full px-4 py-2 rounded-xl border-2 focus:outline-none focus:ring-2 focus:border-transparent transition-all"
+                        style={{ borderColor: '#e2e8f0' }}
+                        min="0"
+                        step="0.1"
+                      />
+                    </div>
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-medium mb-1" style={{ color: '#4a5568' }}>
                     {getTranslatedText('Image URL (Optional)')}

@@ -89,6 +89,8 @@ const PriceListPage = () => {
                         id: price._id || price.id,
                         name: price.category,
                         price: price.pricePerKg || price.price || 0,
+                        minPrice: price.minPrice,
+                        maxPrice: price.maxPrice,
                         unit: price.unit || 'kg',
                         image: price.image || getCategoryImage(price.category),
                     }));
@@ -188,7 +190,11 @@ const PriceListPage = () => {
                                 <div
                                     className="text-right bg-slate-50 px-2.5 py-1.5 rounded-md border border-slate-200"
                                 >
-                                    <p className="text-sm font-bold" style={{ color: "#000000" }}>₹{item.price}</p>
+                                    <p className="text-sm font-bold" style={{ color: "#000000" }}>
+                                        {item.minPrice && item.maxPrice
+                                            ? `₹${item.minPrice} - ₹${item.maxPrice}`
+                                            : `₹${item.price}`}
+                                    </p>
                                 </div>
                             </div>
                         ))}
