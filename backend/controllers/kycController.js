@@ -48,12 +48,15 @@ export const submitKyc = async (req, res) => {
     const shopPhotoFile = files['shopPhoto'] ? files['shopPhoto'][0] : null;
     const gstCertificateFile = files['gstCertificate'] ? files['gstCertificate'][0] : null;
 
-    // Only aadhaar + selfie are mandatory for all types
-    if (!aadhaarFile || !selfieFile) {
+    // Validation: Check if we have the documents either in this request OR already in DB
+    const hasAadhaar = aadhaarFile || scrapper.kyc?.aadhaarPhotoUrl;
+    const hasSelfie = selfieFile || scrapper.kyc?.selfieUrl;
+
+    if (!hasAadhaar || !hasSelfie) {
       return sendError(res, 'Aadhaar and Selfie photos are required.', 400);
     }
 
-    if (!aadhaarNumber) {
+    if (!aadhaarNumber && !scrapper.kyc?.aadhaarNumber) {
       return sendError(res, 'Aadhaar number is required.', 400);
     }
 
@@ -64,7 +67,7 @@ export const submitKyc = async (req, res) => {
 
     // Wholesaler or Industrial must provide GST details
     if (['wholesaler', 'industrial'].includes(scrapper.scrapperType)) {
-      if (!gstNumber) {
+      if (!gstNumber && !scrapper.kyc?.gstNumber) {
         return sendError(res, 'GST number is required for Wholesaler/Industrial partners.', 400);
       }
       if (!gstCertificateFile && !scrapper.kyc?.gstCertificateUrl) {
@@ -118,7 +121,7 @@ export const submitKyc = async (req, res) => {
 
     // 4. Update Database
     scrapper.kyc = {
-      aadhaarNumber: aadhaarNumber,
+      aadhaarNumber: aadhaarNumber || scrapper.kyc?.aadhaarNumber,
       aadhaarPhotoUrl: aadhaarUrl,
       selfieUrl: selfieUrl,
       panNumber: panNumber || scrapper.kyc?.panNumber || null,

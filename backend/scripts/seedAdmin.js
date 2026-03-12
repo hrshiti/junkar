@@ -17,8 +17,8 @@ const seedAdmin = async () => {
     console.log('✅ Connected to MongoDB');
 
     // Admin credentials
-    const adminEmail = 'junkar@gmail.com';
-    const adminPhone = '9999999999';
+    const adminEmail = 'junkarindia@gmail.com';
+    const adminPhone = '9214142700';
     const adminPassword = 'junkar@123';
     const adminName = 'Junkar Admin';
 
