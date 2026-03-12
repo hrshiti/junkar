@@ -59,22 +59,27 @@ const WeightInputPage = () => {
   const location = useLocation();
   const [uploadedImages, setUploadedImages] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [weightMode, setWeightMode] = useState('manual');
-  const [autoDetectedWeight, setAutoDetectedWeight] = useState(null);
-  const [manualWeight, setManualWeight] = useState('');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [marketPrices, setMarketPrices] = useState({});
-  const [estimatedPayout, setEstimatedPayout] = useState(0);
   const [requestType, setRequestType] = useState('household');
 
-  // Model B states
+  // Per-category weight state: { [categoryId]: string }
+  const [categoryWeights, setCategoryWeights] = useState({});
+
+  // Model B states (negotiable)
   const [itemCondition, setItemCondition] = useState('');
   const [expectedPrice, setExpectedPrice] = useState('');
 
-  // Determine pricing type from selected categories
-  const isNegotiable = selectedCategories.some(cat =>
+  // Split categories into non-negotiable (need weight) and negotiable (need condition)
+  const nonNegotiableCategories = selectedCategories.filter(cat =>
+    cat.pricingType !== 'negotiable' && !NEGOTIABLE_CATEGORIES.includes(cat.id)
+  );
+  const negotiableCategories = selectedCategories.filter(cat =>
     cat.pricingType === 'negotiable' || NEGOTIABLE_CATEGORIES.includes(cat.id)
   );
+
+  const hasMixed = nonNegotiableCategories.length > 0 && negotiableCategories.length > 0;
+  const isOnlyNegotiable = nonNegotiableCategories.length === 0 && negotiableCategories.length > 0;
+  const isOnlyKgBased = nonNegotiableCategories.length > 0 && negotiableCategories.length === 0;
 
   // Load data from sessionStorage
   useEffect(() => {
@@ -85,7 +90,6 @@ const WeightInputPage = () => {
       setUploadedImages(JSON.parse(storedImages));
     }
 
-    // Check for pre-selected category from navigation state
     if (location.state?.preSelectedCategory) {
       const cat = { id: location.state.preSelectedCategory.toLowerCase(), name: location.state.preSelectedCategory };
       setSelectedCategories([cat]);
@@ -110,67 +114,48 @@ const WeightInputPage = () => {
           setMarketPrices(pricesMap);
         } else {
           setMarketPrices({
-            'Plastic': 45,
-            'Metal': 180,
-            'Paper': 12,
-            'Electronics': 85,
-            'Copper': 650,
-            'Aluminium': 180,
-            'Steel': 35,
-            'Brass': 420,
+            'Plastic': 45, 'Metal': 180, 'Paper': 12, 'Electronics': 85,
+            'Copper': 650, 'Aluminium': 180, 'Steel': 35, 'Brass': 420,
           });
         }
       } catch (error) {
         console.error('Failed to fetch market prices:', error);
         setMarketPrices({
-          'Plastic': 45,
-          'Metal': 180,
-          'Paper': 12,
-          'Electronics': 85,
-          'Copper': 650,
-          'Aluminium': 180,
-          'Steel': 35,
-          'Brass': 420,
+          'Plastic': 45, 'Metal': 180, 'Paper': 12, 'Electronics': 85,
+          'Copper': 650, 'Aluminium': 180, 'Steel': 35, 'Brass': 420,
         });
       }
     };
-
     fetchMarketPrices();
   }, []);
 
-  // Calculate estimated payout (only for kg_based)
-  useEffect(() => {
-    if (!isNegotiable && selectedCategories.length > 0) {
-      const currentWeight = weightMode === 'auto' && autoDetectedWeight
-        ? autoDetectedWeight
-        : parseFloat(manualWeight) || 0;
+  // Helper: get price for a category
+  const getCategoryPrice = (cat) => {
+    const apiInfo = marketPrices[cat.name];
+    return (typeof apiInfo === 'object' ? apiInfo.pricePerKg : (apiInfo || 0)) || cat.price || 0;
+  };
 
-      if (currentWeight > 0) {
-        const totalPrice = selectedCategories.reduce((sum, cat) => {
-          const apiInfo = marketPrices[cat.name];
-          const apiPrice = typeof apiInfo === 'object' ? apiInfo.pricePerKg : (apiInfo || 0);
-          const priceToUse = apiPrice || cat.price || 0;
-          return sum + priceToUse;
-        }, 0);
-        const avgPrice = totalPrice / selectedCategories.length;
-        const payout = currentWeight * avgPrice;
-        setEstimatedPayout(payout);
-      } else {
-        setEstimatedPayout(0);
-      }
-    }
-  }, [selectedCategories, weightMode, autoDetectedWeight, manualWeight, marketPrices, isNegotiable]);
+  // Per-category estimated payout
+  const getCategoryPayout = (cat) => {
+    const weight = parseFloat(categoryWeights[cat.id]) || 0;
+    return weight * getCategoryPrice(cat);
+  };
 
-  const handleWeightChange = (value) => {
+  // Total estimated payout (only for non-negotiable)
+  const totalEstimatedPayout = nonNegotiableCategories.reduce((sum, cat) => sum + getCategoryPayout(cat), 0);
+
+  // Total weight across all non-negotiable categories
+  const totalWeight = nonNegotiableCategories.reduce((sum, cat) => sum + (parseFloat(categoryWeights[cat.id]) || 0), 0);
+
+  const handleWeightChange = (catId, value) => {
     const regex = /^\d*\.?\d*$/;
     if (regex.test(value) || value === '') {
-      setManualWeight(value);
+      setCategoryWeights(prev => ({ ...prev, [catId]: value }));
     }
   };
 
-  const handleQuickWeight = (weight) => {
-    setManualWeight(weight.toString());
-    setWeightMode('manual');
+  const handleQuickWeight = (catId, weight) => {
+    setCategoryWeights(prev => ({ ...prev, [catId]: weight.toString() }));
   };
 
   const handleExpectedPriceChange = (value) => {
@@ -180,52 +165,54 @@ const WeightInputPage = () => {
     }
   };
 
+  // canContinue logic
+  const allKgWeightsFilled = nonNegotiableCategories.every(cat =>
+    parseFloat(categoryWeights[cat.id]) > 0
+  );
+  const conditionFilled = negotiableCategories.length === 0 || !!itemCondition;
+  const canContinue = (nonNegotiableCategories.length === 0 || allKgWeightsFilled) && conditionFilled;
+
   const handleContinue = () => {
-    if (isNegotiable) {
-      // Model B: condition is required
-      if (!itemCondition) return;
+    if (!canContinue) return;
 
-      const weightData = {
-        weight: 0,
-        mode: 'negotiable',
-        estimatedPayout: 0,
-        quantityType: requestType === 'commercial' ? 'large' : 'small',
-        // Model B specific data
-        pricingType: 'negotiable',
-        itemCondition,
-        expectedPrice: expectedPrice ? parseFloat(expectedPrice) : null,
-      };
-      sessionStorage.setItem('weightData', JSON.stringify(weightData));
-      navigate('/user/add-scrap/upload');
-    } else {
-      // Model A: weight is required
-      const finalWeight = weightMode === 'auto' && autoDetectedWeight
-        ? autoDetectedWeight
-        : parseFloat(manualWeight);
+    let pricingType = 'kg_based';
+    if (hasMixed) pricingType = 'mixed';
+    else if (isOnlyNegotiable) pricingType = 'negotiable';
 
-      if (finalWeight > 0) {
-        const weightData = {
-          weight: finalWeight,
-          mode: weightMode,
-          autoDetected: autoDetectedWeight,
-          estimatedPayout: estimatedPayout,
-          quantityType: requestType === 'commercial' ? 'large' : 'small',
-          pricingType: 'kg_based',
-        };
-        sessionStorage.setItem('weightData', JSON.stringify(weightData));
-        navigate('/user/add-scrap/upload');
-      }
-    }
+    // Build per-category weight details (for non-negotiable)
+    const categoryWeightDetails = nonNegotiableCategories.map(cat => ({
+      categoryId: cat.id,
+      categoryName: cat.name,
+      weight: parseFloat(categoryWeights[cat.id]) || 0,
+      price: getCategoryPrice(cat),
+      estimatedPayout: getCategoryPayout(cat),
+    }));
+
+    const weightData = {
+      // Backward-compatible fields for PriceConfirmationPage
+      weight: totalWeight,
+      mode: 'manual',
+      estimatedPayout: totalEstimatedPayout,
+      pricingType,
+      quantityType: requestType === 'commercial' ? 'large' : 'small',
+
+      // New structured per-category data
+      categoryWeights: categoryWeightDetails,
+      negotiableCategories: negotiableCategories.map(cat => ({
+        categoryId: cat.id,
+        categoryName: cat.name,
+      })),
+
+      // Negotiable-specific
+      itemCondition: negotiableCategories.length > 0 ? itemCondition : null,
+      expectedPrice: expectedPrice ? parseFloat(expectedPrice) : null,
+    };
+
+    sessionStorage.setItem('weightData', JSON.stringify(weightData));
+    navigate('/user/add-scrap/upload');
   };
 
-  const currentWeight = weightMode === 'auto' && autoDetectedWeight
-    ? autoDetectedWeight
-    : parseFloat(manualWeight) || 0;
-
   const quickWeights = [5, 10, 15, 20, 25, 30];
-
-  // Can continue? depends on model
-  const canContinue = isNegotiable ? !!itemCondition : currentWeight > 0;
 
   return (
     <motion.div
@@ -251,7 +238,7 @@ const WeightInputPage = () => {
           className="text-lg md:text-2xl font-bold"
           style={{ color: '#2d3748' }}
         >
-          {isNegotiable ? getTranslatedText("Item Details") : getTranslatedText("Enter Weight")}
+          {isOnlyNegotiable ? getTranslatedText("Item Details") : getTranslatedText("Enter Weight")}
         </h2>
         <div className="w-10"></div>
       </div>
@@ -340,13 +327,169 @@ const WeightInputPage = () => {
           </div>
         </div>
 
-        {/* ============== MODEL B: NEGOTIABLE FORM ============== */}
-        {isNegotiable ? (
+        {/* ============ SECTION 1: KG-BASED (per category weight) ============ */}
+        {nonNegotiableCategories.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            {hasMixed && (
+              <p className="text-xs font-bold mb-3 uppercase tracking-wider" style={{ color: '#38bdf8' }}>
+                ⚖️ Enter Weight per Material
+              </p>
+            )}
+
+            <div className="space-y-4">
+              {nonNegotiableCategories.map((cat) => {
+                const price = getCategoryPrice(cat);
+                const weight = parseFloat(categoryWeights[cat.id]) || 0;
+                const payout = weight * price;
+
+                return (
+                  <div
+                    key={cat.id}
+                    className="rounded-xl p-4 md:p-5"
+                    style={{ backgroundColor: '#ffffff' }}
+                  >
+                    {/* Category label row */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <p className="text-sm font-bold" style={{ color: '#2d3748' }}>{cat.name}</p>
+                        <p className="text-xs" style={{ color: '#718096' }}>₹{price}/{getTranslatedText("kg")}</p>
+                      </div>
+                      {weight > 0 && (
+                        <span className="text-sm font-bold" style={{ color: '#38bdf8' }}>
+                          ≈ ₹{payout.toFixed(0)}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Weight Input */}
+                    <div className="relative mb-3">
+                      <input
+                        type="text"
+                        value={categoryWeights[cat.id] || ''}
+                        onChange={(e) => handleWeightChange(cat.id, e.target.value)}
+                        placeholder="0.0"
+                        className="w-full py-3 px-4 text-2xl font-bold rounded-lg border-2 focus:outline-none focus:ring-2 transition-all"
+                        style={{
+                          borderColor: categoryWeights[cat.id] ? '#38bdf8' : 'rgba(100, 148, 110, 0.3)',
+                          color: '#2d3748',
+                          backgroundColor: '#f9f9f9'
+                        }}
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-lg font-semibold" style={{ color: '#718096' }}>
+                        {getTranslatedText("kg")}
+                      </span>
+                    </div>
+
+                    {/* Quick Weight Buttons */}
+                    <div className="flex flex-wrap gap-2">
+                      {quickWeights.map((w) => (
+                        <button
+                          key={w}
+                          onClick={() => handleQuickWeight(cat.id, w)}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300 border-2"
+                          style={{
+                            borderColor: categoryWeights[cat.id] === w.toString() ? '#38bdf8' : 'rgba(100, 148, 110, 0.3)',
+                            backgroundColor: categoryWeights[cat.id] === w.toString() ? '#38bdf8' : 'transparent',
+                            color: categoryWeights[cat.id] === w.toString() ? '#ffffff' : '#38bdf8'
+                          }}
+                        >
+                          {w} {getTranslatedText("kg")}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Total Estimated Payout (only when all weights are filled) */}
+            {totalEstimatedPayout > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-xl p-4 md:p-5 mt-4"
+                style={{ backgroundColor: 'rgba(100, 148, 110, 0.1)' }}
+              >
+                <p className="text-xs md:text-sm mb-2" style={{ color: '#718096' }}>
+                  {getTranslatedText("Estimated Payout")}
+                </p>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className="text-2xl md:text-3xl font-bold" style={{ color: '#38bdf8' }}>
+                    ₹{totalEstimatedPayout.toFixed(0)}
+                  </span>
+                  <span className="text-sm" style={{ color: '#718096' }}>
+                    {getTranslatedText("for")} {totalWeight.toFixed(1)} {getTranslatedText("kg")}
+                  </span>
+                </div>
+                <div className="text-xs" style={{ color: '#718096' }}>
+                  {nonNegotiableCategories.map((cat, idx) => {
+                    const price = getCategoryPrice(cat);
+                    return (
+                      <span key={cat.id}>
+                        {getTranslatedText(cat.name)} @ ₹{price}/{getTranslatedText("kg")}
+                        {idx < nonNegotiableCategories.length - 1 && ' • '}
+                      </span>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Disclaimer */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 p-4 rounded-xl border-l-4 shadow-sm"
+              style={{ backgroundColor: 'rgba(56, 189, 248, 0.08)', borderColor: '#38bdf8' }}
+            >
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                  </svg>
+                </div>
+                <p className="text-xs md:text-sm leading-relaxed" style={{ color: '#4a5568', fontWeight: '500' }}>
+                  <span style={{ color: '#38bdf8', fontWeight: '700' }}>Note:</span> {getTranslatedText("Note: The final payout will be determined by the scrap partner after inspection based on the material's quality, quantity, and condition. The displayed amount is only an estimate and may vary.")}
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* Divider for mixed */}
+        {hasMixed && (
+          <div className="flex items-center gap-3 my-4">
+            <div className="flex-1 h-px" style={{ backgroundColor: 'rgba(100, 148, 110, 0.3)' }} />
+            <span className="text-xs font-semibold" style={{ color: '#718096' }}>+ NEGOTIABLE ITEMS</span>
+            <div className="flex-1 h-px" style={{ backgroundColor: 'rgba(100, 148, 110, 0.3)' }} />
+          </div>
+        )}
+
+        {/* ============ SECTION 2: NEGOTIABLE (condition form) ============ */}
+        {negotiableCategories.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4"
           >
+            {/* Show negotiable category names */}
+            {hasMixed && (
+              <div className="flex flex-wrap gap-2 mb-1">
+                {negotiableCategories.map(cat => (
+                  <span key={cat.id} className="px-3 py-1 rounded-full text-xs font-bold"
+                    style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#b45309' }}>
+                    {cat.name}
+                  </span>
+                ))}
+              </div>
+            )}
+
             {/* Negotiable Badge */}
             <div className="flex items-center gap-2 px-4 py-3 rounded-xl"
               style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)' }}
@@ -380,8 +523,7 @@ const WeightInputPage = () => {
                     <span className="text-xl">
                       {condition.value === 'good' ? '✅' : condition.value === 'average' ? '⚠️' : '🔧'}
                     </span>
-                    <span className={`text-sm font-semibold ${itemCondition === condition.value ? 'text-sky-700' : 'text-slate-600'
-                      }`}>
+                    <span className={`text-sm font-semibold ${itemCondition === condition.value ? 'text-sky-700' : 'text-slate-600'}`}>
                       {getTranslatedText(condition.label)}
                     </span>
                     {itemCondition === condition.value && (
@@ -424,10 +566,7 @@ const WeightInputPage = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="p-4 rounded-xl border-l-4 shadow-sm"
-              style={{
-                backgroundColor: 'rgba(245, 158, 11, 0.08)',
-                borderColor: '#f59e0b'
-              }}
+              style={{ backgroundColor: 'rgba(245, 158, 11, 0.08)', borderColor: '#f59e0b' }}
             >
               <div className="flex gap-3">
                 <div className="flex-shrink-0 mt-0.5">
@@ -443,130 +582,6 @@ const WeightInputPage = () => {
               </div>
             </motion.div>
           </motion.div>
-        ) : (
-          /* ============== MODEL A: KG-BASED FORM (EXISTING) ============== */
-          <>
-            {/* Manual Input Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-4 md:mb-6"
-            >
-              <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: '#ffffff' }}>
-                <label className="block text-xs md:text-sm font-semibold mb-2" style={{ color: '#2d3748' }}>
-                  {getTranslatedText("Enter Weight (kg)")}
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={manualWeight}
-                    onChange={(e) => handleWeightChange(e.target.value)}
-                    placeholder="0.0"
-                    className="w-full py-3 md:py-4 px-4 text-2xl md:text-3xl font-bold rounded-lg border-2 focus:outline-none focus:ring-2 transition-all"
-                    style={{
-                      borderColor: manualWeight ? '#38bdf8' : 'rgba(100, 148, 110, 0.3)',
-                      color: '#2d3748',
-                      backgroundColor: '#f9f9f9'
-                    }}
-                  />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-lg md:text-xl font-semibold" style={{ color: '#718096' }}>
-                    {getTranslatedText("kg")}
-                  </span>
-                </div>
-              </div>
-
-              {/* Quick Weight Buttons */}
-              <div className="mt-4">
-                <p className="text-xs md:text-sm mb-2" style={{ color: '#718096' }}>
-                  {getTranslatedText("Quick Select:")}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {quickWeights.map((weight) => (
-                    <button
-                      key={weight}
-                      onClick={() => handleQuickWeight(weight)}
-                      className="px-3 py-2 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-semibold transition-all duration-300 border-2"
-                      style={{
-                        borderColor: manualWeight === weight.toString() ? '#38bdf8' : 'rgba(100, 148, 110, 0.3)',
-                        backgroundColor: manualWeight === weight.toString() ? '#38bdf8' : 'transparent',
-                        color: manualWeight === weight.toString() ? '#ffffff' : '#38bdf8'
-                      }}
-                      onMouseEnter={(e) => {
-                        if (manualWeight !== weight.toString()) {
-                          e.target.style.backgroundColor = 'rgba(100, 148, 110, 0.1)';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (manualWeight !== weight.toString()) {
-                          e.target.style.backgroundColor = 'transparent';
-                        }
-                      }}
-                    >
-                      {weight} {getTranslatedText("kg")}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Price Calculation Preview */}
-            {currentWeight > 0 && selectedCategories.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="rounded-xl p-4 md:p-6 mb-4 md:mb-6"
-                style={{ backgroundColor: 'rgba(100, 148, 110, 0.1)' }}
-              >
-                <p className="text-xs md:text-sm mb-3" style={{ color: '#718096' }}>
-                  {getTranslatedText("Estimated Payout")}
-                </p>
-                <div className="flex items-baseline gap-2 mb-2">
-                  <span className="text-2xl md:text-3xl font-bold" style={{ color: '#38bdf8' }}>
-                    ₹{estimatedPayout.toFixed(0)}
-                  </span>
-                  <span className="text-sm md:text-base" style={{ color: '#718096' }}>
-                    {getTranslatedText("for")} {currentWeight} {getTranslatedText("kg")}
-                  </span>
-                </div>
-                <div className="text-xs md:text-sm" style={{ color: '#718096' }}>
-                  {selectedCategories.map((cat, idx) => {
-                    const apiInfo = marketPrices[cat.name];
-                    const price = (typeof apiInfo === 'object' ? apiInfo.pricePerKg : (apiInfo || 0)) || cat.price || 0;
-                    return (
-                      <span key={cat.id}>
-                        {getTranslatedText(cat.name)} @ ₹{price}/{getTranslatedText("kg")}
-                        {idx < selectedCategories.length - 1 && ' • '}
-                      </span>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            )}
-
-            {/* Disclaimer Note */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-4 p-4 rounded-xl border-l-4 shadow-sm"
-              style={{
-                backgroundColor: 'rgba(56, 189, 248, 0.08)',
-                borderColor: '#38bdf8'
-              }}
-            >
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="16" x2="12" y2="12"></line>
-                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                  </svg>
-                </div>
-                <p className="text-xs md:text-sm leading-relaxed" style={{ color: '#4a5568', fontWeight: '500' }}>
-                  <span style={{ color: '#38bdf8', fontWeight: '700' }}>Note:</span> {getTranslatedText("Note: The final payout will be determined by the scrap partner after inspection based on the material's quality, quantity, and condition. The displayed amount is only an estimate and may vary.")}
-                </p>
-              </div>
-            </motion.div>
-          </>
         )}
       </div>
 
@@ -589,9 +604,11 @@ const WeightInputPage = () => {
             onMouseEnter={(e) => e.target.style.backgroundColor = '#5a8263'}
             onMouseLeave={(e) => e.target.style.backgroundColor = '#38bdf8'}
           >
-            {isNegotiable
+            {isOnlyNegotiable
               ? getTranslatedText("Continue")
-              : `${getTranslatedText("Continue with")} ${currentWeight} ${getTranslatedText("kg")}`
+              : hasMixed
+                ? `${getTranslatedText("Continue with")} ${totalWeight.toFixed(1)} ${getTranslatedText("kg")} + ${negotiableCategories.length} Negotiable`
+                : `${getTranslatedText("Continue with")} ${totalWeight.toFixed(1)} ${getTranslatedText("kg")}`
             }
           </motion.button>
         ) : (
@@ -599,9 +616,13 @@ const WeightInputPage = () => {
             className="text-xs md:text-sm text-center"
             style={{ color: '#718096' }}
           >
-            {isNegotiable
+            {isOnlyNegotiable
               ? getTranslatedText("Select item condition to continue")
-              : getTranslatedText("Enter weight to continue")
+              : hasMixed && !allKgWeightsFilled
+                ? "Enter weight for all materials to continue"
+                : hasMixed && !conditionFilled
+                  ? getTranslatedText("Select item condition to continue")
+                  : getTranslatedText("Enter weight to continue")
             }
           </p>
         )}

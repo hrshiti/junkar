@@ -21,7 +21,7 @@ const LoginSignup = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(location.state?.fromSignup !== undefined ? !location.state.fromSignup : true);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const { language, languages, changeLanguage } = useLanguage();
 
@@ -573,7 +573,7 @@ const LoginSignup = () => {
                   <input
                     type="text"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => setName(e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
                     placeholder={getTranslatedText("Full Name")}
                     className="flex-1 bg-transparent border-none outline-none text-base md:text-lg"
                     style={{ color: "#2d3748" }}
@@ -627,7 +627,7 @@ const LoginSignup = () => {
               </motion.div>
             )}
 
-            {/* How did you hear about Scrapto? (Signup only) */}
+            {/* How did you hear about Junkar? (Signup only) */}
             {!isLogin && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
@@ -971,7 +971,7 @@ const LoginSignup = () => {
                   {getTranslatedText("I agree to the")}{" "}
                   <button
                     type="button"
-                    onClick={() => navigate('/user/terms')}
+                    onClick={() => navigate('/user/terms', { state: { fromSignup: !isLogin } })}
                     className="font-semibold text-sky-600 hover:underline"
                   >
                     {getTranslatedText("Terms & Conditions")}

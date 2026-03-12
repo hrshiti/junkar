@@ -8,21 +8,21 @@ const testimonials = [
         role: 'Home Owner',
         text: 'Junkar made selling my old electronics so easy. The scrapper was polite, and I got a great price!',
         rating: 5,
-        avatar: 'https://i.pravatar.cc/150?u=rahul'
+        avatar: 'https://randomuser.me/api/portraits/men/32.jpg'
     },
     {
         name: 'Priya Verma',
         role: 'Regular User',
         text: 'I love how transparent the prices are. No more haggling with local scrap dealers. Highly recommended!',
         rating: 5,
-        avatar: 'https://i.pravatar.cc/150?u=priya'
+        avatar: 'https://randomuser.me/api/portraits/women/44.jpg'
     },
     {
         name: 'Amit Patel',
         role: 'Business Owner',
         text: 'We use Junkar for our office scrap. It is reliable, fast, and the digital payment is very convenient.',
         rating: 4,
-        avatar: 'https://i.pravatar.cc/150?u=amit'
+        avatar: 'https://randomuser.me/api/portraits/men/46.jpg'
     }
 ];
 

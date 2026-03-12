@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
 import { Autocomplete, useJsApiLoader } from '@react-google-maps/api';
 import { useAuth } from '../../shared/context/AuthContext';
 import { validateReferralCode, createReferral, processSignupBonus, getReferralSettings } from '../../shared/utils/referralUtils';
@@ -11,7 +11,7 @@ import { FaPhone, FaLock, FaUser, FaEnvelope, FaTruck, FaMapMarkerAlt, FaCheckCi
 
 const ScrapperLogin = () => {
   const staticTexts = [
-    "Join Scrapto Scrapper Network",
+    "Join Junkar Partner Network",
     "Earn more from",
     "every scrap pickup.",
     "Get verified leads, transparent pricing, and on‑time payments. Designed for serious scrap collectors.",
@@ -19,9 +19,9 @@ const ScrapperLogin = () => {
     "Priority access to high‑value pickups near your area.",
     "Simple OTP login – no passwords, no complications.",
     "Login to continue pickups",
-    "New to Scrapto? Register now",
+    "New to Junkar? Register now",
     "Scrapper Login",
-    "Create Scrapper Account",
+    "Create Junkar Partner Account",
     "Enter your phone number to receive a one‑time OTP.",
     "Quick signup – just your basic details and phone number.",
     "Login",
@@ -30,7 +30,7 @@ const ScrapperLogin = () => {
     "Enter your full name",
     "Email Address",
     "Enter your email address",
-    "How did you hear about Scrapto?",
+    "How did you hear about Junkar?",
     "Select an option",
     "YouTube",
     "Instagram",
@@ -77,12 +77,15 @@ const ScrapperLogin = () => {
     "By continuing, you agree to our Terms & Conditions",
     "Resend in {seconds}s",
     "Search shop location (e.g. Bhopal)",
-    "Location coordinates verified via Google Maps"
+    "Location coordinates verified via Google Maps",
+    "Only alphabets are allowed (no numbers or symbols)",
+    "Format: Vehicle Type - State-District-Series-Number (e.g., Truck - MH-12-AB-1234)"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(location.state?.fromSignup !== undefined ? !location.state.fromSignup : true);
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -556,7 +559,7 @@ const ScrapperLogin = () => {
           <div className="relative z-10">
             <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-white/15 backdrop-blur">
               <span className="w-2 h-2 rounded-full bg-cyan-300 animate-pulse" />
-              {getTranslatedText("Join Scrapto Scrapper Network")}
+              {getTranslatedText("Join Junkar Partner Network")}
             </p>
             <h2 className="mt-4 text-3xl lg:text-4xl font-extrabold leading-tight">
               {getTranslatedText("Earn more from")}
@@ -605,7 +608,7 @@ const ScrapperLogin = () => {
           >
             <div className="inline-flex items-center gap-3 px-3 py-2 rounded-full bg-sky-900/30 text-sky-400 text-xs font-semibold mb-3">
               <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse" />
-              {isLogin ? getTranslatedText('Login to continue pickups') : getTranslatedText('New to Scrapto? Register now')}
+              {isLogin ? getTranslatedText('Login to continue pickups') : getTranslatedText('New to Junkar? Register now')}
             </div>
             <h1 className="text-2xl md:text-3xl font-bold mb-1 text-white">
               {isLogin ? getTranslatedText('Scrapper Login') : getTranslatedText('Create Scrapper Account')}
@@ -690,12 +693,24 @@ const ScrapperLogin = () => {
                       <input
                         type="text"
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        onChange={(e) => {
+                          // Allow only letters (including Indian/Unicode letters) and spaces
+                          const cleaned = e.target.value.replace(/[^a-zA-Z\u0900-\u097F\u0980-\u09FF\u0A00-\u0A7F\u0A80-\u0AFF\u0B00-\u0B7F\u0B80-\u0BFF\u0C00-\u0C7F\u0C80-\u0CFF\u0D00-\u0D7F ]/g, '');
+                          setName(cleaned);
+                        }}
+                        onKeyDown={(e) => {
+                          // Block digit keys directly
+                          if (e.key >= '0' && e.key <= '9') {
+                            e.preventDefault();
+                          }
+                        }}
                         placeholder={getTranslatedText("Enter your full name")}
                         className="w-full px-4 py-3 rounded-xl border-2 border-zinc-700 focus:border-sky-500 focus:ring-2 focus:ring-sky-900/20 focus:outline-none transition-all text-sm md:text-base bg-black text-white placeholder-gray-600"
-
                         required={!isLogin}
                       />
+                      <p className="text-xs text-gray-500 mt-1">
+                        {getTranslatedText("Only alphabets are allowed (no numbers or symbols)")}
+                      </p>
                     </motion.div>
                   )}
 
@@ -727,7 +742,7 @@ const ScrapperLogin = () => {
                       transition={{ duration: 0.3, delay: 0.2 }}
                     >
                       <label className="block text-sm font-semibold mb-2 text-white">
-                        {getTranslatedText("How did you hear about Scrapto?")}
+                        {getTranslatedText("How did you hear about Junkar?")}
                       </label>
                       <select
                         value={heardFrom}
@@ -911,7 +926,13 @@ const ScrapperLogin = () => {
                                 <input
                                   type="text"
                                   value={city}
-                                  onChange={(e) => setCity(e.target.value)}
+                                  onChange={(e) => {
+                                    const cleaned = e.target.value.replace(/[^a-zA-Z\u0900-\u097F\u0980-\u09FF ]/g, '');
+                                    setCity(cleaned);
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key >= '0' && e.key <= '9') e.preventDefault();
+                                  }}
                                   placeholder="City"
                                   className="w-full px-4 py-3 rounded-xl border-2 border-zinc-700 focus:border-sky-500 bg-black/50 text-white text-sm outline-none transition-all"
                                   required={scrapperType === 'dukandaar' || scrapperType === 'wholesaler'}
@@ -922,7 +943,13 @@ const ScrapperLogin = () => {
                                 <input
                                   type="text"
                                   value={state}
-                                  onChange={(e) => setState(e.target.value)}
+                                  onChange={(e) => {
+                                    const cleaned = e.target.value.replace(/[^a-zA-Z\u0900-\u097F\u0980-\u09FF ]/g, '');
+                                    setState(cleaned);
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key >= '0' && e.key <= '9') e.preventDefault();
+                                  }}
                                   placeholder="State"
                                   className="w-full px-4 py-3 rounded-xl border-2 border-zinc-700 focus:border-sky-500 bg-black/50 text-white text-sm outline-none transition-all"
                                   required={scrapperType === 'dukandaar' || scrapperType === 'wholesaler'}
@@ -936,8 +963,29 @@ const ScrapperLogin = () => {
                                 setIsLocatingBusiness(true);
                                 if (navigator.geolocation) {
                                   navigator.geolocation.getCurrentPosition(
-                                    (position) => {
-                                      setBusinessCoordinates([position.coords.longitude, position.coords.latitude]);
+                                    async (position) => {
+                                      const coords = [position.coords.longitude, position.coords.latitude];
+                                      setBusinessCoordinates(coords);
+
+                                      // Reverse Geocode to get address, city, state
+                                      if (isLoaded && window.google) {
+                                        const geocoder = new window.google.maps.Geocoder();
+                                        geocoder.geocode({ location: { lat: coords[1], lng: coords[0] } }, (results, status) => {
+                                          if (status === "OK" && results[0]) {
+                                            setBusinessAddress(results[0].formatted_address);
+                                            const components = results[0].address_components;
+                                            let foundCity = '';
+                                            let foundState = '';
+                                            components.forEach(c => {
+                                              if (c.types.includes('locality') || c.types.includes('sublocality_level_1')) foundCity = c.long_name;
+                                              if (c.types.includes('administrative_area_level_1')) foundState = c.long_name;
+                                            });
+                                            if (foundCity) setCity(foundCity);
+                                            if (foundState) setState(foundState);
+                                          }
+                                        });
+                                      }
+
                                       setIsLocatingBusiness(false);
                                     },
                                     (error) => {
@@ -1025,11 +1073,27 @@ const ScrapperLogin = () => {
                       <input
                         type="text"
                         value={vehicleInfo}
-                        onChange={(e) => setVehicleInfo(e.target.value)}
+                        onChange={(e) => {
+                          // Allow only letters, digits, spaces and hyphens (Indian vehicle number format)
+                          const cleaned = e.target.value.replace(/[^a-zA-Z0-9\- ]/g, '');
+                          setVehicleInfo(cleaned);
+                        }}
+                        onKeyDown={(e) => {
+                          // Block special characters — allow letters, digits, hyphen, space, and control keys
+                          const allowed = /^[a-zA-Z0-9\- ]$/.test(e.key);
+                          const isControl = e.ctrlKey || e.metaKey || e.altKey ||
+                            ['Backspace','Delete','Tab','Enter','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(e.key);
+                          if (!allowed && !isControl) {
+                            e.preventDefault();
+                          }
+                        }}
                         placeholder={getTranslatedText("e.g., Truck - MH-12-AB-1234")}
                         className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${vehicleInfo ? 'border-sky-500 ring-sky-900/20' : 'border-zinc-700 focus:border-sky-500'} `}
                         required={!isLogin}
                       />
+                      <p className="text-xs text-gray-500 mt-1">
+                        {getTranslatedText("Format: Vehicle Type - State-District-Series-Number (e.g., Truck - MH-12-AB-1234)")}
+                      </p>
                     </motion.div>
                   )}
 
@@ -1230,7 +1294,7 @@ const ScrapperLogin = () => {
             className="text-center mt-4 text-xs md:text-sm text-gray-400"
           >
             {getTranslatedText("By continuing, you agree to our ")}
-            <Link to="/scrapper/terms" className="underline hover:text-sky-400 transition-colors">
+            <Link to="/scrapper/terms" state={{ fromSignup: !isLogin }} className="underline hover:text-sky-400 transition-colors">
               {getTranslatedText("Terms & Conditions")}
             </Link>
           </motion.div>

@@ -33,6 +33,13 @@ export const reportFakeLead = asyncHandler(async (req, res) => {
     status: 'pending'
   });
 
+  // Update order status so it's removed from scrapper's list
+  await Order.findByIdAndUpdate(orderId, {
+    status: 'cancelled',
+    assignmentStatus: 'rejected',
+    notes: (order.notes || '') + `\n[System]: Order marked as Fake Lead by Scrapper. Reason: ${reason}.`
+  });
+
   logger.info('Fake lead reported', { reportId: report._id, orderId, scrapperId });
   return sendSuccess(res, 'Fake lead reported. Admin will review.', { report }, 201);
 });

@@ -106,8 +106,11 @@ const TrackOrderPage = () => {
 
                     // Set Scrapper Location if available
                     if (data.scrapper?.liveLocation?.coordinates) {
-                        const [lng, lat] = data.scrapper.liveLocation.coordinates;
-                        if (lat && lng) {
+                        const coords = data.scrapper.liveLocation.coordinates;
+                        const lng = typeof coords[0] === 'number' ? coords[0] : null;
+                        const lat = typeof coords[1] === 'number' ? coords[1] : null;
+
+                        if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng)) {
                             setScrapperLocation({ lat, lng });
                         }
                     }
@@ -132,7 +135,7 @@ const TrackOrderPage = () => {
 
             socketClient.onLocationUpdate((data) => {
                 // data: { orderId, location, heading }
-                if (data.orderId === orderId && data.location && data.location.lat && data.location.lng) {
+                if (data.orderId === orderId && data.location && typeof data.location.lat === 'number' && typeof data.location.lng === 'number' && !isNaN(data.location.lat) && !isNaN(data.location.lng)) {
                     setScrapperLocation(data.location);
                     setHeading(data.heading || 0);
                 }
@@ -220,10 +223,10 @@ const TrackOrderPage = () => {
 
     // Calculate Route
     useEffect(() => {
-        if (isLoaded && scrapperLocation && userLocation && scrapperLocation.lat && userLocation.lat) {
+        if (isLoaded && scrapperLocation && userLocation && typeof scrapperLocation.lat === 'number' && typeof userLocation.lat === 'number' && !isNaN(scrapperLocation.lat) && !isNaN(userLocation.lat)) {
             const directionsService = new window.google.maps.DirectionsService();
             directionsService.route({
-                origin: scrapperLocation, // Use actual location for route
+                origin: scrapperLocation,
                 destination: userLocation,
                 travelMode: window.google.maps.TravelMode.DRIVING
             }, (result, status) => {
@@ -263,7 +266,7 @@ const TrackOrderPage = () => {
                     </button>
                     <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg">
                         <h1 className="font-bold text-gray-800">
-                            {eta ? `Arriving in ${eta}` : 'Tracking Order'}
+                            {order.isDonation ? (eta ? `Donation arriving in ${eta}` : 'Donation Pickup') : (eta ? `Arriving in ${eta}` : 'Tracking Order')}
                         </h1>
                     </div>
                 </div>
@@ -284,27 +287,29 @@ const TrackOrderPage = () => {
                     onUnmount={onUnmount}
                 >
                     {/* User Home Marker */}
-                    <Marker
-                        position={userLocation}
-                        icon={{
-                            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                                <svg width="40" height="48" viewBox="0 0 40 48" xmlns="http://www.w3.org/2000/svg">
-                                    <ellipse cx="20" cy="46" rx="10" ry="2" fill="rgba(0,0,0,0.2)"/>
-                                    <path d="M20 4 C12 4 6 10 6 18 C6 28 20 44 20 44 C20 44 34 28 34 18 C34 10 28 4 20 4 Z" 
-                                          fill="#ef4444" stroke="#ffffff" stroke-width="2"/>
-                                    <circle cx="20" cy="18" r="6" fill="#ffffff"/>
-                                    <circle cx="20" cy="16" r="2.5" fill="#ef4444"/>
-                                    <path d="M16 22 Q20 20 24 22" stroke="#ef4444" stroke-width="1.5" fill="none"/>
-                                </svg>
-                            `),
-                            scaledSize: new window.google.maps.Size(40, 48),
-                            anchor: new window.google.maps.Point(20, 46)
-                        }}
-                        animation={window.google.maps.Animation.BOUNCE}
-                    />
+                    {isLoaded && userLocation && (
+                      <Marker
+                          position={userLocation}
+                          icon={{
+                              url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                                  <svg width="40" height="48" viewBox="0 0 40 48" xmlns="http://www.w3.org/2000/svg">
+                                      <ellipse cx="20" cy="46" rx="10" ry="2" fill="rgba(0,0,0,0.2)"/>
+                                      <path d="M20 4 C12 4 6 10 6 18 C6 28 20 44 20 44 C20 44 34 28 34 18 C34 10 28 4 20 4 Z" 
+                                            fill="#ef4444" stroke="#ffffff" stroke-width="2"/>
+                                      <circle cx="20" cy="18" r="6" fill="#ffffff"/>
+                                      <circle cx="20" cy="16" r="2.5" fill="#ef4444"/>
+                                      <path d="M16 22 Q20 20 24 22" stroke="#ef4444" stroke-width="1.5" fill="none"/>
+                                  </svg>
+                              `),
+                              scaledSize: new window.google.maps.Size(40, 48),
+                              anchor: new window.google.maps.Point(20, 46)
+                          }}
+                          animation={window.google.maps.Animation.BOUNCE}
+                      />
+                    )}
 
                     {/* Scrapper Truck Marker */}
-                    {animatedPosition && (
+                    {isLoaded && animatedPosition && (
                         <Marker
                             position={animatedPosition}
                             icon={{

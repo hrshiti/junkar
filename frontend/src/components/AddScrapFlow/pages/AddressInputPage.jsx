@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaMapMarkerAlt, FaLocationArrow } from 'react-icons/fa';
@@ -32,7 +32,11 @@ const AddressInputPage = () => {
         "Location request timed out.",
         "An unknown error occurred.",
         "Please enter your pickup address",
-        "Please allow location access or enter your location manually"
+        "Please allow location access or enter your location manually",
+        "Enable Device Location",
+        "To find your address automatically, please enable your device location and allow browser access.",
+        "Enable Now",
+        "Maybe Later"
     ];
     const { getTranslatedText } = usePageTranslation(staticTexts);
     const navigate = useNavigate();
@@ -43,6 +47,7 @@ const AddressInputPage = () => {
     const [uploadedImages, setUploadedImages] = useState([]);
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [weightData, setWeightData] = useState(null);
+    const [showPermissionModal, setShowPermissionModal] = useState(false);
 
     // Load data from sessionStorage
     useEffect(() => {
@@ -77,9 +82,25 @@ const AddressInputPage = () => {
         setIsGettingLocation(true);
         setLocationError('');
 
+        // Show permission prompt if needed (UI nudge)
+        // Note: Browsers will still show their native prompt
+        // This is a custom UI to explain "Enable device location"
+        if (!coordinates && !sessionStorage.getItem('location_hint_shown')) {
+            setShowPermissionModal(true);
+            setIsGettingLocation(false);
+            return;
+        }
+
+        performLocationFetch();
+    };
+
+    const performLocationFetch = () => {
+        setIsGettingLocation(true);
+        setLocationError('');
+        setShowPermissionModal(false);
+        sessionStorage.setItem('location_hint_shown', 'true');
         navigator.geolocation.getCurrentPosition(
             async (position) => {
-                console.log("Location detected:", position.coords);
                 const coords = {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude
@@ -144,7 +165,7 @@ const AddressInputPage = () => {
                 }
             },
             {
-                enableHighAccuracy: true,  // Enabling high accuracy for better street detail
+                enableHighAccuracy: true,
                 timeout: 30000,
                 maximumAge: 0
             }
@@ -327,25 +348,47 @@ const AddressInputPage = () => {
                     <h3 className="text-base font-bold mb-3" style={{ color: '#2d3748' }}>
                         {getTranslatedText("Request Summary")}
                     </h3>
-                    <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                            <span style={{ color: '#718096' }}>{getTranslatedText("Categories:")}</span>
-                            <span className="font-semibold text-right" style={{ color: '#2d3748', maxWidth: '70%' }}>
-                                {selectedCategories.map(cat => getTranslatedText(cat.name)).join(', ')}
-                            </span>
+                    <div className="space-y-4">
+                        {/* Categories & Weights Breakdown */}
+                        <div className="space-y-2">
+                            {selectedCategories.map((cat) => {
+                                // Find weight for this category if non-negotiable
+                                const weightInfo = weightData?.categoryWeights?.find(w => w.categoryId === cat.id);
+                                const isNegotiable = weightData?.negotiableCategories?.some(nw => nw.categoryId === cat.id);
+
+                                return (
+                                    <div key={cat.id} className="flex justify-between items-start text-sm">
+                                        <span style={{ color: '#718096' }}>{getTranslatedText(cat.name)}:</span>
+                                        <span className="font-semibold text-right" style={{ color: '#2d3748' }}>
+                                            {isNegotiable
+                                                ? <span style={{ color: '#b45309' }}>{getTranslatedText("Negotiable")}</span>
+                                                : weightInfo
+                                                    ? `${weightInfo.weight} ${getTranslatedText("kg")}`
+                                                    : `- ${getTranslatedText("kg")}`
+                                            }
+                                        </span>
+                                    </div>
+                                );
+                            })}
                         </div>
+
+                        <div className="h-px bg-gray-100" />
+
                         <div className="flex justify-between text-sm">
                             <span style={{ color: '#718096' }}>{getTranslatedText("Images:")}</span>
                             <span className="font-semibold" style={{ color: '#2d3748' }}>
                                 {uploadedImages.length} {getTranslatedText("uploaded")}
                             </span>
                         </div>
-                        <div className="flex justify-between text-sm">
-                            <span style={{ color: '#718096' }}>{getTranslatedText("Weight:")}</span>
-                            <span className="font-semibold" style={{ color: '#2d3748' }}>
-                                {weightData?.weight || 0} {getTranslatedText("kg")}
-                            </span>
-                        </div>
+
+                        {!weightData?.negotiableCategories?.length && weightData?.weight > 0 && (
+                            <div className="flex justify-between text-sm">
+                                <span style={{ color: '#718096' }}>{getTranslatedText("Total Weight:")}</span>
+                                <span className="font-semibold" style={{ color: '#38bdf8' }}>
+                                    {weightData.weight} {getTranslatedText("kg")}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </motion.div>
             </div>
@@ -382,6 +425,46 @@ const AddressInputPage = () => {
                     </p>
                 )}
             </div>
+            {/* Location Permission Modal */}
+            <AnimatePresence>
+                {showPermissionModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+                        >
+                            <div className="w-16 h-16 bg-sky-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <FaLocationArrow className="text-2xl text-sky-500" />
+                            </div>
+                            <h3 className="text-xl font-bold text-center mb-2" style={{ color: '#2d3748' }}>
+                                {getTranslatedText("Enable Device Location")}
+                            </h3>
+                            <p className="text-sm text-center mb-6" style={{ color: '#718096' }}>
+                                {getTranslatedText("To find your address automatically, please enable your device location and allow browser access.")}
+                            </p>
+                            <div className="flex flex-col gap-2">
+                                <button
+                                    onClick={performLocationFetch}
+                                    className="w-full py-3 rounded-xl bg-sky-500 text-white font-bold shadow-lg shadow-sky-200"
+                                >
+                                    {getTranslatedText("Enable Now")}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setShowPermissionModal(false);
+                                        setIsGettingLocation(false);
+                                    }}
+                                    className="w-full py-3 rounded-xl border border-gray-200 text-gray-500 font-semibold"
+                                >
+                                    {getTranslatedText("Maybe Later")}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </motion.div>
     );
 };

@@ -61,6 +61,11 @@ const priceSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
     index: true
+  },
+  isNegotiable: {
+    type: Boolean,
+    default: false,
+    index: true
   }
 }, {
   timestamps: true

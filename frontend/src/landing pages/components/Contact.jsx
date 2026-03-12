@@ -27,7 +27,7 @@ const Contact = () => {
                     style={{ padding: '3rem' }}
                 >
                     <form style={{ display: 'grid', gap: '1.5rem' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                        <div className="contact-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                             <div style={{ display: 'grid', gap: '0.5rem' }}>
                                 <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>{getTranslatedText("Full Name")}</label>
                                 <input
@@ -131,7 +131,11 @@ const Contact = () => {
 
             <style>{`
         @media (max-width: 991px) {
-          section#contact > div { grid-template-columns: 1fr; }
+          section#contact > div { grid-template-columns: 1fr !important; }
+          .contact-form-grid { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 768px) {
+          section#contact .glass-card { padding: 1.5rem !important; }
         }
       `}</style>
         </section>

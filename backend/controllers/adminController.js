@@ -988,7 +988,7 @@ export const getAllPrices = asyncHandler(async (req, res) => {
 // @access  Private (Admin)
 export const createPrice = asyncHandler(async (req, res) => {
   try {
-    const { category, pricePerKg, price: fixedPrice, regionCode, effectiveDate, isActive, image, type, minPrice, maxPrice } = req.body;
+    const { category, pricePerKg, price: fixedPrice, regionCode, effectiveDate, isActive, isNegotiable, image, type, minPrice, maxPrice } = req.body;
 
     if (!category) {
       return sendError(res, 'Category is required', 400);
@@ -1015,6 +1015,7 @@ export const createPrice = asyncHandler(async (req, res) => {
       regionCode: regionCode || 'IN-DL',
       effectiveDate: effectiveDate ? new Date(effectiveDate) : new Date(),
       isActive: isActive !== undefined ? isActive : true,
+      isNegotiable: isNegotiable || false,
       updatedBy: req.user.id,
       image,
       type: type || 'material',
@@ -1034,7 +1035,7 @@ export const createPrice = asyncHandler(async (req, res) => {
 // @access  Private (Admin)
 export const updatePrice = asyncHandler(async (req, res) => {
   try {
-    const { pricePerKg, effectiveDate, isActive, image, minPrice, maxPrice } = req.body;
+    const { pricePerKg, effectiveDate, isActive, isNegotiable, image, minPrice, maxPrice } = req.body;
     const priceId = req.params.id;
 
     const price = await Price.findById(priceId);
@@ -1042,10 +1043,10 @@ export const updatePrice = asyncHandler(async (req, res) => {
       return sendError(res, 'Price not found', 404);
     }
 
-    if (pricePerKg) price.pricePerKg = pricePerKg;
+    if (pricePerKg !== undefined) price.pricePerKg = pricePerKg;
     if (effectiveDate) price.effectiveDate = new Date(effectiveDate);
     if (isActive !== undefined) price.isActive = isActive;
-    if (isActive !== undefined) price.isActive = isActive;
+    if (isNegotiable !== undefined) price.isNegotiable = isNegotiable;
     if (image !== undefined) price.image = image;
     if (minPrice !== undefined) price.minPrice = minPrice;
     if (maxPrice !== undefined) price.maxPrice = maxPrice;

@@ -21,7 +21,7 @@ const PriceTicker = () => {
         { type: "Plastic", originalType: "Plastic", price: 45, unit: "kg" },
         { type: "Metal", originalType: "Metal", price: 180, unit: "kg" },
         { type: "Paper", originalType: "Paper", price: 12, unit: "kg" },
-        { type: "Electronics", originalType: "Electronics", price: 85, unit: "kg" },
+        { type: "E-Waste", originalType: "E-Waste", price: 100, unit: "kg" },
         { type: "Copper", originalType: "Copper", price: 650, unit: "kg" },
         { type: "Aluminium", originalType: "Aluminium", price: 180, unit: "kg" },
         { type: "Steel", originalType: "Steel", price: 35, unit: "kg" },
@@ -40,18 +40,22 @@ const PriceTicker = () => {
             };
           });
 
-          const updated = await Promise.all(
-            staticPrices.map(async (item) => ({
-              ...item,
-              type: await translate(item.originalType),
-              price: apiPrices[item.originalType.toLowerCase()] !== undefined
-                ? apiPrices[item.originalType.toLowerCase()].price
-                : item.price,
-              minPrice: apiPrices[item.originalType.toLowerCase()]?.minPrice,
-              maxPrice: apiPrices[item.originalType.toLowerCase()]?.maxPrice,
-              change: null
-            }))
-          );
+          const updated = (await Promise.all(
+            staticPrices.map(async (item) => {
+              const apiItem = apiPrices[item.originalType.toLowerCase()];
+              if (apiItem && apiItem.isActive === false) return null;
+
+              return {
+                ...item,
+                type: await translate(item.originalType),
+                price: apiItem !== undefined ? apiItem.price : item.price,
+                minPrice: apiItem?.minPrice,
+                maxPrice: apiItem?.maxPrice,
+                isNegotiable: item.originalType.toLowerCase().includes('electron') || item.originalType.toLowerCase().includes('e-waste'),
+                change: null
+              };
+            })
+          )).filter(Boolean);
           setPrices(updated);
         } else {
           const translated = await Promise.all(
@@ -129,9 +133,15 @@ const PriceTicker = () => {
               <p
                 className="text-sm md:text-base font-bold"
                 style={{ color: "#1e293b" }}>
-                {item.minPrice && item.maxPrice
-                  ? `₹${item.minPrice}-${item.maxPrice}/${item.unit}`
-                  : `₹${item.price.toFixed(0)}/${item.unit}`}
+                {item.isNegotiable ? (
+                  <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-[#fef3c7] text-[#92400e] border border-amber-200 w-fit">
+                    <span className="text-amber-500 text-[10px]">💛</span> {getTranslatedText('Negotiable')}
+                  </div>
+                ) : (
+                  item.minPrice && item.maxPrice
+                    ? `₹${item.minPrice}-${item.maxPrice}/${item.unit}`
+                    : `₹${item.price.toFixed(0)}/${item.unit}`
+                )}
               </p>
             </div>
           ))}

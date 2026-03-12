@@ -78,11 +78,12 @@ const HelpSupport = () => {
     setLoading(true);
     setError(null);
     try {
-      let query = '';
-      if (filters.status !== 'all') query += `&status=${filters.status}`;
-      if (filters.priority !== 'all') query += `&priority=${filters.priority}`;
-      if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
+      const params = new URLSearchParams();
+      if (filters.status !== 'all') params.append('status', filters.status);
+      if (filters.priority !== 'all') params.append('priority', filters.priority);
+      if (filters.search) params.append('search', filters.search);
 
+      const query = params.toString();
       const response = await supportAPI.getAllAdmin(query);
       if (response.success) {
         setTickets(response.data.tickets || []);

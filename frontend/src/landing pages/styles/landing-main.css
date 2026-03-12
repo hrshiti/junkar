@@ -401,12 +401,88 @@
   .nav-links {
     display: none;
   }
-
+  
   .hero-title {
     font-size: 2.5rem;
   }
-
+  
   .section {
     padding: 3rem 0;
+  }
+
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .category-card {
+    padding: 1rem 0.5rem;
+  }
+
+  .category-icon {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .category-icon svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .category-name {
+    font-size: 0.9rem;
+  }
+
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .testimonial-card {
+    padding: 1.5rem;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .hero-title {
+    font-size: 2.25rem !important;
+  }
+
+  .section-title {
+    font-size: 1.85rem !important;
+  }
+
+  .section-header p {
+    font-size: 0.95rem;
+  }
+
+  .container {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 1.85rem !important;
+  }
+  
+  .hero-ctas {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .hero-ctas .btn {
+    width: 100%;
+    justify-content: center;
   }
 }

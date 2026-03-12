@@ -44,6 +44,7 @@ export const API_ENDPOINTS = {
   uploads: {
     orderImages: '/uploads/order-images',
     kycDocs: '/uploads/kyc-docs',
+    categoryImage: '/uploads/category-image',
   },
   // Earnings endpoints (to be created in backend)
   earnings: {

@@ -82,10 +82,12 @@ const PriceListPage = () => {
                     response.data.prices.length > 0
                 ) {
                     const allItems = response.data.prices;
-                    // Filter Materials only
+                    // Filter active Materials only
                     const materials = allItems.filter(
-                        (p) => !p.type || p.type === PRICE_TYPES.MATERIAL
+                        (p) => (!p.type || p.type === PRICE_TYPES.MATERIAL) && p.isActive !== false
                     );
+
+                    const negotiableKeys = ['e_waste', 'furniture', 'home_appliance', 'vehicle_scrap', 'electronics', 'e-waste'];
 
                     const mappedPrices = materials.map((price) => ({
                         id: price._id || price.id,
@@ -94,6 +96,7 @@ const PriceListPage = () => {
                         minPrice: price.minPrice,
                         maxPrice: price.maxPrice,
                         unit: price.unit || 'kg',
+                        isNegotiable: negotiableKeys.includes(price.category.toLowerCase().replace(' ', '_').replace('-', '_')),
                         image: price.image || getCategoryImage(price.category),
                     }));
                     setPrices(mappedPrices);
@@ -193,9 +196,15 @@ const PriceListPage = () => {
                                     className="text-right bg-slate-50 px-2.5 py-1.5 rounded-md border border-slate-200"
                                 >
                                     <p className="text-sm font-bold" style={{ color: "#000000" }}>
-                                        {item.minPrice && item.maxPrice
-                                            ? `₹${item.minPrice} - ₹${item.maxPrice}`
-                                            : `₹${item.price}`}
+                                        {item.isNegotiable ? (
+                                            <span className="flex items-center gap-1 font-bold text-[10px] bg-[#fef3c7] text-[#92400e] px-1.5 py-0.5 rounded border border-amber-200 shadow-sm">
+                                                <span className="text-amber-500">💛</span> {getTranslatedText('Negotiable')}
+                                            </span>
+                                        ) : (
+                                            item.minPrice && item.maxPrice
+                                                ? `₹${item.minPrice} - ₹${item.maxPrice}`
+                                                : `₹${item.price}`
+                                        )}
                                     </p>
                                 </div>
                             </div>

@@ -30,7 +30,7 @@ const ScrapperProfile = () => {
     "Vehicle",
     "Vehicle photo",
     "Not provided",
-    "Heard about Scrapto",
+    "Heard about Junkar",
     "Profile editing will be available soon.",
     "KYC status",
     "View",
@@ -45,7 +45,7 @@ const ScrapperProfile = () => {
     "Refer & Earn",
     "Share your code and earn extra on pickups",
     "Terms & Conditions",
-    "Read how Scrapto works for scrappers",
+    "Read how Junkar works for scrappers",
     "Terms & Conditions screen will be added later.",
     "Help & Support",
     "Get help for any issue",
@@ -53,7 +53,10 @@ const ScrapperProfile = () => {
     "Total Weight Purchased",
     "Category-wise Breakdown",
     "No scrap purchased yet",
-    "Weight"
+    "Weight",
+    "Fixed Price",
+    "Negotiable",
+    "Donate"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -384,7 +387,7 @@ const ScrapperProfile = () => {
               )}
               {scrapperUser?.heardFrom && (
                 <>
-                  <span className="text-slate-600">{getTranslatedText("Heard about Scrapto")}</span>
+                  <span className="text-slate-600">{getTranslatedText("Heard about Junkar")}</span>
                   <span className="font-semibold text-right text-slate-900">
                     {scrapperUser.heardFrom.startsWith('other:')
                       ? scrapperUser.heardFrom.replace('other:', '')
@@ -531,7 +534,22 @@ const ScrapperProfile = () => {
                         <div className="space-y-2">
                           {scrapStats.categoryStats.map((item, idx) => (
                             <div key={idx} className="flex justify-between items-center text-xs">
-                              <span className="text-slate-600 font-medium">{getTranslatedText(item.category)}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-slate-600 font-medium">{getTranslatedText(item.category)}</span>
+                                {item.pricingType === 'donate' ? (
+                                  <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-green-100 text-green-700 border border-green-200 uppercase tracking-tighter">
+                                    {getTranslatedText("Donate")}
+                                  </span>
+                                ) : item.pricingType === 'negotiable' ? (
+                                  <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-amber-100 text-amber-700 border border-amber-200 uppercase tracking-tighter">
+                                    {getTranslatedText("Negotiable")}
+                                  </span>
+                                ) : (
+                                  <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-sky-100 text-sky-700 border border-sky-200 uppercase tracking-tighter">
+                                    {getTranslatedText("Fixed Price")}
+                                  </span>
+                                )}
+                              </div>
                               <span className="font-bold text-slate-800">{item.weight.toFixed(2)} kg</span>
                             </div>
                           ))}
@@ -613,7 +631,7 @@ const ScrapperProfile = () => {
                   {getTranslatedText("Terms & Conditions")}
                 </p>
                 <p className="text-xs text-slate-500">
-                  {getTranslatedText("Read how Scrapto works for scrappers")}
+                  {getTranslatedText("Read how Junkar works for scrappers")}
                 </p>
               </div>
               <span className="text-slate-400">

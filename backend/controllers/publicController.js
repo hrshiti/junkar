@@ -12,7 +12,7 @@ export const getPublicPrices = asyncHandler(async (req, res) => {
         // Get distinct categories first to avoid duplicates if multiple regions exist (simplification for now)
         // Or just get all active prices for default region (IN-DL) or all regions if specific query
 
-        const filter = { isActive: true };
+        const filter = {};
         if (req.query.regionCode) {
             filter.regionCode = req.query.regionCode;
         } else {
@@ -22,7 +22,7 @@ export const getPublicPrices = asyncHandler(async (req, res) => {
         }
 
         const prices = await Price.find(filter)
-            .select('category pricePerKg price type regionCode effectiveDate updatedAt image minPrice maxPrice')
+            .select('category pricePerKg price type regionCode effectiveDate updatedAt image minPrice maxPrice isNegotiable isActive')
             .sort({ category: 1 });
 
         sendSuccess(res, 'Public prices retrieved successfully', { prices });

@@ -135,6 +135,7 @@ const MyRequestsPage = () => {
       address,
       notes: order.notes || "",
       hasReview: !!order.review, // Check if review ID exists
+      isDonation: order.isDonation
     };
   };
 
@@ -521,9 +522,14 @@ const MyRequestsPage = () => {
                               backgroundColor: status.bgColor,
                               color: status.color,
                             }}>
-                            <StatusIcon size={12} />
-                            {status.label}
-                          </span>
+                             <StatusIcon size={12} />
+                             {request.isDonation ? (
+                               request.status === 'accepted' ? 'Donation Accepted' :
+                               request.status === 'in_progress' ? 'Donation Pickup' :
+                               request.status === 'completed' ? 'Donation Successful' :
+                               status.label
+                             ) : status.label}
+                           </span>
                         </div>
                         <div
                           className="flex items-center gap-2 text-xs md:text-sm"

@@ -255,20 +255,17 @@ const PriceConfirmationPage = () => {
       };
     }
 
-    const isNegotiableOrder = weightData?.pricingType === 'negotiable';
-    const totalWeight = Number(weightData?.weight || 0);
-    const itemCount = Math.max(selectedCategories.length, 1);
-    const weightPerItem = totalWeight > 0 ? totalWeight / itemCount : 0;
+    const pricingType = weightData?.pricingType || 'kg_based';
+    const isNegotiableOrder = pricingType === 'negotiable' || pricingType === 'mixed';
 
-    let scrapItems;
+    const scrapItems = selectedCategories.map((cat) => {
+      const category = mapCategoryToBackend(cat);
+      const isCatNegotiable = weightData?.negotiableCategories?.some(nw => nw.categoryId === cat.id);
 
-    if (isNegotiableOrder) {
-      // Model B: Negotiable items
-      scrapItems = selectedCategories.map((cat) => {
-        const category = mapCategoryToBackend(cat);
+      if (isCatNegotiable) {
         return {
           category,
-          name: cat.name, // Original name (e.g., Computer Items)
+          name: cat.name,
           pricingType: 'negotiable',
           weight: 0,
           rate: 0,
@@ -276,23 +273,25 @@ const PriceConfirmationPage = () => {
           itemCondition: weightData?.itemCondition || 'average',
           expectedPrice: weightData?.expectedPrice || null
         };
-      });
-    } else {
-      // Model A: kg_based items (existing logic, untouched)
-      scrapItems = selectedCategories.map((cat) => {
-        const category = mapCategoryToBackend(cat);
-        const rate = cat.price || marketPrices[cat.name] || 0;
-        const total = weightPerItem * rate;
+      } else {
+        // Find specific weight for this category
+        const catWeightData = weightData?.categoryWeights?.find(w => w.categoryId === cat.id);
+        const weightValue = catWeightData ? Number(catWeightData.weight) : (Number(weightData?.weight || 0) / selectedCategories.length);
+
+        const rateNode = marketPrices[cat.name];
+        const rate = (typeof rateNode === 'object' ? rateNode.pricePerKg : rateNode) || cat.price || 0;
+        const total = weightValue * rate;
+
         return {
           category,
-          name: cat.name, // Original name
+          name: cat.name,
           pricingType: 'kg_based',
-          weight: weightPerItem || 1,
+          weight: weightValue,
           rate,
           total
         };
-      });
-    }
+      }
+    });
 
     const images = uploadedImages.map((img) => ({
       url: img.url || img.preview,
@@ -451,43 +450,41 @@ const PriceConfirmationPage = () => {
             </div>
           )}
 
-          {/* Weight or Condition (depends on pricing type) */}
+          {/* Weight or Condition Details */}
           {weightData && (
             <div className="mb-4">
-              {weightData.pricingType === 'negotiable' ? (
-                <>
+              {/* If any negotiable items, show condition */}
+              {weightData.negotiableCategories?.length > 0 && (
+                <div className="mb-3">
                   <p className="text-xs md:text-sm mb-1" style={{ color: '#718096' }}>
-                    {getTranslatedText("Condition:")}
+                    {getTranslatedText("Item Condition (Negotiable):")}
                   </p>
-                  <p className="text-base md:text-lg font-semibold capitalize" style={{ color: '#2d3748' }}>
+                  <p className="text-base md:text-lg font-semibold capitalize" style={{ color: '#b45309' }}>
                     {weightData.itemCondition === 'good' ? '✅ ' : weightData.itemCondition === 'average' ? '⚠️ ' : '🔧 '}
                     {getTranslatedText(weightData.itemCondition === 'good' ? 'Good' : weightData.itemCondition === 'average' ? 'Average' : 'Damaged')}
                   </p>
-                  {weightData.expectedPrice && (
-                    <div className="mt-2">
-                      <p className="text-xs md:text-sm mb-1" style={{ color: '#718096' }}>
-                        {getTranslatedText("Expected Price:")}
-                      </p>
-                      <p className="text-base md:text-lg font-semibold" style={{ color: '#38bdf8' }}>
-                        ₹{weightData.expectedPrice}
-                      </p>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
+                </div>
+              )}
+
+              {/* If any weight items, show weights */}
+              {weightData.categoryWeights?.length > 0 && (
+                <div>
                   <p className="text-xs md:text-sm mb-1" style={{ color: '#718096' }}>
-                    {getTranslatedText("Weight:")}
+                    {getTranslatedText("Weights Breakdown:")}
                   </p>
-                  <p className="text-base md:text-lg font-semibold" style={{ color: '#2d3748' }}>
-                    {weightData.weight} {getTranslatedText("kg")}
-                    {weightData.mode === 'auto' && (
-                      <span className="text-xs md:text-sm ml-2" style={{ color: '#718096' }}>
-                        {getTranslatedText("(Auto-detected)")}
-                      </span>
+                  <div className="space-y-1">
+                    {weightData.categoryWeights.map(w => (
+                      <p key={w.categoryId} className="text-sm font-semibold" style={{ color: '#2d3748' }}>
+                        {getTranslatedText(w.categoryName)}: {w.weight} {getTranslatedText("kg")}
+                      </p>
+                    ))}
+                    {weightData.categoryWeights.length > 1 && (
+                      <p className="text-base font-bold mt-1 pt-1 border-t" style={{ color: '#38bdf8' }}>
+                        {getTranslatedText("Total Weight:")} {weightData.weight} {getTranslatedText("kg")}
+                      </p>
                     )}
-                  </p>
-                </>
+                  </div>
+                </div>
               )}
             </div>
           )}
@@ -532,23 +529,31 @@ const PriceConfirmationPage = () => {
                 <p className="text-xs md:text-sm mb-2" style={{ color: '#718096' }}>
                   {getTranslatedText("Price Breakdown:")}
                 </p>
-                {selectedCategories.map((cat) => (
-                  <div key={cat.id} className="flex justify-between items-center mb-1">
-                    <span className="text-xs md:text-sm" style={{ color: '#2d3748' }}>
-                      {getTranslatedText(cat.name)}
-                    </span>
-                    <span className="text-xs md:text-sm font-medium" style={{ color: '#38bdf8' }}>
-                      {(() => {
-                        const info = marketPrices[cat.name];
-                        if (info && (info.minPrice || info.maxPrice)) {
-                          return `₹${info.minPrice || info.pricePerKg} - ₹${info.maxPrice || info.pricePerKg}`;
-                        }
-                        const price = info?.pricePerKg || cat.price || 0;
-                        return `₹${price}`;
-                      })()}/{getTranslatedText("kg")}
-                    </span>
-                  </div>
-                ))}
+                {selectedCategories.map((cat) => {
+                  const isNegotiable = weightData?.negotiableCategories?.some(nw => nw.categoryId === cat.id);
+                  const weightInfo = weightData?.categoryWeights?.find(w => w.categoryId === cat.id);
+
+                  return (
+                    <div key={cat.id} className="flex justify-between items-center mb-1">
+                      <span className="text-xs md:text-sm" style={{ color: '#2d3748' }}>
+                        {getTranslatedText(cat.name)}
+                        {weightInfo && ` (${weightInfo.weight}kg)`}
+                      </span>
+                      <span className="text-xs md:text-sm font-medium" style={{ color: isNegotiable ? '#b45309' : '#38bdf8' }}>
+                        {isNegotiable ? (
+                          getTranslatedText("Negotiable")
+                        ) : (() => {
+                          const info = marketPrices[cat.name];
+                          if (info && (info.minPrice || info.maxPrice)) {
+                            return `₹${info.minPrice || info.pricePerKg || info} - ₹${info.maxPrice || info.pricePerKg || info}`;
+                          }
+                          const price = info?.pricePerKg || info || cat.price || 0;
+                          return `₹${price}/${getTranslatedText("kg")}`;
+                        })()}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Total Estimated Payout */}
@@ -562,12 +567,16 @@ const PriceConfirmationPage = () => {
                       ? `₹0 (${getTranslatedText('Free Donation')})`
                       : weightData?.pricingType === 'negotiable'
                         ? (weightData.expectedPrice ? `₹${weightData.expectedPrice}` : getTranslatedText('Negotiable'))
-                        : `₹${estimatedPayout.toFixed(0)}`}
+                        : weightData?.pricingType === 'mixed'
+                          ? `₹${estimatedPayout.toFixed(0)} + ${getTranslatedText('Negotiable')}`
+                          : `₹${estimatedPayout.toFixed(0)}`}
                   </span>
                   <span className="text-sm md:text-base" style={{ color: '#718096' }}>
                     {weightData?.pricingType === 'negotiable'
                       ? (weightData.expectedPrice ? `(${getTranslatedText('Expected')})` : getTranslatedText('Quote Pending'))
-                      : `${getTranslatedText("for")} ${weightData?.weight || 0} ${getTranslatedText("kg")}`}
+                      : weightData?.pricingType === 'mixed'
+                        ? `${getTranslatedText("for")} ${weightData?.weight || 0} ${getTranslatedText("kg")} + ${weightData?.negotiableCategories?.length || 0} ${getTranslatedText("Items")}`
+                        : `${getTranslatedText("for")} ${weightData?.weight || 0} ${getTranslatedText("kg")}`}
                   </span>
                 </div>
               </div>

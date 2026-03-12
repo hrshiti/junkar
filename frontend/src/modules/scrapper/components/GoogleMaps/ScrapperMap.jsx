@@ -50,6 +50,7 @@ const ScrapperMap = ({
     orderId,
     userLocation,
     scrapperLocation,
+    availableOrders = [],
     stage, // 'request' | 'pickup' | 'arrived'
     userName,
     enableTracking = true,
@@ -202,6 +203,18 @@ const ScrapperMap = ({
                 hasPoints = true;
             }
 
+            if (availableOrders && availableOrders.length > 0) {
+                availableOrders.forEach(order => {
+                    if (order?.location?.lat && order?.location?.lng) {
+                        const pos = { lat: Number(order.location.lat), lng: Number(order.location.lng) };
+                        if (!isNaN(pos.lat) && !isNaN(pos.lng)) {
+                            bounds.extend(pos);
+                            hasPoints = true;
+                        }
+                    }
+                });
+            }
+
             if (animatedPosition) {
                 bounds.extend(animatedPosition);
                 hasPoints = true;
@@ -222,7 +235,7 @@ const ScrapperMap = ({
                 });
             }
         }
-    }, [map, isLoaded, userLocation, animatedPosition]);
+    }, [map, isLoaded, userLocation, animatedPosition, availableOrders]);
 
     if (loadError) {
         return (
@@ -287,15 +300,25 @@ const ScrapperMap = ({
                         }}
                     />
                 )}
+                {/* Request Stage: Show All Available Orders on Map */}
+                {stage === 'request' && (
+                    <>
+                        {availableOrders?.map(order => {
+                            if (!order?.location?.lat || !order?.location?.lng) return null;
+                            const pos = { lat: Number(order.location.lat), lng: Number(order.location.lng) };
+                            if (isNaN(pos.lat) || isNaN(pos.lng)) return null;
 
-                {/* Request Stage: Show User Marker only */}
-                {stage === 'request' && userLocation && (
-                    <Marker
-                        position={userLocation}
-                        title={userName || getTranslatedText("Pickup Location")}
-                        icon={getUserIcon()}
-                        animation={window.google.maps.Animation.DROP}
-                    />
+                            return (
+                                <Marker
+                                    key={order.id}
+                                    position={pos}
+                                    title={order.requestId || order.userName || getTranslatedText("Pickup Location")}
+                                    icon={getUserIcon()}
+                                    animation={window.google.maps.Animation.DROP}
+                                />
+                            );
+                        })}
+                    </>
                 )}
 
                 {/* Pickup Stage: Show both + Route */}

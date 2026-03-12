@@ -81,6 +81,7 @@ const scrapperSchema = new mongoose.Schema({
     },
     panNumber: {
       type: String,
+      match: [/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Please provide a valid PAN number'],
       select: false
     },
     panPhotoUrl: {

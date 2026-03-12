@@ -294,6 +294,14 @@ export const uploadAPI = {
       body: formData,
     });
   },
+  uploadCategoryImage: async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    return apiRequest(API_ENDPOINTS.uploads.categoryImage, {
+      method: 'POST',
+      body: formData,
+    });
+  },
 };
 
 // KYC API

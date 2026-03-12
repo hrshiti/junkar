@@ -359,7 +359,8 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
           if (!scrapper) throw new Error('Scrapper not found');
 
           const orderAmount = lockedOrder.totalAmount || 0;
-          const commissionAmount = Math.max(1, Math.round(orderAmount * 0.01));
+          const isDonation = lockedOrder.isDonation || false;
+          const commissionAmount = (isDonation || orderAmount === 0) ? 0 : Math.max(1, Math.round(orderAmount * 0.01));
 
           // Decide what to deduct based on dealType
           // If 'Cash', scrapper paid user in cash, but still owes 1% commission to platform
@@ -374,24 +375,26 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
             throw new Error(`Insufficient wallet balance. Required: ₹${totalDeduction}, Available: ₹${scrapper.wallet.balance}`);
           }
 
-          // 1. Deduct Commission (Always)
-          scrapper.wallet.balance -= commissionAmount;
-          await scrapper.save({ session });
+          // 1. Deduct Commission (Always if > 0)
+          if (commissionAmount > 0) {
+            scrapper.wallet.balance -= commissionAmount;
+            await scrapper.save({ session });
 
-          await WalletTransaction.create([{
-            trxId: `TRX-COMM-${Date.now()}-${lockedOrder._id.toString().slice(-4)}`,
-            user: scrapper._id,
-            userType: 'Scrapper',
-            amount: commissionAmount,
-            type: 'DEBIT',
-            balanceBefore: scrapper.wallet.balance + commissionAmount,
-            balanceAfter: scrapper.wallet.balance,
-            category: 'COMMISSION',
-            status: 'SUCCESS',
-            description: `Platform Fee (1%) for Order #${lockedOrder._id}`,
-            orderId: lockedOrder._id,
-            gateway: { provider: 'SYSTEM' }
-          }], { session });
+            await WalletTransaction.create([{
+              trxId: `TRX-COMM-${Date.now()}-${lockedOrder._id.toString().slice(-4)}`,
+              user: scrapper._id,
+              userType: 'Scrapper',
+              amount: commissionAmount,
+              type: 'DEBIT',
+              balanceBefore: scrapper.wallet.balance + commissionAmount,
+              balanceAfter: scrapper.wallet.balance,
+              category: 'COMMISSION',
+              status: 'SUCCESS',
+              description: `Platform Fee (1%) for Order #${lockedOrder._id}`,
+              orderId: lockedOrder._id,
+              gateway: { provider: 'SYSTEM' }
+            }], { session });
+          }
 
           // 2. Deduct Order Amount (Only if Online)
           if (lockedOrder.dealType === 'Online' && orderAmount > 0) {
@@ -482,6 +485,23 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
           to: status
         }
       });
+    }
+
+    // Send Completion Notification
+    if (status === ORDER_STATUS.COMPLETED && order.user) {
+      if (order.isDonation) {
+        sendNotificationToUser(order.user._id.toString(), {
+          title: '💚 Thank you for donating!',
+          body: `Aapka donation request successful raha. Thank you for donating and ${order.scrapper?.name || 'our partner'} for pick-up.`,
+          data: { type: 'order_completed', orderId: order._id }
+        }, 'user').catch(err => logger.error('[Notification] Donation completion notification failed:', err));
+      } else {
+        sendNotificationToUser(order.user._id.toString(), {
+          title: '✅ Order Successful',
+          body: `Aapka order REQ-${order._id.toString().slice(-6)} successfully complete ho gaya hai.`,
+          data: { type: 'order_completed', orderId: order._id }
+        }, 'user').catch(err => logger.error('[Notification] Order completion notification failed:', err));
+      }
     }
   }
 

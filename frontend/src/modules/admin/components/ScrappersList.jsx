@@ -116,6 +116,7 @@ const ScrappersList = () => {
           joinedAt: scrapper.createdAt || new Date().toISOString(),
           kycData: scrapper.kyc || null,
           subscriptionData: scrapper.subscription || null,
+          businessLocation: scrapper.businessLocation || null,
           badges: Array.isArray(scrapper.badges) ? scrapper.badges : []
         }));
         setScrappers(transformedScrappers);

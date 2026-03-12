@@ -250,26 +250,37 @@ export const getScrapStats = asyncHandler(async (req, res) => {
   const stats = {};
   let totalWeightCount = 0;
 
+  // Priority mapping for labels
+  const PRIORITY = { 'donate': 3, 'negotiable': 2, 'kg_based': 1 };
+
   completedOrders.forEach(order => {
     totalWeightCount += (order.totalWeight || 0);
     if (order.scrapItems && Array.isArray(order.scrapItems)) {
       order.scrapItems.forEach(item => {
         const cat = item.category;
+        const pType = item.pricingType || 'kg_based';
         const weight = item.weight || 0;
+
         if (stats[cat]) {
-          stats[cat] += weight;
+          stats[cat].weight += weight;
+          // Update pricingType if new one has higher priority
+          const currentP = stats[cat].pricingType;
+          if ((PRIORITY[pType] || 0) > (PRIORITY[currentP] || 0)) {
+            stats[cat].pricingType = pType;
+          }
         } else {
-          stats[cat] = weight;
+          stats[cat] = {
+            category: cat,
+            pricingType: pType,
+            weight: weight
+          };
         }
       });
     }
   });
 
-  // Convert stats object to array for easier frontend handling
-  const categoryStats = Object.keys(stats).map(category => ({
-    category,
-    weight: stats[category]
-  })).sort((a, b) => b.weight - a.weight);
+  // Convert stats object to array
+  const categoryStats = Object.values(stats).sort((a, b) => b.weight - a.weight);
 
   sendSuccess(res, 'Scrap statistics retrieved successfully', {
     totalWeight: totalWeightCount,

@@ -21,7 +21,7 @@ export const DEFAULT_PRICE_FEED = [
   { id: 'price_001', category: 'Plastic', pricePerKg: 45, region: 'All', type: PRICE_TYPES.MATERIAL },
   { id: 'price_002', category: 'Metal', pricePerKg: 180, region: 'All', type: PRICE_TYPES.MATERIAL },
   { id: 'price_003', category: 'Paper', pricePerKg: 12, region: 'All', type: PRICE_TYPES.MATERIAL },
-  { id: 'price_004', category: 'Electronics', pricePerKg: 85, region: 'All', type: PRICE_TYPES.MATERIAL },
+  // { id: 'price_004', category: 'Electronics', pricePerKg: 85, region: 'All', type: PRICE_TYPES.MATERIAL },
   { id: 'price_005', category: 'Copper', pricePerKg: 650, region: 'All', type: PRICE_TYPES.MATERIAL },
   { id: 'price_006', category: 'Aluminium', pricePerKg: 180, region: 'All', type: PRICE_TYPES.MATERIAL },
   { id: 'price_007', category: 'Steel', pricePerKg: 35, region: 'All', type: PRICE_TYPES.MATERIAL },

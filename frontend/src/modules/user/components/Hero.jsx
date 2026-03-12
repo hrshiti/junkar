@@ -125,12 +125,7 @@ const Hero = () => {
         { name: 'Plastic', originalName: 'Plastic', image: plasticImage },
         { name: 'Metal', originalName: 'Metal', image: metalImage },
         { name: 'Paper', originalName: 'Paper', image: scrapImage2 },
-        { name: 'Electronics', originalName: 'Electronics', image: electronicImage },
-        { name: 'Copper', originalName: 'Copper', image: copperImage },
-        { name: 'Aluminium', originalName: 'Aluminium', image: aluminiumImage },
-        { name: 'Steel', originalName: 'Steel', image: steelImage },
-        { name: 'Brass', originalName: 'Brass', image: brassImage },
-        { name: 'E-Waste', originalName: 'E-Waste', image: eWasteImage },
+        { name: 'E-Waste', originalName: 'E-Waste', image: electronicImage },
         { name: 'Scrap Iron', originalName: 'Scrap Iron', image: steelImage },
         { name: 'Raddi', originalName: 'Raddi', image: scrapImage2 },
         { name: 'Furniture', originalName: 'Furniture', image: furnitureImage },
@@ -141,12 +136,28 @@ const Hero = () => {
       try {
         const response = await publicAPI.getPrices();
         if (response.success && response.data?.prices) {
-          // If we had logic to update icons/names from API we could do it here
-          // but user wants static cards with only prices being dynamic elsewhere.
-          // For the Hero categories (which don't show prices directly in the circle), 
-          // we just ensure they exist.
-          setRawCategories(staticCategories);
-          setActiveCategories(staticCategories);
+          const apiPrices = {};
+          response.data.prices.forEach(p => {
+            apiPrices[p.category.toLowerCase()] = p;
+          });
+
+          // Filter out disabled ones, and update image if admin has set one
+          const filtered = staticCategories
+            .filter(cat => {
+              const apiData = apiPrices[cat.originalName.toLowerCase()];
+              return apiData ? apiData.isActive !== false : true;
+            })
+            .map(cat => {
+              const apiData = apiPrices[cat.originalName.toLowerCase()];
+              return {
+                ...cat,
+                // Use admin-uploaded image if available, fallback to static local image
+                image: (apiData && apiData.image) ? apiData.image : cat.image,
+              };
+            });
+
+          setRawCategories(filtered);
+          setActiveCategories(filtered);
         } else {
           setRawCategories(staticCategories);
           setActiveCategories(staticCategories);

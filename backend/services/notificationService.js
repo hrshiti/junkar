@@ -216,11 +216,18 @@ class NotificationService {
             const statusMessages = {
                 confirmed: 'Your order has been accepted by a scrapper!',
                 in_progress: 'Scrapper is on the way to pickup.',
-                completed: 'Your order has been completed successfully!',
+                completed: order.isDonation ? 'Dhanyawad! 🎁 Your Donation is successful' : 'Your order has been completed successfully!',
                 cancelled: 'Your order has been cancelled.'
             };
 
+            const pushMessages = {
+                completed: order.isDonation 
+                    ? 'Aapka daan kiya gaya scrap scrapper ne pickup kar liya hai. Anek dhanyawad!'
+                    : 'Your order has been completed successfully!',
+            };
+
             const message = statusMessages[newStatus] || 'Order status updated';
+            const pushBody = (newStatus === 'completed' && pushMessages[newStatus]) || message;
 
             await this.notifyUser(
                 order.user.toString(),
@@ -231,12 +238,13 @@ class NotificationService {
                     message
                 },
                 {
-                    title: 'Order Update',
-                    body: message,
+                    title: order.isDonation && newStatus === 'completed' ? 'Donation Success 🎁' : 'Order Update',
+                    body: pushBody,
                     data: {
                         orderId: order._id.toString(),
                         type: 'order_status_update',
-                        status: newStatus
+                        status: newStatus,
+                        isDonation: order.isDonation ? 'true' : 'false'
                     }
                 }
             );

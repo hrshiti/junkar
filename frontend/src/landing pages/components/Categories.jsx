@@ -8,20 +8,21 @@ import {
     Cpu,
     Wind,
     HardDrive,
-    Gem,
-    Trash2,
+    FileText,
+    Zap,
+    Cylinder,
     Table as TableIcon
 } from 'lucide-react';
 
 const categories = [
     { name: 'Plastic', icon: <Container size={32} />, color: '#10b981' },
     { name: 'Metal', icon: <Layers size={32} />, color: '#3b82f6' },
-    { name: 'Paper', icon: <Monitor size={32} />, color: '#f59e0b' },
+    { name: 'Paper', icon: <FileText size={32} />, color: '#f59e0b' },
     { name: 'Electronics', icon: <Cpu size={32} />, color: '#8b5cf6' },
-    { name: 'Copper', icon: <Gem size={32} />, color: '#ef4444' },
+    { name: 'Copper', icon: <Zap size={32} />, color: '#ef4444' },
     { name: 'Aluminium', icon: <Wind size={32} />, color: '#64748b' },
     { name: 'Steel', icon: <HardDrive size={32} />, color: '#0f172a' },
-    { name: 'Brass', icon: <Trash2 size={32} />, color: '#d97706' },
+    { name: 'Brass', icon: <Cylinder size={32} />, color: '#d97706' },
 ];
 
 const Categories = () => {

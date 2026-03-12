@@ -11,19 +11,20 @@ const AppSection = () => {
 
     return (
         <section id="app" className="section" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', color: 'white', overflow: 'hidden' }}>
-            <div className="container" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }}>
+            <div className="container app-grid">
                 <motion.div
                     initial={{ opacity: 0, x: -50 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
+                    className="app-content-wrapper"
                 >
                     <span className="section-tag" style={{ color: 'var(--primary-light)' }}>{getTranslatedText("Get the App")}</span>
-                    <h2 className="section-title" style={{ color: 'white', fontSize: '3rem' }}>{getTranslatedText("Experience Smarter Scrap Selling")}</h2>
-                    <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '2.5rem' }}>
+                    <h2 className="section-title" style={{ color: 'white' }}>{getTranslatedText("Experience Smarter Scrap Selling")}</h2>
+                    <p className="app-description" style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '2.5rem' }}>
                         {getTranslatedText("Download the Junkar app to track live prices, manage your requests, and get instant notifications on the go. Available for Android and iOS.")}
                     </p>
 
-                    <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                    <div className="app-buttons" style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             className="btn"
@@ -56,6 +57,7 @@ const AppSection = () => {
                     initial={{ opacity: 0, y: 100 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
+                    className="mockup-container"
                     style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}
                 >
                     {/* Mockup for Phone */}
@@ -96,9 +98,20 @@ const AppSection = () => {
             </div>
 
             <style>{`
+        .app-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+        .app-content-wrapper { z-index: 2; position: relative; }
         @media (max-width: 991px) {
-          section#app > div { grid-template-columns: 1fr; text-align: center; }
-          section#app div { justify-content: center; }
+          .app-grid { grid-template-columns: 1fr !important; text-align: center; gap: 2rem; }
+          section#app .section-title { font-size: 2.25rem !important; margin-top: 1rem; }
+          .app-buttons { justify-content: center; }
+          .mockup-container { margin-top: 2rem; display: flex; justify-content: center; }
+        }
+        @media (max-width: 480px) {
+          section#app .section-title { font-size: 1.85rem !important; }
+          .app-description { font-size: 1rem !important; margin-bottom: 2rem !important; }
+          .app-buttons { flex-direction: column; width: 100%; gap: 1rem !important; }
+          .app-buttons > button { width: 100% !important; justify-content: center !important; }
+          .mockup-container { transform: scale(0.8); margin-top: 0; }
         }
       `}</style>
         </section>

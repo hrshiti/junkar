@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
@@ -51,13 +51,28 @@ const ActiveRequestsPage = () => {
   const { user } = useAuth();
   const [isOnline, setIsOnline] = useState(true);
   const [currentLocation, setCurrentLocation] = useState(null);
-  const [incomingRequest, setIncomingRequest] = useState(null);
   const [isSlideOpen, setIsSlideOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [timeConflict, setTimeConflict] = useState(false);
   const [existingRequests, setExistingRequests] = useState([]);
   const [showActiveRequestsPanel, setShowActiveRequestsPanel] = useState(false);
+  const [availableOrders, setAvailableOrders] = useState([]);
+  const [currentOrderIndex, setCurrentOrderIndex] = useState(0);
+  const incomingRequest = availableOrders[currentOrderIndex] || null;
+  const [dismissedOrderIds, setDismissedOrderIds] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('dismissedOrderIds');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  // Sync dismissed IDs to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem('dismissedOrderIds', JSON.stringify(dismissedOrderIds));
+  }, [dismissedOrderIds]);
 
   // Check authentication first and migrate old data
   useEffect(() => {
@@ -230,74 +245,77 @@ const ActiveRequestsPage = () => {
 
           const conflictCheckList = currentAssigned.length > 0 ? currentAssigned : existingRequests;
 
-          // If there are available orders, force show the first one (most recent usually)
-          // We removed the !incomingRequest check to allow updates or instant show on socket trigger
-          if (orders.length > 0) {
-            const order = orders[0];
+          // Filter out orders that were already dismissed by the scrapper in this session
+          const filteredOrders = orders.filter(o => !dismissedOrderIds.includes(o._id || o.id));
 
-            // Avoid re-setting the same order to prevent re-renders or loops if already showing
-            if (incomingRequest && (incomingRequest.id === order._id || incomingRequest.id === order.id)) {
-              return;
-            }
+          if (filteredOrders.length > 0) {
+            // Map all filtered orders instead of just the first one
+            const mappedOrders = filteredOrders.map(order => {
+              // Map backend order to frontend request format
+              return {
+                id: order._id || order.id,
+                _id: order._id || order.id, // Keep backend ID
+                requestId: `REQ - ${(order._id || order.id).toString().slice(-6).toUpperCase()}`,
+                userName: order.user?.name || 'User',
+                userPhone: order.user?.phone || '',
+                userEmail: order.user?.email || '',
+                scrapType: order.orderType === 'cleaning_service' ? 'Cleaning Service' : (order.scrapItems?.map(item => item.category).join(', ') || 'Scrap'),
+                weight: order.totalWeight,
+                pickupSlot: order.pickupSlot || null,
+                preferredTime: order.preferredTime || null,
+                images: order.images?.map(img => ({
+                  id: img.publicId || img.url,
+                  preview: img.url,
+                  url: img.url
+                })) || [],
+                location: {
+                  address: (() => {
+                    const street = order.pickupAddress?.street;
+                    // Check if street contains coordinates-like pattern
+                    const isCoordinates = street && (
+                      street.includes('Lat:') ||
+                      street.includes('Lat :') ||
+                      street.match(/^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/)
+                    );
 
-            console.log('✨ Displaying new available order:', order._id);
+                    const validParts = [
+                      isCoordinates ? '' : street,
+                      order.pickupAddress?.city,
+                      order.pickupAddress?.state,
+                      order.pickupAddress?.pincode
+                    ].filter(Boolean);
 
-            // Map backend order to frontend request format
-            const mappedRequest = {
-              id: order._id || order.id,
-              _id: order._id || order.id, // Keep backend ID
-              requestId: `REQ - ${(order._id || order.id).toString().slice(-6).toUpperCase()}`,
-              userName: order.user?.name || 'User',
-              userPhone: order.user?.phone || '',
-              userEmail: order.user?.email || '',
-              scrapType: order.orderType === 'cleaning_service' ? 'Cleaning Service' : (order.scrapItems?.map(item => item.category).join(', ') || 'Scrap'),
-              weight: order.totalWeight,
-              pickupSlot: order.pickupSlot || null,
-              preferredTime: order.preferredTime || null,
-              images: order.images?.map(img => ({
-                id: img.publicId || img.url,
-                preview: img.url,
-                url: img.url
-              })) || [],
-              location: {
-                address: (() => {
-                  const street = order.pickupAddress?.street;
-                  // Check if street contains coordinates-like pattern
-                  const isCoordinates = street && (
-                    street.includes('Lat:') ||
-                    street.includes('Lat :') ||
-                    street.match(/^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/) // Matches "12.34, 56.78" pattern
-                  );
+                    return validParts.length > 0 ? validParts.join(', ') : (order.pickupAddress?.city || getTranslatedText('Location on Map'));
+                  })(),
+                  lat: order.pickupAddress?.coordinates?.lat || 19.0760,
+                  lng: order.pickupAddress?.coordinates?.lng || 72.8777
+                },
+                distance: getTranslatedText('Calculating...'),
+                estimatedEarnings: `₹${order.totalAmount || 0}`,
+                status: order.status,
+                assignmentStatus: order.assignmentStatus,
+                notes: order.notes || '',
+                isDonation: order.isDonation,
+                isNegotiated: order.isNegotiated,
+                hasNegotiableItems: order.scrapItems?.some(item => item.pricingType === 'negotiable')
+              };
+            });
 
-                  const validParts = [
-                    isCoordinates ? '' : street,
-                    order.pickupAddress?.city,
-                    order.pickupAddress?.state,
-                    order.pickupAddress?.pincode
-                  ].filter(Boolean);
-
-                  return validParts.length > 0 ? validParts.join(', ') : (order.pickupAddress?.city || getTranslatedText('Location on Map'));
-                })(),
-                lat: order.pickupAddress?.coordinates?.lat || 19.0760,
-                lng: order.pickupAddress?.coordinates?.lng || 72.8777
-              },
-              distance: getTranslatedText('Calculating...'), // Can calculate from current location
-              estimatedEarnings: `₹${order.totalAmount || 0}`,
-              // Backend fields
-              status: order.status,
-              assignmentStatus: order.assignmentStatus,
-              notes: order.notes || ''
-            };
-
-            setIncomingRequest(mappedRequest);
+            // Update indices if current became invalid or new ones arrived
+            setAvailableOrders(mappedOrders);
             setIsSlideOpen(true);
 
-            // Check for time conflicts
-            const hasConflict = checkTimeConflict(mappedRequest, conflictCheckList);
-            setTimeConflict(hasConflict);
-
-            // Start playing sound
-            setAudioPlaying(true);
+            // Check for time conflicts on the FIRST one (or all? keeping it simple for now)
+            if (mappedOrders.length > 0) {
+              const activeRequest = mappedOrders[0];
+              const hasConflict = checkTimeConflict(activeRequest, conflictCheckList);
+              setTimeConflict(hasConflict);
+              setAudioPlaying(true);
+            }
+          } else {
+            setAvailableOrders([]);
+            setIsSlideOpen(false);
+            setAudioPlaying(false);
           }
         }
       } catch (error) {
@@ -350,7 +368,7 @@ const ActiveRequestsPage = () => {
         socketClient.socket.off('new_order_request');
       }
     };
-  }, [isOnline, incomingRequest]);
+  }, [isOnline, incomingRequest, dismissedOrderIds]);
 
   // Handle sound playback - Voice alert + vibration instead of ringtone
   useEffect(() => {
@@ -404,13 +422,13 @@ const ActiveRequestsPage = () => {
           }
         };
 
-        // Speak immediately, then repeat every 6 seconds while ringing
+        // Speak immediately, then repeat every 10 seconds while ringing
         speakOnce();
         voiceInterval = setInterval(() => {
           if (audioPlaying && incomingRequest) {
             speakOnce();
           }
-        }, 6000);
+        }, 10000);
       } else {
         console.warn('Speech synthesis not supported in this browser.');
       }
@@ -478,9 +496,18 @@ const ActiveRequestsPage = () => {
       if (response.success) {
         console.log('✅ ' + getTranslatedText('Order accepted successfully!'), response.data);
 
-        // Clear incoming request
-        setIncomingRequest(null);
-        setIsSlideOpen(false);
+        // Remove the accepted order from available list and adjust index
+        setAvailableOrders(prev => {
+          const updated = prev.filter(o => (o._id || o.id) !== orderId);
+          if (updated.length === 0) {
+            setIsSlideOpen(false);
+            setAudioPlaying(false);
+            setCurrentOrderIndex(0);
+          } else {
+            setCurrentOrderIndex(idx => (idx >= updated.length ? updated.length - 1 : idx));
+          }
+          return updated;
+        });
 
         // Navigate to my active requests list page
         navigate('/scrapper/my-active-requests', {
@@ -502,9 +529,25 @@ const ActiveRequestsPage = () => {
     // Stop sound & vibration immediately
     setAudioPlaying(false);
 
-    setIsSlideOpen(false);
-    setIncomingRequest(null);
-    // Request will be removed, wait for next one
+    if (incomingRequest) {
+      const orderId = incomingRequest._id || incomingRequest.id;
+      if (orderId) {
+        setDismissedOrderIds(prev => [...new Set([...prev, orderId])]);
+
+        // Remove from current list and adjust index
+        setAvailableOrders(prev => {
+          const updated = prev.filter(o => (o._id || o.id) !== orderId);
+          if (updated.length === 0) {
+            setIsSlideOpen(false);
+            setAudioPlaying(false);
+            setCurrentOrderIndex(0);
+          } else {
+            setCurrentOrderIndex(idx => (idx >= updated.length ? updated.length - 1 : idx));
+          }
+          return updated;
+        });
+      }
+    }
   };
 
   // Create custom icons
@@ -553,9 +596,7 @@ const ActiveRequestsPage = () => {
         <ScrapperMap
           stage="request"
           scrapperLocation={currentLocation}
-          // If there's an incoming request, show user location. Otherwise just show Scrapper's location.
-          userLocation={incomingRequest ? incomingRequest.location : null}
-          userName={incomingRequest ? incomingRequest.userName : getTranslatedText('Active Request')}
+          availableOrders={availableOrders}
         />
       </div>
 
@@ -579,108 +620,168 @@ const ActiveRequestsPage = () => {
           {/* Spacer for handle click area */}
           <div className="h-8 flex-shrink-0" />
 
-          {/* Request Content - Compact - Scrollable */}
-          {!isMinimized && (
-            <div
-              className="px-4 pb-2 overflow-y-auto flex-1 pb-24 md:pb-2"
-              style={{ minHeight: 0, WebkitOverflowScrolling: 'touch', overscrollBehaviorY: 'contain' }}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-bold text-slate-100">{incomingRequest.requestId}</h2>
-                <button
-                  onClick={handleRejectRequest}
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)' }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#ef4444' }}>
-                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
-                </button>
+          {/* Carousel Controls */}
+          {availableOrders.length > 1 && (
+            <div className="absolute top-0 inset-x-0 flex items-center justify-between px-4 h-14 z-20 pointer-events-none">
+              <button
+                onClick={() => setCurrentOrderIndex(prev => (prev > 0 ? prev - 1 : availableOrders.length - 1))}
+                className="w-10 h-10 rounded-full bg-slate-800/80 border border-white/10 flex items-center justify-center pointer-events-auto shadow-lg hover:bg-slate-700 active:scale-95 transition-all"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-white">
+                  <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              <div className="flex gap-1.5 bg-slate-800/60 px-2 py-1 rounded-full border border-white/5 backdrop-blur-sm">
+                {availableOrders.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${i === currentOrderIndex ? 'w-4 bg-sky-500' : 'w-1.5 bg-slate-600'}`}
+                  />
+                ))}
               </div>
-
-              {/* Request Details - Compact */}
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-sky-500/20">
-                    <span className="text-sm font-bold text-sky-300">
-                      {incomingRequest.userName[0]}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate text-slate-50">{incomingRequest.userName}</p>
-                    <p className="text-xs truncate text-slate-400">{incomingRequest.scrapType}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold text-sky-400">{incomingRequest.estimatedEarnings}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 p-2 rounded-lg" style={{ backgroundColor: 'rgba(31, 41, 55, 0.9)' }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ color: '#9ca3af', flexShrink: 0 }}>
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor" />
-                  </svg>
-                  <p className="text-xs flex-1 truncate" style={{ color: '#e5e7eb' }}>
-                    {[
-                      incomingRequest.location.address?.split(',')[0], // Street
-                      incomingRequest.location.address?.split(',')[1], // City
-                    ].filter(Boolean).join(', ')}
-                  </p>
-                </div>
-
-                {/* Pickup slot / preferred time info (always show if user sent any time) */}
-                {(incomingRequest.pickupSlot || incomingRequest.preferredTime) && (
-                  <div className="flex items-center gap-2 mt-2 p-2 rounded-lg bg-slate-800/80 border border-slate-700/50">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-slate-400 flex-shrink-0">
-                      <path d="M8 2v2M16 2v2M5 7h14M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-slate-400">{getTranslatedText("Pickup slot")}</p>
-                      <p className="text-xs font-semibold truncate text-slate-200">
-                        {incomingRequest.pickupSlot
-                          ? `${incomingRequest.pickupSlot.dayName}, ${incomingRequest.pickupSlot.date} • ${incomingRequest.pickupSlot.slot}`
-                          : incomingRequest.preferredTime}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* User Notes */}
-                {incomingRequest.notes && (
-                  <div className="mt-2 p-2 rounded-lg bg-slate-800/80 border border-slate-700/50">
-                    <p className="text-xs text-slate-400 font-semibold mb-1">{getTranslatedText("Note")}:</p>
-                    <p className="text-xs text-slate-200 italic">"{incomingRequest.notes}"</p>
-                  </div>
-                )}
-
-                {/* Time Conflict Warning */}
-                {timeConflict && (
-                  <div className="mt-2 p-2 rounded-lg flex items-start gap-2" style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#ef4444', flexShrink: 0, marginTop: '2px' }}>
-                      <path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <div className="flex-1">
-                      <p className="text-xs font-semibold" style={{ color: '#fca5a5' }}>{getTranslatedText("Time Conflict")}</p>
-                      <p className="text-[11px] mt-0.5" style={{ color: '#fecaca' }}>
-                        {getTranslatedText("This request overlaps with an existing pickup. You can still accept it.")}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Active Requests Count */}
-                {existingRequests.length > 0 && (
-                  <div className="mt-2 p-2 rounded-lg bg-sky-500/10 border border-sky-500/20">
-                    <p className="text-xs text-sky-400">
-                      {existingRequests.length === 1
-                        ? getTranslatedText("You have {count} active request", { count: existingRequests.length })
-                        : getTranslatedText("You have {count} active requests", { count: existingRequests.length })}
-                    </p>
-                  </div>
-                )}
-              </div>
-
+              <button
+                onClick={() => setCurrentOrderIndex(prev => (prev < availableOrders.length - 1 ? prev + 1 : 0))}
+                className="w-10 h-10 rounded-full bg-slate-800/80 border border-white/10 flex items-center justify-center pointer-events-auto shadow-lg hover:bg-slate-700 active:scale-95 transition-all"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-white">
+                  <path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
             </div>
           )}
+
+          {/* Request Content - Carousel with Animation */}
+          <AnimatePresence mode="wait">
+            {!isMinimized && incomingRequest && (
+              <motion.div
+                key={incomingRequest.id}
+                initial={{ x: 50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -50, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="px-4 pb-2 overflow-y-auto flex-1 pb-24 md:pb-2 pt-6"
+                style={{ minHeight: 0, WebkitOverflowScrolling: 'touch', overscrollBehaviorY: 'contain' }}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-slate-100">{incomingRequest.requestId}</h2>
+                    {availableOrders.length > 1 && (
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 font-bold uppercase tracking-wider">
+                        {currentOrderIndex + 1} / {availableOrders.length}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={handleRejectRequest}
+                    className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-red-500/30"
+                    style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)' }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#ef4444' }}>
+                      <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Badges Row */}
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {incomingRequest.isDonation ? (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-green-500/20 text-green-400 border border-green-500/30">
+                      🎁 {getTranslatedText("Donate")}
+                    </span>
+                  ) : (incomingRequest.isNegotiated || incomingRequest.hasNegotiableItems) ? (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                      🤝 {getTranslatedText("Negotiable")}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-sky-500/20 text-sky-400 border border-sky-500/30">
+                      💰 {getTranslatedText("Fixed Price")}
+                    </span>
+                  )}
+                </div>
+
+                {/* Request Details - Compact */}
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-sky-500/20">
+                      <span className="text-sm font-bold text-sky-300">
+                        {incomingRequest.userName[0]}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold truncate text-slate-50">{incomingRequest.userName}</p>
+                      <p className="text-xs truncate text-slate-400">{incomingRequest.scrapType}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-sky-400">{incomingRequest.estimatedEarnings}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 p-2 rounded-lg" style={{ backgroundColor: 'rgba(31, 41, 55, 0.9)' }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ color: '#9ca3af', flexShrink: 0 }}>
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor" />
+                    </svg>
+                    <p className="text-xs flex-1 truncate" style={{ color: '#e5e7eb' }}>
+                      {[
+                        incomingRequest.location.address?.split(',')[0], // Street
+                        incomingRequest.location.address?.split(',')[1], // City
+                      ].filter(Boolean).join(', ')}
+                    </p>
+                  </div>
+
+                  {/* Pickup slot / preferred time info (always show if user sent any time) */}
+                  {(incomingRequest.pickupSlot || incomingRequest.preferredTime) && (
+                    <div className="flex items-center gap-2 mt-2 p-2 rounded-lg bg-slate-800/80 border border-slate-700/50">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-slate-400 flex-shrink-0">
+                        <path d="M8 2v2M16 2v2M5 7h14M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-slate-400">{getTranslatedText("Pickup slot")}</p>
+                        <p className="text-xs font-semibold truncate text-slate-200">
+                          {incomingRequest.pickupSlot
+                            ? `${incomingRequest.pickupSlot.dayName}, ${incomingRequest.pickupSlot.date} • ${incomingRequest.pickupSlot.slot}`
+                            : incomingRequest.preferredTime}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* User Notes */}
+                  {incomingRequest.notes && (
+                    <div className="mt-2 p-2 rounded-lg bg-slate-800/80 border border-slate-700/50">
+                      <p className="text-xs text-slate-400 font-semibold mb-1">{getTranslatedText("Note")}:</p>
+                      <p className="text-xs text-slate-200 italic">"{incomingRequest.notes}"</p>
+                    </div>
+                  )}
+
+                  {/* Time Conflict Warning */}
+                  {timeConflict && (
+                    <div className="mt-2 p-2 rounded-lg flex items-start gap-2" style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#ef4444', flexShrink: 0, marginTop: '2px' }}>
+                        <path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <div className="flex-1">
+                        <p className="text-xs font-semibold" style={{ color: '#fca5a5' }}>{getTranslatedText("Time Conflict")}</p>
+                        <p className="text-[11px] mt-0.5" style={{ color: '#fecaca' }}>
+                          {getTranslatedText("This request overlaps with an existing pickup. You can still accept it.")}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Active Requests Count */}
+                  {existingRequests.length > 0 && (
+                    <div className="mt-2 p-2 rounded-lg bg-sky-500/10 border border-sky-500/20">
+                      <p className="text-xs text-sky-400">
+                        {existingRequests.length === 1
+                          ? getTranslatedText("You have {count} active request", { count: existingRequests.length })
+                          : getTranslatedText("You have {count} active requests", { count: existingRequests.length })}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Accept Button - Fixed at Bottom (Always Visible) */}
           <div

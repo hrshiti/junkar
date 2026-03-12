@@ -90,6 +90,16 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
       setIsProcessing(true);
       const scrapperId = kyc.scrapperId || kyc.id;
 
+      // Validate PAN format if provided
+      if (editForm.panNumber) {
+        const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+        if (!panRegex.test(editForm.panNumber)) {
+          alert("Please enter a valid PAN number format (e.g., ABCDE1234F)");
+          setIsProcessing(false);
+          return;
+        }
+      }
+
       let panPhotoUrl = kyc.panPhotoUrl;
       let shopLicenseUrl = kyc.shopLicenseUrl;
 
@@ -273,7 +283,13 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
                   <div className="w-full">
                     <p className="text-xs" style={{ color: '#718096' }}>{getTranslatedText("PAN Number")}</p>
                     {isEditing ? (
-                      <input type="text" value={editForm.panNumber} onChange={e => setEditForm({ ...editForm, panNumber: e.target.value })} className="mt-1 w-full px-2 py-1 border rounded" />
+                      <input
+                        type="text"
+                        value={editForm.panNumber}
+                        onChange={e => setEditForm({ ...editForm, panNumber: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10) })}
+                        placeholder="ABCDE1234F"
+                        className="mt-1 w-full px-2 py-1 border rounded"
+                      />
                     ) : (
                       <p className="font-semibold" style={{ color: '#2d3748' }}>{kyc.panNumber || getTranslatedText('N/A')}</p>
                     )}

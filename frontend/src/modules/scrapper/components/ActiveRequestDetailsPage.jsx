@@ -84,7 +84,10 @@ const ActiveRequestDetailsPage = () => {
     "Submit Report",
     "Fake lead reported. Admin will review.",
     "This order was already reported.",
-    "Failed to submit report."
+    "Failed to submit report.",
+    "Complete Donation",
+    "This is a donation request. No payment is required.",
+    "Confirm Pickup & Thank User"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -215,8 +218,10 @@ const ActiveRequestDetailsPage = () => {
             acceptedAt: order.acceptedAt,
             notes: order.notes || '',
             // Model B fields
-            isNegotiated: order.isNegotiated || false,
+            isNegotiated: order.isNegotiated || order.scrapItems?.some(item => item.pricingType === 'negotiable'),
             scrapItems: order.scrapItems || [],
+            isDonation: order.isDonation || order.scrapItems?.some(item => item.pricingType === 'donate'),
+            hasNegotiableItems: order.isNegotiated || order.scrapItems?.some(item => item.pricingType === 'negotiable')
           };
 
           setRequestData(mappedRequest);
@@ -318,8 +323,10 @@ const ActiveRequestDetailsPage = () => {
             paymentStatus: order.paymentStatus,
             notes: order.notes || '',
             // Model B fields
-            isNegotiated: order.isNegotiated || false,
+            isNegotiated: order.isNegotiated || order.scrapItems?.some(item => item.pricingType === 'negotiable'),
             scrapItems: order.scrapItems || [],
+            isDonation: order.isDonation || order.scrapItems?.some(item => item.pricingType === 'donate'),
+            hasNegotiableItems: order.isNegotiated || order.scrapItems?.some(item => item.pricingType === 'negotiable')
           };
 
           setRequestData(mappedRequest);
@@ -468,7 +475,7 @@ const ActiveRequestDetailsPage = () => {
   };
 
   const handlePaymentMade = () => {
-    if (!paidAmount || parseFloat(paidAmount) <= 0) {
+    if (!requestData.isDonation && (!paidAmount || parseFloat(paidAmount) <= 0)) {
       alert(getTranslatedText('Please enter a valid amount'));
       return;
     }
@@ -478,6 +485,12 @@ const ActiveRequestDetailsPage = () => {
 
     // For Scrap Sell (Scrapper Pays)
     if (!isCleaning) {
+      if (requestData.isDonation) {
+        setConfirmAction('payment_scrap');
+        setConfirmMessage(getTranslatedText("Confirm complete donation pickup?"));
+        setShowConfirmModal(true);
+        return;
+      }
       // Logic handled in handleRazorpayPayment or handleWalletPayment
       setConfirmAction('payment_scrap');
       setConfirmMessage(getTranslatedText("Pay ₹{amount} to User?", { amount: paidAmount }));
@@ -493,12 +506,13 @@ const ActiveRequestDetailsPage = () => {
 
   // Payment Logic for Scrap Sell (Scrapper Pays User)
   const processScrapPayment = async () => {
-    const amount = Number(paidAmount);
-    const commission = Math.max(1, Math.round(amount * 0.01));
+    const isDonation = requestData.isDonation;
+    const amount = isDonation ? 0 : Number(paidAmount);
+    const commission = isDonation ? 0 : Math.max(1, Math.round(amount * 0.01));
 
-    // Case 1: Cash Payment (No wallet transfer to user, just platform fee)
-    if (dealType === 'Cash') {
-      if (walletBalance < commission) {
+    // Case 1: Cash Payment (No wallet transfer to user, just platform fee) or Donation
+    if (dealType === 'Cash' || isDonation) {
+      if (!isDonation && walletBalance < commission) {
         alert(getTranslatedText("Insufficient balance for platform fee (₹{fee})", { fee: commission }));
         return;
       }
@@ -541,7 +555,7 @@ const ActiveRequestDetailsPage = () => {
           key: orderData.data.keyId,
           amount: orderData.data.amount,
           currency: orderData.data.currency,
-          name: "Scrapto",
+          name: "Junkar",
           description: "Order Payment to User",
           order_id: orderData.data.orderId,
           handler: async function (response) {
@@ -692,6 +706,24 @@ const ActiveRequestDetailsPage = () => {
     }
   };
 
+  const handleCancelOrder = async () => {
+    const orderId = requestData._id || requestData.id;
+    if (!orderId) return;
+
+    if (window.confirm(getTranslatedText("Are you sure you want to cancel this order? This action cannot be undone."))) {
+      try {
+        const response = await orderAPI.cancel(orderId, "Cancelled by scrapper");
+        if (response.success) {
+          alert(getTranslatedText("Order cancelled successfully!"));
+          navigate('/scrapper/my-active-requests');
+        }
+      } catch (error) {
+        console.error("Cancellation failed:", error);
+        alert(error.message || getTranslatedText("Failed to cancel order"));
+      }
+    }
+  };
+
   const handleCancel = () => {
     setShowConfirmModal(false);
     setConfirmAction(null);
@@ -736,7 +768,9 @@ const ActiveRequestDetailsPage = () => {
             </svg>
           </button>
           <div>
-            <h1 className="text-xl font-bold text-slate-800">{requestData?.requestId || getTranslatedText("Active Request")}</h1>
+            <h1 className="text-xl font-bold text-slate-800">
+              {requestData?.isDonation ? 'Donation Pickup' : (requestData?.requestId || getTranslatedText("Active Request"))}
+            </h1>
             {allActiveRequests.length > 1 && (
               <p className="text-xs text-slate-500">
                 {currentRequestIndex + 1} {getTranslatedText("of")} {allActiveRequests.length}
@@ -847,19 +881,23 @@ const ActiveRequestDetailsPage = () => {
                     </div>
                   </div>
                   <div className="p-3 rounded-lg" style={{ backgroundColor: '#f1f5f9' }}>
-                    <p className="text-xs mb-1" style={{ color: '#64748b' }}>{getTranslatedText("Estimated Amount")}</p>
-                    <p className="text-xl font-bold" style={{ color: '#0ea5e9' }}>{finalAmount || requestData?.estimatedEarnings || '₹450'}</p>
+                    <p className="text-xs mb-1" style={{ color: '#64748b' }}>
+                      {requestData.isDonation ? "Request Type" : getTranslatedText("Estimated Amount")}
+                    </p>
+                    <p className="text-xl font-bold" style={{ color: '#0ea5e9' }}>
+                      {requestData.isDonation ? <span className="text-green-600">DONATION</span> : (finalAmount || requestData?.estimatedEarnings || '₹450')}
+                    </p>
                   </div>
                 </div>
 
                 {/* Payment Input */}
                 <div className="mb-6 p-6 rounded-2xl shadow-md border border-slate-100" style={{ backgroundColor: '#ffffff' }}>
                   <h2 className="text-lg font-bold mb-4" style={{ color: '#1e293b' }}>
-                    {requestData.orderType === 'cleaning_service' ? getTranslatedText('Enter Amount Received') : getTranslatedText('Enter Amount Paid')}
+                    {requestData.isDonation ? getTranslatedText('Complete Donation') : (requestData.orderType === 'cleaning_service' ? getTranslatedText('Enter Amount Received') : getTranslatedText('Enter Amount Paid'))}
                   </h2>
 
                   {/* Payment Mode Selection for Scrap Pickup - Hidden for Cleaning Service */}
-                  {requestData.orderType !== 'cleaning_service' && (
+                  {requestData.orderType !== 'cleaning_service' && !requestData.isDonation && (
                     <div className="mb-6 space-y-4">
                       {/* Wallet Balance Section */}
                       <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
@@ -868,7 +906,7 @@ const ActiveRequestDetailsPage = () => {
                           <span className="text-slate-800 font-bold">₹{walletBalance}</span>
                         </div>
 
-                        {paidAmount && (() => {
+                        {paidAmount && !requestData.isDonation && (() => {
                           const amount = Number(paidAmount);
                           const commission = Math.max(1, Math.round(amount * 0.01));
                           const isOnlineDeal = dealType === 'Online';
@@ -932,75 +970,108 @@ const ActiveRequestDetailsPage = () => {
                   )}
 
                   {/* Amount Input */}
-                  <div className="mb-4">
-                    <label className="block text-sm font-semibold mb-2" style={{ color: '#475569' }}>
-                      {getTranslatedText("Amount (₹)")}
-                    </label>
-                    <input
-                      type="number"
-                      inputMode="decimal"
-                      value={paidAmount}
-                      onChange={(e) => setPaidAmount(e.target.value)}
-                      placeholder="0.00"
-                      className="w-full px-4 py-4 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-2xl font-bold text-center bg-transparent"
-                      style={{
-                        borderColor: paidAmount ? '#22c55e' : '#cbd5e1',
-                        color: '#1e293b'
-                      }}
-                      min="0"
-                      step="0.01"
-                      autoFocus
-                    />
-                    {paidAmount && (
-                      <p className="text-sm mt-2 text-center" style={{ color: '#64748b' }}>
-                        {requestData.orderType === 'cleaning_service'
-                          ? getTranslatedText("You collected ₹{amount} from the customer", { amount: parseFloat(paidAmount) || 0 })
-                          : getTranslatedText("You will pay ₹{amount} to the customer", { amount: parseFloat(paidAmount) || 0 })
-                        }
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Quick Amount Buttons */}
-                  <div className="grid grid-cols-3 gap-2 mb-4">
-                    {[100, 200, 300, 400, 500, 1000].map((amount) => (
+                  {requestData.isDonation ? (
+                    <div className="mb-6">
+                      <div className="p-4 rounded-xl bg-green-50 border border-green-100 mb-4">
+                        <p className="text-sm font-semibold text-green-800 text-center">
+                          {getTranslatedText("This is a donation request. No payment is required.")}
+                        </p>
+                      </div>
                       <motion.button
-                        key={amount}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => setPaidAmount(amount.toString())}
-                        className="py-2 rounded-lg font-semibold text-sm border"
-                        style={{
-                          backgroundColor: paidAmount === amount.toString() ? '#22c55e' : '#f1f5f9',
-                          borderColor: paidAmount === amount.toString() ? '#22c55e' : '#e2e8f0',
-                          color: paidAmount === amount.toString() ? '#ffffff' : '#475569'
-                        }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handlePaymentMade}
+                        disabled={isProcessingPayment}
+                        className="w-full py-4 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2"
+                        style={{ backgroundColor: '#22c55e', color: '#ffffff' }}
                       >
-                        ₹{amount}
+                        {isProcessingPayment ? (
+                          <span>{getTranslatedText("Processing...")}</span>
+                        ) : (
+                          <>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor" />
+                            </svg>
+                            {getTranslatedText("Confirm Pickup & Thank User")}
+                          </>
+                        )}
                       </motion.button>
-                    ))}
-                  </div>
+                    </div>
+                  ) : (
+                    <div className="mb-4">
+                      <label className="block text-sm font-semibold mb-2" style={{ color: '#475569' }}>
+                        {getTranslatedText("Amount (₹)")}
+                      </label>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        value={paidAmount}
+                        onChange={(e) => setPaidAmount(e.target.value)}
+                        placeholder="0.00"
+                        className="w-full px-4 py-4 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-2xl font-bold text-center bg-transparent"
+                        style={{
+                          borderColor: paidAmount ? '#22c55e' : '#cbd5e1',
+                          color: '#1e293b'
+                        }}
+                        min="0"
+                        step="0.01"
+                        autoFocus
+                      />
+                      {paidAmount && (
+                        <p className="text-sm mt-2 text-center" style={{ color: '#64748b' }}>
+                          {requestData.orderType === 'cleaning_service'
+                            ? getTranslatedText("You collected ₹{amount} from the customer", { amount: parseFloat(paidAmount) || 0 })
+                            : getTranslatedText("You will pay ₹{amount} to the customer", { amount: parseFloat(paidAmount) || 0 })
+                          }
+                        </p>
+                      )}
+                    </div>
+                  )}
 
-                  {/* Final Confirm Button */}
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handlePaymentMade}
-                    disabled={!paidAmount || parseFloat(paidAmount) <= 0 || isProcessingPayment}
-                    className="w-full py-4 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ backgroundColor: '#22c55e', color: '#ffffff' }}
-                  >
-                    {isProcessingPayment ? (
-                      <span>{getTranslatedText("Processing...")}</span>
-                    ) : (
-                      <>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor" />
-                        </svg>
-                        {getTranslatedText("Confirm Payment")}
-                      </>
-                    )}
-                  </motion.button>
+                  {!requestData.isDonation && (
+                    <>
+                      {/* Quick Amount Buttons */}
+                      <div className="grid grid-cols-3 gap-2 mb-4">
+                        {[100, 200, 300, 400, 500, 1000].map((amount) => (
+                          <motion.button
+                            key={amount}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => setPaidAmount(amount.toString())}
+                            className="py-2 rounded-lg font-semibold text-sm border"
+                            style={{
+                              backgroundColor: paidAmount === amount.toString() ? '#22c55e' : '#f1f5f9',
+                              borderColor: paidAmount === amount.toString() ? '#22c55e' : '#e2e8f0',
+                              color: paidAmount === amount.toString() ? '#ffffff' : '#475569'
+                            }}
+                          >
+                            ₹{amount}
+                          </motion.button>
+                        ))}
+                      </div>
+
+                      {/* Final Confirm Button */}
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handlePaymentMade}
+                        disabled={!paidAmount || parseFloat(paidAmount) <= 0 || isProcessingPayment}
+                        className="w-full py-4 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{ backgroundColor: '#22c55e', color: '#ffffff' }}
+                      >
+                        {isProcessingPayment ? (
+                          <span>{getTranslatedText("Processing...")}</span>
+                        ) : (
+                          <>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor" />
+                            </svg>
+                            {getTranslatedText("Confirm Payment")}
+                          </>
+                        )}
+                      </motion.button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -1037,7 +1108,15 @@ const ActiveRequestDetailsPage = () => {
                       <p className="text-xs truncate text-slate-500">{requestData.scrapType}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-bold text-sky-600">{requestData.estimatedEarnings}</p>
+                      <p className="text-sm font-bold text-sky-600">
+                        {requestData.isDonation ? (
+                          <span className="text-green-600 font-extrabold">DONATE</span>
+                        ) : requestData.hasNegotiableItems ? (
+                          <span className="text-amber-600">Negotiable</span>
+                        ) : (
+                          requestData.estimatedEarnings
+                        )}
+                      </p>
                     </div>
                   </div>
 
@@ -1217,13 +1296,22 @@ const ActiveRequestDetailsPage = () => {
                     {getTranslatedText("Chat")}
                   </motion.button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setShowFakeLeadModal(true)}
-                  className="mt-3 py-2 rounded-lg text-xs font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors w-full"
-                >
-                  {getTranslatedText("Report Fake Lead")}
-                </button>
+                <div className="flex gap-2 mt-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowFakeLeadModal(true)}
+                    className="flex-1 py-3 rounded-lg text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors"
+                  >
+                    {getTranslatedText("Report Fake Lead")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancelOrder}
+                    className="flex-1 py-3 rounded-lg text-xs font-bold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors"
+                  >
+                    {getTranslatedText("Cancel Order")}
+                  </button>
+                </div>
               </div>
             </motion.div>
           </>

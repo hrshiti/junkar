@@ -786,7 +786,7 @@ const Hero = () => {
                 <h3
                   className="text-lg md:text-2xl font-bold mb-4 md:mb-8 text-center"
                   style={{ color: "#2d3748" }}>
-                  Why Scrapto?
+                  Why Junkar?
                 </h3>
                 <div className="flex flex-row md:flex-row gap-2 md:gap-6 overflow-x-auto pb-2 md:pb-4 scrollbar-hide">
                   {[

@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaUsers, FaSearch, FaFilter, FaUserCheck, FaUserTimes, FaEye, FaPhone, FaMapMarkerAlt, FaRupeeSign } from 'react-icons/fa';
+import { FaUsers, FaSearch, FaFilter, FaUserCheck, FaUserTimes, FaEye, FaPhone, FaMapMarkerAlt, FaRupeeSign, FaBox } from 'react-icons/fa';
 import { adminAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import { INDIAN_STATES } from './locationConstants';

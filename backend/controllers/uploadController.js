@@ -37,4 +37,18 @@ export const uploadKycDocs = async (req, res) => {
   }
 };
 
+// Upload Category Image
+export const uploadCategoryImage = async (req, res) => {
+  try {
+    const file = req.file;
+    if (!file) {
+      return sendError(res, 'No file provided', 400);
+    }
 
+    const result = await uploadFile(file, { folder: 'categories' });
+    return sendSuccess(res, 'Category image uploaded successfully', { file: result.secure_url }, 201);
+  } catch (error) {
+    logger.error('Category image upload error:', error);
+    return sendError(res, 'Failed to upload category image', 500);
+  }
+};

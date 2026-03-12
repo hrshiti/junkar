@@ -103,7 +103,10 @@ const MyActiveRequestsPage = () => {
       estimatedEarnings: estimatedAmount,
       status: uiStatus,
       acceptedAt: order.acceptedAt,
-      notes: order.notes || ''
+      notes: order.notes || "",
+      isDonation: order.isDonation || order.scrapItems?.some(item => item.pricingType === 'donate'),
+      isNegotiated: order.isNegotiated || order.scrapItems?.some(item => item.pricingType === 'negotiable'),
+      hasNegotiableItems: order.isNegotiated || order.scrapItems?.some(item => item.pricingType === 'negotiable')
     };
   };
 
@@ -317,8 +320,31 @@ const MyActiveRequestsPage = () => {
                         <p className="text-sm md:text-base mb-2 text-slate-500">
                           {getTranslatedText(request.scrapType) || getTranslatedText('Scrap')}
                         </p>
+                        <div className="flex items-center gap-2 mb-2">
+                           {request.isDonation ? (
+                             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-700 border border-green-200">
+                               DONATE
+                             </span>
+                           ) : request.isNegotiated || request.hasNegotiableItems ? (
+                             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200">
+                               NEGOTIABLE
+                             </span>
+                           ) : (
+                             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-700 border border-sky-200">
+                               FIXED PRICE
+                             </span>
+                           )}
+                        </div>
                         <p className="text-lg md:text-xl font-bold text-sky-600">
-                          {request.estimatedEarnings || '₹0'}
+                          {request.isDonation ? (
+                            <span className="text-green-600">Donation</span>
+                          ) : (
+                            request.hasNegotiableItems ? (
+                               <span className="text-amber-600">Negotiable</span>
+                            ) : (
+                               request.estimatedEarnings || '₹0'
+                            )
+                          )}
                         </p>
                       </div>
                     </div>

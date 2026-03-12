@@ -18,7 +18,7 @@ const About = () => {
 
     return (
         <section id="about" className="section container">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }}>
+            <div className="about-grid">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     whileInView={{ opacity: 1, scale: 1 }}
@@ -77,8 +77,9 @@ const About = () => {
             </div>
 
             <style>{`
+        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
         @media (max-width: 991px) {
-          section#about > div { grid-template-columns: 1fr; }
+          .about-grid { grid-template-columns: 1fr !important; }
           .hide-mobile { display: none; }
         }
       `}</style>

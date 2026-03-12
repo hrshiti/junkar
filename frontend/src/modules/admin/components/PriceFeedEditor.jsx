@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { FaRupeeSign, FaSave, FaUpload, FaDownload, FaEdit, FaCheck, FaTimes, FaPlus, FaTrash } from 'react-icons/fa';
 import { DEFAULT_PRICE_FEED, PRICE_TYPES } from '../../shared/utils/priceFeedUtils';
-import { adminAPI } from '../../shared/utils/api';
+import { adminAPI, uploadAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
 // Import images for static categories
@@ -14,17 +14,88 @@ import paperImage from '../../user/assets/scrab.png';
 import electronicImage from '../../user/assets/electronicbg.png';
 import brassImage from '../../user/assets/brass.jpg';
 import steelImage from '../../user/assets/metal2.jpg';
+import woodTableImage from '../../user/assets/wooditem/table.jpg';
+import woodChairImage from '../../user/assets/wooditem/chair.jpg';
+import woodBedImage from '../../user/assets/wooditem/Beds.jpg';
+import woodOtherImage from '../../user/assets/wooditem/other_furniture.jpg';
+import woodAnotherImage from '../../user/assets/wooditem/wood_another.jpg';
+import v2WheelerImage from '../../user/assets/vehicle_categry/2 wheecle.png';
+import v4WheelerImage from '../../user/assets/vehicle_categry/4 wheecle.jpg';
+import vAutoPartsImage from '../../user/assets/vehicle_categry/autoparts.png';
+import vTyreImage from '../../user/assets/vehicle_categry/tyre.jpg';
+import vBatteryImage from '../../user/assets/vehicle_categry/baterry.jpg';
+import vOtherVehicleImage from '../../user/assets/vehicle_categry/other_vehical_parts.jpg';
+import hACImage from '../../user/assets/home_appliance/Ac.jpg';
+import hFridgeImage from '../../user/assets/home_appliance/Fridge.jpg';
+import hWMImage from '../../user/assets/home_appliance/washing_machine.jpg';
+import hTVImage from '../../user/assets/home_appliance/TV.jpg';
+import hMicroImage from '../../user/assets/home_appliance/Microwave.jpg';
+import hOtherApplianceImage from '../../user/assets/home_appliance/other.jpg';
+import eBatteryImage from '../../user/assets/e-waste/battery.png';
+import eCablesImage from '../../user/assets/e-waste/cables.png';
+import eComputerImage from '../../user/assets/e-waste/computer.png';
+import eLaptopImage from '../../user/assets/e-waste/laptop.png';
+import eMotherboardImage from '../../user/assets/e-waste/motherboar.png';
+import eOtherEWasteImage from '../../user/assets/e-waste/other_e-waste.png';
+
+// Static fallback images per category — used in modal preview when no custom image is set.
+// This ensures removing a custom image truly reverts to the local default, not the old DB URL.
+const STATIC_CATEGORY_IMAGES = {
+  'plastic': plasticImage,
+  'metal': metalImage,
+  'copper': copperImage,
+  'aluminium': aluminiumImage,
+  'paper': paperImage,
+  'raddi': paperImage,
+  'electronics': electronicImage,
+  'e-waste': electronicImage,
+  'e_waste': electronicImage,
+  'brass': brassImage,
+  'steel': steelImage,
+  'scrap_iron': steelImage,
+  'scrap iron': steelImage,
+  'table': woodTableImage,
+  'chair': woodChairImage,
+  'bed': woodBedImage,
+  'wooden items': woodAnotherImage,
+  'other furniture': woodOtherImage,
+  'sofa': woodAnotherImage,
+  'furniture': woodAnotherImage,
+  'ac': hACImage,
+  'fridge': hFridgeImage,
+  'washing machine': hWMImage,
+  'tv': hTVImage,
+  'microwave': hMicroImage,
+  'other appliance': hOtherApplianceImage,
+  'home_appliance': hACImage,
+  'home appliance': hACImage,
+  'batteries': eBatteryImage,
+  'cables/wires': eCablesImage,
+  'computer items': eComputerImage,
+  'laptops/mobiles': eLaptopImage,
+  'motherboard': eMotherboardImage,
+  'other e-waste': eOtherEWasteImage,
+  '2-wheeler': v2WheelerImage,
+  '4-wheeler': v4WheelerImage,
+  'auto parts': vAutoPartsImage,
+  'tyre': vTyreImage,
+  'battery': vBatteryImage,
+  'other vehicle parts': vOtherVehicleImage,
+  'vehicle_scrap': v4WheelerImage,
+  'vehicle scrap': v4WheelerImage,
+};
 
 const PriceFeedEditor = () => {
   const [prices, setPrices] = useState([]);
   const [activeTab, setActiveTab] = useState(PRICE_TYPES.MATERIAL);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // 'add' | 'edit'
-  const [currentPriceData, setCurrentPriceData] = useState({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '' });
+  const [currentPriceData, setCurrentPriceData] = useState({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '', isNegotiable: false, isActive: true });
   const [isSaving, setIsSaving] = useState(false);
   const [showCSVModal, setShowCSVModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   const staticTexts = [
     "Please enter a valid price",
     "Price saved successfully!",
@@ -104,46 +175,110 @@ const PriceFeedEditor = () => {
     setLoading(true);
     setError(null);
     try {
-      // 1. Fixed 8 static categories with images
+      // Full list of 37+ categories to mirror User side
       const staticCategories = [
-        { id: 'plastic', category: 'Plastic', image: plasticImage, pricePerKg: 45, type: PRICE_TYPES.MATERIAL },
-        { id: 'metal', category: 'Metal', image: metalImage, pricePerKg: 180, type: PRICE_TYPES.MATERIAL },
-        { id: 'paper', category: 'Paper', image: paperImage, pricePerKg: 12, type: PRICE_TYPES.MATERIAL },
-        { id: 'electronics', category: 'Electronics', image: electronicImage, pricePerKg: 85, type: PRICE_TYPES.MATERIAL },
-        { id: 'copper', category: 'Copper', image: copperImage, pricePerKg: 650, type: PRICE_TYPES.MATERIAL },
-        { id: 'aluminium', category: 'Aluminium', image: aluminiumImage, pricePerKg: 180, type: PRICE_TYPES.MATERIAL },
-        { id: 'steel', category: 'Steel', image: steelImage, pricePerKg: 35, type: PRICE_TYPES.MATERIAL },
-        { id: 'brass', category: 'Brass', image: brassImage, pricePerKg: 420, type: PRICE_TYPES.MATERIAL },
+        { id: 'plastic', category: 'Plastic', image: plasticImage, pricePerKg: 45, type: PRICE_TYPES.MATERIAL, isNegotiable: false },
+        { id: 'metal', category: 'Metal', image: metalImage, pricePerKg: 180, type: PRICE_TYPES.MATERIAL, isNegotiable: false },
+        { id: 'paper', category: 'Paper', image: paperImage, pricePerKg: 12, type: PRICE_TYPES.MATERIAL, isNegotiable: false },
+        { id: 'e_waste', category: 'E-Waste', image: electronicImage, pricePerKg: 100, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'copper', category: 'Copper', image: copperImage, pricePerKg: 650, type: PRICE_TYPES.MATERIAL, isNegotiable: false },
+        { id: 'aluminium', category: 'Aluminium', image: aluminiumImage, pricePerKg: 180, type: PRICE_TYPES.MATERIAL, isNegotiable: false },
+        { id: 'steel', category: 'Steel', image: steelImage, pricePerKg: 35, type: PRICE_TYPES.MATERIAL, isNegotiable: false },
+        { id: 'brass', category: 'Brass', image: brassImage, pricePerKg: 420, type: PRICE_TYPES.MATERIAL, isNegotiable: false },
+        { id: 'scrap_iron', category: 'Scrap Iron', image: steelImage, pricePerKg: 30, type: PRICE_TYPES.MATERIAL, isNegotiable: false },
+        { id: 'raddi', category: 'Raddi', image: paperImage, pricePerKg: 8, type: PRICE_TYPES.MATERIAL, isNegotiable: false },
+        { id: 'furniture', category: 'Furniture', image: paperImage, pricePerKg: 15, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'vehicle_scrap', category: 'Vehicle Scrap', image: steelImage, pricePerKg: 25, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'home_appliance', category: 'Home Appliance', image: electronicImage, pricePerKg: 20, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        // E-Waste Subcategories
+        { id: 'ew_comp', category: 'Computer Items', image: eComputerImage, pricePerKg: 100, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'ew_mob', category: 'Laptops/Mobiles', image: eLaptopImage, pricePerKg: 150, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'ew_mb', category: 'Motherboard', image: eMotherboardImage, pricePerKg: 400, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'ew_cable', category: 'Cables/Wires', image: eCablesImage, pricePerKg: 80, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'ew_batt', category: 'Batteries', image: eBatteryImage, pricePerKg: 60, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'ew_other', category: 'Other E-Waste', image: eOtherEWasteImage, pricePerKg: 50, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        // Furniture Subcategories
+        { id: 'furn_table', category: 'Table', image: woodTableImage, pricePerKg: 20, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'furn_chair', category: 'Chair', image: woodChairImage, pricePerKg: 15, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'furn_sofa', category: 'Sofa', image: woodAnotherImage, pricePerKg: 25, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'furn_bed', category: 'Bed', image: woodBedImage, pricePerKg: 30, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'furn_wood', category: 'Wooden Items', image: woodAnotherImage, pricePerKg: 10, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'furn_other', category: 'Other Furniture', image: woodOtherImage, pricePerKg: 12, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        // Home Appliance Subcategories
+        { id: 'ha_ac', category: 'AC', image: hACImage, pricePerKg: 35, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'ha_fridge', category: 'Fridge', image: hFridgeImage, pricePerKg: 30, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'ha_wm', category: 'Washing Machine', image: hWMImage, pricePerKg: 25, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'ha_tv', category: 'TV', image: hTVImage, pricePerKg: 20, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'ha_micro', category: 'Microwave', image: hMicroImage, pricePerKg: 15, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'ha_other', category: 'Other Appliance', image: hOtherApplianceImage, pricePerKg: 18, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        // Vehicle Scrap Subcategories
+        { id: 'vs_2w', category: '2-Wheeler', image: v2WheelerImage, pricePerKg: 30, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'vs_4w', category: '4-Wheeler', image: v4WheelerImage, pricePerKg: 25, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'vs_parts', category: 'Auto Parts', image: vAutoPartsImage, pricePerKg: 35, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'vs_tyre', category: 'Tyre', image: vTyreImage, pricePerKg: 10, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'vs_batt', category: 'Battery', image: vBatteryImage, pricePerKg: 60, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
+        { id: 'vs_other', category: 'Other Vehicle Parts', image: vOtherVehicleImage, pricePerKg: 20, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
       ];
 
       const response = await adminAPI.getAllPrices();
 
       if (response.success && response.data?.prices) {
-        // 2. Map API prices to our static list
+        // 2. Map API prices to our comprehensive list
         const apiPriceMap = {};
         response.data.prices.forEach(p => {
-          apiPriceMap[p.category.toLowerCase()] = {
-            price: p.pricePerKg,
-            id: p._id || p.id,
-            updatedAt: p.updatedAt
+          apiPriceMap[p.category.toLowerCase()] = p;
+        });
+
+        const mergedPrices = staticCategories.map(cat => {
+          const apiData = apiPriceMap[cat.category.toLowerCase()];
+          return {
+            ...cat,
+            id: apiData?._id || apiData?.id || `static_${cat.id}`,
+            pricePerKg: apiData?.pricePerKg !== undefined ? apiData.pricePerKg : cat.pricePerKg,
+            price: apiData?.price !== undefined ? apiData.price : 0,
+            minPrice: apiData?.minPrice || 0,
+            maxPrice: apiData?.maxPrice || 0,
+            image: apiData?.image || cat.image, // Default to static image if API image is empty
+            type: apiData?.type || cat.type || PRICE_TYPES.MATERIAL,
+            isActive: apiData?.isActive !== false,
+            isNegotiable: apiData?.isNegotiable !== undefined ? apiData.isNegotiable : cat.isNegotiable,
+            updatedAt: apiData?.updatedAt || new Date().toISOString(),
+            region: apiData?.regionCode || 'IN-DL'
           };
         });
 
-        const mergedPrices = staticCategories.map(cat => ({
-          ...cat,
-          id: apiPriceMap[cat.category.toLowerCase()]?.id || `static_${cat.id}`,
-          pricePerKg: apiPriceMap[cat.category.toLowerCase()]?.price !== undefined
-            ? apiPriceMap[cat.category.toLowerCase()].price
-            : cat.pricePerKg,
-          minPrice: apiPriceMap[cat.category.toLowerCase()]?.minPrice || 0,
-          maxPrice: apiPriceMap[cat.category.toLowerCase()]?.maxPrice || 0,
-          updatedAt: apiPriceMap[cat.category.toLowerCase()]?.updatedAt || new Date().toISOString(),
-          region: 'IN-DL'
-        }));
+        // Add any categories from API that are NOT in our static list
+        response.data.prices.forEach(p => {
+          if (!staticCategories.some(sc => sc.category.toLowerCase() === p.category.toLowerCase())) {
+            mergedPrices.push({
+              id: p._id || p.id,
+              category: p.category,
+              pricePerKg: p.pricePerKg,
+              price: p.price,
+              minPrice: p.minPrice || 0,
+              maxPrice: p.maxPrice || 0,
+              image: p.image || plasticImage,
+              type: p.type || PRICE_TYPES.MATERIAL,
+              isActive: p.isActive !== false,
+              isNegotiable: p.isNegotiable || false,
+              updatedAt: p.updatedAt,
+              region: p.regionCode || 'IN-DL'
+            });
+          }
+        });
 
-        setPrices(mergedPrices);
+        const filteredMergedPrices = mergedPrices.filter(p => !p.id.includes('_other'));
+        setPrices(filteredMergedPrices);
       } else {
-        setPrices(staticCategories.map(c => ({ ...c, region: 'IN-DL', updatedAt: new Date().toISOString() })));
+        setPrices(staticCategories.map(c => ({
+          ...c,
+          id: `static_${c.id}`,
+          region: 'IN-DL',
+          updatedAt: new Date().toISOString(),
+          minPrice: 0,
+          maxPrice: 0,
+          isActive: true
+        })));
       }
     } catch (err) {
       console.error('Error loading prices:', err);
@@ -158,7 +293,7 @@ const PriceFeedEditor = () => {
         { category: 'Aluminium', pricePerKg: 180, image: aluminiumImage, type: PRICE_TYPES.MATERIAL },
         { category: 'Steel', pricePerKg: 35, image: steelImage, type: PRICE_TYPES.MATERIAL },
         { category: 'Brass', pricePerKg: 420, image: brassImage, type: PRICE_TYPES.MATERIAL },
-      ].map(p => ({ ...p, id: `err_${p.category.toLowerCase()}`, region: 'IN-DL', updatedAt: nowIso }));
+      ].map(p => ({ ...p, id: `err_${p.category.toLowerCase()}`, region: 'IN-DL', updatedAt: nowIso, isActive: true, isNegotiable: false }));
 
       setPrices(defaultPrices);
     } finally {
@@ -168,7 +303,7 @@ const PriceFeedEditor = () => {
 
   const handleAddClick = () => {
     setModalMode('add');
-    setCurrentPriceData({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '' });
+    setCurrentPriceData({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '', isNegotiable: false, isActive: true });
     setShowModal(true);
   };
 
@@ -182,7 +317,9 @@ const PriceFeedEditor = () => {
       image: price.image || '',
       minPrice: price.minPrice ? price.minPrice.toString() : '0',
       maxPrice: price.maxPrice ? price.maxPrice.toString() : '0',
-      description: ''
+      description: '',
+      isActive: price.isActive !== false,
+      isNegotiable: price.isNegotiable || false
     });
     setShowModal(true);
   };
@@ -219,16 +356,45 @@ const PriceFeedEditor = () => {
     }
   };
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Optional: add client side size validation
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image size should be less than 5MB");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const response = await uploadAPI.uploadCategoryImage(file);
+      if (response.success && response.data?.file) {
+        setCurrentPriceData(prev => ({
+          ...prev,
+          image: response.data.file
+        }));
+      } else {
+        throw new Error(response.message || "Failed to upload image");
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert(error.message || "Failed to upload image. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleModalSubmit = async (e) => {
     e.preventDefault();
-    if (!currentPriceData.category || !currentPriceData.price) {
+    if (!currentPriceData.category || currentPriceData.price === '') {
       alert(getTranslatedText('Please fill in all fields'));
       return;
     }
 
     setIsSaving(true);
     try {
-      const priceValue = parseFloat(currentPriceData.price);
+      const priceValue = parseFloat(currentPriceData.price) || 0;
       const payload = {
         category: currentPriceData.category,
         pricePerKg: activeTab === PRICE_TYPES.MATERIAL ? priceValue : 0,
@@ -236,7 +402,8 @@ const PriceFeedEditor = () => {
         image: currentPriceData.image,
         regionCode: 'IN-DL',
         effectiveDate: new Date().toISOString(),
-        isActive: true,
+        isActive: currentPriceData.isActive,
+        isNegotiable: currentPriceData.isNegotiable,
         type: activeTab,
         minPrice: parseFloat(currentPriceData.minPrice) || 0,
         maxPrice: parseFloat(currentPriceData.maxPrice) || 0
@@ -255,7 +422,7 @@ const PriceFeedEditor = () => {
       if (response.success) {
         await loadPrices();
         setShowModal(false);
-        setCurrentPriceData({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '' });
+        setCurrentPriceData({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '', isNegotiable: false, isActive: true });
         alert(modalMode === 'add' ? getTranslatedText('Item saved successfully!') : getTranslatedText('Item updated successfully!'));
       } else {
         throw new Error(response.message || getTranslatedText('Failed to save item. Please try again.'));
@@ -282,7 +449,8 @@ const PriceFeedEditor = () => {
           regionCode: price.region || 'IN-DL',
           effectiveDate: price.effectiveDate || new Date().toISOString(),
           type: price.type || PRICE_TYPES.MATERIAL,
-          isActive: true,
+          isActive: price.isActive !== false,
+          isNegotiable: price.isNegotiable || false,
           minPrice: price.minPrice || 0,
           maxPrice: price.maxPrice || 0
         };
@@ -495,6 +663,9 @@ const PriceFeedEditor = () => {
                       <span className="sm:hidden">{activeTab === PRICE_TYPES.MATERIAL ? getTranslatedText('Range') : getTranslatedText('Fee')}</span>
                     </th>
                     <th className="px-2 py-2 md:px-6 md:py-4 text-left text-xs md:text-sm font-semibold hidden md:table-cell" style={{ color: '#2d3748' }}>
+                      Status
+                    </th>
+                    <th className="px-2 py-2 md:px-6 md:py-4 text-left text-xs md:text-sm font-semibold hidden md:table-cell" style={{ color: '#2d3748' }}>
                       {getTranslatedText("Region")}
                     </th>
                     <th className="px-2 py-2 md:px-6 md:py-4 text-left text-xs md:text-sm font-semibold hidden lg:table-cell" style={{ color: '#2d3748' }}>
@@ -538,6 +709,18 @@ const PriceFeedEditor = () => {
                         </div>
                       </td>
                       <td className="px-2 py-2 md:px-6 md:py-4 hidden md:table-cell">
+                        <div className="flex flex-col gap-1 items-start">
+                          <span className={`text-xs px-2 py-1 rounded-full text-center ${price.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                            {price.isActive ? 'Active' : 'Disabled'}
+                          </span>
+                          {price.isNegotiable && (
+                            <span className="text-xs px-2 py-1 rounded-full text-center bg-blue-100 text-blue-700">
+                              Negotiable
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-2 py-2 md:px-6 md:py-4 hidden md:table-cell">
                         <span className="text-xs md:text-sm" style={{ color: '#718096' }}>{price.region}</span>
                       </td>
                       <td className="px-2 py-2 md:px-6 md:py-4 hidden lg:table-cell">
@@ -559,19 +742,25 @@ const PriceFeedEditor = () => {
                           </motion.button>
 
                           {/* Only show delete if it's not one of the 8 fixed categories */}
-                          {!['plastic', 'metal', 'paper', 'electronics', 'copper', 'aluminium', 'steel', 'brass'].includes(price.category.toLowerCase()) && (
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => handleDelete(price.id)}
-                              className="p-1.5 md:p-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                              style={{ backgroundColor: '#fee2e2', color: '#dc2626' }}
-                              title={getTranslatedText("Delete category")}
-                              disabled={isSaving}
-                            >
-                              <FaTrash className="text-xs md:text-sm" />
-                            </motion.button>
-                          )}
+                          {!['plastic', 'metal', 'paper', 'e-waste', 'copper', 'aluminium', 'steel', 'brass',
+                            'scrap iron', 'raddi', 'furniture', 'vehicle scrap', 'home appliance',
+                            'computer items', 'laptops/mobiles', 'motherboard', 'cables/wires', 'batteries', 'other e-waste',
+                            'table', 'chair', 'sofa', 'bed', 'wooden items', 'other furniture',
+                            'ac', 'fridge', 'washing machine', 'tv', 'microwave', 'other appliance',
+                            '2-wheeler', '4-wheeler', 'auto parts', 'tyre', 'battery', 'other vehicle parts'
+                          ].includes(price.category.toLowerCase()) && (
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => handleDelete(price.id)}
+                                className="p-1.5 md:p-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                style={{ backgroundColor: '#fee2e2', color: '#dc2626' }}
+                                title={getTranslatedText("Delete category")}
+                                disabled={isSaving}
+                              >
+                                <FaTrash className="text-xs md:text-sm" />
+                              </motion.button>
+                            )}
                         </div>
                       </td>
                     </motion.tr>
@@ -640,50 +829,58 @@ const PriceFeedEditor = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full"
+              className="bg-white rounded-2xl shadow-2xl p-4 md:p-6 max-w-md w-full max-h-[90vh] flex flex-col"
             >
-              <h2 className="text-xl font-bold mb-4" style={{ color: '#2d3748' }}>
+              <h2 className="text-xl font-bold mb-4 flex-shrink-0" style={{ color: '#2d3748' }}>
                 {modalMode === 'add'
                   ? getTranslatedText("Add New {type}", { type: activeTab === 'service' ? getTranslatedText('Service') : getTranslatedText('Material') })
                   : getTranslatedText("Edit {type}", { type: activeTab === 'service' ? getTranslatedText('Service') : getTranslatedText('Material') })
                 }
               </h2>
-              <form onSubmit={handleModalSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: '#4a5568' }}>
-                    {activeTab === PRICE_TYPES.SERVICE ? getTranslatedText('Service Name') : getTranslatedText('Category Name')}
-                  </label>
-                  <input
-                    type="text"
-                    value={currentPriceData.category}
-                    onChange={(e) => setCurrentPriceData(prev => ({ ...prev, category: e.target.value }))}
-                    placeholder={activeTab === PRICE_TYPES.SERVICE ? getTranslatedText("e.g. Garage Cleaning") : getTranslatedText("e.g. Copper Wire")}
-                    className="w-full px-4 py-2 rounded-xl border-2 focus:outline-none focus:ring-2 focus:border-transparent transition-all disabled:bg-gray-50 disabled:text-gray-500"
-                    style={{ borderColor: '#e2e8f0', focusRingColor: '#64946e' }}
-                    required
-                    disabled={['plastic', 'metal', 'paper', 'electronics', 'copper', 'aluminium', 'steel', 'brass'].includes(currentPriceData.category.toLowerCase())}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: '#4a5568' }}>
-                    {activeTab === PRICE_TYPES.SERVICE ? getTranslatedText('Fixed Fee (₹)') : getTranslatedText('Price per Kg (₹)')}
-                  </label>
-                  <input
-                    type="number"
-                    value={currentPriceData.price}
-                    onChange={(e) => setCurrentPriceData(prev => ({ ...prev, price: e.target.value }))}
-                    placeholder={activeTab === PRICE_TYPES.SERVICE ? getTranslatedText("e.g. 500") : getTranslatedText("e.g. 450")}
-                    className="w-full px-4 py-2 rounded-xl border-2 focus:outline-none focus:ring-2 focus:border-transparent transition-all"
-                    style={{ borderColor: '#e2e8f0', focusRingColor: '#64946e' }}
-                    required
-                    min="0"
-                    step="0.1"
-                  />
+              <form onSubmit={handleModalSubmit} className="space-y-3 overflow-y-auto pr-1 custom-scrollbar">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium mb-1" style={{ color: '#4a5568' }}>
+                      {activeTab === PRICE_TYPES.SERVICE ? getTranslatedText('Service Name') : getTranslatedText('Category Name')}
+                    </label>
+                    <input
+                      type="text"
+                      value={currentPriceData.category}
+                      onChange={(e) => setCurrentPriceData(prev => ({ ...prev, category: e.target.value }))}
+                      placeholder={activeTab === PRICE_TYPES.SERVICE ? getTranslatedText("e.g. Garage Cleaning") : getTranslatedText("e.g. Copper Wire")}
+                      className="w-full px-3 py-1.5 text-sm rounded-xl border-2 focus:outline-none focus:ring-2 focus:border-transparent transition-all disabled:bg-gray-50 disabled:text-gray-500"
+                      style={{ borderColor: '#e2e8f0', focusRingColor: '#64946e' }}
+                      required
+                      disabled={['plastic', 'metal', 'paper', 'electronics', 'copper', 'aluminium', 'steel', 'brass',
+                        'e-waste', 'scrap_iron', 'raddi', 'furniture', 'vehicle_scrap', 'home_appliance',
+                        'computer items', 'laptops/mobiles', 'motherboard', 'cables/wires', 'batteries', 'other e-waste',
+                        'table', 'chair', 'sofa', 'bed', 'wooden items', 'other furniture',
+                        'ac', 'fridge', 'washing machine', 'tv', 'microwave', 'other appliance',
+                        '2-wheeler', '4-wheeler', 'auto parts', 'tyre', 'battery', 'other vehicle parts'
+                      ].includes(currentPriceData.category.toLowerCase())}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium mb-1" style={{ color: '#4a5568' }}>
+                      {activeTab === PRICE_TYPES.SERVICE ? getTranslatedText('Fixed Fee (₹)') : getTranslatedText('Price per Kg (₹)')}
+                    </label>
+                    <input
+                      type="number"
+                      value={currentPriceData.price}
+                      onChange={(e) => setCurrentPriceData(prev => ({ ...prev, price: e.target.value }))}
+                      placeholder={activeTab === PRICE_TYPES.SERVICE ? getTranslatedText("e.g. 500") : getTranslatedText("e.g. 450")}
+                      className="w-full px-3 py-1.5 text-sm rounded-xl border-2 focus:outline-none focus:ring-2 focus:border-transparent transition-all"
+                      style={{ borderColor: '#e2e8f0', focusRingColor: '#64946e' }}
+                      required
+                      min="0"
+                      step="0.1"
+                    />
+                  </div>
                 </div>
                 {activeTab !== 'service' && (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium mb-1" style={{ color: '#4a5568' }}>
+                      <label className="block text-xs font-medium mb-1" style={{ color: '#4a5568' }}>
                         Min Price (₹)
                       </label>
                       <input
@@ -691,14 +888,14 @@ const PriceFeedEditor = () => {
                         value={currentPriceData.minPrice}
                         onChange={(e) => setCurrentPriceData(prev => ({ ...prev, minPrice: e.target.value }))}
                         placeholder="e.g. 40"
-                        className="w-full px-4 py-2 rounded-xl border-2 focus:outline-none focus:ring-2 focus:border-transparent transition-all"
+                        className="w-full px-3 py-1.5 text-sm rounded-xl border-2 focus:outline-none focus:ring-2 focus:border-transparent transition-all"
                         style={{ borderColor: '#e2e8f0' }}
                         min="0"
                         step="0.1"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1" style={{ color: '#4a5568' }}>
+                      <label className="block text-xs font-medium mb-1" style={{ color: '#4a5568' }}>
                         Max Price (₹)
                       </label>
                       <input
@@ -706,7 +903,7 @@ const PriceFeedEditor = () => {
                         value={currentPriceData.maxPrice}
                         onChange={(e) => setCurrentPriceData(prev => ({ ...prev, maxPrice: e.target.value }))}
                         placeholder="e.g. 50"
-                        className="w-full px-4 py-2 rounded-xl border-2 focus:outline-none focus:ring-2 focus:border-transparent transition-all"
+                        className="w-full px-3 py-1.5 text-sm rounded-xl border-2 focus:outline-none focus:ring-2 focus:border-transparent transition-all"
                         style={{ borderColor: '#e2e8f0' }}
                         min="0"
                         step="0.1"
@@ -715,7 +912,68 @@ const PriceFeedEditor = () => {
                   </div>
                 )}
                 <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: '#4a5568' }}>
+                  <label className="block text-xs font-medium mb-1" style={{ color: '#4a5568' }}>
+                    {getTranslatedText('Category Image')}
+                  </label>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="file"
+                        id="category-image-upload"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={isUploading}
+                      />
+                      <label
+                        htmlFor="category-image-upload"
+                        className={`flex-1 px-3 py-1.5 rounded-xl border-2 border-dashed flex items-center justify-center gap-2 cursor-pointer transition-all hover:bg-gray-50 ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        style={{ borderColor: '#cbd5e0' }}
+                      >
+                        {isUploading ? (
+                          <>
+                            <div className="w-3 h-3 border-2 border-[#64946e] border-t-transparent animate-spin rounded-full" />
+                            <span className="text-xs">Uploading...</span>
+                          </>
+                        ) : (
+                          <>
+                            <FaUpload className="text-gray-400 text-xs" />
+                            <span className="text-xs text-gray-600">Change image</span>
+                          </>
+                        )}
+                      </label>
+                      {currentPriceData.image && (
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          type="button"
+                          onClick={() => setCurrentPriceData(prev => ({ ...prev, image: '' }))}
+                          className="p-1.5 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
+                          title="Remove custom image"
+                        >
+                          <FaTrash size={12} />
+                        </motion.button>
+                      )}
+                    </div>
+
+                    <div className="relative group">
+                      <div className="w-full h-24 rounded-xl overflow-hidden border-2 border-gray-100 bg-gray-50 flex items-center justify-center relative shadow-inner">
+                        <img
+                          src={currentPriceData.image || STATIC_CATEGORY_IMAGES[currentPriceData.category?.toLowerCase()] || plasticImage}
+                          alt="Preview"
+                          className="max-h-full max-w-full object-contain"
+                        />
+                        {!currentPriceData.image && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-5 pointer-events-none">
+                            <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400 bg-white px-2 py-0.5 rounded shadow-sm">Default</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="hidden">
+                  <label className="block text-xs font-medium mb-1" style={{ color: '#4a5568' }}>
                     {getTranslatedText('Image URL (Optional)')}
                   </label>
                   <input
@@ -725,21 +983,37 @@ const PriceFeedEditor = () => {
                     placeholder={getTranslatedText("https://example.com/image.jpg")}
                     className="w-full px-4 py-2 rounded-xl border-2 focus:outline-none focus:ring-2 focus:border-transparent transition-all disabled:bg-gray-50"
                     style={{ borderColor: '#e2e8f0', focusRingColor: '#64946e' }}
-                    disabled={['plastic', 'metal', 'paper', 'electronics', 'copper', 'aluminium', 'steel', 'brass'].includes(currentPriceData.category.toLowerCase())}
                   />
-                  {currentPriceData.image && (
-                    <div className="mt-2 w-full h-32 rounded-lg overflow-hidden border border-gray-200 bg-white flex items-center justify-center">
-                      <img src={currentPriceData.image} alt="Preview" className="max-h-full object-contain" />
-                    </div>
-                  )}
                 </div>
-                <div className="flex gap-3 pt-2">
+
+                <div className="flex gap-4 pt-1">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={currentPriceData.isActive !== false}
+                      onChange={(e) => setCurrentPriceData(prev => ({ ...prev, isActive: e.target.checked }))}
+                      className="w-3.5 h-3.5 text-[#64946e] rounded border-gray-300 focus:ring-[#64946e]"
+                    />
+                    <span className="text-xs font-medium" style={{ color: '#4a5568' }}>Enable Material</span>
+                  </label>
+
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={currentPriceData.isNegotiable || false}
+                      onChange={(e) => setCurrentPriceData(prev => ({ ...prev, isNegotiable: e.target.checked }))}
+                      className="w-3.5 h-3.5 text-[#64946e] rounded border-gray-300 focus:ring-[#64946e]"
+                    />
+                    <span className="text-xs font-medium" style={{ color: '#4a5568' }}>Negotiable</span>
+                  </label>
+                </div>
+                <div className="flex gap-3 pt-2 flex-shrink-0">
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="flex-1 px-4 py-2 rounded-xl font-semibold transition-all"
+                    className="flex-1 px-4 py-2 rounded-xl font-semibold text-sm transition-all"
                     style={{ backgroundColor: '#f7fafc', color: '#2d3748' }}
                   >
                     {getTranslatedText("Cancel")}
@@ -749,7 +1023,7 @@ const PriceFeedEditor = () => {
                     whileTap={{ scale: 0.98 }}
                     type="submit"
                     disabled={isSaving}
-                    className="flex-1 px-4 py-2 rounded-xl font-semibold text-white transition-all shadow-md"
+                    className="flex-1 px-4 py-2 rounded-xl font-semibold text-sm text-white transition-all shadow-md"
                     style={{ backgroundColor: '#64946e' }}
                   >
                     {isSaving ? getTranslatedText('Saving...') : (modalMode === 'add' ? (activeTab === PRICE_TYPES.SERVICE ? getTranslatedText('Add Service') : getTranslatedText('Add Material')) : (activeTab === PRICE_TYPES.SERVICE ? getTranslatedText('Update Service') : getTranslatedText('Update Material')))}

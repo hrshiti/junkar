@@ -271,8 +271,9 @@ const KYCUploadPage = () => {
       return;
     }
 
-    if (!panNumber || panNumber.length !== 10) {
-      alert(getTranslatedText('Please enter a valid PAN number'));
+    const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+    if (!panNumber || !panRegex.test(panNumber)) {
+      alert(getTranslatedText('Please enter a valid PAN number in format (e.g., ABCDE1234F)'));
       return;
     }
 
@@ -516,7 +517,6 @@ const KYCUploadPage = () => {
             </div>
           </div>
 
-          {/* PAN Number */}
           <div>
             <label className="block text-sm font-semibold mb-2 text-white">
               {getTranslatedText("PAN Number")} <span className="text-red-500">*</span>
@@ -527,9 +527,12 @@ const KYCUploadPage = () => {
               onChange={handlePanNumberChange}
               placeholder={getTranslatedText("Enter 10-digit PAN number")}
               maxLength={10}
-              className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${panNumber.length === 10 ? 'border-sky-500' : 'border-zinc-700'}`}
+              className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${panNumber.length === 10 && /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(panNumber) ? 'border-sky-500' : panNumber.length > 0 && (panNumber.length < 10 || !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(panNumber)) ? 'border-red-500/50' : 'border-zinc-700'}`}
               required
             />
+            <p className="text-[10px] mt-1 text-gray-400">
+              Format: 5 letters, 4 digits, 1 letter (e.g., ABCDE1234F)
+            </p>
           </div>
 
           {/* PAN Photo Upload */}

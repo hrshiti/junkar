@@ -89,26 +89,90 @@ const AllCategoriesPage = () => {
 
         if (response.success && response.data?.prices) {
           const apiItems = response.data.prices.filter(
-            (p) => !p.type || p.type === PRICE_TYPES.MATERIAL
+            (p) => (!p.type || p.type === PRICE_TYPES.MATERIAL)
           );
 
           const apiMapped = apiItems.map((price) => ({
             name: price.category,
             image: price.image || getCategoryImage(price.category),
             type: PRICE_TYPES.MATERIAL,
+            isActive: price.isActive !== false
           }));
 
           // 3. Merge: prefer API data for items that exist in both
-          const merged = [...apiMapped];
-          defaultMapped.forEach((def) => {
-            if (!merged.find((m) => m.name.toLowerCase() === def.name.toLowerCase())) {
+          // If in API and isActive is false, it's hidden.
+          // If not in API, it shows by default.
+          const merged = [];
+          const processedNames = new Set();
+
+          // Process API items first
+          apiMapped.forEach(apiItem => {
+            if (apiItem.isActive) {
+              merged.push(apiItem);
+            }
+            processedNames.add(apiItem.name.toLowerCase());
+          });
+
+          // Add defaults that aren't in API
+          defaultMapped.forEach(def => {
+            if (!processedNames.has(def.name.toLowerCase())) {
               merged.push(def);
             }
           });
+
           finalCategories = merged;
         }
 
-        setCategories(finalCategories);
+        // 4. Define sub-categories for flattening (matching CategorySelectionPage)
+        const subCategoriesMap = {
+          'e_waste': [
+            { name: 'Computer Items', image: eWasteImage, isNegotiable: true },
+            { name: 'Laptops/Mobiles', image: eWasteImage, isNegotiable: true },
+            { name: 'Motherboard', image: eWasteImage, isNegotiable: true },
+            { name: 'Cables/Wires', image: eWasteImage, isNegotiable: true },
+            { name: 'Batteries', image: eWasteImage, isNegotiable: true },
+          ],
+          'furniture': [
+            { name: 'Table', image: furnitureImage, isNegotiable: true },
+            { name: 'Chair', image: furnitureImage, isNegotiable: true },
+            { name: 'Sofa', image: furnitureImage, isNegotiable: true },
+            { name: 'Bed', image: furnitureImage, isNegotiable: true },
+            { name: 'Wooden Items', image: furnitureImage, isNegotiable: true },
+          ],
+          'home_appliance': [
+            { name: 'AC', image: homeApplianceImage, isNegotiable: true },
+            { name: 'Fridge', image: homeApplianceImage, isNegotiable: true },
+            { name: 'Washing Machine', image: homeApplianceImage, isNegotiable: true },
+            { name: 'TV', image: homeApplianceImage, isNegotiable: true },
+            { name: 'Microwave', image: homeApplianceImage, isNegotiable: true },
+          ],
+          'vehicle_scrap': [
+            { name: '2-Wheeler', image: vehicleImage, isNegotiable: true },
+            { name: '4-Wheeler', image: vehicleImage, isNegotiable: true },
+            { name: 'Auto Parts', image: vehicleImage, isNegotiable: true },
+            { name: 'Tyre', image: vehicleImage, isNegotiable: true },
+            { name: 'Battery', image: vehicleImage, isNegotiable: true },
+          ],
+        };
+
+        const negotiableKeys = ['e_waste', 'furniture', 'home_appliance', 'vehicle_scrap', 'electronics', 'e-waste'];
+        const flattened = [];
+        finalCategories.forEach(cat => {
+          flattened.push(cat);
+          const key = cat.name.toLowerCase().replace(' ', '_').replace('-', '_');
+          if (subCategoriesMap[key]) {
+            subCategoriesMap[key].forEach(sub => {
+              flattened.push({
+                ...sub,
+                type: PRICE_TYPES.MATERIAL
+              });
+            });
+          } else if (negotiableKeys.includes(key)) {
+            cat.isNegotiable = true;
+          }
+        });
+
+        setCategories(flattened);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
         // Fallback to defaults only
@@ -124,7 +188,7 @@ const AllCategoriesPage = () => {
       }
     };
     fetchCategories();
-  }, []); // Removed dependency to prevent re-fetching loop
+  }, []);
 
   const handleCategoryClick = (item) => {
     // Navigate to category selection to handle subcategories
@@ -202,6 +266,11 @@ const AllCategoriesPage = () => {
                       className="text-sm md:text-base font-bold text-center mb-1"
                       style={{ color: "#1e293b" }}>
                       {getTranslatedText(category.name)}
+                      {category.isNegotiable && (
+                        <div className="mt-1 flex items-center justify-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-[#fef3c7] text-[#92400e] border border-amber-200 w-fit mx-auto">
+                          <span className="text-amber-500">💛</span> {getTranslatedText('Negotiable')}
+                        </div>
+                      )}
                     </p>
                     <p
                       className="text-sm md:text-center font-medium"

@@ -97,6 +97,14 @@ const Footer = () => {
                     </div>
                 </div>
             </div>
+            <style>{`
+        @media (max-width: 480px) {
+          .footer { text-align: center; }
+          .footer-socials { justify-content: center; }
+          .footer-logo { margin: 0 auto 1.5rem; }
+          .footer-bottom div { justify-content: center; }
+        }
+      `}</style>
         </footer>
     );
 };

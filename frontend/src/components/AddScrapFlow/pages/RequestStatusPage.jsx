@@ -287,15 +287,15 @@ const RequestStatusPage = () => {
       progress: 20
     },
     accepted: {
-      label: 'Accepted',
+      label: requestData?.isDonation ? 'Donation Accepted' : 'Accepted',
       color: '#38bdf8',
-      description: 'Scrapper has accepted your request',
+      description: requestData?.isDonation ? 'A scrapper will pick up your donation for free' : 'Scrapper has accepted your request',
       progress: 40
     },
     on_way: {
-      label: 'On the Way',
+      label: requestData?.isDonation ? 'Scrapper Coming for Donation' : 'On the Way',
       color: '#3b82f6',
-      description: 'Scrapper is coming to your location',
+      description: requestData?.isDonation ? 'Scrapper is on the way to pick up your donation' : 'Scrapper is coming to your location',
       progress: 60
     },
     arrived: {
@@ -619,11 +619,27 @@ const RequestStatusPage = () => {
                 </span>
               </div>
               {requestData.orderType !== 'cleaning_service' && (
-                <div className="flex justify-between items-center">
-                  <span className="text-xs md:text-sm" style={{ color: '#718096' }}>{getTranslatedText("Weight:")}</span>
-                  <span className="text-xs md:text-sm font-semibold" style={{ color: '#2d3748' }}>
-                    {requestData.weight || requestData.totalWeight || 0} {getTranslatedText("kg")}
-                  </span>
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs md:text-sm" style={{ color: '#718096' }}>{getTranslatedText("Weight Details:")}</span>
+                    <span className="text-xs md:text-sm font-semibold" style={{ color: '#2d3748' }}>
+                      {requestData.weight || requestData.totalWeight || 0} {getTranslatedText("kg")}
+                    </span>
+                  </div>
+                  {requestData.scrapItems?.length > 1 && (
+                    <div className="pl-4 space-y-1">
+                      {requestData.scrapItems.map((item, idx) => (
+                        <div key={idx} className="flex justify-between text-[11px] md:text-xs italic">
+                          <span style={{ color: '#94a3b8' }}>{getTranslatedText(item.name)}:</span>
+                          <span style={{ color: '#64748b' }}>
+                            {item.pricingType === 'negotiable'
+                              ? getTranslatedText("Negotiable")
+                              : `${item.weight} ${getTranslatedText("kg")}`}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
               <div className="flex justify-between items-center">
@@ -653,10 +669,10 @@ const RequestStatusPage = () => {
                     <span className="text-xl md:text-2xl font-bold" style={{ color: '#38bdf8' }}>
                       {requestData.orderType === 'cleaning_service'
                         ? `₹${requestData.serviceFee || 0}`
-                        : (requestData.isNegotiated || requestData.scrapItems?.some(i => i.pricingType === 'negotiable')
-                          ? (requestData.scrapItems?.[0]?.expectedPrice
-                            ? `₹${requestData.scrapItems[0].expectedPrice}`
-                            : getTranslatedText('Negotiable'))
+                        : (requestData.scrapItems?.some(i => i.pricingType === 'negotiable')
+                          ? (requestData.scrapItems?.every(i => i.pricingType === 'negotiable')
+                            ? (requestData.scrapItems?.[0]?.expectedPrice ? `₹${requestData.scrapItems[0].expectedPrice}` : getTranslatedText('Negotiable'))
+                            : `₹${requestData.totalAmount?.toFixed(0) || 0} + ${getTranslatedText('Negotiable')}`)
                           : `₹${requestData.totalAmount?.toFixed(0) || 0}`)
                       }
                     </span>

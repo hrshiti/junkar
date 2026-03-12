@@ -152,7 +152,13 @@ class OrderService {
         }
 
         // Validate scrapper wallet balance
-        await walletService.validateBalance(scrapperId, 100, 'scrapper');
+        // If the scrapper has an active subscription (e.g., 1-month free trial), bypass the Rs 100 requirement
+        if (scrapper.subscription && scrapper.subscription.status === 'active') {
+            await walletService.validateBalance(scrapperId, 0, 'scrapper'); // Just ensure it's not negative
+        } else {
+            // Subscription expired or not active, require Rs 100 minimum balance
+            await walletService.validateBalance(scrapperId, 100, 'scrapper');
+        }
 
         // ATOMIC CLAIM: Only update if order is still unassigned/pending
         const order = await Order.findOneAndUpdate(

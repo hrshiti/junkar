@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../shared/context/AuthContext';
-import { createTicket, TICKET_ROLE } from '../../shared/utils/helpSupportUtils';
+import { supportAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
 const ScrapperHelpSupport = () => {
@@ -45,27 +45,63 @@ const ScrapperHelpSupport = () => {
     }
   }, [success, navigate]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!category || !message.trim()) return;
     if (submitting) return;
 
     setSubmitting(true);
     setStatusMessage(getTranslatedText('Submitting your ticket...'));
+
+    // Map frontend categories to backend generic types
+    let backendType = 'general';
+    let subject = 'Scrapper Support Request';
+
+    switch (category) {
+      case 'pickup_routing':
+        backendType = 'issue';
+        subject = 'Pickup Routing/Assignment Issue';
+        break;
+      case 'payment_payout':
+        backendType = 'payment';
+        subject = 'Payout/Payment Issue';
+        break;
+      case 'subscription':
+        backendType = 'account';
+        subject = 'Subscription/Billing Issue';
+        break;
+      case 'kyc':
+        backendType = 'account';
+        subject = 'KYC/Verification Issue';
+        break;
+      case 'app_bug':
+        backendType = 'issue';
+        subject = 'App Bug Report';
+        break;
+      default:
+        backendType = 'general';
+        subject = 'Support Request';
+    }
+
     try {
-      createTicket({
-        role: TICKET_ROLE.SCRAPPER,
-        userId: user?.id || user?.phone,
-        name: user?.name || getTranslatedText('Scrapper'),
-        phone: user?.phone || '',
-        category,
-        message: message.trim()
+      await supportAPI.create({
+        subject: subject,
+        type: backendType,
+        message: message.trim(),
+        role: 'scrapper'
       });
       setSuccess(true);
       setMessage('');
       setCategory('');
+    } catch (error) {
+      console.error("Failed to submit ticket:", error);
+      setStatusMessage(getTranslatedText('Failed to submit. Please try again.'));
+      // Reset submitting status after a delay
+      setTimeout(() => setSubmitting(false), 2000);
     } finally {
-      setSubmitting(false);
+      if (!success) {
+        setSubmitting(false);
+      }
     }
   };
 

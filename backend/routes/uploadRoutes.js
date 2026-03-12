@@ -1,7 +1,7 @@
 import express from 'express';
-import { protect, isUser, isScrapper } from '../middleware/auth.js';
-import { uploadMultiple, uploadFields } from '../services/uploadService.js';
-import { uploadOrderImages, uploadKycDocs } from '../controllers/uploadController.js';
+import { protect, isUser, isScrapper, isAdmin } from '../middleware/auth.js';
+import { uploadMultiple, uploadFields, uploadSingle } from '../services/uploadService.js';
+import { uploadOrderImages, uploadKycDocs, uploadCategoryImage } from '../controllers/uploadController.js';
 
 const router = express.Router();
 
@@ -24,6 +24,15 @@ router.post(
     { name: 'license', maxCount: 2 },
   ]),
   uploadKycDocs
+);
+
+// Category images (admin)
+router.post(
+  '/category-image',
+  protect,
+  isAdmin,
+  uploadSingle('image'),
+  uploadCategoryImage
 );
 
 export default router;
