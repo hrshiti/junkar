@@ -14,6 +14,15 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
-const analytics = getAnalytics(app);
+
+let analytics = null;
+
+if (typeof window !== 'undefined') {
+  try {
+    analytics = getAnalytics(app);
+  } catch (error) {
+    console.warn('Firebase analytics is not available in this environment:', error);
+  }
+}
 
 export { messaging, getToken, onMessage, analytics };
