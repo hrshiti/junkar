@@ -84,7 +84,7 @@ const Contact = () => {
                         <div>
                             <h4 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{getTranslatedText("Call Us")}</h4>
                             <p style={{ color: 'var(--text-muted)' }}>{getTranslatedText("Mon-Fri from 9am to 6pm.")}</p>
-                            <p style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '0.5rem' }}>+1 (555) 000-0000</p>
+                            <p style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '0.5rem' }}>+91 9785455565</p>
                         </div>
                     </div>
 
@@ -95,7 +95,7 @@ const Contact = () => {
                         <div>
                             <h4 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{getTranslatedText("Email Us")}</h4>
                             <p style={{ color: 'var(--text-muted)' }}>{getTranslatedText("Our team is here to help.")}</p>
-                            <p style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '0.5rem' }}>support@junkar.com</p>
+                            <p style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '0.5rem' }}>Support@junkar.in</p>
                         </div>
                     </div>
 
@@ -106,7 +106,7 @@ const Contact = () => {
                         <div>
                             <h4 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{getTranslatedText("Visit Us")}</h4>
                             <p style={{ color: 'var(--text-muted)' }}>{getTranslatedText("Come say hello at our office.")}</p>
-                            <p style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '0.5rem' }}>123 Recycling Way, Green City, ECO 54321</p>
+                            <p style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '0.5rem' }}>RK Industries, Heavy Industrial Area, Basni, Jodhpur 342005</p>
                         </div>
                     </div>
 

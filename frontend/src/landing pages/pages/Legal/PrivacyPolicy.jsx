@@ -39,7 +39,7 @@ const PrivacyPolicy = () => {
                         <p>Junkar's Privacy Policy does not apply to other advertisers or websites. Thus, we are advising you to consult the respective Privacy Policies of these third-party ad servers for more detailed information.</p>
 
                         <h2 style={{ marginTop: '2rem', marginBottom: '1rem', fontWeight: 700 }}>5. Contact Us</h2>
-                        <p>If you have additional questions or require more information about our Privacy Policy, do not hesitate to contact us at support@junkar.in.</p>
+                        <p>If you have additional questions or require more information about our Privacy Policy, do not hesitate to contact us at Support@junkar.in.</p>
                     </div>
                 </div>
             </main>
