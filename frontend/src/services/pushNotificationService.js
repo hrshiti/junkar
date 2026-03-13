@@ -39,6 +39,11 @@ async function getFCMToken() {
     try {
         const registration = await registerServiceWorker();
 
+        if (!messaging) {
+            console.log('Firebase Messaging is not supported in this browser');
+            return null;
+        }
+
         const token = await getToken(messaging, {
             vapidKey: VAPID_KEY,
             serviceWorkerRegistration: registration
@@ -104,6 +109,11 @@ export async function registerFCMToken(forceUpdate = false) {
 
 // Setup foreground notification handler
 export function setupForegroundNotificationHandler(handler) {
+    if (!messaging) {
+        console.warn('Firebase Messaging not initialized, foreground handler skipped');
+        return;
+    }
+
     onMessage(messaging, (payload) => {
         console.log('📬 Foreground message received:', payload);
 
@@ -126,9 +136,14 @@ export function setupForegroundNotificationHandler(handler) {
 // Initialize push notifications
 export async function initializePushNotifications() {
     try {
-        if ('serviceWorker' in navigator) {
-            await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        // Push notifications are generally not supported in many in-app browsers
+        if (!('serviceWorker' in navigator) || !messaging) {
+            console.log('Push notifications not supported in this environment');
+            return;
         }
+
+        await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        
         // Token will be registered on login or if already logged in
         const token = localStorage.getItem('token');
         if (token) {

@@ -55,7 +55,7 @@ export default defineConfig({
     chunkSizeWarningLimit: 1500,
     sourcemap: false,
     cssCodeSplit: true,
-    target: 'es2020',
+    target: 'es2015',
     assetsInlineLimit: 4096,
   },
   optimizeDeps: {

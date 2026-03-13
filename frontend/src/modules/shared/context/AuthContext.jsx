@@ -14,13 +14,22 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    // Check localStorage on mount
-    const token = localStorage.getItem('token');
-    return !!token;
+    try {
+      const token = localStorage.getItem('token');
+      return !!token;
+    } catch (e) {
+      console.warn('LocalStorage access failed', e);
+      return false;
+    }
   });
   const [user, setUser] = useState(() => {
-    const storedUser = localStorage.getItem('user');
-    return storedUser ? JSON.parse(storedUser) : null;
+    try {
+      const storedUser = localStorage.getItem('user');
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch (e) {
+      console.warn('LocalStorage access failed', e);
+      return null;
+    }
   });
   const [loading, setLoading] = useState(true);
 

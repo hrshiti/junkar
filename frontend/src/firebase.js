@@ -13,15 +13,29 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
 
+let messaging = null;
 let analytics = null;
 
+// Initialize Firebase services safely
 if (typeof window !== 'undefined') {
+  // Initialize Analytics safely
   try {
     analytics = getAnalytics(app);
   } catch (error) {
     console.warn('Firebase analytics is not available in this environment:', error);
+  }
+
+  // Initialize Messaging safely
+  // Note: we check isSupported() asynchronously in the service, 
+  // but here we just try to get it if possible, or leave as null.
+  try {
+    // Only attempt to get messaging if the browser supports service workers
+    if ('serviceWorker' in navigator) {
+      messaging = getMessaging(app);
+    }
+  } catch (error) {
+    console.warn('Firebase Messaging could not be initialized:', error);
   }
 }
 
