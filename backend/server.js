@@ -46,14 +46,20 @@ const PORT = process.env.PORT || 7000;
 // Security middleware
 app.use(helmet());
 // CORS Configuration
-const allowedOrigins = process.env.FRONTEND_URL
-  ? process.env.FRONTEND_URL.split(',').map(url => url.trim().replace(/\/$/, "")) // Remove trailing slash
-  : [
-    'http://localhost:5173',
-    'https://junkar.vercel.app',
-    'https://www.junkar.in',
-    'https://junkar.in'
-  ];
+const defaultOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://junkar.vercel.app',
+  'https://www.junkar.in',
+  'https://junkar.in'
+];
+
+const envOrigins = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(',').map(url => url.trim().replace(/\/$/, ""))
+  : [];
+
+// Combine defaults with environment variables, ensuring unique values
+const allowedOrigins = [...new Set([...defaultOrigins, ...envOrigins])];
 
 app.use(
   cors({
@@ -64,10 +70,14 @@ app.use(
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        // Gracefully disallow and log for debugging
+        console.warn(`⚠️ CORS blocked request from origin: ${origin}`);
+        callback(null, false);
       }
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   })
 );
 
