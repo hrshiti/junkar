@@ -15,6 +15,29 @@ import homeApplianceImage from "../assets/home_appliance/washing_machine.jpg";
 import eWasteImage from "../assets/e-waste/motherboar.png";
 import paperImage from "../assets/scrap5.png";
 
+// Subcategory Specific Images
+import brassImage from "../assets/brass.jpg";
+import steelImage from "../assets/metal2.jpg";
+import woodTableImage from "../assets/wooditem/table.jpg";
+import woodChairImage from "../assets/wooditem/chair.jpg";
+import woodBedImage from "../assets/wooditem/Beds.jpg";
+import woodAnotherImage from "../assets/wooditem/wood_another.jpg";
+import v2WheelerImage from "../assets/vehicle_categry/2 wheecle.png";
+import v4WheelerImage from "../assets/vehicle_categry/4 wheecle.jpg";
+import vAutoPartsImage from "../assets/vehicle_categry/autoparts.png";
+import vTyreImage from "../assets/vehicle_categry/tyre.jpg";
+import vBatteryImage from "../assets/vehicle_categry/baterry.jpg";
+import hACImage from "../assets/home_appliance/Ac.jpg";
+import hFridgeImage from "../assets/home_appliance/Fridge.jpg";
+import hWMImage from "../assets/home_appliance/washing_machine.jpg";
+import hTVImage from "../assets/home_appliance/TV.jpg";
+import hMicroImage from "../assets/home_appliance/Microwave.jpg";
+import eBatteryImage from "../assets/e-waste/battery.png";
+import eCablesImage from "../assets/e-waste/cables.png";
+import eComputerImage from "../assets/e-waste/computer.png";
+import eLaptopImage from "../assets/e-waste/laptop.png";
+import eMotherboardImage from "../assets/e-waste/motherboar.png";
+
 import { useState, useEffect } from "react";
 import { publicAPI } from "../../shared/utils/api";
 import { getEffectivePriceFeed, PRICE_TYPES } from "../../shared/utils/priceFeedUtils";
@@ -43,11 +66,11 @@ const AllCategoriesPage = () => {
     if (lowerName.includes("plastic")) return plasticImage;
     if (lowerName.includes("aluminium")) return aluminiumImage;
     if (lowerName.includes("copper")) return copperImage;
+    if (lowerName.includes("brass")) return brassImage;
+    if (lowerName.includes("steel")) return steelImage;
     if (
-      lowerName.includes("metal") ||
       lowerName.includes("iron") ||
-      lowerName.includes("steel") ||
-      lowerName.includes("brass")
+      lowerName.includes("metal")
     )
       return metalImage;
     if (
@@ -57,17 +80,42 @@ const AllCategoriesPage = () => {
       lowerName.includes("raddi")
     )
       return scrapImage2;
+    
+    // E-Waste / Electronics
+    if (lowerName.includes("computer")) return eComputerImage;
+    if (lowerName.includes("laptop") || lowerName.includes("mobile")) return eLaptopImage;
+    if (lowerName.includes("motherboard")) return eMotherboardImage;
+    if (lowerName.includes("cable") || lowerName.includes("wire")) return eCablesImage;
+    if (lowerName.includes("battery")) return eBatteryImage;
     if (
       lowerName.includes("electron") ||
       lowerName.includes("device") ||
-      lowerName.includes("computer") ||
-      lowerName.includes("phone") ||
       lowerName.includes("e-waste")
     )
       return eWasteImage;
+
+    // Appliances
+    if (lowerName.includes("ac")) return hACImage;
+    if (lowerName.includes("fridge")) return hFridgeImage;
+    if (lowerName.includes("washing machine")) return hWMImage;
+    if (lowerName.includes("tv")) return hTVImage;
+    if (lowerName.includes("microwave")) return hMicroImage;
     if (lowerName.includes("appliance")) return homeApplianceImage;
-    if (lowerName.includes("furniture")) return furnitureImage;
+
+    // Furniture
+    if (lowerName.includes("table")) return woodTableImage;
+    if (lowerName.includes("chair")) return woodChairImage;
+    if (lowerName.includes("bed")) return woodBedImage;
+    if (lowerName.includes("sofa")) return woodAnotherImage;
+    if (lowerName.includes("furniture") || lowerName.includes("wooden")) return furnitureImage;
+
+    // Vehicle
+    if (lowerName.includes("2-wheeler") || lowerName.includes("bike")) return v2WheelerImage;
+    if (lowerName.includes("4-wheeler") || lowerName.includes("car")) return v4WheelerImage;
+    if (lowerName.includes("tyre")) return vTyreImage;
+    if (lowerName.includes("auto parts")) return vAutoPartsImage;
     if (lowerName.includes("vehicle")) return vehicleImage;
+
     return scrapImage2; // Default fallback
   };
 
@@ -126,32 +174,32 @@ const AllCategoriesPage = () => {
         // 4. Define sub-categories for flattening (matching CategorySelectionPage)
         const subCategoriesMap = {
           'e_waste': [
-            { name: 'Computer Items', image: eWasteImage, isNegotiable: true },
-            { name: 'Laptops/Mobiles', image: eWasteImage, isNegotiable: true },
-            { name: 'Motherboard', image: eWasteImage, isNegotiable: true },
-            { name: 'Cables/Wires', image: eWasteImage, isNegotiable: true },
-            { name: 'Batteries', image: eWasteImage, isNegotiable: true },
+            { name: 'Computer Items', image: eComputerImage, isNegotiable: true },
+            { name: 'Laptops/Mobiles', image: eLaptopImage, isNegotiable: true },
+            { name: 'Motherboard', image: eMotherboardImage, isNegotiable: true },
+            { name: 'Cables/Wires', image: eCablesImage, isNegotiable: true },
+            { name: 'Batteries', image: eBatteryImage, isNegotiable: true },
           ],
           'furniture': [
-            { name: 'Table', image: furnitureImage, isNegotiable: true },
-            { name: 'Chair', image: furnitureImage, isNegotiable: true },
-            { name: 'Sofa', image: furnitureImage, isNegotiable: true },
-            { name: 'Bed', image: furnitureImage, isNegotiable: true },
-            { name: 'Wooden Items', image: furnitureImage, isNegotiable: true },
+            { name: 'Table', image: woodTableImage, isNegotiable: true },
+            { name: 'Chair', image: woodChairImage, isNegotiable: true },
+            { name: 'Sofa', image: woodAnotherImage, isNegotiable: true },
+            { name: 'Bed', image: woodBedImage, isNegotiable: true },
+            { name: 'Wooden Items', image: woodAnotherImage, isNegotiable: true },
           ],
           'home_appliance': [
-            { name: 'AC', image: homeApplianceImage, isNegotiable: true },
-            { name: 'Fridge', image: homeApplianceImage, isNegotiable: true },
-            { name: 'Washing Machine', image: homeApplianceImage, isNegotiable: true },
-            { name: 'TV', image: homeApplianceImage, isNegotiable: true },
-            { name: 'Microwave', image: homeApplianceImage, isNegotiable: true },
+            { name: 'AC', image: hACImage, isNegotiable: true },
+            { name: 'Fridge', image: hFridgeImage, isNegotiable: true },
+            { name: 'Washing Machine', image: hWMImage, isNegotiable: true },
+            { name: 'TV', image: hTVImage, isNegotiable: true },
+            { name: 'Microwave', image: hMicroImage, isNegotiable: true },
           ],
           'vehicle_scrap': [
-            { name: '2-Wheeler', image: vehicleImage, isNegotiable: true },
-            { name: '4-Wheeler', image: vehicleImage, isNegotiable: true },
-            { name: 'Auto Parts', image: vehicleImage, isNegotiable: true },
-            { name: 'Tyre', image: vehicleImage, isNegotiable: true },
-            { name: 'Battery', image: vehicleImage, isNegotiable: true },
+            { name: '2-Wheeler', image: v2WheelerImage, isNegotiable: true },
+            { name: '4-Wheeler', image: v4WheelerImage, isNegotiable: true },
+            { name: 'Auto Parts', image: vAutoPartsImage, isNegotiable: true },
+            { name: 'Tyre', image: vTyreImage, isNegotiable: true },
+            { name: 'Battery', image: vBatteryImage, isNegotiable: true },
           ],
         };
 
