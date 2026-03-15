@@ -31,6 +31,7 @@ const getKYCStatus = () => {
   if (kycStatus === 'verified') return 'verified';
   if (kycStatus === 'pending') return 'pending';
   if (kycStatus === 'rejected') return 'rejected';
+  if (kycStatus === 'resend_required') return 'resend_required';
   return 'not_submitted';
 };
 
@@ -57,7 +58,7 @@ const getSubscriptionStatus = () => {
 const RequireKycAndSubscription = ({ children }) => {
   const kycStatus = getKYCStatus();
   const subscriptionStatus = getSubscriptionStatus();
-  if (kycStatus === 'not_submitted' || kycStatus === 'rejected') {
+  if (kycStatus === 'not_submitted' || kycStatus === 'rejected' || kycStatus === 'resend_required') {
     return <Navigate to="/scrapper/kyc" replace />;
   }
   if (kycStatus === 'pending') {
@@ -283,6 +284,8 @@ const ScrapperModule = () => {
           kycStatus === 'not_submitted' ? (
             <Navigate to="/scrapper/kyc" replace />
           ) : kycStatus === 'rejected' ? (
+            <Navigate to="/scrapper/kyc" replace />
+          ) : kycStatus === 'resend_required' ? (
             <Navigate to="/scrapper/kyc" replace />
           ) : kycStatus === 'pending' ? (
             <Navigate to="/scrapper/kyc-status" replace />

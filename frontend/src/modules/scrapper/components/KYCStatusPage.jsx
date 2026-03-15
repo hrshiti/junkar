@@ -17,9 +17,12 @@ const KYCStatusPage = () => {
     "You can now start receiving pickup requests.",
     "Completed",
     "rejected",
-    "Rejected",
-    "Your KYC was rejected",
-    "Please resubmit your KYC documents with correct information.",
+    "Resend Required",
+    "resend_required",
+    "Re-upload Required",
+    "Admin has requested to re-upload documents",
+    "Please re-upload your documents with clear information as requested by the admin.",
+    "Re-upload required",
     "Resubmit required",
     "Not Submitted",
     "KYC not submitted",
@@ -62,7 +65,7 @@ const KYCStatusPage = () => {
           setKycData(kyc);
           setKycStatus(kyc.status || 'pending');
 
-          // Sync to local storage just in case other components need it partially
+          // Sync to local storage
           localStorage.setItem('scrapperKYCStatus', kyc.status || 'pending');
           localStorage.setItem('scrapperKYC', JSON.stringify(kyc));
 
@@ -172,6 +175,20 @@ const KYCStatusPage = () => {
           message: getTranslatedText('Your KYC was rejected'),
           description: getTranslatedText('Please resubmit your KYC documents with correct information.'),
           estimatedTime: getTranslatedText('Resubmit required')
+        };
+      case 'resend_required':
+        return {
+          label: getTranslatedText('Re-upload Required'),
+          color: '#f59e0b',
+          icon: (
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="#f59e0b" strokeWidth="2" fill="#f59e0b" fillOpacity="0.1" />
+              <path d="M12 8v4l3 3" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          ),
+          message: getTranslatedText('Admin has requested to re-upload documents'),
+          description: getTranslatedText('Please re-upload your documents with clear information as requested by the admin.'),
+          estimatedTime: getTranslatedText('Re-upload required')
         };
       default:
         return {
@@ -301,6 +318,18 @@ const KYCStatusPage = () => {
                     {statusConfig.label}
                   </span>
                 </div>
+                {kycData.resendReason && kycStatus === 'resend_required' && (
+                  <div className="mt-3 p-3 rounded-lg border border-amber-500/30 bg-amber-500/10">
+                    <p className="text-xs font-semibold text-amber-500 mb-1">Reason for Re-upload Request:</p>
+                    <p className="text-sm text-gray-300">{kycData.resendReason}</p>
+                  </div>
+                )}
+                {kycData.rejectionReason && kycStatus === 'rejected' && (
+                  <div className="mt-3 p-3 rounded-lg border border-red-500/30 bg-red-500/10">
+                    <p className="text-xs font-semibold text-red-500 mb-1">Reason for Rejection:</p>
+                    <p className="text-sm text-gray-300">{kycData.rejectionReason}</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -315,6 +344,17 @@ const KYCStatusPage = () => {
                 className="w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-sky-600 text-white hover:bg-sky-700"
               >
                 {getTranslatedText("Resubmit KYC")}
+              </motion.button>
+            )}
+
+            {kycStatus === 'resend_required' && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate('/scrapper/kyc')}
+                className="w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-sky-600 text-white hover:bg-sky-700"
+              >
+                {getTranslatedText("Re-upload Documents")}
               </motion.button>
             )}
 

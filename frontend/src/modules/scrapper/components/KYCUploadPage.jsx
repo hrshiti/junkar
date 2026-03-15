@@ -24,7 +24,7 @@ const KYCUploadPage = () => {
     "Aadhaar Card Photo",
     "Click to upload",
     "Aadhaar photo",
-    "PNG, JPG or JPEG (MAX. 5MB)",
+    "PNG, JPG or JPEG (MAX. 50MB)",
     "Remove Photo",
     "Selfie Photo",
     "selfie photo",
@@ -52,7 +52,7 @@ const KYCUploadPage = () => {
     "Your KYC documents have been submitted for verification.",
     "Verification Time:",
     "Usually takes 24-48 hours. You'll be notified once verification is complete.",
-    "File is too large (Max 5MB)",
+    "File is too large (Max 50MB)",
     "GST Number",
     "Enter 15-digit GST number",
     "GST Certificate Photo",
@@ -101,6 +101,10 @@ const KYCUploadPage = () => {
             localStorage.setItem('scrapperKYC', JSON.stringify(kyc));
             navigate('/scrapper/kyc-status', { replace: true });
           }
+        } else if (status === 'resend_required') {
+          // Allow scrapper to stay on upload page to re-submit docs
+          localStorage.setItem('scrapperKYCStatus', 'resend_required');
+          localStorage.setItem('scrapperKYC', JSON.stringify(kyc));
         } else if (status === 'verified') {
           localStorage.setItem('scrapperKYCStatus', 'verified');
           localStorage.setItem('scrapperKYC', JSON.stringify(kyc));
@@ -129,8 +133,8 @@ const KYCUploadPage = () => {
   const handleAadhaarPhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert(getTranslatedText('File is too large (Max 5MB)'));
+      if (file.size > 50 * 1024 * 1024) {
+        alert(getTranslatedText('File is too large (Max 50MB)'));
         return;
       }
       setAadhaarPhoto(file);
@@ -145,8 +149,8 @@ const KYCUploadPage = () => {
   const handleSelfiePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert(getTranslatedText('File is too large (Max 5MB)'));
+      if (file.size > 50 * 1024 * 1024) {
+        alert(getTranslatedText('File is too large (Max 50MB)'));
         return;
       }
       setSelfiePhoto(file);
@@ -161,8 +165,8 @@ const KYCUploadPage = () => {
   const handleLicensePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert(getTranslatedText('File is too large (Max 5MB)'));
+      if (file.size > 50 * 1024 * 1024) {
+        alert(getTranslatedText('File is too large (Max 50MB)'));
         return;
       }
       setLicenseFile(file);
@@ -187,8 +191,8 @@ const KYCUploadPage = () => {
   const handlePanPhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert(getTranslatedText('File is too large (Max 5MB)'));
+      if (file.size > 50 * 1024 * 1024) {
+        alert(getTranslatedText('File is too large (Max 50MB)'));
         return;
       }
       setPanPhoto(file);
@@ -203,8 +207,8 @@ const KYCUploadPage = () => {
   const handleShopLicensePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert(getTranslatedText('File is too large (Max 5MB)'));
+      if (file.size > 50 * 1024 * 1024) {
+        alert(getTranslatedText('File is too large (Max 50MB)'));
         return;
       }
       setShopLicenseFile(file);
@@ -219,8 +223,8 @@ const KYCUploadPage = () => {
   const handleShopPhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert(getTranslatedText('File is too large (Max 5MB)'));
+      if (file.size > 50 * 1024 * 1024) {
+        alert(getTranslatedText('File is too large (Max 50MB)'));
         return;
       }
       setShopPhotoFile(file);
@@ -240,8 +244,8 @@ const KYCUploadPage = () => {
   const handleGstCertificateChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert(getTranslatedText('File is too large (Max 5MB)'));
+      if (file.size > 50 * 1024 * 1024) {
+        alert(getTranslatedText('File is too large (Max 50MB)'));
         return;
       }
       setGstCertificate(file);
@@ -445,7 +449,7 @@ const KYCUploadPage = () => {
                     <p className="mb-2 text-sm text-gray-400">
                       <span className="font-semibold">{getTranslatedText("Click to upload")}</span> {getTranslatedText("Aadhaar photo")}
                     </p>
-                    <p className="text-xs text-gray-500">{getTranslatedText("PNG, JPG or JPEG (MAX. 5MB)")}</p>
+                    <p className="text-xs text-gray-500">{getTranslatedText("PNG, JPG or JPEG (MAX. 50MB)")}</p>
                   </div>
                 )}
                 <input
@@ -490,7 +494,7 @@ const KYCUploadPage = () => {
                     <p className="mb-2 text-sm text-gray-400">
                       <span className="font-semibold">{getTranslatedText("Click to upload")}</span> {getTranslatedText("selfie photo")}
                     </p>
-                    <p className="text-xs text-gray-500">{getTranslatedText("PNG, JPG or JPEG (MAX. 5MB)")}</p>
+                    <p className="text-xs text-gray-500">{getTranslatedText("PNG, JPG or JPEG (MAX. 50MB)")}</p>
                   </div>
                 )}
                 <input
@@ -553,7 +557,7 @@ const KYCUploadPage = () => {
                     <p className="mb-2 text-sm text-gray-400">
                       <span className="font-semibold">{getTranslatedText("Click to upload")}</span> {getTranslatedText("PAN photo")}
                     </p>
-                    <p className="text-xs text-gray-500">{getTranslatedText("PNG, JPG or JPEG (MAX. 5MB)")}</p>
+                    <p className="text-xs text-gray-500">{getTranslatedText("PNG, JPG or JPEG (MAX. 50MB)")}</p>
                   </div>
                 )}
                 <input
@@ -598,7 +602,7 @@ const KYCUploadPage = () => {
                     <p className="mb-2 text-sm text-gray-400">
                       <span className="font-semibold">{getTranslatedText("Click to upload")}</span> {getTranslatedText("shop license photo")}
                     </p>
-                    <p className="text-xs text-gray-500">{getTranslatedText("PNG, JPG or JPEG (MAX. 5MB)")}</p>
+                    <p className="text-xs text-gray-500">{getTranslatedText("PNG, JPG or JPEG (MAX. 50MB)")}</p>
                   </div>
                 )}
                 <input
@@ -645,7 +649,7 @@ const KYCUploadPage = () => {
                         <span className="font-semibold">{getTranslatedText("Click to upload")}</span> {getTranslatedText("shop photo")}
                       </p>
                       <p className="text-xs text-gray-500">{getTranslatedText("Shop Photo (required for shopkeeper)")}</p>
-                      <p className="text-xs text-gray-500 mt-1">{getTranslatedText("PNG, JPG or JPEG (MAX. 5MB)")}</p>
+                      <p className="text-xs text-gray-500 mt-1">{getTranslatedText("PNG, JPG or JPEG (MAX. 50MB)")}</p>
                     </div>
                   )}
                   <input
@@ -714,7 +718,7 @@ const KYCUploadPage = () => {
                         <p className="mb-2 text-sm text-gray-400">
                           <span className="font-semibold">{getTranslatedText("Click to upload")}</span> {getTranslatedText("gst certificate photo")}
                         </p>
-                        <p className="text-xs text-gray-500">{getTranslatedText("PNG, JPG or JPEG (MAX. 5MB)")}</p>
+                        <p className="text-xs text-gray-500">{getTranslatedText("PNG, JPG or JPEG (MAX. 50MB)")}</p>
                       </div>
                     )}
                     <input

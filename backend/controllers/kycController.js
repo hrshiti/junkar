@@ -134,6 +134,7 @@ export const submitKyc = async (req, res) => {
       status: 'pending',
       submittedAt: new Date(),
       rejectionReason: null,
+      resendReason: null,
       verifiedAt: null
     };
 
@@ -214,6 +215,7 @@ export const verifyKyc = async (req, res) => {
     scrapper.kyc.verifiedAt = new Date();
     scrapper.kyc.verifiedBy = req.user.id;
     scrapper.kyc.rejectionReason = null;
+    scrapper.kyc.resendReason = null;
     await scrapper.save();
 
     // [NOTIFICATION-1] KYC approved -> Scrapper ko push notification (non-blocking)
@@ -242,6 +244,7 @@ export const rejectKyc = async (req, res) => {
 
     scrapper.kyc.status = 'rejected';
     scrapper.kyc.rejectionReason = reason || 'Not specified';
+    scrapper.kyc.resendReason = null;
     scrapper.kyc.verifiedAt = null;
     scrapper.kyc.verifiedBy = req.user.id;
     await scrapper.save();
@@ -271,7 +274,7 @@ export const getAllScrappersWithKyc = async (req, res) => {
 
     // Build query
     const query = {};
-    if (status && ['pending', 'verified', 'rejected'].includes(status)) {
+    if (status && ['pending', 'verified', 'rejected', 'resend_required'].includes(status)) {
       query['kyc.status'] = status;
       // Pending queue: only show scrappers who actually submitted docs (have aadhaar photo)
       if (status === 'pending') {
@@ -281,7 +284,7 @@ export const getAllScrappersWithKyc = async (req, res) => {
 
     // Get scrappers with KYC info
     const scrappers = await Scrapper.find(query)
-      .select('name phone email scrapperType dealCategories businessLocation subscription status totalPickups earnings rating badges createdAt vehicleInfo kyc.aadhaarNumber kyc.aadhaarPhotoUrl kyc.selfieUrl kyc.panNumber kyc.panPhotoUrl kyc.shopLicenseUrl kyc.shopPhotoUrl kyc.gstNumber kyc.gstCertificateUrl kyc.udyamAadhaarNumber kyc.status kyc.verifiedAt kyc.rejectionReason')
+      .select('name phone email scrapperType dealCategories businessLocation subscription status totalPickups earnings rating badges createdAt vehicleInfo kyc.aadhaarNumber kyc.aadhaarPhotoUrl kyc.selfieUrl kyc.panNumber kyc.panPhotoUrl kyc.shopLicenseUrl kyc.shopPhotoUrl kyc.gstNumber kyc.gstCertificateUrl kyc.udyamAadhaarNumber kyc.status kyc.verifiedAt kyc.rejectionReason kyc.resendReason')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
@@ -305,5 +308,41 @@ export const getAllScrappersWithKyc = async (req, res) => {
   }
 };
 
+// @desc Admin request scrapper to re-upload KYC documents
+// @route POST /api/kyc/:id/request-resend
+// @access Private (Admin)
+export const requestKycResend = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+    const scrapper = await Scrapper.findById(id);
+    if (!scrapper) return sendError(res, 'Scrapper not found', 404);
+
+    // Must have submitted KYC at least once before admin can request resend
+    if (!scrapper.kyc || !scrapper.kyc.aadhaarPhotoUrl) {
+      return sendError(res, 'Scrapper has not submitted KYC yet', 400);
+    }
+
+    scrapper.kyc.status = 'resend_required';
+    scrapper.kyc.resendReason = reason || null;
+    scrapper.kyc.rejectionReason = null;
+    scrapper.kyc.verifiedAt = null;
+    scrapper.kyc.verifiedBy = req.user.id;
+    await scrapper.save();
+
+    // Push notification to scrapper
+    const reasonMsg = reason ? `Reason: ${reason}` : 'Please review the instructions.';
+    sendNotificationToUser(id, {
+      title: '📋 Document Re-upload Required',
+      body: `Admin ne aapke KYC documents dubara upload karne ko kaha hai. ${reasonMsg}`,
+      data: { type: 'kyc_resend_required', scrapperId: id, reason: reason || '' }
+    }, 'scrapper').catch(err => logger.error('[Notification] KYC resend notification failed:', err));
+
+    return sendSuccess(res, 'Resend request sent to scrapper', { kyc: scrapper.kyc });
+  } catch (error) {
+    logger.error('KYC resend request error:', error);
+    return sendError(res, 'Failed to send resend request', 500);
+  }
+};
 
 

@@ -4,8 +4,10 @@ import { FaTimes, FaCheckCircle, FaTimesCircle, FaUserShield, FaPhone, FaIdCard,
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import { adminAPI, uploadAPI } from '../../shared/utils/api';
 
-const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
+const KYCDetailModal = ({ kyc, onClose, onApprove, onReject, onResend }) => {
   const [showRejectForm, setShowRejectForm] = useState(false);
+  const [showResendForm, setShowResendForm] = useState(false);
+  const [resendReason, setResendReason] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -42,6 +44,10 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
     "Cancel",
     "Confirm Rejection",
     "Close",
+    "Request Resend",
+    "Confirm Resend Request",
+    "Please provide a reason for resend request...",
+    "Resend Request Reason *",
     "PAN Number",
     "PAN Photo",
     "Shop License",
@@ -81,6 +87,20 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
     // Use scrapperId if available, otherwise fallback to id
     const scrapperId = kyc.scrapperId || kyc.id;
     onReject(scrapperId, rejectionReason).finally(() => {
+      setIsProcessing(false);
+    });
+  };
+
+  const handleResend = () => {
+    console.log('Resend button clicked', { resendReason, scrapperId: kyc.scrapperId || kyc.id });
+    if (!resendReason.trim()) {
+      alert(getTranslatedText('Please provide a reason for resend request'));
+      return;
+    }
+
+    setIsProcessing(true);
+    const scrapperId = kyc.scrapperId || kyc.id;
+    onResend(scrapperId, resendReason).finally(() => {
       setIsProcessing(false);
     });
   };
@@ -519,6 +539,28 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
               </div>
             )}
 
+            {/* Resend Reason Form */}
+            {showResendForm && (
+              <div className="space-y-2 animate-fadeIn">
+                <label className="block text-sm font-semibold" style={{ color: '#2d3748' }}>
+                  {getTranslatedText("Resend Request Reason *")}
+                </label>
+                <textarea
+                  value={resendReason}
+                  onChange={(e) => setResendReason(e.target.value)}
+                  placeholder={getTranslatedText("Please provide a reason for resend request...")}
+                  rows={3}
+                  className="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all"
+                  style={{
+                    borderColor: '#e2e8f0',
+                    focusBorderColor: '#64946e',
+                    focusRingColor: '#64946e'
+                  }}
+                  autoFocus
+                />
+              </div>
+            )}
+
             {/* Status History */}
             {kyc.verifiedAt && (
               <div className="bg-green-50 rounded-xl p-4">
@@ -545,8 +587,19 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
           <div className="sticky bottom-0 bg-white border-t p-4 md:p-6 flex flex-col sm:flex-row gap-3 justify-end" style={{ borderColor: '#e2e8f0' }}>
             {kyc.status === 'pending' && (
               <>
-                {!showRejectForm ? (
+                {!showRejectForm && !showResendForm ? (
                   <>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setShowResendForm(true)}
+                      className="px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all"
+                      style={{ backgroundColor: '#fff7ed', color: '#c2410c' }}
+                      disabled={isProcessing}
+                    >
+                      <FaEdit />
+                      {getTranslatedText("Request Resend")}
+                    </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -570,7 +623,7 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
                       {getTranslatedText("Approve")}
                     </motion.button>
                   </>
-                ) : (
+                ) : showRejectForm ? (
                   <>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
@@ -595,6 +648,33 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
                     >
                       <FaTimesCircle />
                       {getTranslatedText("Confirm Rejection")}
+                    </motion.button>
+                  </>
+                ) : (
+                  <>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setShowResendForm(false);
+                        setResendReason('');
+                      }}
+                      className="px-6 py-3 rounded-xl font-semibold transition-all"
+                      style={{ backgroundColor: '#f7fafc', color: '#2d3748' }}
+                      disabled={isProcessing}
+                    >
+                      {getTranslatedText("Cancel")}
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleResend}
+                      className="px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{ backgroundColor: '#c2410c', color: '#ffffff' }}
+                      disabled={isProcessing || !resendReason.trim()}
+                    >
+                      <FaEdit />
+                      {getTranslatedText("Confirm Resend Request")}
                     </motion.button>
                   </>
                 )}

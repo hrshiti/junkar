@@ -474,6 +474,12 @@ export const adminAPI = {
       body: JSON.stringify({ reason }),
     });
   },
+  requestKycResend: async (scrapperId, reason) => {
+    return apiRequest(`/kyc/${scrapperId}/request-resend`, {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    });
+  },
   getDashboardStats: async (query = '') => {
     const endPoint = query ? `${API_ENDPOINTS.admin.dashboardStats}?${query}` : API_ENDPOINTS.admin.dashboardStats;
     return apiRequest(endPoint, { method: 'GET' });

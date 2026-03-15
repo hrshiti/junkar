@@ -113,7 +113,7 @@ const scrapperSchema = new mongoose.Schema({
 
     status: {
       type: String,
-      enum: ['pending', 'verified', 'rejected'],
+      enum: ['pending', 'verified', 'rejected', 'resend_required'],
       default: 'pending'
     },
     verifiedAt: {
@@ -126,6 +126,10 @@ const scrapperSchema = new mongoose.Schema({
       default: null
     },
     rejectionReason: {
+      type: String,
+      default: null
+    },
+    resendReason: {
       type: String,
       default: null
     }

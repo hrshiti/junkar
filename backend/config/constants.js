@@ -60,7 +60,7 @@ export const FILE_TYPES = {
   DOCUMENT: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
 };
 
-export const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
+export const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 export const PAGINATION = {
   DEFAULT_PAGE: 1,

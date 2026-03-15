@@ -361,8 +361,8 @@ const PriceFeedEditor = () => {
     if (!file) return;
 
     // Optional: add client side size validation
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image size should be less than 5MB");
+    if (file.size > 50 * 1024 * 1024) {
+      alert("Image size should be less than 50MB");
       return;
     }
 

@@ -32,6 +32,8 @@ const KYCQueue = () => {
     "pending",
     "verified",
     "rejected",
+    "Resend Required",
+    "resend_required",
     "Loading KYC data...",
     "Error loading KYC data",
     "Retry",
@@ -91,7 +93,9 @@ const KYCQueue = () => {
             submittedAt: scrapper.createdAt || new Date().toISOString(),
             verifiedAt: scrapper.kyc?.verifiedAt || null,
             rejectedAt: scrapper.kyc?.status === 'rejected' ? scrapper.updatedAt : null,
+            resendRequiredAt: scrapper.kyc?.status === 'resend_required' ? scrapper.updatedAt : null,
             rejectionReason: scrapper.kyc?.rejectionReason || null,
+            resendReason: scrapper.kyc?.resendReason || null,
             vehicleInfo: scrapper.vehicleInfo ?
               `${scrapper.vehicleInfo.type || ''} - ${scrapper.vehicleInfo.number || ''}` :
               getTranslatedText('Not provided'),
@@ -138,6 +142,8 @@ const KYCQueue = () => {
         await adminAPI.verifyKyc(scrapperId);
       } else if (newStatus === 'rejected') {
         await adminAPI.rejectKyc(scrapperId, reason);
+      } else if (newStatus === 'resend_required') {
+        await adminAPI.requestKycResend(scrapperId, reason);
       }
       console.log('API call successful');
 
@@ -156,7 +162,8 @@ const KYCQueue = () => {
     const styles = {
       pending: { bg: '#fef3c7', color: '#f59e0b', icon: FaClock },
       verified: { bg: '#d1fae5', color: '#10b981', icon: FaCheckCircle },
-      rejected: { bg: '#fee2e2', color: '#ef4444', icon: FaTimesCircle }
+      rejected: { bg: '#fee2e2', color: '#ef4444', icon: FaTimesCircle },
+      resend_required: { bg: '#fff7ed', color: '#c2410c', icon: FaClock }
     };
     const style = styles[status] || styles.pending;
     const Icon = style.icon;
@@ -238,7 +245,7 @@ const KYCQueue = () => {
 
           {/* Filter Buttons */}
           <div className="flex gap-1.5 md:gap-2 flex-wrap">
-            {['all', 'pending', 'verified', 'rejected'].map((status) => (
+            {['all', 'pending', 'verified', 'rejected', 'resend_required'].map((status) => (
               <button
                 key={status}
                 onClick={() => setFilter(status)}
@@ -392,6 +399,7 @@ const KYCQueue = () => {
             }}
             onApprove={(scrapperId) => handleKYCUpdate(scrapperId, 'verified')}
             onReject={(scrapperId, reason) => handleKYCUpdate(scrapperId, 'rejected', reason)}
+            onResend={(scrapperId, reason) => handleKYCUpdate(scrapperId, 'resend_required', reason)}
           />
         )}
       </AnimatePresence>

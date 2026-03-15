@@ -1,7 +1,7 @@
 import express from 'express';
 import { protect, isScrapper, isAdmin } from '../middleware/auth.js';
 import { uploadFields } from '../services/uploadService.js';
-import { submitKyc, getMyKyc, verifyKyc, rejectKyc, getAllScrappersWithKyc } from '../controllers/kycController.js';
+import { submitKyc, getMyKyc, verifyKyc, rejectKyc, getAllScrappersWithKyc, requestKycResend } from '../controllers/kycController.js';
 
 const router = express.Router();
 
@@ -27,8 +27,6 @@ router.get('/me', protect, isScrapper, getMyKyc);
 router.get('/scrappers', protect, isAdmin, getAllScrappersWithKyc);
 router.post('/:id/verify', protect, isAdmin, verifyKyc);
 router.post('/:id/reject', protect, isAdmin, rejectKyc);
+router.post('/:id/request-resend', protect, isAdmin, requestKycResend);
 
 export default router;
-
-
-
