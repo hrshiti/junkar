@@ -161,10 +161,12 @@ export const getMyKyc = async (req, res) => {
     return sendError(res, 'Scrapper user not found', 404);
   }
 
-  // Try legacy lookup by id first, then by phone
-  let scrapper = await Scrapper.findById(user._id).select('kyc subscription');
+  // Select kyc fields explicitly to include ones with select: false if needed
+  let scrapper = await Scrapper.findById(user._id)
+    .select('kyc subscription +kyc.aadhaarNumber +kyc.panNumber');
   if (!scrapper && user.phone) {
-    scrapper = await Scrapper.findOne({ phone: user.phone }).select('kyc subscription');
+    scrapper = await Scrapper.findOne({ phone: user.phone })
+      .select('kyc subscription +kyc.aadhaarNumber +kyc.panNumber');
   }
 
   // Auto-provision scrapper profile if missing
@@ -189,15 +191,16 @@ export const getMyKyc = async (req, res) => {
     });
   }
 
-  // Option B: effective status – if no docs submitted, treat as not_submitted for client
+  // Option B: simplified status logic
   const kycRaw = scrapper.kyc || {};
   const kycObj = kycRaw.toObject ? kycRaw.toObject() : { ...kycRaw };
-  const hasDocs = !!(kycObj.aadhaarPhotoUrl || kycObj.selfieUrl || kycObj.panPhotoUrl ||
-    kycObj.shopLicenseUrl || kycObj.shopPhotoUrl || kycObj.gstCertificateUrl);
-  const effectiveStatus = !hasDocs ? 'not_submitted' : (kycObj.status || 'pending');
+  
+  // Ensure status is explicitly included and prioritized
+  const effectiveStatus = kycObj.status || (kycObj.aadhaarPhotoUrl ? 'pending' : 'not_submitted');
 
   return sendSuccess(res, 'KYC status retrieved', {
     kyc: { ...kycObj, status: effectiveStatus },
+    status: effectiveStatus, // Legacy client support
     subscription: scrapper.subscription
   });
 };

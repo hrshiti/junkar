@@ -62,11 +62,13 @@ const KYCStatusPage = () => {
         const subscription = res.data?.subscription;
 
         if (kyc) {
+          const statusResult = kyc.status || 'pending';
+          console.log('[KYC] Current Status:', statusResult);
           setKycData(kyc);
-          setKycStatus(kyc.status || 'pending');
+          setKycStatus(statusResult);
 
           // Sync to local storage
-          localStorage.setItem('scrapperKYCStatus', kyc.status || 'pending');
+          localStorage.setItem('scrapperKYCStatus', statusResult);
           localStorage.setItem('scrapperKYC', JSON.stringify(kyc));
 
           if (kyc.status === 'verified') {
@@ -95,8 +97,8 @@ const KYCStatusPage = () => {
                 navigate('/scrapper/subscription', { replace: true });
               }
             }
-          } else if (kyc.status === 'rejected') {
-            // Stay here, user sees rejected status and button to resubmit
+          } else if (kyc.status === 'rejected' || kyc.status === 'resend_required') {
+            // Stay here, user sees rejected/resend status and button to resubmit
           }
         } else {
           // No KYC found -> Redirect to upload page
@@ -120,9 +122,10 @@ const KYCStatusPage = () => {
         const res = await kycAPI.getMy();
         const kyc = res.data?.kyc;
         if (kyc) {
+          const statusResult = kyc.status || 'pending';
           setKycData(kyc);
-          setKycStatus(kyc.status || 'pending');
-          localStorage.setItem('scrapperKYCStatus', kyc.status || 'pending');
+          setKycStatus(statusResult);
+          localStorage.setItem('scrapperKYCStatus', statusResult);
           localStorage.setItem('scrapperKYC', JSON.stringify(kyc));
         }
       } catch (err) {
@@ -299,11 +302,11 @@ const KYCStatusPage = () => {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-400">{getTranslatedText("Submitted On:")}</span>
                   <span className="text-sm font-semibold text-white">
-                    {new Date(kycData.submittedAt).toLocaleDateString('en-IN', {
+                    {kycData.submittedAt ? new Date(kycData.submittedAt).toLocaleDateString('en-IN', {
                       day: 'numeric',
                       month: 'short',
                       year: 'numeric'
-                    })}
+                    }) : getTranslatedText('N/A')}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">

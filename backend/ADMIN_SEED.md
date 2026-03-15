@@ -5,10 +5,10 @@ This script creates/updates an admin user in MongoDB with predefined credentials
 
 ## Admin Credentials
 
-- **Email:** `scrapto@scrapto.com`
-- **Password:** `scrapto@123`
-- **Phone:** `9999999999`
-- **Name:** `Scrapto Admin`
+- **Email:** `junkarindia@gmail.com`
+- **Password:** `junkar@123`
+- **Phone:** `9214142700`
+- **Name:** `Junkar Admin`
 - **Role:** `admin`
 
 ## Usage
@@ -49,8 +49,8 @@ POST /api/auth/login
 **Request Body:**
 ```json
 {
-  "email": "scrapto@scrapto.com",
-  "password": "scrapto@123"
+  "email": "junkarindia@gmail.com",
+  "password": "junkar@123"
 }
 ```
 

@@ -25,10 +25,10 @@ node scripts/createAdmin.js admin@scrapto.com Admin@123 "Admin User" 9999999999
 ```
 
 ### Default Credentials:
-- **Email:** `admin@scrapto.com`
-- **Password:** `Admin@123`
-- **Name:** `Admin User`
-- **Phone:** `9999999999`
+- **Email:** `junkarindia@gmail.com`
+- **Password:** `junkar@123`
+- **Name:** `Junkar Admin`
+- **Phone:** `9214142700`
 
 ---
 
@@ -127,8 +127,8 @@ node scripts/createAdmin.js
 curl -X POST http://localhost:7000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "admin@scrapto.com",
-    "password": "Admin@123"
+    "email": "junkarindia@gmail.com",
+    "password": "junkar@123"
   }'
 ```
 

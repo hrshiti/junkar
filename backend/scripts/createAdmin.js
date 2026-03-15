@@ -17,26 +17,31 @@ const createAdmin = async () => {
     console.log('✅ Connected to MongoDB');
 
     // Check if admin already exists
+    const adminEmail = 'junkarindia@gmail.com';
+    const adminPassword = 'junkar@123';
+    const adminName = 'Junkar Admin';
+    const adminPhone = '9214142700';
+
     const existingAdmin = await User.findOne({ 
       $or: [
-        { email: 'admin@scrapto.com' },
+        { email: adminEmail },
         { role: 'admin' }
       ]
     });
 
     if (existingAdmin) {
       console.log('⚠️  Admin user already exists:', existingAdmin.email);
-      console.log('   If you want to update password, use updateAdminPassword.js script');
+      console.log('   Use seedAdmin.js to update existing admin.');
       process.exit(0);
       return;
     }
 
     // Get admin details from command line or use defaults
     const args = process.argv.slice(2);
-    const email = args[0] || 'admin@scrapto.com';
-    const password = args[1] || 'Admin@123';
-    const name = args[2] || 'Admin User';
-    const phone = args[3] || '9999999999';
+    const email = args[0] || adminEmail;
+    const password = args[1] || adminPassword;
+    const name = args[2] || adminName;
+    const phone = args[3] || adminPhone;
 
     // Create admin user
     const admin = await User.create({
