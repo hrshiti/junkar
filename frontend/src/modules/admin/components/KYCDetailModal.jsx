@@ -143,7 +143,12 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
 
   const getImageUrl = (url) => {
     if (!url) return null;
-    return url;
+    if (url.startsWith('http')) return url;
+    
+    // Prefix relative URLs with backend base URL
+    // API_BASE_URL is 'http://localhost:7000/api', we want 'http://localhost:7000'
+    const baseUrl = API_BASE_URL.replace(/\/api$/, '');
+    return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
   return (
@@ -271,7 +276,7 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
                     <p className="font-semibold" style={{ color: '#2d3748' }}>{kyc.vehicleInfo}</p>
                     {kyc.vehiclePhotoUrl && (
                       <img
-                        src={kyc.vehiclePhotoUrl.startsWith('http') ? kyc.vehiclePhotoUrl : `${window.location.origin}${kyc.vehiclePhotoUrl}`}
+                        src={getImageUrl(kyc.vehiclePhotoUrl)}
                         alt="Vehicle"
                         className="mt-1.5 max-w-full max-h-20 w-20 h-20 rounded-lg object-contain border border-slate-200"
                       />
