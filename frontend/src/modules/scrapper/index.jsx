@@ -208,7 +208,7 @@ const ScrapperModule = () => {
   const hasToken = !!localStorage.getItem('token');
   const hasScrapperAuth = localStorage.getItem('scrapperAuthenticated') === 'true';
 
-  if (isVerifying && !hasToken && !hasScrapperAuth) {
+  if (isVerifying && hasToken) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
