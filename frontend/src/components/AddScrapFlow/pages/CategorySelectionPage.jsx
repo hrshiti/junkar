@@ -255,6 +255,7 @@ const CategorySelectionPage = () => {
 
   const subCategoriesMap = getSubCategoriesMap(apiPricesMap);
 
+  // Reverting to flattened list: Show all categories and subcategories together
   const flattenedCategories = [];
   categories.forEach(cat => {
     flattenedCategories.push(cat);
@@ -262,7 +263,7 @@ const CategorySelectionPage = () => {
       subCategoriesMap[cat.id].forEach(sub => {
         flattenedCategories.push({
           ...sub,
-          parentId: cat.id // Keep reference to parent for logic
+          parentId: cat.id
         });
       });
     }
@@ -274,24 +275,41 @@ const CategorySelectionPage = () => {
   const [showOtherModal, setShowOtherModal] = useState(false);
   const [otherItemInput, setOtherItemInput] = useState('');
   const [activeOtherCategory, setActiveOtherCategory] = useState(null);
+  const [otherIsNegotiable, setOtherIsNegotiable] = useState(true);
+
+  const handleSomethingElse = () => {
+    const categoryId = expandedCategoryId || 'general_other';
+    const parentCat = categories.find(c => c.id === expandedCategoryId);
+    setActiveOtherCategory({
+      id: categoryId.endsWith('_other') ? categoryId : `${categoryId}_other`,
+      name: parentCat ? `Other ${parentCat.name}` : 'Other Item',
+      pricingType: 'negotiable',
+      price: 0,
+      image: eOtherEWasteImage // Default fallback icon
+    });
+    setOtherItemInput('');
+    setOtherIsNegotiable(true);
+    setShowOtherModal(true);
+  };
 
   const handleCategoryClick = (category) => {
-    // If it's a main category that has subcategories, drill down
-    if (!expandedCategoryId && subCategoriesMap[category.id]) {
-      setExpandedCategoryId(category.id);
+    // If it's a special "Other" item trigger
+    if (category.isCustomTrigger) {
+      handleSomethingElse();
       return;
     }
 
-    // Check if it's an "Other" category
-    if (category.id.endsWith('_other')) {
+    // Check if it's an "Other" category (from DB or preset)
+    if (category.id?.endsWith('_other')) {
       setActiveOtherCategory(category);
       setOtherItemInput('');
+      setOtherIsNegotiable(true);
       setShowOtherModal(true);
       return;
     }
 
     setSelectedCategories(prev => {
-      // Toggle selection: if already selected, remove it; otherwise add it
+      // Toggle selection
       const isSelected = prev.some(cat => cat.id === category.id);
       if (isSelected) {
         return prev.filter(cat => cat.id !== category.id);
@@ -307,6 +325,7 @@ const CategorySelectionPage = () => {
       const customCategory = {
         ...activeOtherCategory,
         name: otherItemInput.trim(), // Replace generic name with user input
+        pricingType: otherIsNegotiable ? 'negotiable' : 'kg_based',
         id: `${activeOtherCategory.id}_${Date.now()}` // Unique ID for this specific selection
       };
       setSelectedCategories(prev => [...prev, customCategory]);
@@ -458,39 +477,23 @@ const CategorySelectionPage = () => {
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Dedicated "Something else?" Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-8 flex justify-center pb-4"
-        >
-          <button
-            onClick={() => {
-              const categoryId = expandedCategoryId || 'general_other';
-              const parentCat = categories.find(c => c.id === expandedCategoryId);
-              setActiveOtherCategory({
-                id: categoryId.endsWith('_other') ? categoryId : `${categoryId}_other`,
-                name: parentCat ? `Other ${parentCat.name}` : 'Other Item',
-                pricingType: 'negotiable',
-                price: 0,
-                image: eOtherEWasteImage // Default fallback icon
-              });
-              setOtherItemInput('');
-              setShowOtherModal(true);
-            }}
-            className="flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all shadow-md hover:shadow-lg active:scale-95"
-            style={{
-              backgroundColor: '#f8fafc',
-              color: '#0ea5e9',
-              border: '2px dashed #0ea5e9'
-            }}
+          {/* Logical placement: "Something else" always at the end of the list */}
+          <div
+            onClick={handleSomethingElse}
+            className="cursor-pointer flex flex-col items-center group"
           >
-            <span className="text-xl">➕</span>
-            {getTranslatedText("Something else? Click here")}
-          </button>
-        </motion.div>
+            <div
+              className="relative w-16 h-16 md:w-18 md:h-18 lg:w-20 lg:h-20 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm border-2 border-dashed border-sky-400 bg-sky-50 group-hover:bg-sky-100 group-hover:border-sky-500"
+            >
+              <span className="text-2xl text-sky-500">➕</span>
+            </div>
+            <div className="mt-1.5 md:mt-2 text-center">
+              <p className="text-[10px] md:text-xs font-bold text-sky-600 line-clamp-2">
+                {getTranslatedText("Something else?")}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* "Other" Item Input Modal */}
@@ -516,7 +519,6 @@ const CategorySelectionPage = () => {
             <p className="text-sm text-slate-500 mb-4">
               {getTranslatedText("Please enter the name of the item you want to sell.")}
             </p>
-
             <form onSubmit={handleOtherSubmit}>
               <input
                 autoFocus
@@ -524,8 +526,23 @@ const CategorySelectionPage = () => {
                 placeholder={getTranslatedText("e.g. Broken Scanner, Iron Chair...")}
                 value={otherItemInput}
                 onChange={(e) => setOtherItemInput(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-100 focus:border-sky-500 focus:outline-none transition-colors text-lg font-medium mb-6"
+                className="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-100 focus:border-sky-500 focus:outline-none transition-colors text-lg font-medium mb-4"
               />
+
+              <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl mb-6 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => setOtherIsNegotiable(!otherIsNegotiable)}>
+                <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all ${otherIsNegotiable ? 'bg-sky-500 border-sky-500' : 'bg-white border-slate-300'}`}>
+                  {otherIsNegotiable && (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-slate-700">{getTranslatedText("Negotiable Price")}</p>
+                  <p className="text-[10px] text-slate-500">{getTranslatedText("Price decided after scrapper survey")}</p>
+                </div>
+                <span className="text-xl">{otherIsNegotiable ? '💛' : '⚖️'}</span>
+              </div>
 
               <button
                 type="submit"

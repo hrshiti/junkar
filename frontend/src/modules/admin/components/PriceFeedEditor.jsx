@@ -977,7 +977,7 @@ const PriceFeedEditor = () => {
                     {getTranslatedText('Image URL (Optional)')}
                   </label>
                   <input
-                    type="url"
+                    type="text"
                     value={currentPriceData.image}
                     onChange={(e) => setCurrentPriceData(prev => ({ ...prev, image: e.target.value }))}
                     placeholder={getTranslatedText("https://example.com/image.jpg")}

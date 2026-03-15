@@ -1035,7 +1035,7 @@ export const createPrice = asyncHandler(async (req, res) => {
 // @access  Private (Admin)
 export const updatePrice = asyncHandler(async (req, res) => {
   try {
-    const { pricePerKg, effectiveDate, isActive, isNegotiable, image, minPrice, maxPrice } = req.body;
+    const { pricePerKg, price: fixedPrice, effectiveDate, isActive, isNegotiable, image, minPrice, maxPrice } = req.body;
     const priceId = req.params.id;
 
     const price = await Price.findById(priceId);
@@ -1044,6 +1044,7 @@ export const updatePrice = asyncHandler(async (req, res) => {
     }
 
     if (pricePerKg !== undefined) price.pricePerKg = pricePerKg;
+    if (fixedPrice !== undefined) price.price = fixedPrice;
     if (effectiveDate) price.effectiveDate = new Date(effectiveDate);
     if (isActive !== undefined) price.isActive = isActive;
     if (isNegotiable !== undefined) price.isNegotiable = isNegotiable;
