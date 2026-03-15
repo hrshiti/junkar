@@ -197,7 +197,12 @@ const KYCStatusPage = () => {
         return {
           label: getTranslatedText('Not Submitted'),
           color: '#718096',
-          icon: null,
+          icon: (
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="#718096" strokeWidth="2" fill="#718096" fillOpacity="0.1" />
+              <path d="M12 8v4M12 16h.01" stroke="#718096" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          ),
           message: getTranslatedText('KYC not submitted'),
           description: getTranslatedText('Please complete your KYC to continue.'),
           estimatedTime: getTranslatedText('Not started')
@@ -302,11 +307,15 @@ const KYCStatusPage = () => {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-400">{getTranslatedText("Submitted On:")}</span>
                   <span className="text-sm font-semibold text-white">
-                    {kycData.submittedAt ? new Date(kycData.submittedAt).toLocaleDateString('en-IN', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric'
-                    }) : getTranslatedText('N/A')}
+                    {(() => {
+                      if (!kycData.submittedAt) return getTranslatedText('N/A');
+                      const d = new Date(kycData.submittedAt);
+                      return isNaN(d.getTime()) ? getTranslatedText('N/A') : d.toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      });
+                    })()}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -347,6 +356,17 @@ const KYCStatusPage = () => {
                 className="w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-sky-600 text-white hover:bg-sky-700"
               >
                 {getTranslatedText("Resubmit KYC")}
+              </motion.button>
+            )}
+            
+            {(kycStatus === 'not_submitted' || !kycStatus) && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate('/scrapper/kyc')}
+                className="w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-sky-600 text-white hover:bg-sky-700"
+              >
+                {getTranslatedText("Start KYC Process")}
               </motion.button>
             )}
 
