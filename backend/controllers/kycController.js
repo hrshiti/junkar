@@ -163,10 +163,10 @@ export const getMyKyc = async (req, res) => {
 
   // Select kyc fields explicitly to include ones with select: false if needed
   let scrapper = await Scrapper.findById(user._id)
-    .select('kyc subscription +kyc.aadhaarNumber +kyc.panNumber');
+    .select('subscription kyc.status kyc.aadhaarPhotoUrl kyc.selfieUrl kyc.licenseUrl kyc.panPhotoUrl kyc.shopLicenseUrl kyc.shopPhotoUrl kyc.gstNumber kyc.gstCertificateUrl kyc.udyamAadhaarNumber kyc.submittedAt kyc.verifiedAt kyc.verifiedBy kyc.rejectionReason kyc.resendReason +kyc.aadhaarNumber +kyc.panNumber');
   if (!scrapper && user.phone) {
     scrapper = await Scrapper.findOne({ phone: user.phone })
-      .select('kyc subscription +kyc.aadhaarNumber +kyc.panNumber');
+      .select('subscription kyc.status kyc.aadhaarPhotoUrl kyc.selfieUrl kyc.licenseUrl kyc.panPhotoUrl kyc.shopLicenseUrl kyc.shopPhotoUrl kyc.gstNumber kyc.gstCertificateUrl kyc.udyamAadhaarNumber kyc.submittedAt kyc.verifiedAt kyc.verifiedBy kyc.rejectionReason kyc.resendReason +kyc.aadhaarNumber +kyc.panNumber');
   }
 
   // Auto-provision scrapper profile if missing
