@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
@@ -40,7 +40,9 @@ const SubscriptionPlanPage = () => {
     "days",
     "Platform Access",
     "Market Prices",
-    "Go to Dashboard"
+    "Go to Dashboard",
+    "Subscription Update",
+    "Close"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -52,6 +54,8 @@ const SubscriptionPlanPage = () => {
   const [error, setError] = useState(null);
   const [currentSubscription, setCurrentSubscription] = useState(null);
   const [planType, setPlanType] = useState('general'); // Default to platform access
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
   // Check if user is authenticated as scrapper
   useEffect(() => {
@@ -249,7 +253,12 @@ const SubscriptionPlanPage = () => {
       rzp.open();
     } catch (error) {
       console.error('Subscription payment error:', error);
-      alert(error.message || getTranslatedText('Failed to initiate payment. Please try again.'));
+      const errorMsg = error.message || getTranslatedText('Failed to initiate payment. Please try again.');
+      
+      // Use Modal for "first registration" and other subscription messages instead of browser alert
+      setModalMessage(errorMsg);
+      setShowModal(true);
+      
       setIsProcessing(false);
     }
   };
@@ -257,6 +266,8 @@ const SubscriptionPlanPage = () => {
   // Format duration display
   const formatDuration = (duration, durationType) => {
     if (durationType === 'monthly') {
+      // Special case: If duration is 30 but type is monthly, it's likely meant to be 30 days or 1 month
+      if (duration === 30) return `1 ${getTranslatedText('month')}`;
       return duration === 1 ? getTranslatedText('month') : `${duration} ${getTranslatedText('months')}`;
     } else if (durationType === 'quarterly') {
       return `${duration} ${getTranslatedText('months')}`;
@@ -411,7 +422,7 @@ const SubscriptionPlanPage = () => {
               {/* Plan Header */}
               <div className="mb-6">
                 <h3 className="text-xl md:text-2xl font-bold mb-2 text-white">
-                  {plan.name}
+                  {plan.name.replace('Montly', 'Monthly')}
                 </h3>
                 <div className="flex items-baseline gap-2">
                   <span className="text-3xl md:text-4xl font-bold text-sky-400">
@@ -510,6 +521,61 @@ const SubscriptionPlanPage = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Modern Info Modal (Pop-up) */}
+      <AnimatePresence>
+        {showModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowModal(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-md bg-zinc-900 border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="absolute top-0 left-0 w-full h-1 bg-sky-500" />
+              
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 rounded-full bg-sky-500/10 flex items-center justify-center mb-6">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="text-sky-500">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm1-3h-2v-6h2v6zm0-8h-2V7h2v2z" fill="currentColor" />
+                  </svg>
+                </div>
+                
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-4">
+                  {getTranslatedText("Subscription Update")}
+                </h3>
+                
+                <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-8">
+                  {modalMessage}
+                </p>
+                
+                <div className="flex flex-col w-full gap-3">
+                  <button
+                    onClick={() => navigate('/scrapper')}
+                    className="w-full py-3.5 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg transition-all"
+                  >
+                    {getTranslatedText("Go to Dashboard")}
+                  </button>
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className="w-full py-3.5 rounded-xl font-semibold bg-zinc-800 hover:bg-zinc-700 text-gray-300 transition-all text-sm"
+                  >
+                    {getTranslatedText("Close")}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

@@ -23,13 +23,25 @@ import { sendNotificationToUser } from '../utils/pushNotificationHelper.js';
 // @access  Private (Admin)
 export const getDashboardStats = asyncHandler(async (req, res) => {
   try {
-    const { state, city } = req.query;
+    const { state, city, startDate, endDate } = req.query;
 
-    // Build filters for location-based stats
+    // Build filters for location-based and date-based stats
     const userFilter = { role: USER_ROLES.USER };
     const orderFilter = {};
     const scrapperFilter = {};
     const paymentFilter = { status: PAYMENT_STATUS.COMPLETED };
+
+    // Apply Date Filters if provided
+    if (startDate || endDate) {
+      const dateRange = {};
+      if (startDate) dateRange.$gte = new Date(startDate);
+      if (endDate) dateRange.$lte = new Date(endDate);
+
+      userFilter.createdAt = dateRange;
+      orderFilter.createdAt = dateRange;
+      scrapperFilter.createdAt = dateRange;
+      paymentFilter.paidAt = dateRange;
+    }
 
     if (state) {
       userFilter['address.state'] = state;
@@ -127,7 +139,11 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
       payments: {
         total: totalPayments,
         todayRevenue: todayRevenue[0]?.total || 0,
-        monthlyRevenue: monthlyRevenue[0]?.total || 0
+        monthlyRevenue: monthlyRevenue[0]?.total || 0,
+        filteredRevenue: (await Payment.aggregate([
+          { $match: paymentFilter },
+          { $group: { _id: null, total: { $sum: '$amount' } } }
+        ]))[0]?.total || 0
       },
       subscriptions: {
         active: activeSubscriptions
@@ -1102,6 +1118,18 @@ export const getPaymentAnalytics = asyncHandler(async (req, res) => {
       if (endDate) dateFilter.paidAt.$lte = new Date(endDate);
     }
 
+    let groupFormat = '%Y-%m-%d';
+    let isHourly = false;
+
+    // If range is within 24 hours, use hourly grouping for better visualization
+    if (startDate && endDate) {
+      const diffMs = new Date(endDate) - new Date(startDate);
+      const diffHours = diffMs / (1000 * 60 * 60);
+      if (diffHours <= 24) {
+        isHourly = true;
+      }
+    }
+
     const [
       totalRevenue,
       totalPayments,
@@ -1149,9 +1177,9 @@ export const getPaymentAnalytics = asyncHandler(async (req, res) => {
         },
         {
           $group: {
-            _id: {
-              $dateToString: { format: '%Y-%m-%d', date: '$paidAt' }
-            },
+            _id: isHourly
+              ? { $hour: { date: '$paidAt', timezone: '+05:30' } }
+              : { $dateToString: { format: groupFormat, date: '$paidAt' } },
             total: { $sum: '$amount' },
             count: { $sum: 1 }
           }

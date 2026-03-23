@@ -13,6 +13,8 @@ import Analytics from '../models/Analytics.js';
 import { PAYMENT_STATUS } from '../config/constants.js';
 import { sendNotificationToUser } from '../utils/pushNotificationHelper.js';
 import notificationService from '../services/notificationService.js';
+import { notifyUser } from '../services/socketService.js';
+
 
 // Normalize scrapper deal categories so they align with scrapItems.category values
 const normalizeDealCategories = (rawCategories) => {
@@ -304,6 +306,12 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 
   // Validate status transition using State Machine
   const currentStatus = order.status;
+  
+  // Terminal State Protection: If order is already completed or cancelled, don't allow ANY updates
+  if (currentStatus === ORDER_STATUS.COMPLETED || currentStatus === ORDER_STATUS.CANCELLED) {
+    return sendError(res, `Order is already in a terminal state (${currentStatus}) and cannot be updated.`, 400);
+  }
+
   if (status !== currentStatus) {
     const allowedTransitions = ORDER_STATUS_TRANSITIONS[currentStatus] || [];
     if (!allowedTransitions.includes(status)) {
@@ -437,6 +445,13 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
                 orderId: lockedOrder._id,
                 gateway: { provider: 'WALLET' }
               }], { session });
+
+              // Notify user via socket for real-time wallet update
+              notifyUser(user._id.toString(), 'wallet_updated', {
+                balance: user.wallet.balance,
+                amount: orderAmount,
+                type: 'CREDIT'
+              });
             }
 
             order.paymentStatus = PAYMENT_STATUS.COMPLETED;
@@ -539,15 +554,29 @@ export const cancelOrder = asyncHandler(async (req, res) => {
 
   // Check if order can be cancelled
   if (order.status === ORDER_STATUS.COMPLETED) {
-    return sendError(res, 'Cannot cancel completed order', 400);
+    return res.status(400).json({
+      success: false,
+      message: 'Completed orders cannot be cancelled'
+    });
   }
 
   if (order.status === ORDER_STATUS.CANCELLED) {
-    return sendError(res, 'Order is already cancelled', 400);
+    return res.status(400).json({
+      success: false,
+      message: 'Order is already cancelled'
+    });
   }
 
-  // Cancel order
+  if (order.status === ORDER_STATUS.COMPLETED) {
+    return res.status(400).json({
+      success: false,
+      message: 'Completed orders cannot be cancelled'
+    });
+  }
+
   order.status = ORDER_STATUS.CANCELLED;
+  order.cancelledAt = new Date();
+  order.cancellationReason = reason || 'Cancelled by scrapper';
   order.assignmentStatus = 'unassigned';
   order.scrapper = null;
   if (reason) {

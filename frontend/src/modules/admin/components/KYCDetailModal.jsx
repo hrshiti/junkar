@@ -109,12 +109,40 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject, onResend }) => {
     try {
       setIsProcessing(true);
       const scrapperId = kyc.scrapperId || kyc.id;
+      
+      // Validate Phone Format (10 digits)
+      const phoneDigits = editForm.phone.replace(/[^0-9]/g, '');
+      if (phoneDigits.length !== 10) {
+        alert("Please enter a valid 10-digit phone number.");
+        setIsProcessing(false);
+        return;
+      }
+
+      // Validate Aadhaar Format (12 digits) if provided
+      if (editForm.aadhaarNumber) {
+        const aadhaarDigits = editForm.aadhaarNumber.replace(/[^0-9]/g, '');
+        if (aadhaarDigits.length !== 12) {
+          alert("Please enter a valid 12-digit Aadhaar number.");
+          setIsProcessing(false);
+          return;
+        }
+      }
 
       // Validate PAN format if provided
       if (editForm.panNumber) {
         const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
         if (!panRegex.test(editForm.panNumber)) {
           alert("Please enter a valid PAN number format (e.g., ABCDE1234F)");
+          setIsProcessing(false);
+          return;
+        }
+      }
+
+      // Validate GST format if provided
+      if (editForm.gstNumber) {
+        const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+        if (!gstRegex.test(editForm.gstNumber.toUpperCase())) {
+          alert("Please enter a valid GST number format (e.g., 22AAAAA0000A1Z5)");
           setIsProcessing(false);
           return;
         }
@@ -272,7 +300,16 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject, onResend }) => {
                   <div className="w-full">
                     <p className="text-xs" style={{ color: '#718096' }}>{getTranslatedText("Phone")}</p>
                     {isEditing ? (
-                      <input type="text" value={editForm.phone} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} className="mt-1 w-full px-2 py-1 border rounded" />
+                      <input 
+                        type="text" 
+                        value={editForm.phone} 
+                        onChange={e => {
+                          const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+                          setEditForm({ ...editForm, phone: val });
+                        }} 
+                        placeholder="9876543210"
+                        className="mt-1 w-full px-2 py-1 border rounded focus:ring-1 focus:ring-sky-500" 
+                      />
                     ) : (
                       <p className="font-semibold" style={{ color: '#2d3748' }}>{kyc.scrapperPhone}</p>
                     )}
@@ -283,7 +320,16 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject, onResend }) => {
                   <div className="w-full">
                     <p className="text-xs" style={{ color: '#718096' }}>{getTranslatedText("Aadhaar Number")}</p>
                     {isEditing ? (
-                      <input type="text" value={editForm.aadhaarNumber} onChange={e => setEditForm({ ...editForm, aadhaarNumber: e.target.value })} className="mt-1 w-full px-2 py-1 border rounded" />
+                      <input 
+                        type="text" 
+                        value={editForm.aadhaarNumber} 
+                        onChange={e => {
+                          const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 12);
+                          setEditForm({ ...editForm, aadhaarNumber: val });
+                        }} 
+                        placeholder="123456789012"
+                        className="mt-1 w-full px-2 py-1 border rounded focus:ring-1 focus:ring-sky-500" 
+                      />
                     ) : (
                       <p className="font-semibold" style={{ color: '#2d3748' }}>{kyc.aadhaarNumber}</p>
                     )}
@@ -326,7 +372,16 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject, onResend }) => {
                     <div className="w-full">
                       <p className="text-xs" style={{ color: '#718096' }}>{getTranslatedText("GST Number")}</p>
                       {isEditing ? (
-                        <input type="text" value={editForm.gstNumber} onChange={e => setEditForm({ ...editForm, gstNumber: e.target.value })} className="mt-1 w-full px-2 py-1 border rounded" />
+                        <input 
+                          type="text" 
+                          value={editForm.gstNumber} 
+                          onChange={e => {
+                            const val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 15);
+                            setEditForm({ ...editForm, gstNumber: val });
+                          }} 
+                          placeholder="22AAAAA0000A1Z5"
+                          className="mt-1 w-full px-2 py-1 border rounded focus:ring-1 focus:ring-sky-500" 
+                        />
                       ) : (
                         <p className="font-semibold" style={{ color: '#2d3748' }}>{kyc.gstNumber || getTranslatedText('N/A')}</p>
                       )}

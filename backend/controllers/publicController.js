@@ -31,3 +31,24 @@ export const getPublicPrices = asyncHandler(async (req, res) => {
         sendError(res, 'Failed to fetch prices', 500);
     }
 });
+
+// @desc    Get referral tiers and settings for public view
+// @route   GET /api/public/referral-config
+// @access  Public
+export const getPublicReferralConfig = asyncHandler(async (req, res) => {
+    try {
+        const [tiers, settings] = await Promise.all([
+            import('../models/ReferralTier.js').then(m => m.default.find().sort({ minReferrals: 1 })),
+            import('../models/ReferralSetting.js').then(m => m.default.findOne())
+        ]);
+
+        sendSuccess(res, 'Referral configuration retrieved successfully', { 
+            tiers: tiers.length > 0 ? tiers : null, 
+            settings: settings 
+        });
+    } catch (error) {
+        logger.error('[Public] Error fetching referral config:', error);
+        // We still send success with nulls to let frontend use defaults instead of hard crashing
+        sendSuccess(res, 'Failed to fetch dynamic config, using system defaults', { tiers: null, settings: null });
+    }
+});

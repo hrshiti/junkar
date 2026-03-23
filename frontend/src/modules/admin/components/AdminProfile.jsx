@@ -14,7 +14,6 @@ import {
   FaCalendarAlt,
   FaShieldAlt,
   FaBell,
-  FaGlobe,
   FaCamera
 } from 'react-icons/fa';
 
@@ -40,7 +39,8 @@ const AdminProfile = () => {
     sms: false,
     push: true
   });
-  const [language, setLanguage] = useState('en');
+
+
   const staticTexts = [
     "Profile updated successfully!",
     "New passwords do not match!",
@@ -278,7 +278,10 @@ const AdminProfile = () => {
                         type="tel"
                         name="phone"
                         value={formData.phone}
-                        onChange={handleInputChange}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, "").slice(0, 10);
+                          setFormData(prev => ({ ...prev, phone: value }));
+                        }}
                         className="w-full px-4 py-2 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all"
                         style={{
                           borderColor: '#e2e8f0',
@@ -567,39 +570,7 @@ const AdminProfile = () => {
             </div>
           </motion.div>
 
-          {/* Preferences */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-white rounded-2xl shadow-lg p-4 md:p-6"
-          >
-            <h2 className="text-xl font-bold mb-4" style={{ color: '#2d3748' }}>
-              <FaGlobe className="inline mr-2" />
-              {getTranslatedText("Preferences")}
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: '#2d3748' }}>
-                  {getTranslatedText("Language")}
-                </label>
-                <select
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all"
-                  style={{
-                    borderColor: '#e2e8f0',
-                    focusBorderColor: '#64946e',
-                    focusRingColor: '#64946e'
-                  }}
-                >
-                  <option value="en">{getTranslatedText("English")}</option>
-                  <option value="hi">{getTranslatedText("Hindi")}</option>
-                  <option value="mr">{getTranslatedText("Marathi")}</option>
-                </select>
-              </div>
-            </div>
-          </motion.div>
+
 
           {/* Account Stats */}
           <motion.div

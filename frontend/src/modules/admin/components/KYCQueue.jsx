@@ -58,7 +58,7 @@ const KYCQueue = () => {
     try {
       // Fetch scrappers with KYC status from backend
       const queryParams = new URLSearchParams();
-      if (filter !== 'all' && ['pending', 'verified', 'rejected'].includes(filter)) {
+      if (filter !== 'all' && ['pending', 'verified', 'rejected', 'resend_required'].includes(filter)) {
         queryParams.append('status', filter);
       }
       queryParams.append('page', '1');
@@ -117,11 +117,12 @@ const KYCQueue = () => {
   };
 
   const filteredKYCs = kycList.filter(kyc => {
+    const trimmedQuery = searchQuery.trim().toLowerCase();
     const matchesFilter = filter === 'all' || kyc.status === filter;
     const matchesSearch =
-      kyc.scrapperName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      kyc.scrapperPhone.includes(searchQuery) ||
-      kyc.aadhaarNumber.includes(searchQuery);
+      kyc.scrapperName.toLowerCase().includes(trimmedQuery) ||
+      kyc.scrapperPhone.includes(searchQuery.trim()) ||
+      kyc.aadhaarNumber.includes(searchQuery.trim());
     return matchesFilter && matchesSearch;
   });
 

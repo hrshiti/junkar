@@ -16,7 +16,7 @@ export const reportFakeLead = asyncHandler(async (req, res) => {
     return sendError(res, 'Valid reason is required (wrong_item, wrong_address, not_available, customer_not_available, other).', 400);
   }
 
-  const order = await Order.findById(orderId).select('_id scrapper status');
+  const order = await Order.findById(orderId).select('_id scrapper status notes');
   if (!order) return sendError(res, 'Order not found', 404);
   if (order.scrapper?.toString() !== scrapperId.toString()) {
     return sendError(res, 'You can only report orders assigned to you.', 403);
@@ -37,6 +37,8 @@ export const reportFakeLead = asyncHandler(async (req, res) => {
   await Order.findByIdAndUpdate(orderId, {
     status: 'cancelled',
     assignmentStatus: 'rejected',
+    cancelledAt: new Date(),
+    cancellationReason: `Fake Lead: ${reason}`,
     notes: (order.notes || '') + `\n[System]: Order marked as Fake Lead by Scrapper. Reason: ${reason}.`
   });
 

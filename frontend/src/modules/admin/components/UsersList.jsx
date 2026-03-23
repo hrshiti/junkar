@@ -153,11 +153,16 @@ const UsersList = () => {
           // For now, we'll use updateUser to set isActive: true
           const response = await adminAPI.updateUser(userId, { isActive: true });
           if (response.success) {
-            setUsers(prev => prev.map(user =>
-              user.id === userId
-                ? { ...user, status: 'active', blockedAt: null, blockReason: null }
-                : user
-            ));
+            setUsers(prev => {
+              if (filter === 'blocked') {
+                return prev.filter(user => user.id !== userId);
+              }
+              return prev.map(user =>
+                user.id === userId
+                  ? { ...user, status: 'active', blockedAt: null, blockReason: null }
+                  : user
+              );
+            });
             alert(getTranslatedText('User unblocked successfully!'));
           } else {
             throw new Error(response.message || getTranslatedText('Failed to unblock user'));
@@ -166,16 +171,21 @@ const UsersList = () => {
           // Block user
           const response = await adminAPI.blockUser(userId);
           if (response.success) {
-            setUsers(prev => prev.map(user =>
-              user.id === userId
-                ? {
-                  ...user,
-                  status: 'blocked',
-                  blockedAt: new Date().toISOString(),
-                  blockReason: 'Admin action'
-                }
-                : user
-            ));
+            setUsers(prev => {
+              if (filter === 'active') {
+                return prev.filter(user => user.id !== userId);
+              }
+              return prev.map(user =>
+                user.id === userId
+                  ? {
+                    ...user,
+                    status: 'blocked',
+                    blockedAt: new Date().toISOString(),
+                    blockReason: 'Admin action'
+                  }
+                  : user
+              );
+            });
             alert(getTranslatedText('User blocked successfully!'));
           } else {
             throw new Error(response.message || getTranslatedText('Failed to block user'));
@@ -263,10 +273,11 @@ const UsersList = () => {
               placeholder={getTranslatedText("Search by name, phone, or email...")}
               value={searchQuery}
               onChange={(e) => {
-                setSearchQuery(e.target.value);
+                const newValue = e.target.value.replace(/^\s+/, '');
+                setSearchQuery(newValue);
                 // Debounce search - reload data after user stops typing
                 const timeoutId = setTimeout(() => {
-                  if (e.target.value) {
+                  if (newValue) {
                     loadUsersData();
                   }
                 }, 500);

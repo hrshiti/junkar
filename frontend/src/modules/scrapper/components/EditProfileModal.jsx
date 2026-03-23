@@ -33,7 +33,10 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
         "Submit Request",
         "Request submitted. Admin will review and update your location.",
         "Failed to submit request",
-        "You already have a pending request."
+        "You already have a pending request.",
+        "Name should only contain letters",
+        "Minimum 3 characters required",
+        "Enter valid vehicle number (e.g. DL10AB1234)"
     ];
     const { getTranslatedText } = usePageTranslation(staticTexts);
     const { user } = useAuth();
@@ -118,16 +121,43 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
         setLoading(true);
         setError('');
 
-        // Basic Validation
-        if (!formData.name.trim()) {
+        // Name Validation: Only letters and spaces, min 3 chars
+        const nameRegex = /^[a-zA-Z\s]+$/;
+        const trimmedName = formData.name.trim();
+        if (!trimmedName) {
             setError(getTranslatedText("Name is required"));
             setLoading(false);
             return;
         }
-        if (!formData.vehicleNumber.trim()) {
+        if (!nameRegex.test(trimmedName)) {
+            setError(getTranslatedText("Name should only contain letters"));
+            setLoading(false);
+            return;
+        }
+        if (trimmedName.length < 3) {
+            setError(getTranslatedText("Minimum 3 characters required"));
+            setLoading(false);
+            return;
+        }
+
+        // Vehicle Number Validation: Indian Standard Regex
+        // Format: DL 10 AB 1234 (Spaces optional but allowed here for validation)
+        const vehicleRegex = /^[A-Z]{2}[0-9]{1,2}[A-Z]{1,2}[0-9]{4}$/;
+        const sanitizedVehicle = formData.vehicleNumber.trim().replace(/\s+/g, '').toUpperCase();
+        
+        if (!sanitizedVehicle) {
             setError(getTranslatedText("Enter valid vehicle number"));
             setLoading(false);
             return;
+        }
+
+        // Validate only for motorized vehicles (Cycle/Thela might not have registered numbers)
+        if (!['cycle', 'thela'].includes(formData.vehicleType)) {
+            if (!vehicleRegex.test(sanitizedVehicle)) {
+                setError(getTranslatedText("Enter valid vehicle number (e.g. DL10AB1234)"));
+                setLoading(false);
+                return;
+            }
         }
 
         try {
@@ -139,10 +169,10 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
             }
 
             const payload = {
-                name: formData.name,
+                name: trimmedName.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' '),
                 vehicleInfo: {
                     type: formData.vehicleType,
-                    number: formData.vehicleNumber.toUpperCase(), // Standardize to uppercase
+                    number: sanitizedVehicle, // Standardize to uppercase and no spaces
                     photoUrl: photoUrl ?? null
                 },
                 dealCategories: formData.dealCategories,

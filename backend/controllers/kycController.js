@@ -279,10 +279,6 @@ export const getAllScrappersWithKyc = async (req, res) => {
     const query = {};
     if (status && ['pending', 'verified', 'rejected', 'resend_required'].includes(status)) {
       query['kyc.status'] = status;
-      // Pending queue: only show scrappers who actually submitted docs (have aadhaar photo)
-      if (status === 'pending') {
-        query['kyc.aadhaarPhotoUrl'] = { $exists: true, $ne: null };
-      }
     }
 
     // Get scrappers with KYC info

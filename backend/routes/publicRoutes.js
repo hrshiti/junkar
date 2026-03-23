@@ -7,5 +7,8 @@ const router = express.Router();
 // Public routes (no auth middleware)
 router.get('/prices', getPublicPrices);
 router.get('/homepage-reviews', getHomepageReviews);
+router.get('/referral-config', (req, res, next) => {
+    import('../controllers/publicController.js').then(m => m.getPublicReferralConfig(req, res, next));
+});
 
 export default router;

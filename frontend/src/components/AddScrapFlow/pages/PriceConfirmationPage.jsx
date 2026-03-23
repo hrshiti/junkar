@@ -93,8 +93,8 @@ const PriceConfirmationPage = () => {
     const storedCategories = sessionStorage.getItem('selectedCategories');
     const storedImages = sessionStorage.getItem('uploadedImages');
     const storedWeight = sessionStorage.getItem('weightData');
-
     const storedAddress = sessionStorage.getItem('addressData');
+    const storedConfirmation = sessionStorage.getItem('confirmationData');
 
     if (storedCategories) {
       setSelectedCategories(JSON.parse(storedCategories));
@@ -111,11 +111,38 @@ const PriceConfirmationPage = () => {
       setAddressData(JSON.parse(storedAddress));
     }
 
+    // Restore page-specific inputs on refresh
+    if (storedConfirmation) {
+      try {
+        const conf = JSON.parse(storedConfirmation);
+        if (conf.pickupMode) setPickupMode(conf.pickupMode);
+        if (conf.notes) setNotes(conf.notes);
+        if (conf.isDonation !== undefined) setIsDonation(conf.isDonation);
+        if (conf.selectedDate) setSelectedDate(conf.selectedDate);
+        if (conf.selectedSlot) setSelectedSlot(conf.selectedSlot);
+      } catch (err) {
+        console.error("Error parsing confirmation data:", err);
+      }
+    }
+
     // Redirect if missing required data
     if (!storedCategories || !storedImages || !storedWeight || !storedAddress) {
       navigate('/user/add-scrap/category');
     }
   }, [navigate]);
+
+  // Handle auto-save for Confirmation page inputs
+  useEffect(() => {
+    const confirmationData = {
+      pickupMode,
+      notes,
+      isDonation,
+      selectedDate,
+      selectedSlot,
+      timestamp: new Date().toISOString()
+    };
+    sessionStorage.setItem('confirmationData', JSON.stringify(confirmationData));
+  }, [pickupMode, notes, isDonation, selectedDate, selectedSlot]);
 
   // Fetch market prices from backend
   useEffect(() => {
@@ -330,6 +357,14 @@ const PriceConfirmationPage = () => {
           console.error('Error processing milestone:', err);
         }
       }
+
+      // Clear flow-specific session data on success
+      sessionStorage.removeItem('selectedCategories');
+      sessionStorage.removeItem('uploadedImages');
+      sessionStorage.removeItem('weightData');
+      sessionStorage.removeItem('addressData');
+      sessionStorage.removeItem('confirmationData');
+      // location_hint_shown is fine to keep for session UX, but optional
 
       navigate('/user/request-status', {
         state: { requestData: createdOrder || payload },

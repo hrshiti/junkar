@@ -113,8 +113,8 @@ const scrapperSchema = new mongoose.Schema({
 
     status: {
       type: String,
-      enum: ['pending', 'verified', 'rejected', 'resend_required'],
-      default: 'pending',
+      enum: ['not_submitted', 'pending', 'verified', 'rejected', 'resend_required'],
+      default: 'not_submitted',
       required: true
     },
     submittedAt: {

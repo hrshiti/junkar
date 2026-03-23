@@ -58,8 +58,8 @@ export const subscribe = asyncHandler(async (req, res) => {
     return sendError(res, 'Plan ID is required', 400);
   }
 
-  // Verify scrapper exists
-  const scrapper = await Scrapper.findById(scrapperId);
+  // Verify scrapper exists with populated subscription plan details
+  const scrapper = await Scrapper.findById(scrapperId).populate('subscription.planId marketSubscription.planId');
   if (!scrapper) {
     return sendError(res, 'Scrapper not found', 404);
   }
@@ -81,6 +81,15 @@ export const subscribe = asyncHandler(async (req, res) => {
     const now = new Date();
 
     if (expiryDate && expiryDate > now) {
+      // Check if it's the free trial plan to provide a friendly message
+      const isFreeTrial = targetSub.planId?.price === 0 || 
+                         targetSub.planId?.name === 'First Month Free' ||
+                         (targetSub.planId?.name && targetSub.planId.name.toLowerCase().includes('free'));
+      
+      if (isFreeTrial) {
+        return sendError(res, "As a first registration, your 1-month Free Subscription is already active. Please click 'Go to Dashboard' to start using the platform.", 400);
+      }
+
       return sendError(res, `You already have an active ${plan.type === 'market_price' ? 'Market Price' : 'Platform'} subscription. Please renew or cancel it first.`, 400);
     }
   }

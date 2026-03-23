@@ -107,6 +107,25 @@ const ScrapperWallet = () => {
 
     useEffect(() => {
         fetchWalletData();
+
+        // Refresh on focus/visibility (so wallet updates when coming back from order completion)
+        const handleRefresh = () => {
+            if (!document.hidden) {
+                fetchWalletData();
+            }
+        };
+
+        window.addEventListener('focus', handleRefresh);
+        document.addEventListener('visibilitychange', handleRefresh);
+
+        // Optional: refresh every 30 seconds for real-time status updates
+        const interval = setInterval(fetchWalletData, 30000);
+
+        return () => {
+            window.removeEventListener('focus', handleRefresh);
+            document.removeEventListener('visibilitychange', handleRefresh);
+            clearInterval(interval);
+        };
     }, []);
 
     const handleAddMoney = async (e) => {

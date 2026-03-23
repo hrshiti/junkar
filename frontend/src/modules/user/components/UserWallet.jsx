@@ -4,6 +4,8 @@ import { useAuth } from '../../shared/context/AuthContext';
 import { FaWallet, FaHistory, FaArrowUp, FaArrowDown, FaExclamationCircle, FaTimes, FaMoneyBillWave, FaUniversity } from 'react-icons/fa';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import { walletAPI } from '../../shared/utils/api';
+import socketClient from '../../shared/utils/socketClient';
+
 import useRazorpay from '../../../hooks/useRazorpay';
 import UserBottomNav from './UserBottomNav';
 
@@ -112,6 +114,16 @@ const UserWallet = () => {
 
     useEffect(() => {
         fetchWalletData();
+
+        // Register socket listener for real-time updates
+        socketClient.onWalletUpdate((data) => {
+            console.log("Wallet updated received via socket:", data);
+            fetchWalletData();
+        });
+
+        return () => {
+            socketClient.offWalletUpdate();
+        };
     }, []);
 
     const handleAddMoney = async (e) => {

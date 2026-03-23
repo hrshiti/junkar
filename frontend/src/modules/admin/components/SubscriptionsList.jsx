@@ -81,10 +81,11 @@ const SubscriptionsList = () => {
 
   const filteredSubscriptions = subscriptions.filter(sub => {
     const matchesFilter = filter === 'all' || sub.status === filter;
+    const trimmedSearch = searchQuery.trim().toLowerCase();
     const matchesSearch =
-      sub.scrapperName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      sub.scrapperPhone.includes(searchQuery) ||
-      sub.planName.toLowerCase().includes(searchQuery.toLowerCase());
+      sub.scrapperName.toLowerCase().includes(trimmedSearch) ||
+      sub.scrapperPhone.includes(searchQuery.trim()) ||
+      sub.planName.toLowerCase().includes(trimmedSearch);
     return matchesFilter && matchesSearch;
   });
 

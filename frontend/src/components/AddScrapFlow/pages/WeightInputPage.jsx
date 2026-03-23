@@ -52,7 +52,9 @@ const WeightInputPage = () => {
     "Commercial",
     "Small Quantity",
     "Bulk (>100kg)",
-    "Request Type:"
+    "Request Type:",
+    "For commercial requests, total weight must be at least 100kg",
+    "Enter weight for all materials to continue"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -85,6 +87,7 @@ const WeightInputPage = () => {
   useEffect(() => {
     const storedImages = sessionStorage.getItem('uploadedImages');
     let storedCategories = sessionStorage.getItem('selectedCategories');
+    const storedWeightData = sessionStorage.getItem('weightData');
 
     if (storedImages) {
       setUploadedImages(JSON.parse(storedImages));
@@ -97,7 +100,54 @@ const WeightInputPage = () => {
     } else if (storedCategories) {
       setSelectedCategories(JSON.parse(storedCategories));
     }
+
+    // Hydrate weight/negotiable data if it exists (for handle Refresh)
+    if (storedWeightData) {
+      try {
+        const parsed = JSON.parse(storedWeightData);
+        if (parsed.categoryWeights) {
+          const weightsMap = {};
+          parsed.categoryWeights.forEach(item => {
+            weightsMap[item.categoryId] = item.weight.toString();
+          });
+          setCategoryWeights(weightsMap);
+        }
+        if (parsed.itemCondition) setItemCondition(parsed.itemCondition);
+        if (parsed.expectedPrice) setExpectedPrice(parsed.expectedPrice.toString());
+        if (parsed.quantityType) setRequestType(parsed.quantityType === 'large' ? 'commercial' : 'household');
+      } catch (err) {
+        console.error('Error parsing stored weight data:', err);
+      }
+    }
   }, [navigate, location.state]);
+
+  // Handle auto-save for Persistence
+  useEffect(() => {
+    if (selectedCategories.length === 0) return;
+
+    const currentWeightData = {
+      weight: totalWeight,
+      mode: 'manual',
+      estimatedPayout: totalEstimatedPayout,
+      pricingType: hasMixed ? 'mixed' : (isOnlyNegotiable ? 'negotiable' : 'kg_based'),
+      quantityType: requestType === 'commercial' ? 'large' : 'small',
+      categoryWeights: nonNegotiableCategories.map(cat => ({
+        categoryId: cat.id,
+        categoryName: cat.name,
+        weight: parseFloat(categoryWeights[cat.id]) || 0,
+        price: getCategoryPrice(cat),
+        estimatedPayout: (parseFloat(categoryWeights[cat.id]) || 0) * getCategoryPrice(cat),
+      })),
+      negotiableCategories: negotiableCategories.map(cat => ({
+        categoryId: cat.id,
+        categoryName: cat.name,
+      })),
+      itemCondition: negotiableCategories.length > 0 ? itemCondition : null,
+      expectedPrice: expectedPrice ? parseFloat(expectedPrice) : null,
+    };
+
+    sessionStorage.setItem('weightData', JSON.stringify(currentWeightData));
+  }, [categoryWeights, itemCondition, expectedPrice, requestType, selectedCategories]);
 
   // Fetch market prices from backend
   useEffect(() => {
@@ -165,12 +215,17 @@ const WeightInputPage = () => {
     }
   };
 
+  // Commercial validation: total weight must be >= 100kg for commercial requests (if items are kg-based)
+  const isWeightValidForRequestType = (requestType === 'commercial' && nonNegotiableCategories.length > 0)
+    ? totalWeight >= 100
+    : true;
+
   // canContinue logic
   const allKgWeightsFilled = nonNegotiableCategories.every(cat =>
     parseFloat(categoryWeights[cat.id]) > 0
   );
   const conditionFilled = negotiableCategories.length === 0 || !!itemCondition;
-  const canContinue = (nonNegotiableCategories.length === 0 || allKgWeightsFilled) && conditionFilled;
+  const canContinue = (nonNegotiableCategories.length === 0 || allKgWeightsFilled) && conditionFilled && isWeightValidForRequestType;
 
   const handleContinue = () => {
     if (!canContinue) return;
@@ -616,13 +671,15 @@ const WeightInputPage = () => {
             className="text-xs md:text-sm text-center"
             style={{ color: '#718096' }}
           >
-            {isOnlyNegotiable
-              ? getTranslatedText("Select item condition to continue")
-              : hasMixed && !allKgWeightsFilled
-                ? "Enter weight for all materials to continue"
-                : hasMixed && !conditionFilled
-                  ? getTranslatedText("Select item condition to continue")
-                  : getTranslatedText("Enter weight to continue")
+            {requestType === 'commercial' && nonNegotiableCategories.length > 0 && totalWeight < 100
+              ? getTranslatedText("For commercial requests, total weight must be at least 100kg")
+              : isOnlyNegotiable
+                ? getTranslatedText("Select item condition to continue")
+                : hasMixed && !allKgWeightsFilled
+                  ? getTranslatedText("Enter weight for all materials to continue")
+                  : hasMixed && !conditionFilled
+                    ? getTranslatedText("Select item condition to continue")
+                    : getTranslatedText("Enter weight to continue")
             }
           </p>
         )}

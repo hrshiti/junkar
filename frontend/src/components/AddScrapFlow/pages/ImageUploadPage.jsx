@@ -18,7 +18,7 @@ const ImageUploadPage = () => {
     "Continue with",
     "Image",
     "Images",
-    "Upload at least one image to continue",
+    "Upload at least one image for each category to continue",
     "Please login again to upload images.",
     "Failed to upload images. Please try again.",
     "Plastic", "Metal", "Paper", "Electronics",
@@ -85,7 +85,9 @@ const ImageUploadPage = () => {
 
   // Total image count across all categories
   const totalImageCount = Object.values(categoryImages).reduce((sum, imgs) => sum + imgs.length, 0);
-  const canContinue = totalImageCount > 0;
+  // Mandatory: Every selected category must have at least one image
+  const allCategoriesHaveImages = selectedCategories.every(cat => categoryImages[cat.id] && categoryImages[cat.id].length > 0);
+  const canContinue = allCategoriesHaveImages;
 
   // Add images to a specific category
   const handleFileSelect = (catId, files) => {
@@ -411,7 +413,7 @@ const ImageUploadPage = () => {
           </motion.button>
         ) : (
           <p className="text-xs md:text-sm text-center" style={{ color: '#718096' }}>
-            {getTranslatedText("Upload at least one image to continue")}
+            {getTranslatedText("Upload at least one image for each category to continue")}
           </p>
         )}
       </div>

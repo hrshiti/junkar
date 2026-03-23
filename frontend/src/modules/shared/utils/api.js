@@ -488,8 +488,9 @@ export const adminAPI = {
     const endPoint = query ? `${API_ENDPOINTS.admin.locations}?${query}` : API_ENDPOINTS.admin.locations;
     return apiRequest(endPoint, { method: 'GET' });
   },
-  getPaymentAnalytics: async () => {
-    return apiRequest(API_ENDPOINTS.admin.analyticsPayments, { method: 'GET' });
+  getPaymentAnalytics: async (query = '') => {
+    const endPoint = query ? `${API_ENDPOINTS.admin.analyticsPayments}?${query}` : API_ENDPOINTS.admin.analyticsPayments;
+    return apiRequest(endPoint, { method: 'GET' });
   },
   getAllUsers: async (query = '') => {
     return apiRequest(`${API_ENDPOINTS.admin.users}${query ? `?${query}` : ''}`, { method: 'GET' });
@@ -784,6 +785,9 @@ export const publicAPI = {
   },
   getHomepageReviews: async () => {
     return apiRequest('/public/homepage-reviews', { method: 'GET' });
+  },
+  getReferralConfig: async () => {
+    return apiRequest('/public/referral-config', { method: 'GET' });
   },
 };
 

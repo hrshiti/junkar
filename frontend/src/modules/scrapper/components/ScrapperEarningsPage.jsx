@@ -29,7 +29,15 @@ const ScrapperEarningsPage = () => {
         "Order ID",
         "Unknown User",
         "Scrap",
-        "Download Statement"
+        "Download Statement",
+        "Paper",
+        "Plastic",
+        "Metal",
+        "Electronics",
+        "Others",
+        "Furniture",
+        "Raddi",
+        "Cleaning Service"
     ];
     const { getTranslatedText } = usePageTranslation(staticTexts);
 
@@ -173,7 +181,7 @@ const ScrapperEarningsPage = () => {
                                             <div>
                                                 <p className="font-bold text-gray-800 text-sm">{order.userName || getTranslatedText('Unknown User')}</p>
                                                 <p className="text-xs text-gray-500">
-                                                    {getTranslatedText(order.scrapType || 'Scrap')} • {formatDate(order.completedAt)}
+                                                    {(order.scrapType || 'Scrap').split(', ').map(cat => getTranslatedText(cat.trim())).join(', ')} • {formatDate(order.completedAt)}
                                                 </p>
                                             </div>
                                         </div>

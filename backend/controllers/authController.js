@@ -251,6 +251,25 @@ export const getMe = asyncHandler(async (req, res) => {
 export const updateProfile = asyncHandler(async (req, res) => {
   const { name, phone, address } = req.body;
 
+  // Validate name format (Alphabets and spaces only)
+  if (name && !/^[a-zA-Z\s]*$/.test(name)) {
+    return sendError(res, 'Full name should only contain alphabetical characters', 400);
+  }
+
+  // Validate state and city format if provided
+  const alphaRegex = /^[a-zA-Z\s]*$/;
+  if (address?.state && !alphaRegex.test(address.state)) {
+    return sendError(res, 'State name should only contain alphabetical characters', 400);
+  }
+  if (address?.city && !alphaRegex.test(address.city)) {
+    return sendError(res, 'City name should only contain alphabetical characters', 400);
+  }
+
+  // Validate pincode if provided (should be exactly 6 digits for India)
+  if (address?.pincode && !/^[0-9]{6}$/.test(address.pincode)) {
+    return sendError(res, 'Pincode should be exactly 6 digits', 400);
+  }
+
   const user = await User.findByIdAndUpdate(
     req.user.id,
     {

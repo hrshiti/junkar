@@ -81,7 +81,7 @@ const HelpSupport = () => {
       const params = new URLSearchParams();
       if (filters.status !== 'all') params.append('status', filters.status);
       if (filters.priority !== 'all') params.append('priority', filters.priority);
-      if (filters.search) params.append('search', filters.search);
+      if (filters.search.trim()) params.append('search', filters.search.trim());
 
       const query = params.toString();
       const response = await supportAPI.getAllAdmin(query);
@@ -151,7 +151,6 @@ const HelpSupport = () => {
             />
           </div>
           <div className="flex items-center gap-2">
-            <FaFilter className="text-gray-400" />
             <select
               value={filters.status}
               onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}

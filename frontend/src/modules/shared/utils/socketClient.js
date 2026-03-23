@@ -305,6 +305,25 @@ class SocketClient {
   }
 
   /**
+   * Listen for real-time wallet updates
+   * @param {Function} callback - Callback function
+   */
+  onWalletUpdate(callback) {
+    if (this.socket) {
+      this.socket.on('wallet_updated', callback);
+    }
+  }
+
+  /**
+   * Remove wallet update listener
+   */
+  offWalletUpdate() {
+    if (this.socket) {
+      this.socket.off('wallet_updated');
+    }
+  }
+
+  /**
    * Get connection status
    * @returns {boolean} Connection status
    */

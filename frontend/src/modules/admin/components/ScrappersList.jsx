@@ -103,7 +103,7 @@ const ScrappersList = () => {
           id: scrapper._id || scrapper.id,
           name: scrapper.name || 'N/A',
           phone: scrapper.phone || 'N/A',
-          kycStatus: scrapper.kyc?.status || 'not_submitted',
+          kycStatus: (scrapper.kyc?.status === 'pending' && !scrapper.kyc?.aadhaarPhotoUrl) ? 'not_submitted' : (scrapper.kyc?.status || 'not_submitted'),
           status: scrapper.status || 'active',
           subscriptionStatus: scrapper.subscription?.status || 'expired',
           rating: scrapper.rating?.average ?? scrapper.rating ?? 0,
@@ -140,11 +140,17 @@ const ScrappersList = () => {
         : filter === 'blocked'
           ? scrapper.status === 'blocked'
           : scrapper.kycStatus === filter;
+          
+    const matchesState = selectedState ? scrapper.businessLocation?.state === selectedState : true;
+    const matchesCity = selectedCity ? scrapper.businessLocation?.city === selectedCity : true;
+
+    const trimmedSearch = searchQuery.trim().toLowerCase();
     const matchesSearch =
-      scrapper.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      scrapper.phone.includes(searchQuery) ||
-      scrapper.vehicleInfo.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesFilter && matchesSearch;
+      scrapper.name.toLowerCase().includes(trimmedSearch) ||
+      scrapper.phone.includes(trimmedSearch) ||
+      scrapper.vehicleInfo.toLowerCase().includes(trimmedSearch);
+      
+    return matchesFilter && matchesState && matchesCity && matchesSearch;
   });
 
   const handleViewDetails = (scrapperId) => {
@@ -237,9 +243,9 @@ const ScrappersList = () => {
         transition={{ delay: 0.1 }}
         className="bg-white rounded-2xl shadow-lg p-3 md:p-6"
       >
-        <div className="flex flex-col md:flex-row gap-2 md:gap-4">
-          {/* Search */}
-          <div className="flex-1 relative">
+        <div className="flex flex-col gap-4">
+          {/* Top Row: Search */}
+          <div className="w-full relative">
             <FaSearch className="absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 text-xs md:text-base" style={{ color: '#718096' }} />
             <input
               type="text"
@@ -255,8 +261,10 @@ const ScrappersList = () => {
             />
           </div>
 
-          {/* Filter Buttons */}
-          <div className="flex gap-1.5 md:gap-2 flex-wrap">
+          {/* Bottom Row: Filters */}
+          <div className="flex flex-col xl:flex-row gap-3 md:gap-4 justify-between items-start xl:items-center border-t pt-3 md:pt-4" style={{ borderColor: '#edf2f7' }}>
+            {/* Filter Buttons */}
+            <div className="flex gap-1.5 md:gap-2 flex-wrap">
             {['all', 'verified', 'pending', 'rejected', 'blocked'].map((status) => (
               <button
                 key={status}
@@ -305,6 +313,7 @@ const ScrappersList = () => {
               ))}
             </select>
           </div>
+        </div>
         </div>
       </motion.div>
 

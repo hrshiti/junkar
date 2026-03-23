@@ -186,6 +186,28 @@ const CategorySelectionPage = () => {
     fetchCategories();
   }, []);
 
+  // Load from sessionStorage on mount for persistence (handle Refresh)
+  useEffect(() => {
+    const savedCategories = sessionStorage.getItem('selectedCategories');
+    if (savedCategories) {
+      try {
+        const parsed = JSON.parse(savedCategories);
+        if (Array.isArray(parsed) && parsed.length > 0 && selectedCategories.length === 0) {
+          setSelectedCategories(parsed);
+        }
+      } catch (err) {
+        console.error('Error parsing saved categories:', err);
+      }
+    }
+  }, []);
+
+  // Persist to sessionStorage whenever selectedCategories changes
+  useEffect(() => {
+    if (selectedCategories.length > 0) {
+      sessionStorage.setItem('selectedCategories', JSON.stringify(selectedCategories));
+    }
+  }, [selectedCategories]);
+
   // Auto-select or expand category if coming from homepage/AllCategoriesPage
   useEffect(() => {
     const preSelectedCategoryName = location.state?.preSelectedCategory;

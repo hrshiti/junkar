@@ -24,7 +24,7 @@ const CreateCouponModal = ({ onClose, onCreated }) => {
         applicableRole: 'ALL',
         usageType: 'SINGLE_USE_PER_USER',
         limit: 0,
-        validFrom: new Date().toISOString().split('T')[0],
+        validFrom: new Date().toLocaleDateString('en-CA'),
         validTo: ''
     });
 
@@ -185,6 +185,7 @@ const CreateCouponModal = ({ onClose, onCreated }) => {
                                 name="validFrom"
                                 value={formData.validFrom}
                                 onChange={handleChange}
+                                min={new Date().toLocaleDateString('en-CA')}
                                 className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                             />
                         </div>
@@ -195,6 +196,7 @@ const CreateCouponModal = ({ onClose, onCreated }) => {
                                 name="validTo"
                                 value={formData.validTo}
                                 onChange={handleChange}
+                                min={formData.validFrom || new Date().toLocaleDateString('en-CA')}
                                 className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                                 required
                             />
@@ -283,10 +285,13 @@ const CouponsList = () => {
         }
     };
 
-    const filteredCoupons = coupons.filter(coupon =>
-        coupon.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        coupon.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredCoupons = coupons.filter(coupon => {
+        const trimmedSearch = searchTerm.trim().toLowerCase();
+        return (
+            coupon.code.toLowerCase().includes(trimmedSearch) ||
+            coupon.title.toLowerCase().includes(trimmedSearch)
+        );
+    });
 
     return (
         <div className="space-y-6">

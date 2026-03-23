@@ -73,6 +73,18 @@ const AddressInputPage = () => {
         }
     }, [navigate]);
 
+    // Persist address data whenever it changes
+    useEffect(() => {
+        if (address.trim() || coordinates) {
+            const addressData = {
+                address: address.trim(),
+                coordinates: coordinates,
+                timestamp: new Date().toISOString()
+            };
+            sessionStorage.setItem('addressData', JSON.stringify(addressData));
+        }
+    }, [address, coordinates]);
+
     const getCurrentLocation = () => {
         if (!navigator.geolocation) {
             setLocationError(getTranslatedText('Geolocation is not supported by your browser'));

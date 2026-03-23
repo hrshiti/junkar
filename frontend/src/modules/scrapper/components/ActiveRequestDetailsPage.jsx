@@ -715,7 +715,7 @@ const ActiveRequestDetailsPage = () => {
         const response = await orderAPI.cancel(orderId, "Cancelled by scrapper");
         if (response.success) {
           alert(getTranslatedText("Order cancelled successfully!"));
-          navigate('/scrapper/my-active-requests');
+          navigate('/scrapper');
         }
       } catch (error) {
         console.error("Cancellation failed:", error);

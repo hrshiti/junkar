@@ -123,7 +123,7 @@ const PriceListPage = () => {
     }, []);
 
     const filteredPrices = prices.filter(p =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase())
+        p.name.toLowerCase().includes(searchTerm.trim().toLowerCase())
     );
 
     return (

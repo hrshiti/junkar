@@ -485,6 +485,7 @@ const CampaignManagement = () => {
                         type="date"
                         value={formData.startDate}
                         onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                        min={new Date().toLocaleDateString('en-CA')}
                         className="w-full px-4 py-2 rounded-xl border-2 focus:outline-none focus:ring-2 text-sm"
                         style={{
                           borderColor: '#e2e8f0',
@@ -501,6 +502,7 @@ const CampaignManagement = () => {
                         type="date"
                         value={formData.endDate}
                         onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                        min={formData.startDate || new Date().toLocaleDateString('en-CA')}
                         className="w-full px-4 py-2 rounded-xl border-2 focus:outline-none focus:ring-2 text-sm"
                         style={{
                           borderColor: '#e2e8f0',
@@ -540,7 +542,8 @@ const CampaignManagement = () => {
                         <FaRupeeSign className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: '#64946e' }} />
                         <input
                           type="number"
-                          value={formData.customRewards.signupBonus}
+                          value={formData.customRewards.signupBonus || ''}
+                          placeholder="0"
                           onChange={(e) => setFormData({
                             ...formData,
                             customRewards: {
@@ -567,7 +570,8 @@ const CampaignManagement = () => {
                         <FaRupeeSign className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: '#64946e' }} />
                         <input
                           type="number"
-                          value={formData.customRewards.refereeWelcomeBonus}
+                          value={formData.customRewards.refereeWelcomeBonus || ''}
+                          placeholder="0"
                           onChange={(e) => setFormData({
                             ...formData,
                             customRewards: {

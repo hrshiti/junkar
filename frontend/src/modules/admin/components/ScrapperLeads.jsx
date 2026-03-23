@@ -5,7 +5,6 @@ import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import {
   FaUserPlus,
   FaSearch,
-  FaFilter,
   FaTruck,
   FaMapMarkerAlt,
   FaPhone,
@@ -299,7 +298,6 @@ const ScrapperLeads = () => {
             />
           </div>
           <div className="flex items-center gap-2 justify-start md:justify-end">
-            <FaFilter style={{ color: '#718096' }} />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -502,7 +500,14 @@ const ScrapperLeads = () => {
                     <input
                       type="text"
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/[^a-zA-Z\s.]/g, '');
+                        // Capitalize first letter of each word
+                        const formattedVal = val.split(' ')
+                          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                          .join(' ');
+                        setFormData({ ...formData, name: formattedVal });
+                      }}
                       className="w-full px-4 py-2 rounded-xl border-2 focus:outline-none focus:ring-2 text-sm"
                       style={{
                         borderColor: '#e2e8f0',

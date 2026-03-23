@@ -901,10 +901,10 @@ export const getUnreadNotificationCount = (userId, userType) => {
  */
 export const getTierConfig = () => {
   const defaultTiers = {
-    bronze: { minReferrals: 0, bonusPercent: 0, monthlyBonus: 0, name: 'Bronze', color: '#cd7f32' },
-    silver: { minReferrals: 5, bonusPercent: 5, monthlyBonus: 100, name: 'Silver', color: '#c0c0c0' },
-    gold: { minReferrals: 15, bonusPercent: 10, monthlyBonus: 300, name: 'Gold', color: '#ffd700' },
-    platinum: { minReferrals: 30, bonusPercent: 15, monthlyBonus: 500, name: 'Platinum', color: '#e5e4e2' }
+    bronze: { minReferrals: 0, bonusPercent: 5, monthlyBonus: 0, name: 'Bronze', color: '#cd7f32' },
+    silver: { minReferrals: 10, bonusPercent: 10, monthlyBonus: 500, name: 'Silver', color: '#c0c0c0' },
+    gold: { minReferrals: 50, bonusPercent: 15, monthlyBonus: 2000, name: 'Gold', color: '#ffd700' },
+    platinum: { minReferrals: 100, bonusPercent: 20, monthlyBonus: 5000, name: 'Platinum', color: '#e5e4e2' }
   };
   
   const stored = localStorage.getItem('tierConfig');

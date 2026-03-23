@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   FaChartBar, FaDownload, FaCalendarAlt, FaRupeeSign, FaUsers,
   FaTruck, FaFileInvoice, FaCheckCircle, FaCreditCard,
@@ -12,8 +13,9 @@ const Reports = () => {
   const [stats, setStats] = useState(null);
   const [revenueStats, setRevenueStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [exportLoading, setExportLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(null); // 'users', 'scrappers', 'orders', 'revenue' or null
   const [dateRange, setDateRange] = useState('month'); // today, week, month, year
+  const navigate = useNavigate();
 
   const staticTexts = [
     "Failed to export report",
@@ -68,11 +70,11 @@ const Reports = () => {
           start.setMonth(end.getMonth() - 1);
       }
 
+      const queryString = `startDate=${start.toISOString()}&endDate=${end.toISOString()}`;
+
       const [dashboardRes, revenueRes] = await Promise.all([
-        adminAPI.getDashboardStats(),
-        adminAPI.getPaymentAnalytics(
-          `startDate=${start.toISOString()}&endDate=${end.toISOString()}`
-        )
+        adminAPI.getDashboardStats(queryString),
+        adminAPI.getPaymentAnalytics(queryString)
       ]);
 
       if (dashboardRes.success && dashboardRes.data?.stats) {
@@ -92,7 +94,7 @@ const Reports = () => {
 
   const handleExportReport = async (type) => {
     if (exportLoading) return;
-    setExportLoading(true);
+    setExportLoading(type);
 
     try {
       let csvContent = '';
@@ -177,7 +179,7 @@ const Reports = () => {
       console.error('Export failed:', err);
       alert(getTranslatedText('Failed to export report'));
     } finally {
-      setExportLoading(false);
+      setExportLoading(null);
     }
   };
 
@@ -187,42 +189,48 @@ const Reports = () => {
       value: stats?.users?.total || 0,
       icon: FaUsers,
       color: '#3b82f6',
-      bg: '#dbeafe'
+      bg: '#dbeafe',
+      path: '/admin/users'
     },
     {
       title: getTranslatedText('Total Scrappers'),
       value: stats?.scrappers?.total || 0,
       icon: FaTruck,
       color: '#10b981',
-      bg: '#d1fae5'
+      bg: '#d1fae5',
+      path: '/admin/scrappers'
     },
     {
       title: getTranslatedText('Total Orders'),
       value: stats?.orders?.total || 0,
       icon: FaFileInvoice,
       color: '#f59e0b',
-      bg: '#fef3c7'
+      bg: '#fef3c7',
+      path: '/admin/orders'
     },
     {
       title: getTranslatedText('Completed Orders'),
       value: stats?.orders?.completed || 0,
       icon: FaCheckCircle,
       color: '#8b5cf6',
-      bg: '#ede9fe'
+      bg: '#ede9fe',
+      path: '/admin/orders'
     },
     {
       title: getTranslatedText('Total Revenue'),
-      value: `₹${((revenueStats?.totalRevenue || 0) / 1000).toFixed(1)}k`,
+      value: `₹${((revenueStats?.totalAreaRevenue || revenueStats?.totalRevenue || 0) / 1000).toFixed(1)}k`,
       icon: FaRupeeSign,
       color: '#06b6d4',
-      bg: '#cffafe'
+      bg: '#cffafe',
+      path: '/admin/earnings'
     },
     {
       title: getTranslatedText('Daily Revenue'), // Using dashboard specific stat or derived
       value: `₹${stats?.payments?.todayRevenue || 0}`,
       icon: FaCreditCard,
       color: '#ef4444',
-      bg: '#fee2e2'
+      bg: '#fee2e2',
+      path: '/admin/earnings'
     }
   ];
 
@@ -280,11 +288,14 @@ const Reports = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate(card.path)}
+              className="bg-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 cursor-pointer group"
             >
               <div className="flex items-center justify-between mb-2 md:mb-4">
                 <div
-                  className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl flex items-center justify-center"
+                  className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl flex items-center justify-center transition-all group-hover:shadow-md"
                   style={{ backgroundColor: card.bg }}
                 >
                   <Icon style={{ color: card.color, fontSize: '16px' }} className="md:text-2xl" />
@@ -319,20 +330,23 @@ const Reports = () => {
             { label: getTranslatedText('Revenue Report'), type: 'revenue', icon: FaRupeeSign }
           ].map((report, index) => {
             const Icon = report.icon;
+            const isCurrentlyExporting = exportLoading === report.type;
+            const isAnyExporting = exportLoading !== null;
+
             return (
               <motion.button
                 key={report.type}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 + index * 0.05 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={!isAnyExporting ? { scale: 1.05 } : {}}
+                whileTap={!isAnyExporting ? { scale: 0.95 } : {}}
                 onClick={() => handleExportReport(report.type)}
-                disabled={exportLoading}
+                disabled={isAnyExporting}
                 className="p-4 rounded-xl flex flex-col items-center gap-2 transition-all disabled:opacity-50"
                 style={{ backgroundColor: '#f7fafc' }}
               >
-                {exportLoading ? (
+                {isCurrentlyExporting ? (
                   <FaSpinner className="animate-spin text-2xl" style={{ color: '#64946e' }} />
                 ) : (
                   <Icon style={{ color: '#64946e', fontSize: '24px' }} />
@@ -371,7 +385,17 @@ const Reports = () => {
                     </div>
                   </div>
                   <span className="text-[10px] text-gray-500 whitespace-nowrap rotate-45 origin-left md:rotate-0 translate-y-2 md:translate-y-0">
-                    {new Date(day._id).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                    {(() => {
+                      if (typeof day._id === 'number') {
+                        // Handle hourly labels
+                        const hour = day._id;
+                        const period = hour >= 12 ? 'PM' : 'AM';
+                        const displayHour = hour % 12 || 12;
+                        return `${displayHour} ${period}`;
+                      }
+                      // Default date labels
+                      return new Date(day._id).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+                    })()}
                   </span>
                 </div>
               );

@@ -107,8 +107,8 @@ const TierManagement = () => {
 
   const handleAddTier = () => {
     setTiers([
-      ...tiers,
-      { name: getTranslatedText('New Tier'), minReferrals: 0, bonusPercent: 0, monthlyBonus: 0, color: '#3b82f6' }
+      { name: getTranslatedText('New Tier'), minReferrals: 0, bonusPercent: 0, monthlyBonus: 0, color: '#3b82f6' },
+      ...tiers
     ]);
   };
 

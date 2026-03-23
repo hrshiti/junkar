@@ -587,9 +587,10 @@ const MyProfilePage = () => {
                     <input
                       type="text"
                       value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+                        setFormData({ ...formData, name: value });
+                      }}
                       className="w-full px-3 py-2 md:px-4 md:py-2.5 rounded-lg text-xs md:text-base border transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                       style={{
                         borderColor: '#e2e8f0',
@@ -609,9 +610,10 @@ const MyProfilePage = () => {
                     <input
                       type="tel"
                       value={formData.phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
-                      }
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, "").slice(0, 10);
+                        setFormData({ ...formData, phone: value });
+                      }}
                       className="w-full px-3 py-2 md:px-4 md:py-2.5 rounded-lg text-xs md:text-base border transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                       style={{
                         borderColor: '#e2e8f0',
@@ -660,7 +662,10 @@ const MyProfilePage = () => {
                         <input
                           type="text"
                           value={formData.city}
-                          onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+                            setFormData({ ...formData, city: value });
+                          }}
                           className="w-full px-3 py-2 rounded-lg text-xs border focus:outline-none"
                           style={{ borderColor: '#e2e8f0', color: '#1e293b', backgroundColor: '#ffffff' }}
                         />
@@ -670,7 +675,10 @@ const MyProfilePage = () => {
                         <input
                           type="text"
                           value={formData.pincode}
-                          onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+                            setFormData({ ...formData, pincode: value });
+                          }}
                           className="w-full px-3 py-2 rounded-lg text-xs border focus:outline-none"
                           style={{ borderColor: '#e2e8f0', color: '#1e293b', backgroundColor: '#ffffff' }}
                         />
@@ -679,11 +687,14 @@ const MyProfilePage = () => {
 
                     <div className="mt-3">
                       <label className="block text-[10px] font-semibold text-slate-500 uppercase">{getTranslatedText("State")}</label>
-                      <input
-                        type="text"
-                        value={formData.state}
-                        onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                        className="w-full px-3 py-2 rounded-lg text-xs border focus:outline-none"
+                        <input
+                          type="text"
+                          value={formData.state}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+                            setFormData({ ...formData, state: value });
+                          }}
+                          className="w-full px-3 py-2 rounded-lg text-xs border focus:outline-none"
                         style={{ borderColor: '#e2e8f0', color: '#1e293b', backgroundColor: '#ffffff' }}
                       />
                     </div>

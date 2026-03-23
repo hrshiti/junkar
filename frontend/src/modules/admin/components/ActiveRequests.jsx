@@ -138,10 +138,11 @@ const ActiveRequests = () => {
 
   const filteredRequests = requests.filter(request => {
     const matchesFilter = filter === 'all' || request.status === filter;
+    const trimmedSearch = searchQuery.trim().toLowerCase();
     const matchesSearch =
-      request.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      request.requestId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      request.userPhone.includes(searchQuery);
+      request.userName.toLowerCase().includes(trimmedSearch) ||
+      request.requestId.toLowerCase().includes(trimmedSearch) ||
+      request.userPhone.includes(trimmedSearch);
     return matchesFilter && matchesSearch;
   });
 

@@ -410,9 +410,10 @@ const PriceFeedEditor = () => {
       };
 
       let response;
-      const isStaticId = currentPriceData.id && String(currentPriceData.id).startsWith('static_');
+      const idStr = currentPriceData.id ? String(currentPriceData.id) : '';
+      const isNew = !currentPriceData.id || idStr.startsWith('static_') || idStr.startsWith('err_') || idStr.startsWith('price_');
 
-      if (modalMode === 'add' || isStaticId) {
+      if (modalMode === 'add' || isNew) {
         response = await adminAPI.createPrice(payload);
       } else {
         // Edit mode with a real DB ID
@@ -455,7 +456,10 @@ const PriceFeedEditor = () => {
           maxPrice: price.maxPrice || 0
         };
 
-        if (price.id && price.id.startsWith('price_')) {
+        const idStr = price.id ? String(price.id) : '';
+        const isNew = !price.id || idStr.startsWith('static_') || idStr.startsWith('err_') || idStr.startsWith('price_');
+
+        if (isNew) {
           return adminAPI.createPrice(payload);
         } else {
           return adminAPI.updatePrice(price.id, payload);

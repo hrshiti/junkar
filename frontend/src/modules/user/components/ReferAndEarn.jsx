@@ -5,9 +5,12 @@ import {
   getOrGenerateReferralCode,
   getUserReferralStats,
   getReferralSettings,
+  updateReferralSettings,
   getUserTier,
+  updateTierConfig,
   processMonthlyTierBonus,
 } from "../../shared/utils/referralUtils";
+import { publicAPI } from "../../shared/utils/api";
 import QRCodeGenerator from "../../shared/components/QRCodeGenerator";
 import { usePageTranslation } from "../../../hooks/usePageTranslation";
 import { useDynamicTranslation } from "../../../hooks/useDynamicTranslation";
@@ -81,17 +84,34 @@ const ReferAndEarn = () => {
   const { translateText: translateDynamic } = useDynamicTranslation();
 
   useEffect(() => {
-    if (user) {
-      const code = getOrGenerateReferralCode(user.phone || user.id, "user");
-      setReferralCode(code);
-      setShareLink(`${window.location.origin}?ref=${code}`);
+    const fetchConfigAndStats = async () => {
+      try {
+        // Fetch real-time config from backend
+        const configResp = await publicAPI.getReferralConfig();
+        if (configResp.success && configResp.data) {
+          const { tiers, settings } = configResp.data;
+          // Dynamically update local storage for utilities to use
+          if (tiers) updateTierConfig(tiers);
+          if (settings) updateReferralSettings(settings);
+        }
+      } catch (err) {
+        console.error('Failed to sync referral config:', err);
+      }
 
-      const referralStats = getUserReferralStats(user.phone || user.id, "user");
-      setStats(referralStats);
+      if (user) {
+        const code = getOrGenerateReferralCode(user.phone || user.id, "user");
+        setReferralCode(code);
+        setShareLink(`${window.location.origin}?ref=${code}`);
 
-      const tier = getUserTier(user.phone || user.id, "user");
-      setTierInfo(tier);
-    }
+        const referralStats = getUserReferralStats(user.phone || user.id, "user");
+        setStats(referralStats);
+
+        const tier = getUserTier(user.phone || user.id, "user");
+        setTierInfo(tier);
+      }
+    };
+
+    fetchConfigAndStats();
   }, [user]);
 
   const handleCopyCode = () => {

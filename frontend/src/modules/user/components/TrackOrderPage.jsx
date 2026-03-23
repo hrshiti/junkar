@@ -104,11 +104,17 @@ const TrackOrderPage = () => {
                         }
                     }
 
-                    // Set Scrapper Location if available
-                    if (data.scrapper?.liveLocation?.coordinates) {
-                        const coords = data.scrapper.liveLocation.coordinates;
-                        const lng = typeof coords[0] === 'number' ? coords[0] : null;
-                        const lat = typeof coords[1] === 'number' ? coords[1] : null;
+                    // Set Scrapper Location (Live first, then fallback to Business Location)
+                    let scrapperCoords = null;
+                    if (data.scrapper?.liveLocation?.coordinates && (data.scrapper.liveLocation.coordinates[0] !== 0 || data.scrapper.liveLocation.coordinates[1] !== 0)) {
+                        scrapperCoords = data.scrapper.liveLocation.coordinates;
+                    } else if (data.scrapper?.businessLocation?.coordinates) {
+                        scrapperCoords = data.scrapper.businessLocation.coordinates;
+                    }
+
+                    if (scrapperCoords) {
+                        const lng = typeof scrapperCoords[0] === 'number' ? scrapperCoords[0] : null;
+                        const lat = typeof scrapperCoords[1] === 'number' ? scrapperCoords[1] : null;
 
                         if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng)) {
                             setScrapperLocation({ lat, lng });
@@ -349,8 +355,14 @@ const TrackOrderPage = () => {
                 </GoogleMap>
             </div>
 
-            {/* Bottom Card */}
-            <div className="bg-white rounded-t-3xl shadow-[0_-4px_20px_rgba(0,0,0,0.1)] p-6 z-10 -mt-6 relative">
+            {/* Bottom Card - Mobile Swipeable Sheet */}
+            <motion.div 
+                initial={{ y: 0 }}
+                drag="y"
+                dragConstraints={{ top: -250, bottom: 0 }}
+                dragElastic={0.05}
+                className="bg-white rounded-t-3xl shadow-[0_-4px_20px_rgba(0,0,0,0.1)] p-6 z-10 -mt-6 relative cursor-grab active:cursor-grabbing"
+            >
                 <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
 
                 <div className="flex items-center justify-between mb-6">
@@ -365,7 +377,7 @@ const TrackOrderPage = () => {
                     </div>
                     <div className="flex gap-2">
                         <button
-                            onClick={() => navigate(`/chat`, { state: { orderId: order._id } })}
+                            onClick={() => navigate(`/user/chat`, { state: { orderId: order._id } })}
                             className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center hover:bg-blue-200 transition-colors"
                         >
                             <FaComment />
@@ -387,7 +399,7 @@ const TrackOrderPage = () => {
                         {eta ? `Arriving in ${eta} (${distance})` : 'Calculating ETA...'}
                     </p>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 };
