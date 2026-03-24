@@ -9,7 +9,7 @@ const Navbar = () => {
     const [scrolled, setScrolled] = useState(false);
 
     const { getTranslatedText } = usePageTranslation([
-        'Home', 'About', 'Contact', 'App', 'Get App'
+        'Home', 'About', 'Contact', 'App', 'Get App', 'Partner'
     ]);
 
     useEffect(() => {
@@ -47,6 +47,7 @@ const Navbar = () => {
                         <a href="/#about" className="nav-link" style={{ color: '#64748b', fontWeight: 600, fontFamily: 'Poppins' }}>{getTranslatedText('About')}</a >
                         <a href="/#contact" className="nav-link" style={{ color: '#64748b', fontWeight: 600, fontFamily: 'Poppins' }}>{getTranslatedText('Contact')}</a >
                         <a href="/#app" className="nav-link" style={{ color: '#64748b', fontWeight: 600, fontFamily: 'Poppins' }}>{getTranslatedText('App')}</a >
+                        <Link to="/vendor" className="nav-link" style={{ color: '#64748b', fontWeight: 600, fontFamily: 'Poppins' }}>{getTranslatedText('Partner')}</Link>
                     </div>
 
                     <motion.div

@@ -130,6 +130,26 @@ const KYCUploadPage = () => {
     );
   }
 
+  // Helper to check for duplicate document uploads
+  const isDocumentDuplicate = (newFile, currentFieldName) => {
+    const allFiles = [
+      { file: aadhaarPhoto, name: 'Aadhaar' },
+      { file: selfiePhoto, name: 'Selfie' },
+      { file: panPhoto, name: 'PAN' },
+      { file: shopLicenseFile, name: 'Shop License' },
+      { file: shopPhotoFile, name: 'Shop Photo' },
+      { file: gstCertificate, name: 'GST Certificate' }
+    ].filter(f => f.file && f.name !== currentFieldName);
+
+    for (const f of allFiles) {
+      // Basic check using name, size and type
+      if (f.file.name === newFile.name && f.file.size === newFile.size && f.file.type === newFile.type) {
+        return f.name;
+      }
+    }
+    return null;
+  };
+
   const handleAadhaarPhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -137,6 +157,15 @@ const KYCUploadPage = () => {
         alert(getTranslatedText('File is too large (Max 50MB)'));
         return;
       }
+
+      // Check for duplicate document
+      const duplicateOrigin = isDocumentDuplicate(file, 'Aadhaar');
+      if (duplicateOrigin) {
+        alert(`${getTranslatedText('This image is already uploaded as')} ${duplicateOrigin}. ${getTranslatedText('Please upload a unique document.')}`);
+        e.target.value = ''; // Reset input
+        return;
+      }
+
       setAadhaarPhoto(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -153,6 +182,15 @@ const KYCUploadPage = () => {
         alert(getTranslatedText('File is too large (Max 50MB)'));
         return;
       }
+
+      // Check for duplicate document
+      const duplicateOrigin = isDocumentDuplicate(file, 'Selfie');
+      if (duplicateOrigin) {
+        alert(`${getTranslatedText('This image is already uploaded as')} ${duplicateOrigin}. ${getTranslatedText('Please upload a unique document.')}`);
+        e.target.value = ''; // Reset input
+        return;
+      }
+
       setSelfiePhoto(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -195,6 +233,15 @@ const KYCUploadPage = () => {
         alert(getTranslatedText('File is too large (Max 50MB)'));
         return;
       }
+
+      // Check for duplicate document
+      const duplicateOrigin = isDocumentDuplicate(file, 'PAN');
+      if (duplicateOrigin) {
+        alert(`${getTranslatedText('This image is already uploaded as')} ${duplicateOrigin}. ${getTranslatedText('Please upload a unique document.')}`);
+        e.target.value = ''; // Reset input
+        return;
+      }
+
       setPanPhoto(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -211,6 +258,15 @@ const KYCUploadPage = () => {
         alert(getTranslatedText('File is too large (Max 50MB)'));
         return;
       }
+
+      // Check for duplicate document
+      const duplicateOrigin = isDocumentDuplicate(file, 'Shop License');
+      if (duplicateOrigin) {
+        alert(`${getTranslatedText('This image is already uploaded as')} ${duplicateOrigin}. ${getTranslatedText('Please upload a unique document.')}`);
+        e.target.value = ''; // Reset input
+        return;
+      }
+
       setShopLicenseFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -227,6 +283,15 @@ const KYCUploadPage = () => {
         alert(getTranslatedText('File is too large (Max 50MB)'));
         return;
       }
+
+      // Check for duplicate document
+      const duplicateOrigin = isDocumentDuplicate(file, 'Shop Photo');
+      if (duplicateOrigin) {
+        alert(`${getTranslatedText('This image is already uploaded as')} ${duplicateOrigin}. ${getTranslatedText('Please upload a unique document.')}`);
+        e.target.value = ''; // Reset input
+        return;
+      }
+
       setShopPhotoFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -248,6 +313,15 @@ const KYCUploadPage = () => {
         alert(getTranslatedText('File is too large (Max 50MB)'));
         return;
       }
+
+      // Check for duplicate document
+      const duplicateOrigin = isDocumentDuplicate(file, 'GST Certificate');
+      if (duplicateOrigin) {
+        alert(`${getTranslatedText('This image is already uploaded as')} ${duplicateOrigin}. ${getTranslatedText('Please upload a unique document.')}`);
+        e.target.value = ''; // Reset input
+        return;
+      }
+
       setGstCertificate(file);
       const reader = new FileReader();
       reader.onloadend = () => {

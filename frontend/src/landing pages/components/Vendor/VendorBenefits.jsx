@@ -1,4 +1,5 @@
 import { Users, LayoutDashboard, Wallet } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
 const vendorBenefits = [

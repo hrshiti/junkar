@@ -226,7 +226,11 @@ const PriceFeedEditor = () => {
         // 2. Map API prices to our comprehensive list
         const apiPriceMap = {};
         response.data.prices.forEach(p => {
-          apiPriceMap[p.category.toLowerCase()] = p;
+          const catName = p.category.toLowerCase();
+          // GUARD: Preserve the newest rate (first occurrence), ignore older history rows
+          if (!apiPriceMap[catName]) {
+            apiPriceMap[catName] = p;
+          }
         });
 
         const mergedPrices = staticCategories.map(cat => {
@@ -248,7 +252,8 @@ const PriceFeedEditor = () => {
         });
 
         // Add any categories from API that are NOT in our static list
-        response.data.prices.forEach(p => {
+        // Iterating over Object.values(apiPriceMap) ensures we only add unique the latest custom prices
+        Object.values(apiPriceMap).forEach(p => {
           if (!staticCategories.some(sc => sc.category.toLowerCase() === p.category.toLowerCase())) {
             mergedPrices.push({
               id: p._id || p.id,

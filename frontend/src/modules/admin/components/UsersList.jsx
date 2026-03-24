@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaUsers, FaSearch, FaFilter, FaUserCheck, FaUserTimes, FaEye, FaPhone, FaMapMarkerAlt, FaRupeeSign, FaBox } from 'react-icons/fa';
+import { FaUsers, FaSearch, FaFilter, FaUserCheck, FaUserTimes, FaEye, FaPhone, FaMapMarkerAlt, FaRupeeSign, FaBox, FaTrash } from 'react-icons/fa';
 import { adminAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import { INDIAN_STATES } from './locationConstants';
@@ -51,7 +51,11 @@ const UsersList = () => {
     "Last active: {time}",
     "View",
     "Block",
-    "Unblock"
+    "Unblock",
+    "Delete",
+    "Are you sure you want to delete this user? This action cannot be undone.",
+    "User deleted successfully!",
+    "Failed to delete user"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
@@ -195,6 +199,24 @@ const UsersList = () => {
         console.error('Error toggling user block status:', error);
         alert(error.message || getTranslatedText('Failed to update user status. Please try again.'));
       }
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm(getTranslatedText('Are you sure you want to delete this user? This action cannot be undone.'))) {
+      return;
+    }
+    try {
+      const response = await adminAPI.deleteUser(userId);
+      if (response.success) {
+        setUsers(prev => prev.filter(user => user.id !== userId));
+        alert(getTranslatedText('User deleted successfully!'));
+      } else {
+        throw new Error(response.message || getTranslatedText('Failed to delete user'));
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert(error.message || getTranslatedText('Failed to delete user'));
     }
   };
 
@@ -503,6 +525,17 @@ const UsersList = () => {
                           <span className="hidden sm:inline">{getTranslatedText("Unblock")}</span>
                         </motion.button>
                       )}
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleDeleteUser(user.id)}
+                        className="px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl font-semibold text-xs md:text-sm flex items-center gap-1.5 md:gap-2 transition-all"
+                        style={{ backgroundColor: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca' }}
+                        title={getTranslatedText('Delete')}
+                      >
+                        <FaTrash className="text-xs md:text-sm" />
+                        <span className="hidden sm:inline">{getTranslatedText('Delete')}</span>
+                      </motion.button>
                     </div>
                   </div>
                 </motion.div>

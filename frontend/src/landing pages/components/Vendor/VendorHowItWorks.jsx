@@ -1,4 +1,5 @@
 import { UserPlus, CheckCircle, Smartphone } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
 const VendorHowItWorks = () => {

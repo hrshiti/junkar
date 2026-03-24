@@ -144,7 +144,8 @@ const AllCategoriesPage = () => {
             name: price.category,
             image: price.image || getCategoryImage(price.category),
             type: PRICE_TYPES.MATERIAL,
-            isActive: price.isActive !== false
+            isActive: price.isActive !== false,
+            isNegotiable: price.isNegotiable || false
           }));
 
           // 3. Merge: prefer API data for items that exist in both
@@ -203,7 +204,6 @@ const AllCategoriesPage = () => {
           ],
         };
 
-        const negotiableKeys = ['e_waste', 'furniture', 'home_appliance', 'vehicle_scrap', 'electronics', 'e-waste'];
         const flattened = [];
         finalCategories.forEach(cat => {
           flattened.push(cat);
@@ -215,8 +215,6 @@ const AllCategoriesPage = () => {
                 type: PRICE_TYPES.MATERIAL
               });
             });
-          } else if (negotiableKeys.includes(key)) {
-            cat.isNegotiable = true;
           }
         });
 

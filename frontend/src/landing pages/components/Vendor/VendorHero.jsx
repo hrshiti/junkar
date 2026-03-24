@@ -1,4 +1,5 @@
 import { Smartphone } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
 const VendorHero = () => {
@@ -58,7 +59,7 @@ const VendorHero = () => {
                         transition={{ delay: 0.4 }}
                         style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}
                     >
-                        <a href="#app" className="btn btn-primary" style={{ padding: '0.8rem 2rem', background: '#10b981', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.8rem', color: 'white' }}>
+                        <a href="https://play.google.com/store/apps/details?id=com.company.junkarpartner" target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ padding: '0.8rem 2rem', background: '#10b981', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.8rem', color: 'white' }}>
                             <Smartphone size={20} />
                             {getTranslatedText("Get App")}
                         </a>

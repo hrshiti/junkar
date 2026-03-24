@@ -51,7 +51,7 @@ const VendorNavbar = () => {
                         animate={{ opacity: 1, x: 0 }}
                         style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}
                     >
-                        <a href="#app" className="btn btn-primary" style={{ padding: '0.6rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#10b981', textDecoration: 'none', color: 'white' }}>
+                        <a href="https://play.google.com/store/apps/details?id=com.company.junkarpartner" target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ padding: '0.6rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#10b981', textDecoration: 'none', color: 'white' }}>
                             <Smartphone size={18} />
                             {getTranslatedText("Get App")}
                         </a>

@@ -21,9 +21,20 @@ const Footer = () => {
                             {getTranslatedText("Revolutionizing the scrap industry with transparency, efficiency, and sustainability. Turn your trash into cash and contribute to a greener planet.")}
                         </p>
                         <div className="footer-socials">
-                            {[Facebook, Twitter, Instagram, Linkedin].map((Icon, i) => (
-                                <a key={i} href="#" className="social-link">
-                                    <Icon size={20} color="white" />
+                            {[
+                                { Icon: Facebook, link: "https://www.facebook.com/share/1Ctd3wjnSE/" },
+                                { Icon: Twitter, link: "https://x.com/Junkar_in" },
+                                { Icon: Instagram, link: "https://www.instagram.com/junkar.in?utm_source=qr&igsh=MW04ajVnYmN2Yzh1ag==" },
+                                { Icon: Linkedin, link: "https://www.linkedin.com/in/junkar-india-19a7903b5?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" }
+                            ].map((social, i) => (
+                                <a 
+                                    key={i} 
+                                    href={social.link} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="social-link"
+                                >
+                                    <social.Icon size={20} color="white" />
                                 </a>
                             ))}
                         </div>
@@ -35,7 +46,7 @@ const Footer = () => {
                             <li><Link to="/" className="footer-link">{getTranslatedText("Home")}</Link></li>
                             <li><a href="/#about" className="footer-link">{getTranslatedText("About Us")}</a></li>
                             <li><a href="/#how-it-works" className="footer-link">{getTranslatedText("How it Works")}</a></li>
-                            <li><a href="/#partners" className="footer-link">{getTranslatedText("Partners")}</a></li>
+                            <li><Link to="/vendor" className="footer-link">{getTranslatedText("Partners")}</Link></li>
                         </ul>
                     </div>
 

@@ -8,7 +8,7 @@ const SellScrapPage = () => {
     const { getTranslatedText } = usePageTranslation(["Sell Bulk Scrap", "Select Categories", "Approx Weight (kg)", "Upload Images", "Self-delivery to Partner's Location", "Create Request", "Processing...", "Request Created Successfully!"]);
     const navigate = useNavigate();
     const [categories, setCategories] = useState([]);
-    const [weight, setWeight] = useState('');
+    const [categoryWeights, setCategoryWeights] = useState({});
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(false);
     const [nearbyPartners, setNearbyPartners] = useState([]);
@@ -28,10 +28,21 @@ const SellScrapPage = () => {
     const handleCategoryToggle = (catId) => {
         if (categories.includes(catId)) {
             setCategories(categories.filter(c => c !== catId));
+            const newWeights = { ...categoryWeights };
+            delete newWeights[catId];
+            setCategoryWeights(newWeights);
         } else {
             setCategories([...categories, catId]);
+            setCategoryWeights({ ...categoryWeights, [catId]: '' });
         }
     };
+
+    const handleWeightChange = (catId, value) => {
+        setCategoryWeights({ ...categoryWeights, [catId]: value });
+    };
+
+    // Calculate Total Weight for UI display
+    const totalWeightCalculated = Object.values(categoryWeights).reduce((sum, w) => sum + (Number(w) || 0), 0);
 
     const handleImageUpload = async (e) => {
         const files = Array.from(e.target.files);
@@ -96,21 +107,25 @@ const SellScrapPage = () => {
             alert("Please select at least one category (Plastic, Metal, etc.) at the top.");
             return;
         }
-        if (!weight || weight <= 0) {
-            alert("Please enter a valid weight.");
+
+        const missingWeight = categories.some(catId => !categoryWeights[catId] || Number(categoryWeights[catId]) <= 0);
+        if (missingWeight) {
+            alert("Please enter a valid weight for all selected categories.");
             return;
         }
 
         setLoading(true);
         try {
+            const scrapItems = categories.map(catId => ({
+                category: catId,
+                weight: Number(categoryWeights[catId]),
+                rate: 0,
+                total: 0
+            }));
+
             const payload = {
-                scrapItems: categories.map(cat => ({
-                    category: cat,
-                    weight: Number(weight) / categories.length, // Distribute weight approx
-                    rate: 0,
-                    total: 0
-                })),
-                totalWeight: Number(weight),
+                scrapItems: scrapItems,
+                totalWeight: totalWeightCalculated,
                 pickupAddress: { street: 'Self-delivery' }, // Default for scrapper delivery
                 images: images,
                 quantityType: 'large',
@@ -162,17 +177,46 @@ const SellScrapPage = () => {
                     </div>
                 </section>
 
-                {/* Weight */}
-                <section className="bg-white p-3.5 rounded-xl shadow-sm">
-                    <h2 className="text-sm font-semibold mb-2.5 text-slate-700">{getTranslatedText("Approx Weight (kg)")}</h2>
-                    <input
-                        type="number"
-                        value={weight}
-                        onChange={(e) => setWeight(e.target.value)}
-                        placeholder="e.g. 150"
-                        className="w-full p-3 text-xl font-bold border-2 border-slate-200 rounded-lg focus:border-sky-500 outline-none text-slate-700"
-                    />
-                </section>
+                {/* Weight Inputs (Dynamic per category) */}
+                {categories.length > 0 && (
+                    <section className="bg-white p-3.5 rounded-xl shadow-sm space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-sm font-semibold text-slate-700">{getTranslatedText("Approx Weight (kg)")}</h2>
+                            {totalWeightCalculated > 0 && (
+                                <div className="bg-sky-50 px-3 py-1 rounded-full border border-sky-100">
+                                    <span className="text-[10px] font-bold text-sky-600 uppercase tracking-wider">Total: {totalWeightCalculated} KG</span>
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div className="space-y-3">
+                            {categories.map(catId => {
+                                const catInfo = availableCategories.find(c => c.id === catId);
+                                return (
+                                    <div key={catId} className="flex items-center gap-3 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                                        <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-xl shadow-sm">
+                                            {catInfo?.icon}
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-[10px] font-bold text-slate-500 uppercase">{catInfo?.name}</p>
+                                            <div className="relative mt-0.5">
+                                                <input
+                                                    type="number"
+                                                    value={categoryWeights[catId] || ''}
+                                                    onChange={(e) => handleWeightChange(catId, e.target.value)}
+                                                    placeholder="0"
+                                                    className="w-full bg-transparent border-b-2 border-slate-200 focus:border-sky-500 outline-none py-1 font-bold text-slate-700 transition-colors"
+                                                    required
+                                                />
+                                                <span className="absolute right-0 bottom-1 text-[10px] font-bold text-slate-400">KG</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </section>
+                )}
 
                 {/* Self Delivery Notice Box */}
                 <section className="bg-sky-50 p-4 rounded-xl border-l-4 border-sky-500 shadow-sm flex items-start gap-3">

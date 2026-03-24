@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Download, ArrowRight, Play, ShoppingBag } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { usePageTranslation } from '../../hooks/usePageTranslation';
 
 const Hero = () => {
@@ -70,10 +71,12 @@ const Hero = () => {
                         transition={{ delay: 0.4 }}
                         style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}
                     >
-                        <button className="btn btn-primary" style={{ padding: '0.8rem 2rem' }}>
-                            {getTranslatedText("Request Pickup")} <ArrowRight size={20} />
-                        </button>
-                        <a href="#app">
+                        <Link to="/user/add-scrap/category" style={{ textDecoration: 'none' }}>
+                            <button className="btn btn-primary" style={{ padding: '0.8rem 2rem' }}>
+                                {getTranslatedText("Request Pickup")} <ArrowRight size={20} />
+                            </button>
+                        </Link>
+                        <a href="https://play.google.com/store/apps/details?id=com.company.junkar" target="_blank" rel="noopener noreferrer">
                             <button className="btn" style={{ background: 'transparent', border: '2px solid white', color: 'white', padding: '0.8rem 2rem' }}>
                                 <Download size={20} />
                                 {getTranslatedText("Download App")}

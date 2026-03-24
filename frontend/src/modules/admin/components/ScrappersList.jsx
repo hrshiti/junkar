@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FaTruck, FaSearch, FaUserCheck, FaUserTimes, FaEye, FaPhone,
-  FaIdCard, FaStar, FaRupeeSign, FaCheckCircle, FaClock, FaTimesCircle, FaMapMarkerAlt
+  FaIdCard, FaStar, FaRupeeSign, FaCheckCircle, FaClock, FaTimesCircle, FaMapMarkerAlt, FaTrash
 } from 'react-icons/fa';
 import { adminAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
@@ -53,7 +53,11 @@ const ScrappersList = () => {
     "Scrapper {status} successfully!",
     "Failed to update scrapper status",
     "Failed to update scrapper status. Please try again.",
-    "Not provided"
+    "Not provided",
+    "Delete",
+    "Are you sure you want to delete this scrapper? This action cannot be undone.",
+    "Scrapper deleted successfully!",
+    "Failed to delete scrapper"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
@@ -510,6 +514,33 @@ const ScrappersList = () => {
                         <span className="hidden sm:inline">
                           {scrapper.status === 'blocked' ? getTranslatedText('Unblock') : getTranslatedText('Block')}
                         </span>
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={async () => {
+                          if (!window.confirm(getTranslatedText('Are you sure you want to delete this scrapper? This action cannot be undone.'))) {
+                            return;
+                          }
+                          try {
+                            const response = await adminAPI.deleteScrapper(scrapper.id);
+                            if (response.success) {
+                              setScrappers(prev => prev.filter(s => s.id !== scrapper.id));
+                              alert(getTranslatedText('Scrapper deleted successfully!'));
+                            } else {
+                              throw new Error(response.message || getTranslatedText('Failed to delete scrapper'));
+                            }
+                          } catch (error) {
+                            console.error('Error deleting scrapper:', error);
+                            alert(error.message || getTranslatedText('Failed to delete scrapper'));
+                          }
+                        }}
+                        className="px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl font-semibold text-xs md:text-sm flex items-center gap-1.5 md:gap-2 transition-all"
+                        style={{ backgroundColor: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca' }}
+                        title={getTranslatedText('Delete')}
+                      >
+                        <FaTrash className="text-xs md:text-sm" />
+                        <span className="hidden sm:inline">{getTranslatedText('Delete')}</span>
                       </motion.button>
                     </div>
                   </div>

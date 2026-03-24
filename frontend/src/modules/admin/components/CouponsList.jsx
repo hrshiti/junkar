@@ -196,7 +196,11 @@ const CreateCouponModal = ({ onClose, onCreated }) => {
                                 name="validTo"
                                 value={formData.validTo}
                                 onChange={handleChange}
-                                min={formData.validFrom || new Date().toLocaleDateString('en-CA')}
+                                min={(() => {
+                                    const nextDay = new Date(formData.validFrom || new Date());
+                                    nextDay.setDate(nextDay.getDate() + 1);
+                                    return nextDay.toLocaleDateString('en-CA');
+                                })()}
                                 className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                                 required
                             />

@@ -5,7 +5,7 @@ import { Autocomplete, useJsApiLoader } from '@react-google-maps/api';
 import { useAuth } from '../../shared/context/AuthContext';
 import { validateReferralCode, createReferral, processSignupBonus, getReferralSettings } from '../../shared/utils/referralUtils';
 import { linkLeadToScrapper } from '../../shared/utils/leadUtils';
-import { authAPI } from '../../shared/utils/api';
+import { authAPI, publicAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import { FaPhone, FaLock, FaUser, FaEnvelope, FaTruck, FaMapMarkerAlt, FaCheckCircle, FaExclamationCircle, FaInfoCircle, FaMapMarkedAlt, FaSearchLocation } from 'react-icons/fa';
 
@@ -115,6 +115,14 @@ const ScrapperLogin = () => {
   const { login, isAuthenticated, user } = useAuth();
   const autocompleteRef = useRef(null);
 
+  const [availableCategories, setAvailableCategories] = useState([
+    { id: 'Paper', label: 'Paper / Raddi', icon: '📄' },
+    { id: 'Plastic', label: 'Plastic', icon: '♻️' },
+    { id: 'Metal', label: 'Metal', icon: '⛓️' },
+    { id: 'Electronics', label: 'Electronics', icon: '💻' },
+    { id: 'Others', label: 'Furniture / Others', icon: '🪑' }
+  ]);
+
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
     libraries: ['places']
@@ -191,6 +199,50 @@ const ScrapperLogin = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
+
+  // Fetch dynamic scrap categories for registration
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await publicAPI.getActivePrices();
+        if (response.success && response.data?.prices) {
+          const prices = response.data.prices;
+          
+          // Map to unique categories for scrapper deal selection
+          const uniqueCategories = Array.from(new Set(prices.map(p => p.category)))
+            .map(catName => {
+              // Extract icon mapping or default
+              const iconMap = {
+                'Paper': '📄',
+                'Plastic': '♻️',
+                'Metal': '⛓️',
+                'Electronics': '💻',
+                'Furniture': '🪑',
+                'Iron': '⛓️',
+                'Copper': '⛓️',
+                'Battery': '🔋',
+                'Others': '📦'
+              };
+              
+              return {
+                id: catName,
+                label: catName,
+                icon: iconMap[catName] || '♻️'
+              };
+            });
+            
+          if (uniqueCategories.length > 0) {
+            setAvailableCategories(uniqueCategories);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch dynamic categories:', err);
+        // Fallback to static list (already in state)
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   // Helper function to check KYC status
   const getKYCStatus = () => {
@@ -1024,13 +1076,7 @@ const ScrapperLogin = () => {
                                 {getTranslatedText("Deal Categories (What do you buy?)")}
                               </label>
                               <div className="grid grid-cols-2 gap-2">
-                                {[
-                                  { id: 'Paper', label: 'Paper / Raddi', icon: '📄' },
-                                  { id: 'Plastic', label: 'Plastic', icon: '♻️' },
-                                  { id: 'Metal', label: 'Metal', icon: '⛓️' },
-                                  { id: 'Electronics', label: 'Electronics', icon: '💻' },
-                                  { id: 'Others', label: 'Furniture / Others', icon: '🪑' }
-                                ].map((cat) => (
+                                {availableCategories.map((cat) => (
                                   <button
                                     key={cat.id}
                                     type="button"

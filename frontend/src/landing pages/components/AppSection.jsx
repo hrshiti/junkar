@@ -37,19 +37,21 @@ const AppSection = () => {
                             </div>
                         </motion.button>
 
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            className="btn"
-                            style={{ background: 'white', color: 'black', padding: '0.8rem 1.5rem', borderRadius: '12px' }}
-                        >
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M17.523 15.3414C17.523 16.3533 16.6853 17.1643 15.6603 17.1643C14.6353 17.1643 13.7977 16.3533 13.7977 15.3414C13.7977 14.3295 14.6353 13.5186 15.6603 13.5186C16.6853 13.5186 17.523 14.3295 17.523 15.3414ZM8.3308 17.1643C7.3058 17.1643 6.4681 16.3533 6.4681 15.3414C6.4681 14.3295 7.3058 13.5186 8.3308 13.5186C9.3558 13.5186 10.1935 14.3295 10.1935 15.3414C10.1935 16.3533 9.3558 17.1643 8.3308 17.1643ZM17.9351 9.0744L19.9825 5.5323C20.1098 5.3094 20.0385 5.0253 19.8156 4.898C19.5927 4.7707 19.3086 4.842 19.1813 5.0649L17.1009 8.6656C15.548 7.9566 13.8247 7.5457 12.0001 7.5457C10.1754 7.5457 8.4522 7.9566 6.8993 8.6656L4.8189 5.0649C4.6915 4.842 4.4074 4.7707 4.1845 4.898C3.9616 5.0253 3.8903 5.3094 4.0177 5.5323L6.065 9.0744C2.6596 10.9412 0.3013 14.4828 0 18.6631H24C23.6987 14.4828 21.3404 10.9412 17.9351 9.0744Z" fill="#3DDC84" />
-                            </svg>
-                            <div style={{ textAlign: 'left', lineHeight: 1 }}>
-                                <p style={{ fontSize: '0.7rem' }}>{getTranslatedText("Get it on")}</p>
-                                <p style={{ fontSize: '1.1rem', fontWeight: 800 }}>{getTranslatedText("Google Play")}</p>
-                            </div>
-                        </motion.button>
+                        <a href="https://play.google.com/store/apps/details?id=com.company.junkar" target="_blank" rel="noopener noreferrer">
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                className="btn"
+                                style={{ background: 'white', color: 'black', padding: '0.8rem 1.5rem', borderRadius: '12px' }}
+                            >
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M17.523 15.3414C17.523 16.3533 16.6853 17.1643 15.6603 17.1643C14.6353 17.1643 13.7977 16.3533 13.7977 15.3414C13.7977 14.3295 14.6353 13.5186 15.6603 13.5186C16.6853 13.5186 17.523 14.3295 17.523 15.3414ZM8.3308 17.1643C7.3058 17.1643 6.4681 16.3533 6.4681 15.3414C6.4681 14.3295 7.3058 13.5186 8.3308 13.5186C9.3558 13.5186 10.1935 14.3295 10.1935 15.3414C10.1935 16.3533 9.3558 17.1643 8.3308 17.1643ZM17.9351 9.0744L19.9825 5.5323C20.1098 5.3094 20.0385 5.0253 19.8156 4.898C19.5927 4.7707 19.3086 4.842 19.1813 5.0649L17.1009 8.6656C15.548 7.9566 13.8247 7.5457 12.0001 7.5457C10.1754 7.5457 8.4522 7.9566 6.8993 8.6656L4.8189 5.0649C4.6915 4.842 4.4074 4.7707 4.1845 4.898C3.9616 5.0253 3.8903 5.3094 4.0177 5.5323L6.065 9.0744C2.6596 10.9412 0.3013 14.4828 0 18.6631H24C23.6987 14.4828 21.3404 10.9412 17.9351 9.0744Z" fill="#3DDC84" />
+                                </svg>
+                                <div style={{ textAlign: 'left', lineHeight: 1 }}>
+                                    <p style={{ fontSize: '0.7rem' }}>{getTranslatedText("Get it on")}</p>
+                                    <p style={{ fontSize: '1.1rem', fontWeight: 800 }}>{getTranslatedText("Google Play")}</p>
+                                </div>
+                            </motion.button>
+                        </a>
                     </div>
                 </motion.div>
 
