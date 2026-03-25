@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Download, ArrowRight, Play, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePageTranslation } from '../../hooks/usePageTranslation';
+import heroBg from '../../assets/landing/user_hero_bg_premium.png';
 
 const Hero = () => {
     const { getTranslatedText } = usePageTranslation([
@@ -26,7 +27,7 @@ const Hero = () => {
             display: 'flex',
             alignItems: 'flex-start',
             paddingTop: '6rem',
-            background: `url('/src/assets/landing/user_hero_bg_premium.png') no-repeat center center/cover`,
+            background: `url(${heroBg}) no-repeat center center/cover`,
             color: 'white' // Assuming we need contrast with background, or dark text depending on the image. Lantan is white on dark.
         }}>
             {/* Adding an overlay to ensure text is readable if image is complex */}
@@ -86,22 +87,22 @@ const Hero = () => {
 
                     <motion.div
                         className="hero-stats"
-                        style={{ display: 'flex', gap: '2rem', marginTop: '3rem', borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '2rem' }}
+                        style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', marginTop: '3rem', borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '2rem' }}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.6 }}
                     >
-                        <div>
+                        <div className="stat-item">
                             <h3 style={{ fontSize: '1.8rem', color: 'white' }}>10k+</h3>
                             <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>{getTranslatedText("Active Sellers")}</p>
                         </div>
-                        <div style={{ width: '1px', background: 'rgba(255,255,255,0.2)' }}></div>
-                        <div>
+                        <div className="stat-divider" style={{ width: '1px', background: 'rgba(255,255,255,0.2)' }}></div>
+                        <div className="stat-item">
                             <h3 style={{ fontSize: '1.8rem', color: 'white' }}>50+</h3>
                             <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>{getTranslatedText("Verified Scrappers")}</p>
                         </div>
-                        <div style={{ width: '1px', background: 'rgba(255,255,255,0.2)' }}></div>
-                        <div>
+                        <div className="stat-divider" style={{ width: '1px', background: 'rgba(255,255,255,0.2)' }}></div>
+                        <div className="stat-item">
                             <h3 style={{ fontSize: '1.8rem', color: 'white' }}>₹1.2Cr+</h3>
                             <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>{getTranslatedText("Cash Paid Out")}</p>
                         </div>

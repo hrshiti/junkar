@@ -29,12 +29,12 @@ const VendorHowItWorks = () => {
     ];
 
     return (
-        <section id="how-it-works" className="section" style={{ background: '#f8fafc', padding: '6rem 0' }}>
+        <section id="how-it-works" className="section vendor-how-it-works">
             <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem' }}>
-                <div className="section-header" style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                <div className="section-header" style={{ textAlign: 'center' }}>
                     <span className="section-tag" style={{ color: '#059669', display: 'block', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>{getTranslatedText("The Process")}</span>
-                    <h2 className="section-title" style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1rem', color: '#1e293b' }}>{getTranslatedText("HOW TO START?")}</h2>
-                    <p style={{ color: '#64748b', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>{getTranslatedText("Three simple steps to join our network and grow your scrap business.")}</p>
+                    <h2 className="section-title" style={{ fontWeight: 800, color: '#1e293b' }}>{getTranslatedText("HOW TO START?")}</h2>
+                    <p style={{ color: '#64748b', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>{getTranslatedText("Three simple steps to join our network and grow your scrap business.")}</p>
                 </div>
 
                 <div className="steps-grid" style={{
@@ -107,13 +107,21 @@ const VendorHowItWorks = () => {
             </div>
 
             <style>{`
+                .vendor-how-it-works { padding: 6rem 0; }
+                .vendor-how-it-works .section-header { margin-bottom: 4rem; }
+                .vendor-how-it-works .section-title { fontSize: 3rem; marginBottom: 1rem; }
+                
                 .step-card-modern:hover .icon-wrapper {
                     background: #10b981 !important;
                     color: white !important;
                     transform: rotate(12deg);
                 }
                 @media (max-width: 768px) {
-                    .section-title { font-size: 2.25rem !important; }
+                    .vendor-how-it-works { padding: 1.5rem 0 !important; }
+                    .vendor-how-it-works .section-header { margin-bottom: 1.5rem !important; }
+                    .vendor-how-it-works .section-title { font-size: 2rem !important; margin-bottom: 0.5rem !important; }
+                    .vendor-how-it-works .steps-grid { gap: 1.5rem !important; padding-top: 1rem !important; }
+                    .step-card-modern { padding: 2.5rem 1.5rem !important; }
                 }
             `}</style>
         </section>

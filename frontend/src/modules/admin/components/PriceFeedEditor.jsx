@@ -117,7 +117,7 @@ const PriceFeedEditor = () => {
     "Failed to save some prices. Please try again.",
     "Successfully imported {count} prices!",
     "Failed to save some imported prices. Please try again.",
-    "No valid prices found in CSV file",
+    "All prices are up to date!",
     "Price Feed Management",
     "Manage scrap category prices per kilogram",
     "Add Material",
@@ -219,22 +219,24 @@ const PriceFeedEditor = () => {
         { id: 'vs_batt', category: 'Battery', image: vBatteryImage, pricePerKg: 60, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
         { id: 'vs_other', category: 'Other Vehicle Parts', image: vOtherVehicleImage, pricePerKg: 20, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
       ];
-
-      const response = await adminAPI.getAllPrices();
+      // Fetch with high limit to ensure no categories are missed due to DB pagination (Fix for 45 revert bug)
+      const response = await adminAPI.getAllPrices({ limit: 1000 });
+      let mergedPrices = [];
 
       if (response.success && response.data?.prices) {
-        // 2. Map API prices to our comprehensive list
         const apiPriceMap = {};
         response.data.prices.forEach(p => {
-          const catName = p.category.toLowerCase();
-          // GUARD: Preserve the newest rate (first occurrence), ignore older history rows
-          if (!apiPriceMap[catName]) {
+          const catName = p.category.trim().toLowerCase();
+          // Keep ONLY the latest active price for each category, prioritize Active status
+          if (!apiPriceMap[catName] || (p.isActive && !apiPriceMap[catName].isActive)) {
             apiPriceMap[catName] = p;
           }
         });
 
-        const mergedPrices = staticCategories.map(cat => {
-          const apiData = apiPriceMap[cat.category.toLowerCase()];
+        mergedPrices = staticCategories.map(cat => {
+          const normalizedCatName = cat.category.trim().toLowerCase();
+          const apiData = apiPriceMap[normalizedCatName];
+          // CRITICAL: If apiData exists, use its REAL ID and Price. No fallback to 45.
           return {
             ...cat,
             id: apiData?._id || apiData?.id || `static_${cat.id}`,
@@ -242,19 +244,22 @@ const PriceFeedEditor = () => {
             price: apiData?.price !== undefined ? apiData.price : 0,
             minPrice: apiData?.minPrice || 0,
             maxPrice: apiData?.maxPrice || 0,
-            image: apiData?.image || cat.image, // Default to static image if API image is empty
-            type: apiData?.type || cat.type || PRICE_TYPES.MATERIAL,
-            isActive: apiData?.isActive !== false,
+            image: apiData?.image || cat.image,
+            isActive: apiData ? apiData.isActive !== false : true,
             isNegotiable: apiData?.isNegotiable !== undefined ? apiData.isNegotiable : cat.isNegotiable,
             updatedAt: apiData?.updatedAt || new Date().toISOString(),
-            region: apiData?.regionCode || 'IN-DL'
+            region: apiData?.regionCode || 'IN-DL',
+            originalPrice: apiData?.pricePerKg !== undefined ? apiData.pricePerKg : cat.pricePerKg, // Store for comparison
+            originalFixedPrice: apiData?.price !== undefined ? apiData.price : 0,
+            originalMinPrice: apiData?.minPrice || 0,
+            originalMaxPrice: apiData?.maxPrice || 0
           };
         });
 
-        // Add any categories from API that are NOT in our static list
-        // Iterating over Object.values(apiPriceMap) ensures we only add unique the latest custom prices
+        // Add custom categories from API that are NOT in static list
         Object.values(apiPriceMap).forEach(p => {
-          if (!staticCategories.some(sc => sc.category.toLowerCase() === p.category.toLowerCase())) {
+          const normalizedCatNameFromAPI = p.category.trim().toLowerCase();
+          if (!staticCategories.some(sc => sc.category.trim().toLowerCase() === normalizedCatNameFromAPI)) {
             mergedPrices.push({
               id: p._id || p.id,
               category: p.category,
@@ -267,24 +272,32 @@ const PriceFeedEditor = () => {
               isActive: p.isActive !== false,
               isNegotiable: p.isNegotiable || false,
               updatedAt: p.updatedAt,
-              region: p.regionCode || 'IN-DL'
+              region: apiData?.regionCode || 'IN-DL',
+              originalPrice: p.pricePerKg,
+              originalFixedPrice: p.price,
+              originalMinPrice: p.minPrice || 0,
+              originalMaxPrice: p.maxPrice || 0
             });
           }
         });
-
-        const filteredMergedPrices = mergedPrices.filter(p => !p.id.includes('_other'));
-        setPrices(filteredMergedPrices);
       } else {
-        setPrices(staticCategories.map(c => ({
+        mergedPrices = staticCategories.map(c => ({
           ...c,
           id: `static_${c.id}`,
           region: 'IN-DL',
           updatedAt: new Date().toISOString(),
           minPrice: 0,
           maxPrice: 0,
-          isActive: true
-        })));
+          isActive: true,
+          originalPrice: c.pricePerKg,
+          originalFixedPrice: 0,
+          originalMinPrice: 0,
+          originalMaxPrice: 0
+        }));
       }
+
+      const filteredMergedPrices = mergedPrices.filter(p => !p.id.includes('_other'));
+      setPrices(filteredMergedPrices);
     } catch (err) {
       console.error('Error loading prices:', err);
       // Fallback
@@ -442,11 +455,37 @@ const PriceFeedEditor = () => {
   };
 
   const handleBulkSave = async () => {
-    // ... bulk save logic remains mostly same but includes images if present in state ...
-    // Since we reload from DB on edit/add, state 'prices' has images already.
     setIsSaving(true);
     try {
-      const savePromises = prices.map(price => {
+      // SMART SAVE: Only save items that have actually changed (Dirty items)
+      const dirtyPrices = prices.filter(p => {
+        const currentP = p.pricePerKg;
+        const originalP = p.originalPrice;
+        const currentF = p.price;
+        const originalF = p.originalFixedPrice;
+        const currentMin = p.minPrice || 0;
+        const originalMin = p.originalMinPrice || 0;
+        const currentMax = p.maxPrice || 0;
+        const originalMax = p.originalMaxPrice || 0;
+        
+        // Check if it's a new item (id starts with 'static_', 'err_', or 'price_')
+        const idStr = p.id ? String(p.id) : '';
+        const isNew = !p.id || idStr.startsWith('static_') || idStr.startsWith('err_') || idStr.startsWith('price_');
+
+        // If it's a new item, it's always considered dirty for saving
+        if (isNew) return true;
+
+        // For existing items, compare current values with original loaded values
+        return currentP !== originalP || currentF !== originalF || currentMin !== originalMin || currentMax !== originalMax;
+      });
+
+      if (dirtyPrices.length === 0) {
+        alert(getTranslatedText('All prices are up to date!'));
+        setIsSaving(false);
+        return;
+      }
+
+      const savePromises = dirtyPrices.map(price => {
         const payload = {
           category: price.category,
           pricePerKg: price.type === PRICE_TYPES.SERVICE ? 0 : (price.pricePerKg || price.price),
@@ -464,9 +503,11 @@ const PriceFeedEditor = () => {
         const idStr = price.id ? String(price.id) : '';
         const isNew = !price.id || idStr.startsWith('static_') || idStr.startsWith('err_') || idStr.startsWith('price_');
 
+        // Focused Fix: Send data as update if ID exists, or create if new
         if (isNew) {
           return adminAPI.createPrice(payload);
         } else {
+          // Explicitly use updatePrice to prevent multiple version duplicates during bulk
           return adminAPI.updatePrice(price.id, payload);
         }
       });
@@ -476,7 +517,7 @@ const PriceFeedEditor = () => {
 
       if (failed.length === 0) {
         await loadPrices();
-        alert(getTranslatedText('All prices saved successfully!'));
+        alert(getTranslatedText('All changes saved successfully!'));
       } else {
         throw new Error(getTranslatedText("{count} prices failed to save", { count: failed.length }));
       }

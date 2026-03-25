@@ -79,8 +79,11 @@ const About = () => {
             <style>{`
         .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
         @media (max-width: 991px) {
-          .about-grid { grid-template-columns: 1fr !important; }
+          .about-grid { grid-template-columns: 1fr !important; padding: 0 1.5rem !important; gap: 2rem !important; }
           .hide-mobile { display: none; }
+        }
+        @media (max-width: 768px) {
+           section#about { padding: 1.5rem 0 !important; }
         }
       `}</style>
         </section>

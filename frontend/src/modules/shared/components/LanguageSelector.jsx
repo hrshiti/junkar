@@ -62,7 +62,7 @@ const LanguageSelector = ({ variant = 'light', direction = 'bottom' }) => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
-                        className={`absolute ${direction === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'} right-0 w-56 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50`}
+                        className={`absolute ${direction === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'} md:right-0 left-0 w-56 md:w-56 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50`}
                         style={{ maxHeight: '80vh' }}
                     >
                         <div className="p-3 border-b border-gray-100 bg-gray-50">

@@ -96,6 +96,7 @@ export const staticTranslations = {
         "Contact": "संपर्क",
         "App": "ऐप",
         "Get App": "ऐप प्राप्त करें",
+        "ScrapperPartner": "स्क्रैपर पार्टनर",
         "Subscribe to get latest market rates and eco-tips.": "नवीनतम बाजार भाव और इको-टिप्स प्राप्त करने के लिए सदस्यता लें।",
         "Email address": "ईमेल पता",
         "All rights reserved.": "सर्वाधिकार सुरक्षित।",
@@ -318,6 +319,7 @@ export const staticTranslations = {
         "Contact": "संपर्क",
         "App": "अॅप",
         "Get App": "अॅप मिळवा",
+        "ScrapperPartner": "स्क्रॅपर पार्टनर",
         "GET APP": "अॅप मिळवा",
         "Loading...": "लोड होत आहे...",
 
@@ -357,6 +359,7 @@ export const staticTranslations = {
     // Add other languages here if needed (bn, etc.)
     bn: {
         "Home": "হোম",
+        "ScrapperPartner": "স্ক্র্যাপার পার্টনার",
         "Sell Scrap": "স্ক্র্যাপ বিক্রি করুন",
     }
 };

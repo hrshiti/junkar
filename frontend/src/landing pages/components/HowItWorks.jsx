@@ -35,9 +35,9 @@ const HowItWorks = () => {
     ]);
 
     return (
-        <section id="how-it-works" className="section" style={{ background: '#f8fafc', padding: '6rem 0' }}>
+        <section id="how-it-works" className="section" style={{ background: '#f8fafc' }}>
             <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem' }}>
-                <div className="section-header" style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                <div className="section-header" style={{ textAlign: 'center' }}>
                     <span className="section-tag" style={{ color: 'var(--primary)', display: 'block', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>{getTranslatedText("Process")}</span>
                     <h2 className="section-title" style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1rem', color: '#1e293b' }}>{getTranslatedText("HOW IT WORKS")}</h2>
                     <p style={{ color: '#64748b', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>{getTranslatedText("Four simple steps to turn your junk into cash and help the environment.")}</p>
@@ -119,6 +119,8 @@ const HowItWorks = () => {
                     transform: rotate(12deg);
                 }
                 @media (max-width: 768px) {
+                    section#how-it-works { padding: 1rem 0 !important; }
+                    section#how-it-works .section-header { margin-bottom: 1.5rem !important; }
                     .section-title { font-size: 2.25rem !important; }
                 }
             `}</style>

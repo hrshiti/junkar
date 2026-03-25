@@ -49,7 +49,7 @@ const Features = () => {
     ]);
 
     return (
-        <section className="section" style={{ background: '#f8fafc' }}>
+        <section id="benefits" className="section" style={{ background: '#f8fafc' }}>
             <div className="container">
                 <div className="section-header">
                     <span className="section-tag">{getTranslatedText("Benefits")}</span>
@@ -89,6 +89,12 @@ const Features = () => {
                     ))}
                 </div>
             </div>
+            <style>{`
+                @media (max-width: 768px) {
+                    section#benefits { padding: 1rem 0 !important; }
+                    section#benefits .section-header { margin-bottom: 1rem !important; }
+                }
+            `}</style>
         </section>
     );
 };

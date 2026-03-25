@@ -1,11 +1,15 @@
 import { Facebook, Twitter, Instagram, Linkedin, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { usePageTranslation } from '../../hooks/usePageTranslation';
 
 const Footer = () => {
+    const location = useLocation();
+    const isVendorPage = location.pathname.startsWith('/vendor');
+    const basePath = isVendorPage ? '/vendor' : ''; 
+
     const { getTranslatedText } = usePageTranslation([
         "Revolutionizing the scrap industry with transparency, efficiency, and sustainability. Turn your trash into cash and contribute to a greener planet.",
-        "Quick Links", "Support", "Newsletter", "Home", "About Us", "How it Works", "Partners", "FAQ", "Contact Us", "Privacy Policy", "Terms of Service",
+        "Quick Links", "Support", "Newsletter", "Home", "About Us", "How it Works", "ScrapperPartner", "FAQ", "Contact Us", "Privacy Policy", "Terms of Service",
         "Subscribe to get latest market rates and eco-tips.", "Email address", "Privacy", "Terms", "Cookies", "All rights reserved."
     ]);
 
@@ -43,10 +47,10 @@ const Footer = () => {
                     <div>
                         <h4 className="footer-heading">{getTranslatedText("Quick Links")}</h4>
                         <ul className="footer-links">
-                            <li><Link to="/" className="footer-link">{getTranslatedText("Home")}</Link></li>
-                            <li><a href="/#about" className="footer-link">{getTranslatedText("About Us")}</a></li>
-                            <li><a href="/#how-it-works" className="footer-link">{getTranslatedText("How it Works")}</a></li>
-                            <li><Link to="/vendor" className="footer-link">{getTranslatedText("Partners")}</Link></li>
+                            <li><Link to={`${basePath}/`} className="footer-link">{getTranslatedText("Home")}</Link></li>
+                            <li><a href={`${basePath}/#about`} className="footer-link">{getTranslatedText("About Us")}</a></li>
+                            <li><a href={`${basePath}/#how-it-works`} className="footer-link">{getTranslatedText("How it Works")}</a></li>
+                            <li><Link to="/vendor" className="footer-link">{getTranslatedText("ScrapperPartner")}</Link></li>
                         </ul>
                     </div>
 
@@ -109,6 +113,15 @@ const Footer = () => {
                 </div>
             </div>
             <style>{`
+        @media (max-width: 768px) {
+          .footer { padding: 3rem 0 1.5rem !important; }
+          .footer-logo { margin-bottom: 0.5rem !important; }
+          .footer-logo img { height: 3.5rem !important; }
+          .footer-text { margin-bottom: 1rem !important; font-size: 0.9rem !important; }
+          .footer-heading { margin-bottom: 1rem !important; margin-top: 1rem !important; }
+          .footer-grid { margin-bottom: 2rem !important; gap: 1.5rem !important; }
+          .footer-bottom { padding-top: 1.5rem !important; }
+        }
         @media (max-width: 480px) {
           .footer { text-align: center; }
           .footer-socials { justify-content: center; }

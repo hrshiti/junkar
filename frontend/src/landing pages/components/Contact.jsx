@@ -1,3 +1,7 @@
+
+
+
+
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { usePageTranslation } from '../../hooks/usePageTranslation';
@@ -109,33 +113,20 @@ const Contact = () => {
                             <p style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '0.5rem' }}>RK Industries, Heavy Industrial Area, Basni, Jodhpur 342005</p>
                         </div>
                     </div>
-
-                    {/* Map Placeholder */}
-                    <div style={{
-                        marginTop: 'auto',
-                        width: '100%',
-                        height: '200px',
-                        background: '#e2e8f0',
-                        borderRadius: '20px',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#64748b'
-                    }}>
-                        <p>Google Maps Embed</p>
-                    </div>
                 </motion.div>
             </div>
 
             <style>{`
         @media (max-width: 991px) {
-          section#contact > div { grid-template-columns: 1fr !important; }
-          .contact-form-grid { grid-template-columns: 1fr !important; }
+          section#contact > div { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
+          .contact-form-grid { grid-template-columns: 1fr !important; gap: 0.75rem !important; }
+          section#contact > div > div:nth-child(2) { padding: 0 1.5rem !important; }
         }
         @media (max-width: 768px) {
-          section#contact .glass-card { padding: 1.5rem !important; }
+          section#contact { padding-top: 1rem !important; }
+          section#contact .glass-card { padding: 1rem !important; margin: 0 1rem !important; }
+          section#contact form { gap: 0.5rem !important; }
+          .section-header { margin-bottom: 0.5rem !important; }
         }
       `}</style>
         </section>

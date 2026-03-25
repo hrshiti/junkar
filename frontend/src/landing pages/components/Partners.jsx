@@ -168,6 +168,12 @@ const Partners = () => {
           70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(56, 189, 248, 0); }
           100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
         }
+        @media (max-width: 768px) {
+          .partners-section { padding: 1rem 0 !important; }
+          .partners-section h2 { font-size: 1.5rem !important; margin-bottom: 0.5rem !important; }
+          .partners-section .container > div:first-child { margin-bottom: 0.25rem !important; }
+          .partners-ticker-container { padding: 0.25rem 0 !important; }
+        }
       `}</style>
     </section>
   );

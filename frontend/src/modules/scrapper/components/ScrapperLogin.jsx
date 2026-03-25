@@ -9,7 +9,7 @@ import { authAPI, publicAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import { FaPhone, FaLock, FaUser, FaEnvelope, FaTruck, FaMapMarkerAlt, FaCheckCircle, FaExclamationCircle, FaInfoCircle, FaMapMarkedAlt, FaSearchLocation } from 'react-icons/fa';
 
-const ScrapperLogin = () => {
+const ScrapperLogin = (props) => {
   const staticTexts = [
     "Join Junkar Partner Network",
     "Earn more from",
@@ -85,7 +85,7 @@ const ScrapperLogin = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const [isLogin, setIsLogin] = useState(location.state?.fromSignup !== undefined ? !location.state.fromSignup : true);
+  const [isLogin, setIsLogin] = useState(props.isRegisterMode ? false : (location.state?.fromSignup !== undefined ? !location.state.fromSignup : true));
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');

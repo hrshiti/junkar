@@ -552,8 +552,10 @@ export const adminAPI = {
   markReportedLeadReviewed: async (id) => {
     return apiRequest(`/admin/reported-leads/${id}/review`, { method: 'PATCH' });
   },
-  getAllPrices: async () => {
-    return apiRequest(API_ENDPOINTS.admin.prices, { method: 'GET' });
+  getAllPrices: async (params = {}) => {
+    const queryString = Object.keys(params).map(key => `${key}=${params[key]}`).join('&');
+    const endpoint = `${API_ENDPOINTS.admin.prices}${queryString ? `?${queryString}` : ''}`;
+    return apiRequest(endpoint, { method: 'GET' });
   },
   createPrice: async (priceData) => {
     return apiRequest(API_ENDPOINTS.admin.prices, {

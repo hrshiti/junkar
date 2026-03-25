@@ -1,6 +1,7 @@
 import { Smartphone } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import vendorHeroBg from '../../../assets/landing/vendor_hero_bg_premium.png';
 
 const VendorHero = () => {
     const { getTranslatedText } = usePageTranslation([
@@ -17,7 +18,7 @@ const VendorHero = () => {
             alignItems: 'center',
             paddingTop: '60px', // Navbar height
             margin: 0,
-            background: `url('/src/assets/landing/vendor_hero_bg_premium.png') no-repeat center center/cover`,
+            background: `url(${vendorHeroBg}) no-repeat center center/cover`,
             color: 'white'
         }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(90deg, rgba(15,23,42,0.8) 0%, rgba(15,23,42,0.3) 100%)' }}></div>
@@ -37,7 +38,7 @@ const VendorHero = () => {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', lineHeight: 1.1, marginBottom: '1.5rem', color: 'white' }}
+                        style={{ fontSize: 'clamp(2.2rem, 5vw, 4rem)', lineHeight: 1.1, marginBottom: '1.5rem', color: 'white' }}
                     >
                         {getTranslatedText("Join Junkar as a")} <br />
                         <span style={{ color: '#34d399' }}>{getTranslatedText("Scrap Vendor")}</span>
@@ -47,7 +48,7 @@ const VendorHero = () => {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        style={{ fontSize: '1.2rem', maxWidth: '600px', marginBottom: '2.5rem', color: 'rgba(255,255,255,0.9)' }}
+                        style={{ fontSize: '1.1rem', maxWidth: '600px', marginBottom: '2.5rem', color: 'rgba(255,255,255,0.9)' }}
                     >
                         {getTranslatedText("Receive nearby scrap pickup requests and grow your scrap collection business with our digital platform.")}
                     </motion.p>
@@ -66,6 +67,22 @@ const VendorHero = () => {
                     </motion.div>
                 </div>
             </div>
+            <style>{`
+                @media (max-width: 768px) {
+                    section#home.hero { 
+                        min-height: 80vh !important; 
+                        text-align: center !important; 
+                        padding: 6rem 1.5rem 3rem !important; 
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                    }
+                    section#home.hero .container { margin: 0 auto !important; }
+                    section#home.hero .hero-ctas { justify-content: center !important; }
+                    section#home.hero .hero-title { font-size: 2.5rem !important; }
+                    section#home.hero .hero-badge { margin-bottom: 0.5rem !important; }
+                }
+            `}</style>
         </section>
     );
 };

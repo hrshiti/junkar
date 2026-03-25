@@ -975,12 +975,15 @@ export const getAllPrices = asyncHandler(async (req, res) => {
       filter.isActive = req.query.isActive === 'true';
     }
 
+    // Support fetching ALL prices for Admin Editor (bypass pagination if limit is 0 or high)
+    const isAdminEditorFetch = req.query.limit === '1000' || req.query.all === 'true';
+    
     const [prices, total] = await Promise.all([
       Price.find(filter)
         .populate('updatedBy', 'name email')
         .sort({ effectiveDate: -1, category: 1 })
-        .skip(skip)
-        .limit(limit),
+        .skip(isAdminEditorFetch ? 0 : skip)
+        .limit(isAdminEditorFetch ? 1000 : limit),
       Price.countDocuments(filter)
     ]);
 

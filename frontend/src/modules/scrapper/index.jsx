@@ -227,6 +227,7 @@ const ScrapperModule = () => {
       <Routes>
         {/* Public routes (no scrapper auth required) */}
         <Route path="/login" element={<ScrapperLogin />} />
+        <Route path="/register" element={<ScrapperLogin isRegisterMode={true} />} />
         <Route path="/kyc" element={<KYCUploadPage />} />
         <Route path="/terms" element={<ScrapperTerms />} />
 
