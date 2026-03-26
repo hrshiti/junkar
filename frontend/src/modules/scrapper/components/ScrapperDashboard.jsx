@@ -2,7 +2,8 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
-import { FaGift, FaChartLine, FaCheck } from 'react-icons/fa';
+import { FaGift, FaChartLine, FaCheck, FaBell } from 'react-icons/fa';
+import socketClient from '../../shared/utils/socketClient';
 import PriceTicker from '../../user/components/PriceTicker';
 import ScrapperSolutions from './ScrapperSolutions';
 import { getActiveRequestsCount, getScrapperAssignedRequests, migrateOldActiveRequest } from '../../shared/utils/scrapperRequestUtils';
@@ -73,6 +74,10 @@ const ScrapperDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isAvailable, setIsAvailable] = useState(false);
+  const [isReadyForRequests, setIsReadyForRequests] = useState(() => {
+    return localStorage.getItem('scrapperReceptionMode') === 'true';
+  });
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
   const [kycStatus, setKycStatus] = useState(null); // Backend KYC status
   const [subscriptionData, setSubscriptionData] = useState(null); // Backend subscription data
   const [isLoadingStatus, setIsLoadingStatus] = useState(true);
@@ -257,6 +262,42 @@ const ScrapperDashboard = () => {
       navigate('/scrapper/active-requests', { replace: false });
     }
   };
+
+  const handleReceptionToggle = () => {
+    const newState = !isReadyForRequests;
+    setIsReadyForRequests(newState);
+    localStorage.setItem('scrapperReceptionMode', newState);
+    // When turning off, clear the current count
+    if (!newState) {
+      setPendingRequestsCount(0);
+    }
+  };
+
+  // Socket listener for new requests (Active only when Ready Mode is ON)
+  useEffect(() => {
+    if (!isReadyForRequests) return;
+
+    const setupSocket = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        socketClient.connect(token);
+        if (socketClient.socket) {
+          socketClient.socket.on('new_order_request', (data) => {
+            console.log('🔔 Dashboard: New Request Received!', data);
+            setPendingRequestsCount(prev => prev + 1);
+          });
+        }
+      }
+    };
+
+    setupSocket();
+
+    return () => {
+      if (socketClient.socket) {
+        socketClient.socket.off('new_order_request');
+      }
+    };
+  }, [isReadyForRequests]);
 
   // Verify authentication and fetch KYC/Subscription status from backend
   useEffect(() => {
@@ -531,7 +572,19 @@ const ScrapperDashboard = () => {
           <div>
             <img src={siteLogo} alt="Scrapto" className="h-20 md:h-24 w-auto object-contain object-left -ml-3" />
           </div>
-          <div className="flex items-center gap-3 md:hidden">
+          <div className="flex items-center gap-4 md:hidden">
+            {/* Bell Icon with Badge */}
+            <div className="relative cursor-pointer w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md border border-slate-100 transition-transform active:scale-95" onClick={() => {
+              setPendingRequestsCount(0);
+              navigate('/scrapper/active-requests');
+            }}>
+              <FaBell className={`text-xl ${pendingRequestsCount > 0 ? 'text-sky-600 animate-bounce' : 'text-slate-400'}`} />
+              {isReadyForRequests && pendingRequestsCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border-2 border-white">
+                  {pendingRequestsCount > 10 ? '10+' : pendingRequestsCount}
+                </span>
+              )}
+            </div>
             <LanguageSelector />
             <button
               type="button"
@@ -569,13 +622,34 @@ const ScrapperDashboard = () => {
               </p>
             </div>
           </div>
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={handleAvailabilityToggle}
-            className={`px-6 py-2 rounded-full font-semibold text-sm transition-all duration-300 ${isAvailable ? 'shadow-lg bg-sky-600 text-white' : 'bg-sky-500/20 text-sky-600'}`}
-          >
-            {isAvailable ? getTranslatedText('ON') : getTranslatedText('OFF')}
-          </motion.button>
+                  {/* New Toggle Button for Premium Feel (Center Ready Mode) */}
+          <div className="flex-1 flex flex-col items-center justify-center px-2">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-1">Reception</p>
+            <motion.div
+              initial={false}
+              onClick={handleReceptionToggle}
+              className={`w-14 h-7 rounded-full p-1 cursor-pointer flex items-center transition-colors duration-300 ${isReadyForRequests ? 'bg-green-500 shadow-lg shadow-green-500/20' : 'bg-slate-300 shadow-inner'}`}
+            >
+              <motion.div
+                animate={{ x: isReadyForRequests ? 28 : 0 }}
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                className="w-5 h-5 bg-white rounded-full shadow-lg flex items-center justify-center"
+              >
+                {isReadyForRequests && <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-ping" />}
+              </motion.div>
+            </motion.div>
+          </div>
+
+          <div className="flex flex-col items-center">
+             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-1">Map</p>
+             <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={handleAvailabilityToggle}
+              className={`px-6 py-2 rounded-full font-semibold text-sm transition-all duration-300 ${isAvailable ? 'shadow-lg bg-sky-600 text-white border-none' : 'bg-sky-500/10 text-sky-600 border border-sky-500/20'}`}
+            >
+              {isAvailable ? getTranslatedText('ON') : getTranslatedText('OFF')}
+            </motion.button>
+          </div>
         </motion.div>
 
         {/* Live Market Prices - Hidden as per request */}

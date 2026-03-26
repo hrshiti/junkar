@@ -291,3 +291,20 @@ export const getNearbyBigScrappers = asyncHandler(async (req, res) => {
 
     sendSuccess(res, 'Nearby big scrappers retrieved successfully', { scrappers: nearbyBigScrappers });
 });
+
+/**
+ * @desc    Delete logged in scrapper account completely
+ * @route   DELETE /api/scrappers/me
+ * @access  Private (Scrapper)
+ */
+export const deleteMyAccount = asyncHandler(async (req, res) => {
+    const scrapperId = req.user.id;
+
+    // 1. Delete the Scrapper profile (wipes rankings, ratings, vehicle info, kyc docs info)
+    await Scrapper.findByIdAndDelete(scrapperId);
+
+    // 2. Delete the User authentication profile (wipes phone, password, auth)
+    await User.findByIdAndDelete(scrapperId);
+
+    sendSuccess(res, 'Your scrapper account and all details have been successfully deleted.');
+});

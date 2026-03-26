@@ -661,6 +661,9 @@ export const scrapperProfileAPI = {
       body: JSON.stringify(payload),
     });
   },
+  deleteMyAccount: async () => {
+    return apiRequest('/scrappers/me', { method: 'DELETE' });
+  },
 };
 
 // Banner API

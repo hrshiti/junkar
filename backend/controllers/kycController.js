@@ -85,37 +85,34 @@ export const submitKyc = async (req, res) => {
     let gstCertificateUrl = scrapper.kyc?.gstCertificateUrl;
 
     try {
+      logger.info('Commencing parallel Cloudinary uploads for KYC docs');
+      const uploadTasks = [];
+
       if (aadhaarFile) {
-        const result = await uploadFile(aadhaarFile, { folder: 'scrapto/kyc/aadhaar' });
-        aadhaarUrl = result.secure_url;
+        uploadTasks.push(uploadFile(aadhaarFile, { folder: 'scrapto/kyc/aadhaar' }).then(res => { aadhaarUrl = res.secure_url; }));
       }
-
       if (selfieFile) {
-        const result = await uploadFile(selfieFile, { folder: 'scrapto/kyc/selfie' });
-        selfieUrl = result.secure_url;
+        uploadTasks.push(uploadFile(selfieFile, { folder: 'scrapto/kyc/selfie' }).then(res => { selfieUrl = res.secure_url; }));
       }
-
       if (panFile) {
-        const result = await uploadFile(panFile, { folder: 'scrapto/kyc/pan' });
-        panUrl = result.secure_url;
+        uploadTasks.push(uploadFile(panFile, { folder: 'scrapto/kyc/pan' }).then(res => { panUrl = res.secure_url; }));
       }
-
       if (shopLicenseFile) {
-        const result = await uploadFile(shopLicenseFile, { folder: 'scrapto/kyc/shopLicense' });
-        shopLicenseUrl = result.secure_url;
+        uploadTasks.push(uploadFile(shopLicenseFile, { folder: 'scrapto/kyc/shopLicense' }).then(res => { shopLicenseUrl = res.secure_url; }));
       }
-
       if (shopPhotoFile) {
-        const result = await uploadFile(shopPhotoFile, { folder: 'scrapto/kyc/shopPhoto' });
-        shopPhotoUrl = result.secure_url;
+        uploadTasks.push(uploadFile(shopPhotoFile, { folder: 'scrapto/kyc/shopPhoto' }).then(res => { shopPhotoUrl = res.secure_url; }));
+      }
+      if (gstCertificateFile) {
+        uploadTasks.push(uploadFile(gstCertificateFile, { folder: 'scrapto/kyc/gst' }).then(res => { gstCertificateUrl = res.secure_url; }));
       }
 
-      if (gstCertificateFile) {
-        const result = await uploadFile(gstCertificateFile, { folder: 'scrapto/kyc/gst' });
-        gstCertificateUrl = result.secure_url;
+      if (uploadTasks.length > 0) {
+        await Promise.all(uploadTasks);
+        logger.info(`Successfully uploaded ${uploadTasks.length} documents in parallel`);
       }
     } catch (uploadError) {
-      logger.error('Error uploading KYC documents:', uploadError);
+      logger.error('Error uploading KYC documents (Parallel):', uploadError);
       return sendError(res, `Failed to upload documents: ${uploadError.message}`, 500);
     }
 

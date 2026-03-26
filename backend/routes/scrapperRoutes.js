@@ -4,7 +4,8 @@ import {
     updateMyProfile,
     getScrapperPublicProfile,
     updateFcmToken,
-    getNearbyBigScrappers
+    getNearbyBigScrappers,
+    deleteMyAccount
 } from '../controllers/scrapperController.js';
 import { createRequest as createAddressChangeRequest } from '../controllers/addressChangeRequestController.js';
 import { protect, authorize } from '../middleware/auth.js';
@@ -18,6 +19,7 @@ router.get('/:id/profile', protect, getScrapperPublicProfile);
 // Protected routes (Scrapper only)
 router.get('/me', protect, authorize(USER_ROLES.SCRAPPER), getMyProfile);
 router.put('/me', protect, authorize(USER_ROLES.SCRAPPER), updateMyProfile);
+router.delete('/me', protect, authorize(USER_ROLES.SCRAPPER), deleteMyAccount);
 router.post('/me/address-change-request', protect, authorize(USER_ROLES.SCRAPPER), createAddressChangeRequest);
 router.post('/fcm-token', protect, authorize(USER_ROLES.SCRAPPER), updateFcmToken);
 

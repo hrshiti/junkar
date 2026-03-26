@@ -56,7 +56,9 @@ const ScrapperProfile = () => {
     "Weight",
     "Fixed Price",
     "Negotiable",
-    "Donate"
+    "Donate",
+    "Delete Account",
+    "Are you sure you want to completely delete your account? This action cannot be undone and all your details will be wiped out forever."
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -189,6 +191,26 @@ const ScrapperProfile = () => {
     navigate('/scrapper/login', { replace: true });
   };
 
+  const handleDeleteAccount = async () => {
+    const confirmMessage = getTranslatedText("Are you sure you want to completely delete your account? This action cannot be undone and all your details will be wiped out forever.");
+    if (!window.confirm(confirmMessage)) return;
+
+    try {
+      setLoading(true);
+      const res = await scrapperProfileAPI.deleteMyAccount();
+      if (res.success) {
+        handleLogout();
+      } else {
+        alert("Failed to delete account. Please try again.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error deleting account.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getKycLabel = () => {
     switch (kycStatus) {
       case 'verified':
@@ -232,7 +254,6 @@ const ScrapperProfile = () => {
           >
             {getTranslatedText("Scrapper Profile")}
           </h1>
-
         </div>
       </div>
 
@@ -657,6 +678,15 @@ const ScrapperProfile = () => {
               </span>
             </button>
           </div>
+
+          {/* Delete Account Action */}
+          <button
+            onClick={handleDeleteAccount}
+            className="w-full flex items-center justify-center gap-2 px-3.5 py-3.5 mt-4 text-red-600 font-semibold bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl transition-colors shadow-sm"
+          >
+            <span aria-hidden>🗑️</span>
+            {getTranslatedText("Delete Account")}
+          </button>
         </div>
       </div>
       {/* Edit Profile Modal */}

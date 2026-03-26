@@ -381,6 +381,9 @@ export const deleteUser = asyncHandler(async (req, res) => {
       return sendError(res, 'Cannot delete user with existing orders', 400);
     }
 
+    // Also delete any potential scrapper profile linked to this user ID
+    await Scrapper.findByIdAndDelete(userId).catch(err => logger.info(`No scrapper profile found for user ${userId} during deletion`));
+
     await User.findByIdAndDelete(userId);
 
     sendSuccess(res, 'User deleted successfully', {});
@@ -659,7 +662,11 @@ export const deleteScrapper = asyncHandler(async (req, res) => {
       return sendError(res, 'Cannot delete scrapper with existing orders', 400);
     }
 
+    // Delete scrapper profile
     await Scrapper.findByIdAndDelete(scrapperId);
+    
+    // CRITICAL: Also delete corresponding auth record in User collection to allow re-registration
+    await User.findByIdAndDelete(scrapperId);
 
     sendSuccess(res, 'Scrapper deleted successfully', {});
   } catch (error) {
