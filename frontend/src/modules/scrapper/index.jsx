@@ -18,6 +18,8 @@ import ChatListPage from './components/ChatListPage';
 import ScrapperWallet from './components/ScrapperWallet';
 import ScrapperEarningsPage from './components/ScrapperEarningsPage';
 import SellScrapPage from './components/SellScrapPage';
+import ScrapperCategoryListPage from './components/ScrapperCategoryListPage';
+import ScrapperPartnerListPage from './components/ScrapperPartnerListPage';
 import { authAPI } from '../shared/utils/api';
 import { FaHome, FaList, FaRegComments, FaUser, FaWallet } from 'react-icons/fa';
 import WebViewHeader from '../shared/components/WebViewHeader';
@@ -279,6 +281,8 @@ const ScrapperModule = () => {
         <Route path="/wallet" element={<RequireKycAndSubscription><ScrapperWallet /></RequireKycAndSubscription>} />
         <Route path="/earnings" element={<RequireKycAndSubscription><ScrapperEarningsPage /></RequireKycAndSubscription>} />
         <Route path="/sell-scrap" element={<RequireKycAndSubscription><SellScrapPage /></RequireKycAndSubscription>} />
+        <Route path="/sell-scrap/categories" element={<RequireKycAndSubscription><ScrapperCategoryListPage /></RequireKycAndSubscription>} />
+        <Route path="/sell-scrap/partners" element={<RequireKycAndSubscription><ScrapperPartnerListPage /></RequireKycAndSubscription>} />
 
         {/* Redirect logic based on KYC and Subscription status */}
         <Route path="*" element={

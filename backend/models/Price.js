@@ -66,6 +66,21 @@ const priceSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
     index: true
+  },
+  showToUser: {
+    type: Boolean,
+    default: true,
+    index: true
+  },
+  showToDukandaar: {
+    type: Boolean,
+    default: false,
+    index: true
+  },
+  showToWholesaler: {
+    type: Boolean,
+    default: false,
+    index: true
   }
 }, {
   timestamps: true

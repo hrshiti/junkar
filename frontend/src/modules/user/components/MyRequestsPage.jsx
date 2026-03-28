@@ -276,8 +276,11 @@ const MyRequestsPage = () => {
     if (!dateString) return "";
     const date = new Date(dateString);
     const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const nowOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    const diffTime = Math.abs(nowOnly - dateOnly);
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) return getTranslatedText("Today");
     if (diffDays === 1) return getTranslatedText("Yesterday");

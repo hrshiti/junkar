@@ -72,6 +72,29 @@ const ScrapperProfile = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [scrapStats, setScrapStats] = useState({ totalWeight: 0, categoryStats: [] });
   const [showStats, setShowStats] = useState(false);
+  const [showCategoryRequestModal, setShowCategoryRequestModal] = useState(false);
+  const [categoryRequestText, setCategoryRequestText] = useState('');
+  const [isSendingRequest, setIsSendingRequest] = useState(false);
+
+  const handleSendCategoryRequest = async () => {
+    if (!categoryRequestText.trim()) return;
+    setIsSendingRequest(true);
+    try {
+      const res = await scrapperProfileAPI.requestNewCategory(categoryRequestText);
+      if (res.success) {
+        alert("Request sent successfully!");
+        setShowCategoryRequestModal(false);
+        setCategoryRequestText('');
+      } else {
+        alert(res.error || "Failed to send request.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert(error.message || "Error sending request.");
+    } finally {
+      setIsSendingRequest(false);
+    }
+  };
 
   const handleProfileUpdate = (updatedScrapper) => {
     // 1. Update local state
@@ -585,6 +608,69 @@ const ScrapperProfile = () => {
                 )}
               </AnimatePresence>
             </div>
+
+            {/* Request for New Category (Dukandaar & Wholesaler only) */}
+            {['dukandaar', 'wholesaler'].includes(scrapperUser?.scrapperType) && (
+              <div className="flex flex-col border-b border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowCategoryRequestModal(!showCategoryRequestModal)}
+                  className="w-full flex items-center justify-between px-3.5 py-3 text-left hover:bg-slate-50 transition-colors"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">
+                      Request for New Category
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Ask admin to add a new scrap category
+                    </p>
+                  </div>
+                  <span className="text-slate-400 transform transition-transform" style={{ rotate: showCategoryRequestModal ? '90deg' : '0deg' }}>
+                    ›
+                  </span>
+                </button>
+
+                <AnimatePresence>
+                  {showCategoryRequestModal && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="px-4 pb-4 bg-slate-50/50 overflow-hidden"
+                    >
+                      <div className="p-3 mt-1 bg-white rounded-xl border border-slate-200 shadow-sm space-y-3">
+                        <p className="text-xs text-slate-600 font-medium">Which category do you want to add?</p>
+                        <input
+                          type="text"
+                          value={categoryRequestText}
+                          onChange={(e) => setCategoryRequestText(e.target.value)}
+                          placeholder="e.g. Broken Glass, Iron Scraps..."
+                          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        />
+                        <div className="flex justify-end gap-2 pt-1">
+                          <button
+                            onClick={() => {
+                              setShowCategoryRequestModal(false);
+                              setCategoryRequestText('');
+                            }}
+                            className="px-3 py-1.5 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleSendCategoryRequest}
+                            disabled={!categoryRequestText.trim() || isSendingRequest}
+                            className="px-3 py-1.5 text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-lg transition-colors disabled:opacity-50"
+                          >
+                            {isSendingRequest ? "Sending..." : "Send Request"}
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
 
             {/* Requests & history */}
             <button

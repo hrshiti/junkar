@@ -308,3 +308,48 @@ export const deleteMyAccount = asyncHandler(async (req, res) => {
 
     sendSuccess(res, 'Your scrapper account and all details have been successfully deleted.');
 });
+
+/**
+ * @desc    Search for big scrappers by city string match
+ * @route   GET /api/scrappers/search-by-city
+ * @access  Private (Scrapper) - restricted by role
+ */
+export const searchScrappersByCity = asyncHandler(async (req, res) => {
+    const { city } = req.query;
+    if (!city) {
+        return sendError(res, 'Please provide a city name to search.', 400);
+    }
+
+    const scrapperId = req.user.id;
+    const currentScrapper = await Scrapper.findById(scrapperId).select('scrapperType');
+
+    if (!currentScrapper) {
+        return sendError(res, 'Scrapper profile not found.', 404);
+    }
+
+    let targetRoleTypes = [];
+    if (currentScrapper.scrapperType === 'feri_wala') {
+        targetRoleTypes = ['dukandaar'];
+    } else if (currentScrapper.scrapperType === 'dukandaar') {
+        targetRoleTypes = ['wholesaler'];
+    } else {
+        return sendError(res, 'City search not applicable for your role.', 403);
+    }
+
+    const cityRegex = new RegExp(city, 'i');
+
+    const searchResults = await Scrapper.find({
+        scrapperType: { $in: targetRoleTypes },
+        'businessLocation.city': cityRegex,
+        'kyc.status': 'verified'
+    }).select('name phone businessLocation rating services isOnline').lean();
+    
+    // Default the distance to N/A or compute basic empty response for frontend format
+    // Because this isn't geo-based, there is no real distance.
+    const scrappers = searchResults.map(s => ({
+        ...s,
+        distance: null
+    }));
+
+    sendSuccess(res, `Found ${scrappers.length} partners in ${city}`, { scrappers });
+});

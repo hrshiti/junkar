@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { FaRupeeSign, FaSave, FaUpload, FaDownload, FaEdit, FaCheck, FaTimes, FaPlus, FaTrash } from 'react-icons/fa';
+import { FaRupeeSign, FaSave, FaUpload, FaDownload, FaEdit, FaCheck, FaTimes, FaPlus, FaTrash, FaBell } from 'react-icons/fa';
 import { DEFAULT_PRICE_FEED, PRICE_TYPES } from '../../shared/utils/priceFeedUtils';
 import { adminAPI, uploadAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
@@ -90,12 +90,18 @@ const PriceFeedEditor = () => {
   const [activeTab, setActiveTab] = useState(PRICE_TYPES.MATERIAL);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // 'add' | 'edit'
-  const [currentPriceData, setCurrentPriceData] = useState({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '', isNegotiable: false, isActive: true });
+  const [currentPriceData, setCurrentPriceData] = useState({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '', isNegotiable: false, isActive: true, showToUser: true, showToDukandaar: false, showToWholesaler: false });
   const [isSaving, setIsSaving] = useState(false);
   const [showCSVModal, setShowCSVModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [categoryRequests, setCategoryRequests] = useState([]);
+  const [showRequestDrawer, setShowRequestDrawer] = useState(false);
+  const [requestCount, setRequestCount] = useState(0);
+  const [hasNewNotifications, setHasNewNotifications] = useState(false);
+  const [prevCount, setPrevCount] = useState(0);
+
   const staticTexts = [
     "Please enter a valid price",
     "Price saved successfully!",
@@ -169,7 +175,38 @@ const PriceFeedEditor = () => {
 
   useEffect(() => {
     loadPrices();
+    fetchCategoryRequests();
   }, []);
+
+  const fetchCategoryRequests = async () => {
+    try {
+      const res = await adminAPI.getCategoryRequests();
+      if (res.success) {
+        setCategoryRequests(res.data);
+        
+        // Only show red dot if the number of requests has increased
+        if (res.count > prevCount) {
+          setHasNewNotifications(true);
+        }
+        
+        setRequestCount(res.count);
+        setPrevCount(res.count);
+      }
+    } catch (error) {
+      console.error("Failed to fetch category requests", error);
+    }
+  };
+
+  const handleDismissRequest = async (id) => {
+    try {
+      const res = await adminAPI.deleteCategoryRequest(id);
+      if (res.success) {
+        fetchCategoryRequests();
+      }
+    } catch (error) {
+      console.error("Failed to dismiss category request", error);
+    }
+  };
 
   const loadPrices = async () => {
     setLoading(true);
@@ -252,7 +289,10 @@ const PriceFeedEditor = () => {
             originalPrice: apiData?.pricePerKg !== undefined ? apiData.pricePerKg : cat.pricePerKg, // Store for comparison
             originalFixedPrice: apiData?.price !== undefined ? apiData.price : 0,
             originalMinPrice: apiData?.minPrice || 0,
-            originalMaxPrice: apiData?.maxPrice || 0
+            originalMaxPrice: apiData?.maxPrice || 0,
+            showToUser: apiData?.showToUser !== undefined ? apiData.showToUser : true,
+            showToDukandaar: apiData?.showToDukandaar || false,
+            showToWholesaler: apiData?.showToWholesaler || false
           };
         });
 
@@ -276,7 +316,10 @@ const PriceFeedEditor = () => {
               originalPrice: p.pricePerKg,
               originalFixedPrice: p.price,
               originalMinPrice: p.minPrice || 0,
-              originalMaxPrice: p.maxPrice || 0
+              originalMaxPrice: p.maxPrice || 0,
+              showToUser: p.showToUser !== undefined ? p.showToUser : true,
+              showToDukandaar: p.showToDukandaar || false,
+              showToWholesaler: p.showToWholesaler || false
             });
           }
         });
@@ -292,7 +335,10 @@ const PriceFeedEditor = () => {
           originalPrice: c.pricePerKg,
           originalFixedPrice: 0,
           originalMinPrice: 0,
-          originalMaxPrice: 0
+          originalMaxPrice: 0,
+          showToUser: true,
+          showToDukandaar: false,
+          showToWholesaler: false
         }));
       }
 
@@ -321,7 +367,7 @@ const PriceFeedEditor = () => {
 
   const handleAddClick = () => {
     setModalMode('add');
-    setCurrentPriceData({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '', isNegotiable: false, isActive: true });
+    setCurrentPriceData({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '', isNegotiable: false, isActive: true, showToUser: true, showToDukandaar: false, showToWholesaler: false });
     setShowModal(true);
   };
 
@@ -337,7 +383,10 @@ const PriceFeedEditor = () => {
       maxPrice: price.maxPrice ? price.maxPrice.toString() : '0',
       description: '',
       isActive: price.isActive !== false,
-      isNegotiable: price.isNegotiable || false
+      isNegotiable: price.isNegotiable || false,
+      showToUser: price.showToUser !== undefined ? price.showToUser : true,
+      showToDukandaar: price.showToDukandaar || false,
+      showToWholesaler: price.showToWholesaler || false
     });
     setShowModal(true);
   };
@@ -424,7 +473,10 @@ const PriceFeedEditor = () => {
         isNegotiable: currentPriceData.isNegotiable,
         type: activeTab,
         minPrice: parseFloat(currentPriceData.minPrice) || 0,
-        maxPrice: parseFloat(currentPriceData.maxPrice) || 0
+        maxPrice: parseFloat(currentPriceData.maxPrice) || 0,
+        showToUser: currentPriceData.showToUser,
+        showToDukandaar: currentPriceData.showToDukandaar,
+        showToWholesaler: currentPriceData.showToWholesaler
       };
 
       let response;
@@ -441,7 +493,7 @@ const PriceFeedEditor = () => {
       if (response.success) {
         await loadPrices();
         setShowModal(false);
-        setCurrentPriceData({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '', isNegotiable: false, isActive: true });
+        setCurrentPriceData({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '', isNegotiable: false, isActive: true, showToUser: true, showToDukandaar: false, showToWholesaler: false });
         alert(modalMode === 'add' ? getTranslatedText('Item saved successfully!') : getTranslatedText('Item updated successfully!'));
       } else {
         throw new Error(response.message || getTranslatedText('Failed to save item. Please try again.'));
@@ -600,7 +652,28 @@ const PriceFeedEditor = () => {
               {getTranslatedText("Manage scrap category prices per kilogram")}
             </p>
           </div>
-          <div className="flex gap-1.5 md:gap-2 flex-wrap">
+          <div className="flex gap-1.5 md:gap-2 flex-wrap items-center">
+            {/* Category Requests Notification Bell */}
+            <div className="relative mr-2">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  setShowRequestDrawer(true);
+                  setHasNewNotifications(false);
+                }}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                title="View Category Requests"
+              >
+                <FaBell size={18} />
+                {requestCount > 0 && hasNewNotifications && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full border-2 border-white shadow-sm">
+                    {requestCount > 99 ? '99+' : requestCount}
+                  </span>
+                )}
+              </motion.button>
+            </div>
+            
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -1057,7 +1130,76 @@ const PriceFeedEditor = () => {
                     <span className="text-xs font-medium" style={{ color: '#4a5568' }}>Negotiable</span>
                   </label>
                 </div>
-                <div className="flex gap-3 pt-2 flex-shrink-0">
+
+                {/* VISIBILITY TOGGLES */}
+                <div className="pt-2 border-t mt-2" style={{ borderColor: '#e2e8f0' }}>
+                  <label className="block text-xs font-bold mb-2 uppercase tracking-wide" style={{ color: '#4a5568' }}>
+                    Visibility
+                  </label>
+                  
+                  <div className="space-y-2">
+                    {/* USER CHECKBOX */}
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={currentPriceData.showToUser !== false}
+                        onChange={(e) => setCurrentPriceData(prev => ({ ...prev, showToUser: e.target.checked }))}
+                        className="w-3.5 h-3.5 text-[#64946e] rounded border-gray-300 focus:ring-[#64946e]"
+                      />
+                      <span className="text-xs font-medium" style={{ color: '#4a5568' }}>User Price List</span>
+                    </label>
+
+                    {/* SCRAPPER GROUP */}
+                    <div className="flex flex-col gap-1">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={currentPriceData.showToDukandaar || currentPriceData.showToWholesaler}
+                          ref={input => {
+                            if (input) {
+                                input.indeterminate = (currentPriceData.showToDukandaar && !currentPriceData.showToWholesaler) || 
+                                                      (!currentPriceData.showToDukandaar && currentPriceData.showToWholesaler);
+                            }
+                          }}
+                          onChange={(e) => {
+                            const isChecked = e.target.checked;
+                            setCurrentPriceData(prev => ({ 
+                              ...prev, 
+                              showToDukandaar: isChecked, 
+                              showToWholesaler: isChecked 
+                            }));
+                          }}
+                          className="w-3.5 h-3.5 text-[#64946e] rounded border-gray-300 focus:ring-[#64946e]"
+                        />
+                        <span className="text-xs font-medium" style={{ color: '#4a5568' }}>Scrapper (Sell Scrap)</span>
+                      </label>
+                      
+                      {/* Dukandaar & Wholesaler Sub-options */}
+                      <div className="ml-5 flex gap-4 mt-1 border-l-2 pl-3 py-1" style={{ borderColor: '#edf2f7' }}>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={currentPriceData.showToDukandaar || false}
+                            onChange={(e) => setCurrentPriceData(prev => ({ ...prev, showToDukandaar: e.target.checked }))}
+                            className="w-3.5 h-3.5 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
+                          />
+                          <span className="text-xs text-gray-600">Dukandaar</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={currentPriceData.showToWholesaler || false}
+                            onChange={(e) => setCurrentPriceData(prev => ({ ...prev, showToWholesaler: e.target.checked }))}
+                            className="w-3.5 h-3.5 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
+                          />
+                          <span className="text-xs text-gray-600">Thokvypari</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4 flex-shrink-0">
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -1084,6 +1226,82 @@ const PriceFeedEditor = () => {
           </motion.div>
         )
       }
+
+      {/* Category Request Drawer */}
+      {showRequestDrawer && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.4 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowRequestDrawer(false)}
+            className="absolute inset-0 bg-black cursor-pointer"
+          />
+
+          {/* Drawer */}
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="relative w-full max-w-md bg-white shadow-2xl h-full flex flex-col"
+          >
+            <div className="p-4 border-b flex justify-between items-center bg-slate-50">
+              <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <FaBell className="text-amber-500" /> Category Requests
+              </h2>
+              <button 
+                onClick={() => setShowRequestDrawer(false)}
+                className="p-2 bg-slate-200 hover:bg-slate-300 rounded-full text-slate-600 transition-colors text-xs"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/50">
+              {categoryRequests.length === 0 ? (
+                <div className="text-center py-10 text-slate-500 italic text-sm">
+                  No pending category requests.
+                </div>
+              ) : (
+                categoryRequests.map((req) => (
+                  <motion.div 
+                    key={req._id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm relative group"
+                  >
+                    <button 
+                      onClick={() => handleDismissRequest(req._id)}
+                      className="absolute top-3 right-3 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded bg-slate-50 transition-colors text-xs opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                      title="Dismiss Request"
+                    >
+                      <FaTimes />
+                    </button>
+                    
+                    <div className="pr-8">
+                      <p className="text-xs text-slate-500 mb-1">
+                        Requested Category:
+                      </p>
+                      <p className="text-base font-bold text-slate-800 break-words mb-3 bg-sky-50 px-2 py-1.5 border border-sky-100 rounded inline-block">
+                        {req.category}
+                      </p>
+                      
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
+                        <p><span className="font-semibold text-slate-700">Name:</span> {req.name}</p>
+                        <p><span className="font-semibold text-slate-700">Type:</span> <span className="capitalize">{req.role}</span></p>
+                        <p><span className="font-semibold text-slate-700">City:</span> {req.city}</p>
+                        <p><span className="font-semibold text-slate-700">Date:</span> {new Date(req.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div >
   );
 };

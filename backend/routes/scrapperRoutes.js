@@ -5,6 +5,7 @@ import {
     getScrapperPublicProfile,
     updateFcmToken,
     getNearbyBigScrappers,
+    searchScrappersByCity,
     deleteMyAccount
 } from '../controllers/scrapperController.js';
 import { createRequest as createAddressChangeRequest } from '../controllers/addressChangeRequestController.js';
@@ -25,5 +26,6 @@ router.post('/fcm-token', protect, authorize(USER_ROLES.SCRAPPER), updateFcmToke
 
 // B2B Discovery
 router.get('/nearby-big', protect, authorize(USER_ROLES.SCRAPPER), getNearbyBigScrappers);
+router.get('/search-by-city', protect, authorize(USER_ROLES.SCRAPPER), searchScrappersByCity);
 
 export default router;

@@ -147,13 +147,22 @@ class NotificationService {
      */
     async notifyScrapper(scrapperId, order, notificationPayload) {
         try {
+            // A. Fetch User Name if not already there (to show on notification card)
+            if (order.user && typeof order.user === 'object' && !order.user.name) {
+                await order.populate('user', 'name');
+            }
+
             // A. Send Socket Event
             notifyUser(scrapperId, 'new_order_request', {
                 orderId: order._id,
+                userName: order.user?.name || 'Customer',
                 pickupAddress: order.pickupAddress,
                 orderType: order.orderType || 'scrap_pickup',
                 totalAmount: order.totalAmount,
-                message: notificationPayload.body
+                message: notificationPayload.body,
+                city: order.pickupAddress?.city || '',
+                addressPreview: [order.pickupAddress?.street, order.pickupAddress?.city]
+                    .filter(Boolean).join(', ')
             });
 
             // B. Send Push Notification

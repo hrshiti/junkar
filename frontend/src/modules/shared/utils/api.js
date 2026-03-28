@@ -522,6 +522,12 @@ export const adminAPI = {
       body: JSON.stringify(scrapperData),
     });
   },
+  getCategoryRequests: async () => {
+    return apiRequest('/category-requests/admin', { method: 'GET' });
+  },
+  deleteCategoryRequest: async (id) => {
+    return apiRequest(`/category-requests/admin/${id}`, { method: 'DELETE' });
+  },
   updateScrapperStatus: async (id, status) => {
     return apiRequest(API_ENDPOINTS.admin.scrapperStatus(id), {
       method: 'PATCH',
@@ -654,6 +660,17 @@ export const scrapperProfileAPI = {
   },
   getNearbyBig: async (lat, lng, radius = 1000) => {
     return apiRequest(`/scrappers/nearby-big?lat=${lat}&lng=${lng}&radius=${radius}`, { method: 'GET' });
+  },
+  searchByCity: async (city) => {
+    return apiRequest(`/scrappers/search-by-city?city=${encodeURIComponent(city)}`, {
+      method: 'GET'
+    });
+  },
+  requestNewCategory: async (categoryText) => {
+    return apiRequest('/category-requests', {
+      method: 'POST',
+      body: JSON.stringify({ category: categoryText }),
+    });
   },
   requestAddressChange: async (payload) => {
     return apiRequest('/scrappers/me/address-change-request', {
@@ -793,6 +810,9 @@ export const publicAPI = {
   },
   getReferralConfig: async () => {
     return apiRequest('/public/referral-config', { method: 'GET' });
+  },
+  getScrapperCategories: async (role) => {
+    return apiRequest(`/public/scrapper-categories?role=${role}`, { method: 'GET' });
   },
 };
 

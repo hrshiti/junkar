@@ -20,9 +20,12 @@ export const getPublicPrices = asyncHandler(async (req, res) => {
             // Let's default to 'IN-DL' to be consistent with default creation
             filter.regionCode = 'IN-DL';
         }
+        
+        // Ensure we only send categories meant for users
+        filter.showToUser = { $ne: false };
 
         const prices = await Price.find(filter)
-            .select('category pricePerKg price type regionCode effectiveDate updatedAt image minPrice maxPrice isNegotiable isActive')
+            .select('category pricePerKg price type regionCode effectiveDate updatedAt image minPrice maxPrice isNegotiable isActive showToUser')
             .sort({ category: 1 });
 
         sendSuccess(res, 'Public prices retrieved successfully', { prices });
@@ -32,6 +35,52 @@ export const getPublicPrices = asyncHandler(async (req, res) => {
     }
 });
 
+// @desc    Get dynamic categories for scrappers based on role
+// @route   GET /api/public/scrapper-categories
+// @access  Public
+export const getScrapperCategories = asyncHandler(async (req, res) => {
+    try {
+        const { role } = req.query;
+        const filter = { isActive: true };
+
+        // We only care about base categories, typically 'IN-DL' as default or ignore region completely 
+        // if categories are universal
+        filter.regionCode = req.query.regionCode || 'IN-DL';
+
+        // Filter by role
+        if (role === 'dukandaar') {
+            filter.showToDukandaar = true;
+        } else if (role === 'wholesaler') {
+            filter.showToWholesaler = true;
+        } else if (role === 'feri_wala') {
+            // Pheriwala sees the union of Dukandaar + Wholesaler categories
+            filter.$or = [
+                { showToDukandaar: true },
+                { showToWholesaler: true }
+            ];
+        } else {
+            // If no recognized role, return empty or default subset
+            // We'll return nothing to be safe, or just require a valid role
+            return sendSuccess(res, 'Invalid role for scrapper categories', { categories: [] });
+        }
+
+        const prices = await Price.find(filter)
+            .select('category image minPrice maxPrice isNegotiable') // Only needed fields
+            .sort({ category: 1 });
+
+        // Map to standard format expected by SellScrapPage
+        const categories = prices.map(p => ({
+            id: p.category.toLowerCase().replace(/\s+/g, '_'),
+            name: p.category,
+            icon: p.image || null, // UI will fallback if null
+        }));
+
+        sendSuccess(res, 'Scrapper categories retrieved successfully', { categories });
+    } catch (error) {
+        logger.error('[Public] Error fetching scrapper categories:', error);
+        sendError(res, 'Failed to fetch scrapper categories', 500);
+    }
+});
 // @desc    Get referral tiers and settings for public view
 // @route   GET /api/public/referral-config
 // @access  Public

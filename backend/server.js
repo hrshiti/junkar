@@ -30,6 +30,7 @@ import walletRoutes from "./routes/walletRoutes.js";
 import translationRoutes from "./routes/translateRoutes.js";
 import fcmTokenRoutes from "./routes/fcmTokenRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import categoryRequestRoutes from "./routes/categoryRequestRoutes.js";
 import { initializeSocket } from "./services/socketService.js";
 
 // Validate environment variables
@@ -194,6 +195,7 @@ v1Router.use("/wallet", walletRoutes);
 v1Router.use("/translate", translationRoutes);
 v1Router.use("/fcm-tokens", fcmTokenRoutes);
 v1Router.use("/notifications", notificationRoutes);
+v1Router.use("/category-requests", categoryRequestRoutes);
 
 // Mount versioned routes
 app.use("/api/v1", v1Router);
@@ -217,6 +219,7 @@ app.use("/api/admin/referral-system", referralRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/translate", translationRoutes);
 app.use("/api/fcm-tokens", fcmTokenRoutes);
+app.use("/api/category-requests", categoryRequestRoutes);
 
 // Error handling middleware (must be last)
 app.use(notFound);

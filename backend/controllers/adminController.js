@@ -1014,7 +1014,7 @@ export const getAllPrices = asyncHandler(async (req, res) => {
 // @access  Private (Admin)
 export const createPrice = asyncHandler(async (req, res) => {
   try {
-    const { category, pricePerKg, price: fixedPrice, regionCode, effectiveDate, isActive, isNegotiable, image, type, minPrice, maxPrice } = req.body;
+    const { category, pricePerKg, price: fixedPrice, regionCode, effectiveDate, isActive, isNegotiable, image, type, minPrice, maxPrice, showToUser, showToDukandaar, showToWholesaler } = req.body;
 
     if (!category) {
       return sendError(res, 'Category is required', 400);
@@ -1046,7 +1046,10 @@ export const createPrice = asyncHandler(async (req, res) => {
       image,
       type: type || 'material',
       minPrice: minPrice || 0,
-      maxPrice: maxPrice || 0
+      maxPrice: maxPrice || 0,
+      showToUser: showToUser !== undefined ? showToUser : true,
+      showToDukandaar: showToDukandaar || false,
+      showToWholesaler: showToWholesaler || false
     });
 
     sendSuccess(res, 'Price created successfully', { price: newPriceEntry });
@@ -1061,7 +1064,7 @@ export const createPrice = asyncHandler(async (req, res) => {
 // @access  Private (Admin)
 export const updatePrice = asyncHandler(async (req, res) => {
   try {
-    const { pricePerKg, price: fixedPrice, effectiveDate, isActive, isNegotiable, image, minPrice, maxPrice } = req.body;
+    const { pricePerKg, price: fixedPrice, effectiveDate, isActive, isNegotiable, image, minPrice, maxPrice, showToUser, showToDukandaar, showToWholesaler } = req.body;
     const priceId = req.params.id;
 
     const price = await Price.findById(priceId);
@@ -1077,6 +1080,9 @@ export const updatePrice = asyncHandler(async (req, res) => {
     if (image !== undefined) price.image = image;
     if (minPrice !== undefined) price.minPrice = minPrice;
     if (maxPrice !== undefined) price.maxPrice = maxPrice;
+    if (showToUser !== undefined) price.showToUser = showToUser;
+    if (showToDukandaar !== undefined) price.showToDukandaar = showToDukandaar;
+    if (showToWholesaler !== undefined) price.showToWholesaler = showToWholesaler;
     price.updatedBy = req.user.id;
 
     await price.save();

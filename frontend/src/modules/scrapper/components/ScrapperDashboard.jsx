@@ -1,8 +1,8 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
-import { FaGift, FaChartLine, FaCheck, FaBell } from 'react-icons/fa';
+import { FaGift, FaChartLine, FaCheck, FaBell, FaArrowLeft } from 'react-icons/fa';
 import socketClient from '../../shared/utils/socketClient';
 import PriceTicker from '../../user/components/PriceTicker';
 import ScrapperSolutions from './ScrapperSolutions';
@@ -78,6 +78,8 @@ const ScrapperDashboard = () => {
     return localStorage.getItem('scrapperReceptionMode') === 'true';
   });
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
   const [kycStatus, setKycStatus] = useState(null); // Backend KYC status
   const [subscriptionData, setSubscriptionData] = useState(null); // Backend subscription data
   const [isLoadingStatus, setIsLoadingStatus] = useState(true);
@@ -285,6 +287,16 @@ const ScrapperDashboard = () => {
           socketClient.socket.on('new_order_request', (data) => {
             console.log('🔔 Dashboard: New Request Received!', data);
             setPendingRequestsCount(prev => prev + 1);
+            setPendingRequests(prev => [
+              ...prev,
+              {
+                orderId: data.orderId,
+                userName: data.userName || 'Customer',
+                city: data.city || '',
+                addressPreview: data.addressPreview || 'New pickup request',
+                receivedAt: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+              }
+            ]);
           });
         }
       }
@@ -573,32 +585,135 @@ const ScrapperDashboard = () => {
             <img src={siteLogo} alt="Scrapto" className="h-20 md:h-24 w-auto object-contain object-left -ml-3" />
           </div>
           <div className="flex items-center gap-4 md:hidden">
-            {/* Bell Icon with Badge */}
-            <div className="relative cursor-pointer w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md border border-slate-100 transition-transform active:scale-95" onClick={() => {
-              setPendingRequestsCount(0);
-              navigate('/scrapper/active-requests');
-            }}>
-              <FaBell className={`text-xl ${pendingRequestsCount > 0 ? 'text-sky-600 animate-bounce' : 'text-slate-400'}`} />
-              {isReadyForRequests && pendingRequestsCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border-2 border-white">
-                  {pendingRequestsCount > 10 ? '10+' : pendingRequestsCount}
-                </span>
-              )}
-            </div>
-            <LanguageSelector />
-            <button
-              type="button"
-              onClick={() => navigate('/scrapper/profile')}
-              className="focus:outline-none"
-            >
+            {/* Bell Icon with Badge + Notification Dropdown */}
+            <div className="relative">
               <div
-                className="w-12 h-12 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-shadow bg-sky-600"
+                className="cursor-pointer w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md border border-slate-100 transition-transform active:scale-95"
+                onClick={() => setShowNotificationDropdown(prev => !prev)}
               >
-                <span className="text-white font-bold text-lg">
-                  {(user?.name || 'S')[0].toUpperCase()}
-                </span>
+                <FaBell className={`text-xl ${pendingRequestsCount > 0 ? 'text-sky-600 animate-bounce' : 'text-slate-400'}`} />
+                {isReadyForRequests && pendingRequestsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border-2 border-white">
+                    {pendingRequestsCount > 10 ? '10+' : pendingRequestsCount}
+                  </span>
+                )}
               </div>
-            </button>
+
+              {/* Full Page Notification Drawer (Side Panel) */}
+              <AnimatePresence>
+                {showNotificationDropdown && (
+                  <motion.div
+                    initial={{ x: '100%' }}
+                    animate={{ x: 0 }}
+                    exit={{ x: '100%' }}
+                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                    className="fixed inset-0 z-[9999] bg-[#f4f7fe] flex flex-col"
+                  >
+                    {/* Drawer Header */}
+                    <div className="bg-white p-4 flex items-center justify-between border-b border-slate-200">
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => setShowNotificationDropdown(false)}
+                          className="p-2 rounded-full bg-slate-100/50 text-slate-600 active:scale-90 transition-transform"
+                        >
+                          <FaArrowLeft size={18} />
+                        </button>
+                        <h2 className="text-lg font-extrabold text-[#111827]">New Pickup Requests 🔔</h2>
+                      </div>
+                      {pendingRequests.length > 0 && (
+                        <button
+                          onClick={() => { setPendingRequests([]); setPendingRequestsCount(0); setShowNotificationDropdown(false); }}
+                          className="text-sm font-bold text-red-500 bg-red-50 px-3 py-1.5 rounded-lg active:scale-95 transition-transform"
+                        >
+                          Clear All
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Drawer Body - Notification Cards */}
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
+                      {pendingRequests.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full text-center">
+                          <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm">
+                            <FaBell className="text-slate-200 text-4xl" />
+                          </div>
+                          <p className="text-slate-400 font-bold">No new requests</p>
+                          <p className="text-slate-300 text-xs mt-1">Check back later for new orders</p>
+                        </div>
+                      ) : (
+                        pendingRequests.slice().reverse().map((req, idx) => (
+                          <motion.div
+                            key={req.orderId || idx}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.1 }}
+                            onClick={() => {
+                              setPendingRequestsCount(0);
+                              setPendingRequests([]);
+                              setShowNotificationDropdown(false);
+                              navigate('/scrapper/active-requests');
+                            }}
+                            className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col relative overflow-hidden active:scale-[0.98] transition-all cursor-pointer hover:shadow-md group"
+                          >
+                            <div className="absolute left-0 top-0 w-1 h-full bg-sky-500" />
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center">
+                                  <FaBell size={18} />
+                                </div>
+                                <div>
+                                  <h4 className="text-sm font-extrabold text-slate-800">New Request Alert!</h4>
+                                  <p className="text-[10px] text-slate-400 font-medium">{req.receivedAt}</p>
+                                </div>
+                              </div>
+                              <span className="px-2 py-1 rounded-md bg-green-50 text-green-600 text-[10px] font-bold">New</span>
+                            </div>
+
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">👤</div>
+                                <p className="text-xs font-bold text-slate-700">From: <span className="text-sky-600">{req.userName}</span></p>
+                              </div>
+                              <div className="flex items-start gap-2">
+                                <div className="w-6 h-6 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mt-0.5">📍</div>
+                                <p className="text-xs text-slate-500 font-medium leading-relaxed flex-1">
+                                  {req.addressPreview || req.city || 'Location available on map'}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="mt-4 pt-3 border-t border-slate-50 flex items-center justify-between">
+                              <span className="text-[10px] font-bold text-sky-500">View on Map</span>
+                              <div className="w-6 h-6 rounded-full bg-sky-50 flex items-center justify-center text-sky-500 transition-transform group-hover:translate-x-1">
+                                <span className="text-lg font-bold leading-none">›</span>
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            {!showNotificationDropdown && (
+              <>
+                <LanguageSelector />
+                <button
+                  type="button"
+                  onClick={() => navigate('/scrapper/profile')}
+                  className="focus:outline-none"
+                >
+                  <div
+                    className="w-12 h-12 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-shadow bg-sky-600"
+                  >
+                    <span className="text-white font-bold text-lg">
+                      {(user?.name || 'S')[0].toUpperCase()}
+                    </span>
+                  </div>
+                </button>
+              </>
+            )}
           </div>
         </div>
 
