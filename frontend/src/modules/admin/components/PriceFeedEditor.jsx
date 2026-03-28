@@ -212,154 +212,37 @@ const PriceFeedEditor = () => {
     setLoading(true);
     setError(null);
     try {
-      // Full list of 37+ categories to mirror User side
-      const staticCategories = [
-        { id: 'plastic', category: 'Plastic', image: plasticImage, pricePerKg: 45, type: PRICE_TYPES.MATERIAL, isNegotiable: false },
-        { id: 'metal', category: 'Metal', image: metalImage, pricePerKg: 180, type: PRICE_TYPES.MATERIAL, isNegotiable: false },
-        { id: 'paper', category: 'Paper', image: paperImage, pricePerKg: 12, type: PRICE_TYPES.MATERIAL, isNegotiable: false },
-        { id: 'e_waste', category: 'E-Waste', image: electronicImage, pricePerKg: 100, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'copper', category: 'Copper', image: copperImage, pricePerKg: 650, type: PRICE_TYPES.MATERIAL, isNegotiable: false },
-        { id: 'aluminium', category: 'Aluminium', image: aluminiumImage, pricePerKg: 180, type: PRICE_TYPES.MATERIAL, isNegotiable: false },
-        { id: 'steel', category: 'Steel', image: steelImage, pricePerKg: 35, type: PRICE_TYPES.MATERIAL, isNegotiable: false },
-        { id: 'brass', category: 'Brass', image: brassImage, pricePerKg: 420, type: PRICE_TYPES.MATERIAL, isNegotiable: false },
-        { id: 'scrap_iron', category: 'Scrap Iron', image: steelImage, pricePerKg: 30, type: PRICE_TYPES.MATERIAL, isNegotiable: false },
-        { id: 'raddi', category: 'Raddi', image: paperImage, pricePerKg: 8, type: PRICE_TYPES.MATERIAL, isNegotiable: false },
-        { id: 'furniture', category: 'Furniture', image: paperImage, pricePerKg: 15, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'vehicle_scrap', category: 'Vehicle Scrap', image: steelImage, pricePerKg: 25, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'home_appliance', category: 'Home Appliance', image: electronicImage, pricePerKg: 20, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        // E-Waste Subcategories
-        { id: 'ew_comp', category: 'Computer Items', image: eComputerImage, pricePerKg: 100, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'ew_mob', category: 'Laptops/Mobiles', image: eLaptopImage, pricePerKg: 150, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'ew_mb', category: 'Motherboard', image: eMotherboardImage, pricePerKg: 400, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'ew_cable', category: 'Cables/Wires', image: eCablesImage, pricePerKg: 80, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'ew_batt', category: 'Batteries', image: eBatteryImage, pricePerKg: 60, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'ew_other', category: 'Other E-Waste', image: eOtherEWasteImage, pricePerKg: 50, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        // Furniture Subcategories
-        { id: 'furn_table', category: 'Table', image: woodTableImage, pricePerKg: 20, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'furn_chair', category: 'Chair', image: woodChairImage, pricePerKg: 15, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'furn_sofa', category: 'Sofa', image: woodAnotherImage, pricePerKg: 25, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'furn_bed', category: 'Bed', image: woodBedImage, pricePerKg: 30, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'furn_wood', category: 'Wooden Items', image: woodAnotherImage, pricePerKg: 10, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'furn_other', category: 'Other Furniture', image: woodOtherImage, pricePerKg: 12, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        // Home Appliance Subcategories
-        { id: 'ha_ac', category: 'AC', image: hACImage, pricePerKg: 35, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'ha_fridge', category: 'Fridge', image: hFridgeImage, pricePerKg: 30, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'ha_wm', category: 'Washing Machine', image: hWMImage, pricePerKg: 25, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'ha_tv', category: 'TV', image: hTVImage, pricePerKg: 20, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'ha_micro', category: 'Microwave', image: hMicroImage, pricePerKg: 15, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'ha_other', category: 'Other Appliance', image: hOtherApplianceImage, pricePerKg: 18, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        // Vehicle Scrap Subcategories
-        { id: 'vs_2w', category: '2-Wheeler', image: v2WheelerImage, pricePerKg: 30, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'vs_4w', category: '4-Wheeler', image: v4WheelerImage, pricePerKg: 25, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'vs_parts', category: 'Auto Parts', image: vAutoPartsImage, pricePerKg: 35, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'vs_tyre', category: 'Tyre', image: vTyreImage, pricePerKg: 10, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'vs_batt', category: 'Battery', image: vBatteryImage, pricePerKg: 60, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-        { id: 'vs_other', category: 'Other Vehicle Parts', image: vOtherVehicleImage, pricePerKg: 20, type: PRICE_TYPES.MATERIAL, isNegotiable: true },
-      ];
-      // Fetch with high limit to ensure no categories are missed due to DB pagination (Fix for 45 revert bug)
       const response = await adminAPI.getAllPrices({ limit: 1000 });
-      let mergedPrices = [];
+      let apiPrices = [];
 
       if (response.success && response.data?.prices) {
-        const apiPriceMap = {};
-        response.data.prices.forEach(p => {
-          const catName = p.category.trim().toLowerCase();
-          // Keep ONLY the latest active price for each category, prioritize Active status
-          if (!apiPriceMap[catName] || (p.isActive && !apiPriceMap[catName].isActive)) {
-            apiPriceMap[catName] = p;
-          }
-        });
-
-        mergedPrices = staticCategories.map(cat => {
-          const normalizedCatName = cat.category.trim().toLowerCase();
-          const apiData = apiPriceMap[normalizedCatName];
-          // CRITICAL: If apiData exists, use its REAL ID and Price. No fallback to 45.
-          return {
-            ...cat,
-            id: apiData?._id || apiData?.id || `static_${cat.id}`,
-            pricePerKg: apiData?.pricePerKg !== undefined ? apiData.pricePerKg : cat.pricePerKg,
-            price: apiData?.price !== undefined ? apiData.price : 0,
-            minPrice: apiData?.minPrice || 0,
-            maxPrice: apiData?.maxPrice || 0,
-            image: apiData?.image || cat.image,
-            isActive: apiData ? apiData.isActive !== false : true,
-            isNegotiable: apiData?.isNegotiable !== undefined ? apiData.isNegotiable : cat.isNegotiable,
-            updatedAt: apiData?.updatedAt || new Date().toISOString(),
-            region: apiData?.regionCode || 'IN-DL',
-            originalPrice: apiData?.pricePerKg !== undefined ? apiData.pricePerKg : cat.pricePerKg, // Store for comparison
-            originalFixedPrice: apiData?.price !== undefined ? apiData.price : 0,
-            originalMinPrice: apiData?.minPrice || 0,
-            originalMaxPrice: apiData?.maxPrice || 0,
-            showToUser: apiData?.showToUser !== undefined ? apiData.showToUser : true,
-            showToDukandaar: apiData?.showToDukandaar || false,
-            showToWholesaler: apiData?.showToWholesaler || false
-          };
-        });
-
-        // Add custom categories from API that are NOT in static list
-        Object.values(apiPriceMap).forEach(p => {
-          const normalizedCatNameFromAPI = p.category.trim().toLowerCase();
-          if (!staticCategories.some(sc => sc.category.trim().toLowerCase() === normalizedCatNameFromAPI)) {
-            mergedPrices.push({
-              id: p._id || p.id,
-              category: p.category,
-              pricePerKg: p.pricePerKg,
-              price: p.price,
-              minPrice: p.minPrice || 0,
-              maxPrice: p.maxPrice || 0,
-              image: p.image || plasticImage,
-              type: p.type || PRICE_TYPES.MATERIAL,
-              isActive: p.isActive !== false,
-              isNegotiable: p.isNegotiable || false,
-              updatedAt: p.updatedAt,
-              region: apiData?.regionCode || 'IN-DL',
-              originalPrice: p.pricePerKg,
-              originalFixedPrice: p.price,
-              originalMinPrice: p.minPrice || 0,
-              originalMaxPrice: p.maxPrice || 0,
-              showToUser: p.showToUser !== undefined ? p.showToUser : true,
-              showToDukandaar: p.showToDukandaar || false,
-              showToWholesaler: p.showToWholesaler || false
-            });
-          }
-        });
-      } else {
-        mergedPrices = staticCategories.map(c => ({
-          ...c,
-          id: `static_${c.id}`,
-          region: 'IN-DL',
-          updatedAt: new Date().toISOString(),
-          minPrice: 0,
-          maxPrice: 0,
-          isActive: true,
-          originalPrice: c.pricePerKg,
-          originalFixedPrice: 0,
-          originalMinPrice: 0,
-          originalMaxPrice: 0,
-          showToUser: true,
-          showToDukandaar: false,
-          showToWholesaler: false
+        apiPrices = response.data.prices.map(p => ({
+          id: p._id || p.id,
+          category: p.category,
+          pricePerKg: p.pricePerKg || 0,
+          price: p.price || 0,
+          minPrice: p.minPrice || 0,
+          maxPrice: p.maxPrice || 0,
+          image: p.image || '', // Cloudinary or custom URL
+          type: p.type || PRICE_TYPES.MATERIAL,
+          isActive: p.isActive !== false,
+          isNegotiable: p.isNegotiable || false,
+          updatedAt: p.updatedAt || new Date().toISOString(),
+          region: p.regionCode || 'IN-DL',
+          originalPrice: p.pricePerKg || 0,
+          originalFixedPrice: p.price || 0,
+          originalMinPrice: p.minPrice || 0,
+          originalMaxPrice: p.maxPrice || 0,
+          showToUser: p.showToUser !== undefined ? p.showToUser : true,
+          showToDukandaar: p.showToDukandaar || false,
+          showToWholesaler: p.showToWholesaler || false
         }));
       }
 
-      const filteredMergedPrices = mergedPrices.filter(p => !p.id.includes('_other'));
-      setPrices(filteredMergedPrices);
+      setPrices(apiPrices);
     } catch (err) {
       console.error('Error loading prices:', err);
-      // Fallback
-      const nowIso = new Date().toISOString();
-      const defaultPrices = [
-        { category: 'Plastic', pricePerKg: 45, image: plasticImage, type: PRICE_TYPES.MATERIAL },
-        { category: 'Metal', pricePerKg: 180, image: metalImage, type: PRICE_TYPES.MATERIAL },
-        { category: 'Paper', pricePerKg: 12, image: paperImage, type: PRICE_TYPES.MATERIAL },
-        { category: 'Electronics', pricePerKg: 85, image: electronicImage, type: PRICE_TYPES.MATERIAL },
-        { category: 'Copper', pricePerKg: 650, image: copperImage, type: PRICE_TYPES.MATERIAL },
-        { category: 'Aluminium', pricePerKg: 180, image: aluminiumImage, type: PRICE_TYPES.MATERIAL },
-        { category: 'Steel', pricePerKg: 35, image: steelImage, type: PRICE_TYPES.MATERIAL },
-        { category: 'Brass', pricePerKg: 420, image: brassImage, type: PRICE_TYPES.MATERIAL },
-      ].map(p => ({ ...p, id: `err_${p.category.toLowerCase()}`, region: 'IN-DL', updatedAt: nowIso, isActive: true, isNegotiable: false }));
-
-      setPrices(defaultPrices);
+      setPrices([]);
     } finally {
       setLoading(false);
     }
@@ -399,21 +282,13 @@ const PriceFeedEditor = () => {
 
     setIsSaving(true);
     try {
-      // Check if it's a backend price or local-only
-      if (id && !id.startsWith('price_')) {
-        // Backend price, delete via API
-        const response = await adminAPI.deletePrice(id);
+      const response = await adminAPI.deletePrice(id);
 
-        if (response.success) {
-          await loadPrices();
-          alert(getTranslatedText('Category deleted successfully!'));
-        } else {
-          throw new Error(response.message || getTranslatedText('Failed to delete category'));
-        }
+      if (response.success) {
+        await loadPrices();
+        alert(getTranslatedText('Category deleted successfully!'));
       } else {
-        // Local-only price, just remove from state
-        setPrices(prevPrices => prevPrices.filter(p => p.id !== id));
-        alert(getTranslatedText('Category removed!'));
+        throw new Error(response.message || getTranslatedText('Failed to delete category'));
       }
     } catch (error) {
       console.error('Error deleting category:', error);
@@ -480,13 +355,9 @@ const PriceFeedEditor = () => {
       };
 
       let response;
-      const idStr = currentPriceData.id ? String(currentPriceData.id) : '';
-      const isNew = !currentPriceData.id || idStr.startsWith('static_') || idStr.startsWith('err_') || idStr.startsWith('price_');
-
-      if (modalMode === 'add' || isNew) {
+      if (modalMode === 'add') {
         response = await adminAPI.createPrice(payload);
       } else {
-        // Edit mode with a real DB ID
         response = await adminAPI.updatePrice(currentPriceData.id, payload);
       }
 
@@ -509,26 +380,8 @@ const PriceFeedEditor = () => {
   const handleBulkSave = async () => {
     setIsSaving(true);
     try {
-      // SMART SAVE: Only save items that have actually changed (Dirty items)
       const dirtyPrices = prices.filter(p => {
-        const currentP = p.pricePerKg;
-        const originalP = p.originalPrice;
-        const currentF = p.price;
-        const originalF = p.originalFixedPrice;
-        const currentMin = p.minPrice || 0;
-        const originalMin = p.originalMinPrice || 0;
-        const currentMax = p.maxPrice || 0;
-        const originalMax = p.originalMaxPrice || 0;
-        
-        // Check if it's a new item (id starts with 'static_', 'err_', or 'price_')
-        const idStr = p.id ? String(p.id) : '';
-        const isNew = !p.id || idStr.startsWith('static_') || idStr.startsWith('err_') || idStr.startsWith('price_');
-
-        // If it's a new item, it's always considered dirty for saving
-        if (isNew) return true;
-
-        // For existing items, compare current values with original loaded values
-        return currentP !== originalP || currentF !== originalF || currentMin !== originalMin || currentMax !== originalMax;
+        return p.pricePerKg !== p.originalPrice || p.price !== p.originalFixedPrice || (p.minPrice || 0) !== (p.originalMinPrice || 0) || (p.maxPrice || 0) !== (p.originalMaxPrice || 0);
       });
 
       if (dirtyPrices.length === 0) {
@@ -542,7 +395,7 @@ const PriceFeedEditor = () => {
           category: price.category,
           pricePerKg: price.type === PRICE_TYPES.SERVICE ? 0 : (price.pricePerKg || price.price),
           price: price.type === PRICE_TYPES.SERVICE ? (price.price || price.pricePerKg) : 0,
-          image: price.image, // Include image
+          image: price.image,
           regionCode: price.region || 'IN-DL',
           effectiveDate: price.effectiveDate || new Date().toISOString(),
           type: price.type || PRICE_TYPES.MATERIAL,
@@ -552,16 +405,7 @@ const PriceFeedEditor = () => {
           maxPrice: price.maxPrice || 0
         };
 
-        const idStr = price.id ? String(price.id) : '';
-        const isNew = !price.id || idStr.startsWith('static_') || idStr.startsWith('err_') || idStr.startsWith('price_');
-
-        // Focused Fix: Send data as update if ID exists, or create if new
-        if (isNew) {
-          return adminAPI.createPrice(payload);
-        } else {
-          // Explicitly use updatePrice to prevent multiple version duplicates during bulk
-          return adminAPI.updatePrice(price.id, payload);
-        }
+        return adminAPI.updatePrice(price.id, payload);
       });
 
       const results = await Promise.all(savePromises);
@@ -813,7 +657,7 @@ const PriceFeedEditor = () => {
                       </td>
                       <td className="px-2 py-2 md:px-6 md:py-4">
                         <img
-                          src={price.image}
+                          src={price.image || STATIC_CATEGORY_IMAGES[price.category?.toLowerCase()] || plasticImage}
                           alt={price.category}
                           className="w-10 h-10 rounded-full object-cover shadow-sm border"
                           style={{ borderColor: '#e2e8f0' }}
@@ -864,26 +708,17 @@ const PriceFeedEditor = () => {
                             <FaEdit className="text-xs md:text-sm" />
                           </motion.button>
 
-                          {/* Only show delete if it's not one of the 8 fixed categories */}
-                          {!['plastic', 'metal', 'paper', 'e-waste', 'copper', 'aluminium', 'steel', 'brass',
-                            'scrap iron', 'raddi', 'furniture', 'vehicle scrap', 'home appliance',
-                            'computer items', 'laptops/mobiles', 'motherboard', 'cables/wires', 'batteries', 'other e-waste',
-                            'table', 'chair', 'sofa', 'bed', 'wooden items', 'other furniture',
-                            'ac', 'fridge', 'washing machine', 'tv', 'microwave', 'other appliance',
-                            '2-wheeler', '4-wheeler', 'auto parts', 'tyre', 'battery', 'other vehicle parts'
-                          ].includes(price.category.toLowerCase()) && (
-                              <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => handleDelete(price.id)}
-                                className="p-1.5 md:p-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                style={{ backgroundColor: '#fee2e2', color: '#dc2626' }}
-                                title={getTranslatedText("Delete category")}
-                                disabled={isSaving}
-                              >
-                                <FaTrash className="text-xs md:text-sm" />
-                              </motion.button>
-                            )}
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => handleDelete(price.id)}
+                            className="p-1.5 md:p-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{ backgroundColor: '#fee2e2', color: '#dc2626' }}
+                            title={getTranslatedText("Delete category")}
+                            disabled={isSaving}
+                          >
+                            <FaTrash className="text-xs md:text-sm" />
+                          </motion.button>
                         </div>
                       </td>
                     </motion.tr>
@@ -974,13 +809,7 @@ const PriceFeedEditor = () => {
                       className="w-full px-3 py-1.5 text-sm rounded-xl border-2 focus:outline-none focus:ring-2 focus:border-transparent transition-all disabled:bg-gray-50 disabled:text-gray-500"
                       style={{ borderColor: '#e2e8f0', focusRingColor: '#64946e' }}
                       required
-                      disabled={['plastic', 'metal', 'paper', 'electronics', 'copper', 'aluminium', 'steel', 'brass',
-                        'e-waste', 'scrap_iron', 'raddi', 'furniture', 'vehicle_scrap', 'home_appliance',
-                        'computer items', 'laptops/mobiles', 'motherboard', 'cables/wires', 'batteries', 'other e-waste',
-                        'table', 'chair', 'sofa', 'bed', 'wooden items', 'other furniture',
-                        'ac', 'fridge', 'washing machine', 'tv', 'microwave', 'other appliance',
-                        '2-wheeler', '4-wheeler', 'auto parts', 'tyre', 'battery', 'other vehicle parts'
-                      ].includes(currentPriceData.category.toLowerCase())}
+                      disabled={modalMode === 'edit' && false} // Enable editing for everyone
                     />
                   </div>
                   <div>

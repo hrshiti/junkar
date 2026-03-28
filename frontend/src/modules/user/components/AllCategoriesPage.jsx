@@ -123,112 +123,29 @@ const AllCategoriesPage = () => {
     const fetchCategories = async () => {
       setLoading(true);
       try {
-        // 1. Get default categories
-        const defaultFeed = getEffectivePriceFeed();
-        const defaultMapped = defaultFeed.map((item) => ({
-          name: item.category,
-          image: getCategoryImage(item.category),
-          type: PRICE_TYPES.MATERIAL,
-        }));
-
-        // 2. Try to get categories from API
         const response = await publicAPI.getPrices();
-        let finalCategories = [...defaultMapped];
-
         if (response.success && response.data?.prices) {
-          const apiItems = response.data.prices.filter(
-            (p) => (!p.type || p.type === PRICE_TYPES.MATERIAL)
+          const apiMaterials = response.data.prices.filter(
+            (p) => p.isActive !== false && (!p.type || p.type === PRICE_TYPES.MATERIAL)
           );
 
-          const apiMapped = apiItems.map((price) => ({
+          const mapped = apiMaterials.map((price) => ({
             name: price.category,
             image: price.image || getCategoryImage(price.category),
             type: PRICE_TYPES.MATERIAL,
-            isActive: price.isActive !== false,
-            isNegotiable: price.isNegotiable || false
+            isNegotiable: price.isNegotiable || false,
+            minPrice: price.minPrice,
+            maxPrice: price.maxPrice,
+            price: price.pricePerKg || price.price || 0
           }));
 
-          // 3. Merge: prefer API data for items that exist in both
-          // If in API and isActive is false, it's hidden.
-          // If not in API, it shows by default.
-          const merged = [];
-          const processedNames = new Set();
-
-          // Process API items first
-          apiMapped.forEach(apiItem => {
-            if (apiItem.isActive) {
-              merged.push(apiItem);
-            }
-            processedNames.add(apiItem.name.toLowerCase());
-          });
-
-          // Add defaults that aren't in API
-          defaultMapped.forEach(def => {
-            if (!processedNames.has(def.name.toLowerCase())) {
-              merged.push(def);
-            }
-          });
-
-          finalCategories = merged;
+          setCategories(mapped);
+        } else {
+          setCategories([]);
         }
-
-        // 4. Define sub-categories for flattening (matching CategorySelectionPage)
-        const subCategoriesMap = {
-          'e_waste': [
-            { name: 'Computer Items', image: eComputerImage, isNegotiable: true },
-            { name: 'Laptops/Mobiles', image: eLaptopImage, isNegotiable: true },
-            { name: 'Motherboard', image: eMotherboardImage, isNegotiable: true },
-            { name: 'Cables/Wires', image: eCablesImage, isNegotiable: true },
-            { name: 'Batteries', image: eBatteryImage, isNegotiable: true },
-          ],
-          'furniture': [
-            { name: 'Table', image: woodTableImage, isNegotiable: true },
-            { name: 'Chair', image: woodChairImage, isNegotiable: true },
-            { name: 'Sofa', image: woodAnotherImage, isNegotiable: true },
-            { name: 'Bed', image: woodBedImage, isNegotiable: true },
-            { name: 'Wooden Items', image: woodAnotherImage, isNegotiable: true },
-          ],
-          'home_appliance': [
-            { name: 'AC', image: hACImage, isNegotiable: true },
-            { name: 'Fridge', image: hFridgeImage, isNegotiable: true },
-            { name: 'Washing Machine', image: hWMImage, isNegotiable: true },
-            { name: 'TV', image: hTVImage, isNegotiable: true },
-            { name: 'Microwave', image: hMicroImage, isNegotiable: true },
-          ],
-          'vehicle_scrap': [
-            { name: '2-Wheeler', image: v2WheelerImage, isNegotiable: true },
-            { name: '4-Wheeler', image: v4WheelerImage, isNegotiable: true },
-            { name: 'Auto Parts', image: vAutoPartsImage, isNegotiable: true },
-            { name: 'Tyre', image: vTyreImage, isNegotiable: true },
-            { name: 'Battery', image: vBatteryImage, isNegotiable: true },
-          ],
-        };
-
-        const flattened = [];
-        finalCategories.forEach(cat => {
-          flattened.push(cat);
-          const key = cat.name.toLowerCase().replace(' ', '_').replace('-', '_');
-          if (subCategoriesMap[key]) {
-            subCategoriesMap[key].forEach(sub => {
-              flattened.push({
-                ...sub,
-                type: PRICE_TYPES.MATERIAL
-              });
-            });
-          }
-        });
-
-        setCategories(flattened);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
-        // Fallback to defaults only
-        const defaultFeed = getEffectivePriceFeed();
-        const mapped = defaultFeed.map((item) => ({
-          name: item.category,
-          image: getCategoryImage(item.category),
-          type: PRICE_TYPES.MATERIAL,
-        }));
-        setCategories(mapped);
+        setCategories([]);
       } finally {
         setLoading(false);
       }
@@ -312,9 +229,17 @@ const AllCategoriesPage = () => {
                       className="text-sm md:text-base font-bold text-center mb-1"
                       style={{ color: "#1e293b" }}>
                       {getTranslatedText(category.name)}
-                      {category.isNegotiable && (
-                        <div className="mt-1 flex items-center justify-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-[#fef3c7] text-[#92400e] border border-amber-200 w-fit mx-auto">
-                          <span className="text-amber-500">💛</span> {getTranslatedText('Negotiable')}
+                      {category.isNegotiable ? (
+                        <div className="mt-1 flex flex-col items-center gap-0.5">
+                          <div className="flex items-center justify-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-[#fef3c7] text-[#92400e] border border-amber-200 w-fit mx-auto">
+                            <span className="text-amber-500">💛</span> {getTranslatedText('Negotiable')}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mt-1 flex justify-center text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded-md bg-slate-50 text-slate-700 border border-slate-100 w-fit mx-auto">
+                           {category.minPrice && category.maxPrice 
+                             ? `₹${category.minPrice} - ${category.maxPrice}` 
+                             : `₹${category.price || 0}/${getTranslatedText('kg')}`}
                         </div>
                       )}
                     </p>

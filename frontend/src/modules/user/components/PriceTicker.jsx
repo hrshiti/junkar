@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { publicAPI } from "../../shared/utils/api";
-import { getEffectivePriceFeed } from "../../shared/utils/priceFeedUtils";
 import { usePageTranslation } from "../../../hooks/usePageTranslation";
 import { useDynamicTranslation } from "../../../hooks/useDynamicTranslation";
-
 const PriceTicker = () => {
   const [prices, setPrices] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { getTranslatedText } = usePageTranslation([
     "Price",
     "Source: Admin price feed",
@@ -16,70 +15,40 @@ const PriceTicker = () => {
 
   useEffect(() => {
     const fetchPrices = async () => {
-      // 1. Static list of 8 categories
-      const staticPrices = [
-        { type: "Plastic", originalType: "Plastic", price: 45, unit: "kg" },
-        { type: "Metal", originalType: "Metal", price: 180, unit: "kg" },
-        { type: "Paper", originalType: "Paper", price: 12, unit: "kg" },
-        { type: "E-Waste", originalType: "E-Waste", price: 100, unit: "kg" },
-        { type: "Copper", originalType: "Copper", price: 650, unit: "kg" },
-        { type: "Aluminium", originalType: "Aluminium", price: 180, unit: "kg" },
-        { type: "Steel", originalType: "Steel", price: 35, unit: "kg" },
-        { type: "Brass", originalType: "Brass", price: 420, unit: "kg" },
-      ];
-
       try {
         const response = await publicAPI.getPrices();
         if (response.success && response.data?.prices) {
-          const apiPrices = {};
-          response.data.prices.forEach(p => {
-            apiPrices[p.category.toLowerCase()] = {
-              price: p.pricePerKg,
-              minPrice: p.minPrice,
-              maxPrice: p.maxPrice
-            };
-          });
-
+          const materials = response.data.prices.filter(p => p.isActive !== false && (!p.type || p.type === 'material'));
+          
           const updated = (await Promise.all(
-            staticPrices.map(async (item) => {
-              const apiItem = apiPrices[item.originalType.toLowerCase()];
-              if (apiItem && apiItem.isActive === false) return null;
-
-              return {
-                ...item,
-                type: await translate(item.originalType),
-                price: apiItem !== undefined ? apiItem.price : item.price,
-                minPrice: apiItem?.minPrice,
-                maxPrice: apiItem?.maxPrice,
-                isNegotiable: item.originalType.toLowerCase().includes('electron') || item.originalType.toLowerCase().includes('e-waste'),
-                change: null
-              };
-            })
-          )).filter(Boolean);
+            materials.map(async (item) => ({
+              id: item._id,
+              type: await translate(item.category),
+              originalType: item.category,
+              price: item.pricePerKg || 0,
+              minPrice: item.minPrice,
+              maxPrice: item.maxPrice,
+              unit: 'kg',
+              isNegotiable: item.isNegotiable || false,
+              change: null
+            }))
+          ));
           setPrices(updated);
         } else {
-          const translated = await Promise.all(
-            staticPrices.map(async (item) => ({
-              ...item,
-              type: await translate(item.originalType)
-            }))
-          );
-          setPrices(translated);
+          setPrices([]);
         }
       } catch (error) {
-        console.error(getTranslatedText("Failed to fetch live prices, using default:"), error);
-        const translated = await Promise.all(
-          staticPrices.map(async (item) => ({
-            ...item,
-            type: await translate(item.originalType)
-          }))
-        );
-        setPrices(translated);
+        console.error("Failed to fetch live prices:", error);
+        setPrices([]);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchPrices();
   }, [translate]);
+
+  if (loading || prices.length === 0) return null;
 
   return (
     <div className="mb-6 md:mb-8">

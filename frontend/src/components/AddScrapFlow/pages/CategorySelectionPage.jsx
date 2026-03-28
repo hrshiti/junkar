@@ -90,94 +90,52 @@ const CategorySelectionPage = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Helper to get image based on category name
+  const getCategoryImage = (name) => {
+    const lowerName = name.toLowerCase();
+    if (lowerName.includes("plastic")) return plasticImage;
+    if (lowerName.includes("aluminium")) return aluminiumImage;
+    if (lowerName.includes("copper")) return copperImage;
+    if (lowerName.includes("brass")) return brassImage;
+    if (lowerName.includes("steel")) return steelImage;
+    if (lowerName.includes("iron") || lowerName.includes("metal")) return metalImage;
+    if (lowerName.includes("paper") || lowerName.includes("book") || lowerName.includes("raddi")) return scrapImage2;
+    if (lowerName.includes("laptop") || lowerName.includes("mobile")) return eLaptopImage;
+    if (lowerName.includes("battery")) return vBatteryImage;
+    if (lowerName.includes("ac")) return hACImage;
+    if (lowerName.includes("fridge")) return hFridgeImage;
+    if (lowerName.includes("washing machine")) return hWMImage;
+    if (lowerName.includes("vehicle") || lowerName.includes("car") || lowerName.includes("bike")) return v4WheelerImage;
+    return plasticImage; // Default fallback
+  };
+
   useEffect(() => {
     const fetchCategories = async () => {
       setLoading(true);
 
-      // 1. Start with the fixed 14 static categories
-      const staticCategories = [
-        { id: 'plastic', name: 'Plastic', image: plasticImage, price: 45, pricingType: 'kg_based' },
-        { id: 'metal', name: 'Metal', image: metalImage, price: 180, pricingType: 'kg_based' },
-        { id: 'paper', name: 'Paper', image: scrapImage2, price: 12, pricingType: 'kg_based' },
-        { id: 'copper', name: 'Copper', image: copperImage, price: 650, pricingType: 'kg_based' },
-        { id: 'aluminium', name: 'Aluminium', image: aluminiumImage, price: 180, pricingType: 'kg_based' },
-        { id: 'steel', name: 'Steel', image: steelImage, price: 35, pricingType: 'kg_based' },
-        { id: 'brass', name: 'Brass', image: brassImage, price: 420, pricingType: 'kg_based' },
-        { id: 'e_waste', name: 'E-Waste', image: electronicImage, price: 100, pricingType: 'negotiable' },
-        { id: 'scrap_iron', name: 'Scrap Iron', image: steelImage, price: 30, pricingType: 'kg_based' },
-        { id: 'raddi', name: 'Raddi', image: scrapImage2, price: 8, pricingType: 'kg_based' },
-        { id: 'furniture', name: 'Furniture', image: scrapImage2, price: 15, pricingType: 'negotiable' },
-        { id: 'vehicle_scrap', name: 'Vehicle Scrap', image: steelImage, price: 25, pricingType: 'negotiable' },
-        { id: 'home_appliance', name: 'Home Appliance', image: electronicImage, price: 20, pricingType: 'negotiable' },
-      ];
-
       try {
-        // 2. Fetch latest prices from API
         const response = await publicAPI.getPrices();
 
         if (response.success && response.data?.prices) {
-          // 3. Create a map for easy lookup
-          const apiPrices = {};
-          response.data.prices.forEach(p => {
-            apiPrices[p.category.toLowerCase()] = {
-              category: p.category, // store original name
-              price: p.pricePerKg !== undefined ? p.pricePerKg : p.price,
-              isNegotiable: p.isNegotiable,
-              isActive: p.isActive !== false,
-              image: p.image // include image URL
-            };
-          });
+          const apiMaterials = response.data.prices.filter(p => p.isActive !== false && (!p.type || p.type === 'material'));
 
-          // Store so subcategories can also use API image/price
-          setApiPricesMap(apiPrices);
+          const mapped = apiMaterials.map(p => ({
+            id: p._id,
+            name: p.category,
+            image: p.image || getCategoryImage(p.category),
+            price: p.pricePerKg || p.price || 0,
+            minPrice: p.minPrice,
+            maxPrice: p.maxPrice,
+            pricingType: p.isNegotiable ? 'negotiable' : 'kg_based'
+          }));
 
-          // 4. Update only the prices in our static list
-          const updatedCategories = [];
-          const processedCategories = new Set();
-          // 1. Process all static categories first
-          staticCategories.forEach(cat => {
-            const apiData = apiPrices[cat.name.toLowerCase()];
-            if (apiData) {
-              if (apiData.isActive) {
-                updatedCategories.push({
-                  ...cat,
-                  price: apiData.price !== undefined ? apiData.price : cat.price,
-                  pricingType: apiData.isNegotiable ? 'negotiable' : 'kg_based',
-                  image: apiData.image || cat.image // Support image from DB if provided
-                });
-              }
-              // If apiData exists but isActive is false, it's explicitly disabled, so we skip it.
-              processedCategories.add(cat.name.toLowerCase());
-            } else {
-              // Not in API, show as default active
-              updatedCategories.push(cat);
-              processedCategories.add(cat.name.toLowerCase());
-            }
-          });
-
-          // 2. Add any active categories from API that weren't in our static list
-          Object.keys(apiPrices).forEach(catName => {
-            if (!processedCategories.has(catName)) {
-              const apiData = apiPrices[catName];
-              if (apiData.isActive) {
-                updatedCategories.push({
-                  id: `db_${catName.replace(/\s+/g, '_')}`,
-                  name: apiData.category || (catName.charAt(0).toUpperCase() + catName.slice(1)),
-                  image: apiData.image || plasticImage, // Fallback image correctly used
-                  price: apiData.price || 0,
-                  pricingType: apiData.isNegotiable ? 'negotiable' : 'kg_based'
-                });
-              }
-            }
-          });
-
-          setCategories(updatedCategories);
+          setCategories(mapped);
         } else {
-          setCategories(staticCategories);
+          setCategories([]);
         }
       } catch (error) {
-        console.error('Failed to fetch prices from API, using defaults:', error);
-        setCategories(staticCategories);
+        console.error('Failed to fetch categories:', error);
+        setCategories([]);
       } finally {
         setLoading(false);
       }
@@ -186,112 +144,7 @@ const CategorySelectionPage = () => {
     fetchCategories();
   }, []);
 
-  // Load from sessionStorage on mount for persistence (handle Refresh)
-  useEffect(() => {
-    const savedCategories = sessionStorage.getItem('selectedCategories');
-    if (savedCategories) {
-      try {
-        const parsed = JSON.parse(savedCategories);
-        if (Array.isArray(parsed) && parsed.length > 0 && selectedCategories.length === 0) {
-          setSelectedCategories(parsed);
-        }
-      } catch (err) {
-        console.error('Error parsing saved categories:', err);
-      }
-    }
-  }, []);
-
-  // Persist to sessionStorage whenever selectedCategories changes
-  useEffect(() => {
-    if (selectedCategories.length > 0) {
-      sessionStorage.setItem('selectedCategories', JSON.stringify(selectedCategories));
-    }
-  }, [selectedCategories]);
-
-  // Auto-select or expand category if coming from homepage/AllCategoriesPage
-  useEffect(() => {
-    const preSelectedCategoryName = location.state?.preSelectedCategory;
-    if (preSelectedCategoryName && categories.length > 0) {
-      const categoryToSelect = categories.find(
-        cat => cat.name.toLowerCase() === preSelectedCategoryName.toLowerCase()
-      );
-
-      if (categoryToSelect) {
-        // If it has subcategories, expand it
-        if (subCategoriesMap[categoryToSelect.id]) {
-          setExpandedCategoryId(categoryToSelect.id);
-        } else if (selectedCategories.length === 0) {
-          // Otherwise just select it
-          setSelectedCategories([categoryToSelect]);
-        }
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.state, categories]);
-
-  // Optimized Categories Grid
-  const [expandedCategoryId, setExpandedCategoryId] = useState(null);
-  const [apiPricesMap, setApiPricesMap] = useState({});
-
-  // Helper: get sub from API prices if available, otherwise use static defaults
-  const buildSubCategory = (sub, apiPrices) => {
-    const apiData = apiPrices[sub.name.toLowerCase()];
-    return {
-      ...sub,
-      price: apiData?.price !== undefined ? apiData.price : sub.price,
-      pricingType: apiData?.isNegotiable !== undefined ? (apiData.isNegotiable ? 'negotiable' : 'kg_based') : sub.pricingType,
-      image: (apiData && apiData.image) ? apiData.image : sub.image,
-    };
-  };
-
-  const getSubCategoriesMap = (apiPrices) => ({
-    'e_waste': [
-      { id: 'ew_comp', name: 'Computer Items', image: eComputerImage, price: 100, pricingType: 'negotiable' },
-      { id: 'ew_mob', name: 'Laptops/Mobiles', image: eLaptopImage, price: 150, pricingType: 'negotiable' },
-      { id: 'ew_mb', name: 'Motherboard', image: eMotherboardImage, price: 400, pricingType: 'negotiable' },
-      { id: 'ew_cable', name: 'Cables/Wires', image: eCablesImage, price: 80, pricingType: 'negotiable' },
-      { id: 'ew_batt', name: 'Batteries', image: eBatteryImage, price: 60, pricingType: 'negotiable' },
-    ].map(sub => buildSubCategory(sub, apiPrices)),
-    'furniture': [
-      { id: 'furn_table', name: 'Table', image: woodTableImage, price: 20, pricingType: 'negotiable' },
-      { id: 'furn_chair', name: 'Chair', image: woodChairImage, price: 15, pricingType: 'negotiable' },
-      { id: 'furn_sofa', name: 'Sofa', image: woodAnotherImage, price: 25, pricingType: 'negotiable' },
-      { id: 'furn_bed', name: 'Bed', image: woodBedImage, price: 30, pricingType: 'negotiable' },
-      { id: 'furn_wood', name: 'Wooden Items', image: woodAnotherImage, price: 10, pricingType: 'negotiable' },
-    ].map(sub => buildSubCategory(sub, apiPrices)),
-    'home_appliance': [
-      { id: 'ha_ac', name: 'AC', image: hACImage, price: 35, pricingType: 'negotiable' },
-      { id: 'ha_fridge', name: 'Fridge', image: hFridgeImage, price: 30, pricingType: 'negotiable' },
-      { id: 'ha_wm', name: 'Washing Machine', image: hWMImage, price: 25, pricingType: 'negotiable' },
-      { id: 'ha_tv', name: 'TV', image: hTVImage, price: 20, pricingType: 'negotiable' },
-      { id: 'ha_micro', name: 'Microwave', image: hMicroImage, price: 15, pricingType: 'negotiable' },
-    ].map(sub => buildSubCategory(sub, apiPrices)),
-    'vehicle_scrap': [
-      { id: 'vs_2w', name: '2-Wheeler', image: v2WheelerImage, price: 30, pricingType: 'negotiable' },
-      { id: 'vs_4w', name: '4-Wheeler', image: v4WheelerImage, price: 25, pricingType: 'negotiable' },
-      { id: 'vs_parts', name: 'Auto Parts', image: vAutoPartsImage, price: 35, pricingType: 'negotiable' },
-      { id: 'vs_tyre', name: 'Tyre', image: vTyreImage, price: 10, pricingType: 'negotiable' },
-      { id: 'vs_batt', name: 'Battery', image: vBatteryImage, price: 60, pricingType: 'negotiable' },
-    ].map(sub => buildSubCategory(sub, apiPrices)),
-  });
-
-  const subCategoriesMap = getSubCategoriesMap(apiPricesMap);
-
-  // Reverting to flattened list: Show all categories and subcategories together
-  const flattenedCategories = [];
-  categories.forEach(cat => {
-    flattenedCategories.push(cat);
-    if (subCategoriesMap[cat.id]) {
-      subCategoriesMap[cat.id].forEach(sub => {
-        flattenedCategories.push({
-          ...sub,
-          parentId: cat.id
-        });
-      });
-    }
-  });
-
-  const currentLevelCategories = flattenedCategories;
+  const currentLevelCategories = categories;
 
   // Modal for "Other" category input
   const [showOtherModal, setShowOtherModal] = useState(false);
@@ -300,11 +153,9 @@ const CategorySelectionPage = () => {
   const [otherIsNegotiable, setOtherIsNegotiable] = useState(true);
 
   const handleSomethingElse = () => {
-    const categoryId = expandedCategoryId || 'general_other';
-    const parentCat = categories.find(c => c.id === expandedCategoryId);
     setActiveOtherCategory({
-      id: categoryId.endsWith('_other') ? categoryId : `${categoryId}_other`,
-      name: parentCat ? `Other ${parentCat.name}` : 'Other Item',
+      id: 'general_other',
+      name: 'Other Item',
       pricingType: 'negotiable',
       price: 0,
       image: eOtherEWasteImage // Default fallback icon
@@ -377,27 +228,19 @@ const CategorySelectionPage = () => {
       {/* Compact Header */}
       <div className="flex items-center justify-between p-3 md:p-4 border-b shadow-sm" style={{ borderColor: '#e0f2fe', backgroundColor: '#ffffff' }}>
         <button
-          onClick={() => expandedCategoryId ? setExpandedCategoryId(null) : navigate('/user')}
+          onClick={() => navigate('/user')}
           className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-50 transition-colors shadow-sm"
           style={{ backgroundColor: '#ffffff', border: '1.5px solid #e0f2fe' }}
         >
-          {expandedCategoryId ? (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ color: '#000000' }}>
-              <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          ) : (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ color: '#000000' }}>
-              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          )}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ color: '#000000' }}>
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
         </button>
         <h2
           className="text-lg md:text-xl font-bold"
           style={{ color: '#1e293b' }}
         >
-          {expandedCategoryId
-            ? getTranslatedText(categories.find(c => c.id === expandedCategoryId)?.name || "Sub Categories")
-            : getTranslatedText("Select Scrap Category")}
+          {getTranslatedText("Select Scrap Category")}
         </h2>
         <div className="w-9"></div>
       </div>
@@ -420,16 +263,8 @@ const CategorySelectionPage = () => {
 
       {/* Optimized Categories Grid */}
       <div className="flex-1 overflow-y-auto p-3 md:p-4 pb-24 md:pb-6">
-        {expandedCategoryId && (
-          <p className="text-xs font-bold mb-3 text-sky-600 flex items-center gap-1 cursor-pointer" onClick={() => setExpandedCategoryId(null)}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-              <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            {getTranslatedText("Back to All Categories")}
-          </p>
-        )}
         <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-          {currentLevelCategories.map((category, index) => (
+          {categories.map((category, index) => (
             <div
               key={category.id}
               onClick={() => handleCategoryClick(category)}
@@ -464,16 +299,6 @@ const CategorySelectionPage = () => {
                     </div>
                   </div>
                 )}
-                {!expandedCategoryId && subCategoriesMap[category.id] && (
-                  <div
-                    className="absolute bottom-1 right-1 w-5 h-5 rounded-full flex items-center justify-center shadow-sm"
-                    style={{ backgroundColor: '#0ea5e9' }}
-                  >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-white">
-                      <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </div>
-                )}
               </div>
 
               {/* Compact Category Info */}
@@ -492,8 +317,16 @@ const CategorySelectionPage = () => {
                   }}
                 >
                   {category.pricingType === 'negotiable'
-                    ? <span className="flex items-center gap-1"><span className="text-amber-500">💛</span> {getTranslatedText('Negotiable')}</span>
-                    : `₹${category.price}/${getTranslatedText('kg')}`
+                    ? (
+                      <div className="flex flex-col items-center gap-0.5">
+                        <span className="flex items-center gap-1"><span className="text-amber-500 text-[8px] md:text-[10px]">💛</span> {getTranslatedText('Negotiable')}</span>
+                      </div>
+                    )
+                    : (
+                      category.minPrice && category.maxPrice 
+                        ? `₹${category.minPrice} - ${category.maxPrice}`
+                        : `₹${category.price}/${getTranslatedText('kg')}`
+                    )
                   }
                 </p>
               </div>

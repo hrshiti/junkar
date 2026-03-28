@@ -78,8 +78,7 @@ const PriceListPage = () => {
                 const response = await publicAPI.getPrices();
                 if (
                     response.success &&
-                    response.data?.prices &&
-                    response.data.prices.length > 0
+                    response.data?.prices
                 ) {
                     const allItems = response.data.prices;
                     // Filter active Materials only
@@ -99,20 +98,11 @@ const PriceListPage = () => {
                     }));
                     setPrices(mappedPrices);
                 } else {
-                    throw new Error("No prices from API");
+                    setPrices([]);
                 }
             } catch (error) {
                 console.error("Failed to fetch prices:", error);
-                // Fallback
-                const defaultFeed = getEffectivePriceFeed();
-                const mapped = defaultFeed.map((item, index) => ({
-                    id: index,
-                    name: item.category,
-                    price: item.price,
-                    unit: 'kg',
-                    image: getCategoryImage(item.category),
-                }));
-                setPrices(mapped);
+                setPrices([]);
             } finally {
                 setLoading(false);
             }

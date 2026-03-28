@@ -120,52 +120,28 @@ const Hero = () => {
     const fetchCategories = async () => {
       setCategoriesLoading(true);
 
-      // 1. Fixed 8 static categories
-      const staticCategories = [
-        { name: 'Plastic', originalName: 'Plastic', image: plasticImage },
-        { name: 'Metal', originalName: 'Metal', image: metalImage },
-        { name: 'Paper', originalName: 'Paper', image: scrapImage2 },
-        { name: 'E-Waste', originalName: 'E-Waste', image: electronicImage },
-        { name: 'Scrap Iron', originalName: 'Scrap Iron', image: steelImage },
-        { name: 'Raddi', originalName: 'Raddi', image: scrapImage2 },
-        { name: 'Furniture', originalName: 'Furniture', image: furnitureImage },
-        { name: 'Vehicle Scrap', originalName: 'Vehicle Scrap', image: vehicleImage },
-        { name: 'Home Appliance', originalName: 'Home Appliance', image: homeApplianceImage },
-      ];
-
       try {
         const response = await publicAPI.getPrices();
         if (response.success && response.data?.prices) {
-          const apiPrices = {};
-          response.data.prices.forEach(p => {
-            apiPrices[p.category.toLowerCase()] = p;
-          });
+          const apiMaterials = response.data.prices.filter(p => p.isActive !== false && (!p.type || p.type === 'material'));
+          
+          const mapped = apiMaterials.map(p => ({
+            name: p.category,
+            originalName: p.category,
+            // Use admin-uploaded image or fallback to local icons
+            image: p.image || getCategoryImage(p.category)
+          }));
 
-          // Filter out disabled ones, and update image if admin has set one
-          const filtered = staticCategories
-            .filter(cat => {
-              const apiData = apiPrices[cat.originalName.toLowerCase()];
-              return apiData ? apiData.isActive !== false : true;
-            })
-            .map(cat => {
-              const apiData = apiPrices[cat.originalName.toLowerCase()];
-              return {
-                ...cat,
-                // Use admin-uploaded image if available, fallback to static local image
-                image: (apiData && apiData.image) ? apiData.image : cat.image,
-              };
-            });
-
-          setRawCategories(filtered);
-          setActiveCategories(filtered);
+          setRawCategories(mapped);
+          setActiveCategories(mapped);
         } else {
-          setRawCategories(staticCategories);
-          setActiveCategories(staticCategories);
+          setRawCategories([]);
+          setActiveCategories([]);
         }
       } catch (error) {
         console.error("Failed to fetch categories:", error);
-        setRawCategories(staticCategories);
-        setActiveCategories(staticCategories);
+        setRawCategories([]);
+        setActiveCategories([]);
       } finally {
         setCategoriesLoading(false);
       }
