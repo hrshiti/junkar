@@ -11,14 +11,14 @@ import { USER_ROLES } from '../config/constants.js';
 // Helper: bypass OTP sending for specific test numbers (disabled in production by default)
 const isBypassEnabled = process.env.ENABLE_BYPASS_OTP !== 'false' && process.env.NODE_ENV !== 'production';
 // User test numbers
-const userBypassList = new Set(['6260491554', '9685974247', '9876543210', '9999999999', '7610416911', '9111111111']);
+const userBypassList = new Set(['6260491554', '9685974247', '9876543210', '9999999999', '7610416911', '9111111111', '9575500329']);
 // Scrapper test numbers (dedicated for scrapper testing)
-const scrapperBypassList = new Set(['7000000000', '9000000000', '8888888888', '7777777777', '6666666666', '5555555555', '1234512345', '9000000001', '9000000002', '9000000003', '9000000004', '9000000005', '9000000006', '9000000007', '9000000008', '9000000009', '6111111111', '9827223585', '9009022251', '9575500329', '8643041429']);
+const scrapperBypassList = new Set(['7000000000', '9000000000', '8888888888', '7777777777', '6666666666', '5555555555', '1234512345', '9000000001', '9000000002', '9000000003', '9000000004', '9000000005', '9000000006', '9000000007', '9000000008', '9000000009', '6111111111', '9827223585', '9009022251', '8643041429']);
 // Combined bypass list
 const bypassList = new Set([...userBypassList, ...scrapperBypassList]);
 const isBypassOtpNumber = (phone) => {
   // Always allow bypass for the main default numbers
-  if (phone === '6260491554' || phone === '7000000000' || phone === '9000000000') return true;
+  if (phone === '6260491554' || phone === '7000000000' || phone === '9000000000' || phone === '9827223585' || phone === '9575500329') return true;
   // Other numbers only bypass in non-production environments
   return isBypassEnabled && bypassList.has(phone);
 };

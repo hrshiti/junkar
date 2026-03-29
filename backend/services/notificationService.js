@@ -1,4 +1,5 @@
 import Scrapper from '../models/Scrapper.js';
+import Notification from '../models/Notification.js';
 import { notifyUser } from './socketService.js';
 import { sendNotificationToUser } from '../utils/pushNotificationHelper.js';
 import logger from '../utils/logger.js';
@@ -16,9 +17,11 @@ class NotificationService {
     async notifyOnlineScrappers(order) {
         try {
             const query = {
-                isOnline: true,
                 status: 'active',
-                'kyc.status': 'verified'
+                $and: [
+                    { $or: [{ isOnline: true }, { receptionMode: true }] },
+                    { $or: [{ 'kyc.status': 'verified' }, { receptionMode: true }] }
+                ]
             };
 
             // Only feri_wala and small scrappers get donation orders
@@ -64,7 +67,7 @@ class NotificationService {
     async notifyBigScrappers(order) {
         try {
             const bigScrappers = await Scrapper.find({
-                isOnline: true,
+                $or: [{ isOnline: true }, { receptionMode: true }],
                 status: 'active',
                 'kyc.status': 'verified',
                 scrapperType: 'big'
@@ -165,7 +168,17 @@ class NotificationService {
                     .filter(Boolean).join(', ')
             });
 
-            // B. Send Push Notification
+            // B. Save to Database for the Bell Icon
+            await Notification.create({
+                recipient: scrapperId,
+                recipientModel: 'Scrapper',
+                type: 'new_order',
+                title: notificationPayload.title,
+                message: notificationPayload.body,
+                data: notificationPayload.data || {}
+            });
+
+            // C. Send Push Notification
             await sendNotificationToUser(scrapperId, notificationPayload, 'scrapper');
         } catch (error) {
             logger.error(`Failed to notify scrapper ${scrapperId}:`, error);
@@ -185,6 +198,18 @@ class NotificationService {
         try {
             // Socket notification
             notifyUser(userId, event, data);
+
+            // Save to DB for the Bell Icon if it's a push payload
+            if (pushPayload) {
+                await Notification.create({
+                    recipient: userId,
+                    recipientModel: 'User',
+                    type: 'system',
+                    title: pushPayload.title || 'Notification',
+                    message: pushPayload.body || JSON.stringify(data),
+                    data: pushPayload.data || data || {}
+                });
+            }
 
             // Push notification if payload provided
             if (pushPayload) {

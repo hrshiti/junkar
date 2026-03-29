@@ -87,7 +87,7 @@ export const getMyProfile = asyncHandler(async (req, res) => {
 });
 
 export const updateMyProfile = asyncHandler(async (req, res) => {
-    const { name, vehicleInfo, availability, isOnline, dealCategories, city, state } = req.body;
+    const { name, vehicleInfo, availability, isOnline, receptionMode, dealCategories, city, state } = req.body;
     const userId = req.user.id || req.user._id;
 
     // 1. Update Scrapper Document
@@ -138,9 +138,10 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
             scrapper.businessLocation.state = state;
         }
 
-        // Update Online Status
+        // Update Online and Reception Status
         if (availability !== undefined) scrapper.isOnline = availability;
         if (isOnline !== undefined) scrapper.isOnline = isOnline;
+        if (receptionMode !== undefined) scrapper.receptionMode = receptionMode;
 
         // Re-verification Trigger Logic: Mark KYC as pending if critical info changes
         if (requiresReverification && scrapper.kyc && scrapper.kyc.status === 'verified') {

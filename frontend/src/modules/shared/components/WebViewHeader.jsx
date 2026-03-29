@@ -85,7 +85,7 @@ const WebViewHeader = ({ navItems, userRole = 'user' }) => {
                 {/* Notification Bell */}
                 <div
                     className="relative w-10 h-10 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center cursor-pointer hover:bg-emerald-50 hover:border-emerald-200 transition-colors"
-                    onClick={() => navigate('/notifications')}
+                    onClick={() => navigate(userRole === 'scrapper' ? '/scrapper/request-list' : '/notifications')}
                 >
                     <IoNotificationsOutline className="text-xl text-gray-600" />
                     {unreadCount > 0 && (

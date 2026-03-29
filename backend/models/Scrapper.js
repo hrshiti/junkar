@@ -279,6 +279,10 @@ const scrapperSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  receptionMode: {
+    type: Boolean,
+    default: false
+  },
   rating: {
     average: {
       type: Number,

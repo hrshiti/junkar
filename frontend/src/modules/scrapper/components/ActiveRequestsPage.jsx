@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
 import ScrapperMap from './GoogleMaps/ScrapperMap';
 import {
@@ -57,6 +57,9 @@ const ActiveRequestsPage = () => {
   const [timeConflict, setTimeConflict] = useState(false);
   const [existingRequests, setExistingRequests] = useState([]);
   const [showActiveRequestsPanel, setShowActiveRequestsPanel] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const highlightedOrderId = searchParams.get('highlight');
+  
   const [availableOrders, setAvailableOrders] = useState([]);
   const [currentOrderIndex, setCurrentOrderIndex] = useState(0);
   const incomingRequest = availableOrders[currentOrderIndex] || null;
@@ -305,9 +308,24 @@ const ActiveRequestsPage = () => {
             setAvailableOrders(mappedOrders);
             setIsSlideOpen(true);
 
-            // Check for time conflicts on the FIRST one (or all? keeping it simple for now)
+            // Check if a specific order should be highlighted
+            let initialIndex = 0;
+            if (highlightedOrderId) {
+              const hIndex = mappedOrders.findIndex(o => o.id === highlightedOrderId || o._id === highlightedOrderId);
+              if (hIndex !== -1) {
+                initialIndex = hIndex;
+                setCurrentOrderIndex(hIndex);
+                
+                // Clear the parameter so it doesn't get stuck
+                const newParams = new URLSearchParams(searchParams);
+                newParams.delete('highlight');
+                setSearchParams(newParams, { replace: true });
+              }
+            }
+
+            // Check for time conflicts on the selected or first order
             if (mappedOrders.length > 0) {
-              const activeRequest = mappedOrders[0];
+              const activeRequest = mappedOrders[initialIndex];
               const hasConflict = checkTimeConflict(activeRequest, conflictCheckList);
               setTimeConflict(hasConflict);
               setAudioPlaying(true);

@@ -8,10 +8,10 @@ async function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
         try {
             const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-            console.log('✅ Service Worker registered:', registration);
+            console.log('Service Worker registered:', registration);
             return registration;
         } catch (error) {
-            console.error('❌ Service Worker registration failed:', error);
+            console.error('Service Worker registration failed:', error);
             throw error;
         }
     } else {
@@ -24,10 +24,10 @@ async function requestNotificationPermission() {
     if ('Notification' in window) {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-            console.log('✅ Notification permission granted');
+            console.log('Notification permission granted');
             return true;
         } else {
-            console.log('❌ Notification permission denied');
+            console.log('Notification permission denied');
             return false;
         }
     }
@@ -50,14 +50,14 @@ async function getFCMToken() {
         });
 
         if (token) {
-            console.log('✅ FCM Token obtained:', token);
+            console.log('FCM Token obtained:', token);
             return token;
         } else {
-            console.log('❌ No FCM token available');
+            console.log('No FCM token available');
             return null;
         }
     } catch (error) {
-        console.error('❌ Error getting FCM token:', error);
+        console.error('Error getting FCM token:', error);
         throw error;
     }
 }
@@ -85,7 +85,6 @@ export async function registerFCMToken(forceUpdate = false) {
         }
 
         // Save to backend
-        // Assuming apiRequest handles Authorization header automatically via localStorage
         const response = await apiRequest('/fcm-tokens/save', {
             method: 'POST',
             body: JSON.stringify({
@@ -96,37 +95,66 @@ export async function registerFCMToken(forceUpdate = false) {
 
         if (response && response.success) {
             localStorage.setItem('fcm_token_web', token);
-            console.log('✅ FCM token registered with backend');
+            console.log('FCM token registered with backend');
             return token;
         } else {
             throw new Error('Failed to register token with backend');
         }
     } catch (error) {
-        console.error('❌ Error registering FCM token:', error);
+        console.error('Error registering FCM token:', error);
         // Don't throw for non-critical feature
     }
 }
 
 // Setup foreground notification handler
+// When the browser tab is OPEN (foreground), Firebase suppresses auto-display.
+// We must manually show it using Service Worker's showNotification().
 export function setupForegroundNotificationHandler(handler) {
     if (!messaging) {
         console.warn('Firebase Messaging not initialized, foreground handler skipped');
         return;
     }
 
-    onMessage(messaging, (payload) => {
-        console.log('📬 Foreground message received:', payload);
+    onMessage(messaging, async (payload) => {
+        console.log('Foreground FCM message received:', payload);
 
-        // Show notification
         if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification(payload.notification.title, {
-                body: payload.notification.body,
-                icon: payload.notification.icon || '/favicon.png',
-                data: payload.data
-            });
+            try {
+                let showViaSW = false;
+                if ('serviceWorker' in navigator) {
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    if (registration && registration.active) {
+                        showViaSW = true;
+                        await registration.showNotification(
+                            payload.notification?.title || 'New Request 🔔',
+                            {
+                                body: payload.notification?.body || '',
+                                icon: '/favicon.png',
+                                badge: '/favicon.png',
+                                data: { ...payload.data, link: '/scrapper/request-list' },
+                                tag: 'new-order-' + (payload.data?.orderId || Date.now()),
+                                requireInteraction: true,
+                            }
+                        );
+                    }
+                }
+                
+                if (!showViaSW) {
+                    new Notification(payload.notification?.title || 'New Request 🔔', {
+                        body: payload.notification?.body || '',
+                        icon: '/favicon.png',
+                    });
+                }
+            } catch (err) {
+                console.warn('Push notification display failed, falling back:', err);
+                new Notification(payload.notification?.title || 'New Request 🔔', {
+                    body: payload.notification?.body || '',
+                    icon: '/favicon.png',
+                });
+            }
         }
 
-        // Call custom handler
+        // Call custom in-app handler (updates badge count etc.)
         if (handler) {
             handler(payload);
         }

@@ -245,7 +245,6 @@ const ScrapperDashboard = () => {
     setMarketSubStatus(marketStatus);
   };
 
-  // Handle availability toggle
   const handleAvailabilityToggle = async () => {
     const newAvailability = !isAvailable;
     setIsAvailable(newAvailability);
@@ -255,8 +254,6 @@ const ScrapperDashboard = () => {
       await scrapperProfileAPI.updateMyProfile({ isOnline: newAvailability });
     } catch (error) {
       console.error('Failed to update availability status:', error);
-      // Optional: revert state if failed, but for better UX we often just log it 
-      // as the user might be offline and we want optimistic UI
     }
 
     // If turning ON, navigate to active requests page
@@ -265,7 +262,7 @@ const ScrapperDashboard = () => {
     }
   };
 
-  const handleReceptionToggle = () => {
+  const handleReceptionToggle = async () => {
     const newState = !isReadyForRequests;
     setIsReadyForRequests(newState);
     localStorage.setItem('scrapperReceptionMode', newState);
@@ -273,43 +270,63 @@ const ScrapperDashboard = () => {
     if (!newState) {
       setPendingRequestsCount(0);
     }
+    
+    // Sync with backend so push notifications work correctly
+    try {
+      await scrapperProfileAPI.updateMyProfile({ receptionMode: newState });
+    } catch (error) {
+      console.error('Failed to update availability status via reception toggle:', error);
+    }
   };
 
   // Socket listener for new requests (Active only when Ready Mode is ON)
   useEffect(() => {
     if (!isReadyForRequests) return;
 
-    const setupSocket = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        socketClient.connect(token);
-        if (socketClient.socket) {
-          socketClient.socket.on('new_order_request', (data) => {
-            console.log('🔔 Dashboard: New Request Received!', data);
-            setPendingRequestsCount(prev => prev + 1);
-            setPendingRequests(prev => [
-              ...prev,
-              {
-                orderId: data.orderId,
-                userName: data.userName || 'Customer',
-                city: data.city || '',
-                addressPreview: data.addressPreview || 'New pickup request',
-                receivedAt: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
-              }
-            ]);
-          });
+    const jwtToken = localStorage.getItem('token');
+    if (!jwtToken) return;
+
+    // Connect socket (idempotent - won't reconnect if already connected)
+    const socket = socketClient.connect(jwtToken);
+
+    const handleNewOrder = (data) => {
+      console.log('🔔 Dashboard: New Request Received!', data);
+      setPendingRequestsCount(prev => prev + 1);
+      setPendingRequests(prev => [
+        ...prev,
+        {
+          orderId: data.orderId,
+          userName: data.userName || 'Customer',
+          city: data.city || '',
+          addressPreview: data.addressPreview || 'New pickup request',
+          receivedAt: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
         }
-      }
+      ]);
     };
 
-    setupSocket();
+    // Attach listener immediately (socket.io buffers events until connected)
+    socket.on('new_order_request', handleNewOrder);
 
     return () => {
-      if (socketClient.socket) {
-        socketClient.socket.off('new_order_request');
-      }
+      socket.off('new_order_request', handleNewOrder);
     };
   }, [isReadyForRequests]);
+
+  // FCM Foreground Push Notification Handler - runs ONCE on mount only
+  // Firebase's onMessage can only be registered once - re-registering causes silent failures
+  useEffect(() => {
+    let active = true;
+    import('../../../services/pushNotificationService').then(({ setupForegroundNotificationHandler }) => {
+      if (!active) return;
+      setupForegroundNotificationHandler((payload) => {
+        const type = payload?.data?.type;
+        if (type === 'new_order' || type === 'donation_order') {
+          setPendingRequestsCount(prev => prev + 1);
+        }
+      });
+    }).catch(() => {});
+    return () => { active = false; };
+  }, []);
 
   // Verify authentication and fetch KYC/Subscription status from backend
   useEffect(() => {
@@ -438,6 +455,15 @@ const ScrapperDashboard = () => {
         // If all checks pass (KYC verified + Platform Subscription active), allow dashboard to render
         migrateOldActiveRequest();
         loadDashboardData();
+        
+        // Ensure local reception state is synced to backend on load
+        const localReception = localStorage.getItem('scrapperReceptionMode') === 'true';
+        if (localReception) {
+            import('../../shared/utils/api').then(({ scrapperProfileAPI }) => {
+                scrapperProfileAPI.updateMyProfile({ receptionMode: true }).catch(console.error);
+            });
+        }
+        
       } catch (error) {
         console.error('Error fetching KYC/Subscription status:', error);
         // On error, check localStorage as fallback

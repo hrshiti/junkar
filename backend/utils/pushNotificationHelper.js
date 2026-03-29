@@ -14,13 +14,13 @@ export async function sendNotificationToUser(userId, payload, role = 'user', inc
         let user;
 
         if (role === 'scrapper') {
-            user = await Scrapper.findById(userId);
+            user = await Scrapper.findById(userId).select('name fcmTokens fcmTokenMobile');
         } else {
-            user = await User.findById(userId);
+            user = await User.findById(userId).select('name fcmTokens fcmTokenMobile');
         }
 
         if (!user) {
-            console.warn(`User/Scrapper with ID ${userId} not found for notification`);
+            console.warn(`[FCM] ${role} with ID ${userId} not found`);
             return;
         }
 
@@ -36,13 +36,17 @@ export async function sendNotificationToUser(userId, payload, role = 'user', inc
         // Remove duplicates
         const uniqueTokens = [...new Set(tokens)];
 
+        console.log(`[FCM] Sending to ${role} "${user.name}" (${userId}): ${uniqueTokens.length} token(s) | Title: "${payload.title}"`);
+
         if (uniqueTokens.length === 0) {
+            console.warn(`[FCM] No tokens found for ${role} ${userId} — notification skipped`);
             return;
         }
 
         // Send notification
         await sendPushNotification(uniqueTokens, payload);
+        console.log(`[FCM] Push sent successfully to ${role} ${userId}`);
     } catch (error) {
-        console.error('Error sending notification helper:', error);
+        console.error('[FCM] Error sending notification:', error);
     }
 }

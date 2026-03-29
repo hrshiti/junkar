@@ -9,6 +9,7 @@ import SubscriptionPlanPage from './components/SubscriptionPlanPage';
 import ActiveRequestsPage from './components/ActiveRequestsPage';
 import ActiveRequestDetailsPage from './components/ActiveRequestDetailsPage';
 import RequestManagementPage from './components/RequestManagementPage';
+import RequestListPage from './components/RequestListPage';
 import ReferAndEarn from './components/ReferAndEarn';
 import ScrapperHelpSupport from './components/ScrapperHelpSupport';
 import ScrapperProfile from './components/ScrapperProfile';
@@ -269,6 +270,7 @@ const ScrapperModule = () => {
         <Route path="/" element={<RequireKycAndSubscription><ScrapperDashboard /></RequireKycAndSubscription>} />
         <Route path="/dashboard" element={<RequireKycAndSubscription><ScrapperDashboard /></RequireKycAndSubscription>} />
         <Route path="/active-requests" element={<RequireKycAndSubscription><ActiveRequestsPage /></RequireKycAndSubscription>} />
+        <Route path="/request-list" element={<RequireKycAndSubscription><RequestListPage /></RequireKycAndSubscription>} />
         <Route path="/my-active-requests" element={<RequireKycAndSubscription><RequestManagementPage /></RequireKycAndSubscription>} />
         <Route path="/active-request/:requestId" element={<RequireKycAndSubscription><ActiveRequestDetailsPage /></RequireKycAndSubscription>} />
         <Route path="/help" element={<RequireKycAndSubscription><ScrapperHelpSupport /></RequireKycAndSubscription>} />
