@@ -428,40 +428,16 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 
           const orderAmount = lockedOrder.totalAmount || 0;
           const isDonation = lockedOrder.isDonation || false;
-          const commissionAmount = (isDonation || orderAmount === 0) ? 0 : Math.max(1, Math.round(orderAmount * 0.01));
 
           // Decide what to deduct based on dealType
-          // If 'Cash', scrapper paid user in cash, but still owes 1% commission to platform
-          // If 'Online', scrapper pays user via platform (deduct totalAmount from wallet) + 1% commission
-          let totalDeduction = commissionAmount;
+          let totalDeduction = 0;
           if (lockedOrder.dealType === 'Online') {
-            totalDeduction += orderAmount;
+            totalDeduction = orderAmount;
           }
 
           // SECURITY CHECK: Verify scrapper has enough balance
           if (scrapper.wallet.balance < totalDeduction) {
             throw new Error(`Insufficient wallet balance. Required: ₹${totalDeduction}, Available: ₹${scrapper.wallet.balance}`);
-          }
-
-          // 1. Deduct Commission (Always if > 0)
-          if (commissionAmount > 0) {
-            scrapper.wallet.balance -= commissionAmount;
-            await scrapper.save({ session });
-
-            await WalletTransaction.create([{
-              trxId: `TRX-COMM-${Date.now()}-${lockedOrder._id.toString().slice(-4)}`,
-              user: scrapper._id,
-              userType: 'Scrapper',
-              amount: commissionAmount,
-              type: 'DEBIT',
-              balanceBefore: scrapper.wallet.balance + commissionAmount,
-              balanceAfter: scrapper.wallet.balance,
-              category: 'COMMISSION',
-              status: 'SUCCESS',
-              description: `Platform Fee (1%) for Order #${lockedOrder._id}`,
-              orderId: lockedOrder._id,
-              gateway: { provider: 'SYSTEM' }
-            }], { session });
           }
 
           // 2. Deduct Order Amount (Only if Online)

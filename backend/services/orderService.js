@@ -255,8 +255,6 @@ class OrderService {
                 const scrapperId = order.scrapper;
                 const userId = order.user;
                 const orderAmount = order.totalAmount;
-                const commissionRate = 0.01; // 1%
-                const commissionAmount = orderAmount * commissionRate;
 
                 // 1. Deduct order amount from scrapper wallet
                 await walletService.debitWallet(
@@ -284,25 +282,12 @@ class OrderService {
                     session
                 );
 
-                // 3. Deduct commission from scrapper
-                await walletService.debitWallet(
-                    scrapperId,
-                    commissionAmount,
-                    {
-                        type: 'commission',
-                        description: `1% Commission for Order #${order._id}`,
-                        orderId: order._id
-                    },
-                    'scrapper',
-                    session
-                );
-
                 // 4. Update order status
                 order.status = ORDER_STATUS.COMPLETED;
                 order.completedDate = new Date();
                 await order.save({ session });
 
-                logger.info(`Order ${orderId} completed. Amount: ₹${orderAmount}, Commission: ₹${commissionAmount}`);
+                logger.info(`Order ${orderId} completed. Amount: ₹${orderAmount}`);
 
                 return order;
             });

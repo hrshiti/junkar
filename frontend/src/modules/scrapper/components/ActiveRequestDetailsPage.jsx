@@ -549,14 +549,9 @@ const ActiveRequestDetailsPage = () => {
   const processScrapPayment = async () => {
     const isDonation = requestData.isDonation;
     const amount = isDonation ? 0 : Number(paidAmount);
-    const commission = isDonation ? 0 : Math.max(1, Math.round(amount * 0.01));
 
-    // Case 1: Cash Payment (No wallet transfer to user, just platform fee) or Donation
+    // Case 1: Cash Payment (No wallet transfer to user) or Donation
     if (dealType === 'Cash' || isDonation) {
-      if (!isDonation && walletBalance < commission) {
-        alert(getTranslatedText("Insufficient balance for platform fee (₹{fee})", { fee: commission }));
-        return;
-      }
       setIsProcessingPayment(true);
       await completePaymentSuccess(amount);
       return;
@@ -564,7 +559,7 @@ const ActiveRequestDetailsPage = () => {
 
     // Case 2: Wallet Payment
     if (useWallet) {
-      if (walletBalance >= (amount + commission)) {
+      if (walletBalance >= amount) {
         // Pay via Wallet
         try {
           setIsProcessingPayment(true);
@@ -575,7 +570,7 @@ const ActiveRequestDetailsPage = () => {
           setIsProcessingPayment(false);
         }
       } else {
-        alert(getTranslatedText("Insufficient balance for this deal and platform fee."));
+        alert(getTranslatedText("Insufficient balance for this deal."));
       }
     } else {
       // Case 3: Pay via Razorpay (Online)
@@ -588,8 +583,8 @@ const ActiveRequestDetailsPage = () => {
           return;
         }
 
-        // Recharge wallet first (Amount + Commission to ensure success on backend)
-        const rechargeAmount = amount + commission;
+        // Recharge wallet first (Amount to ensure success on backend)
+        const rechargeAmount = amount;
         const orderData = await walletService.createRechargeOrder(rechargeAmount);
 
         const options = {
@@ -951,16 +946,11 @@ const ActiveRequestDetailsPage = () => {
 
                         {paidAmount && !requestData.isDonation && (() => {
                           const amount = Number(paidAmount);
-                          const commission = Math.max(1, Math.round(amount * 0.01));
                           const isOnlineDeal = dealType === 'Online';
 
-                          // Case 1: Wallet Payment (Amount + Commission)
-                          if (isOnlineDeal && useWallet && walletBalance < (amount + commission)) {
+                          // Case 1: Wallet Payment
+                          if (isOnlineDeal && useWallet && walletBalance < amount) {
                             return <p className="text-red-500 text-xs mb-2">{getTranslatedText("Insufficient Balance. Please recharge.")}</p>;
-                          }
-                          // Case 2: Cash/Online Deal (Only Commission checked from wallet)
-                          if (walletBalance < commission) {
-                            return <p className="text-red-500 text-xs mb-2">{getTranslatedText("Insufficient balance for platform fee (₹{fee})", { fee: commission })}</p>;
                           }
                           return null;
                         })()}
@@ -987,7 +977,7 @@ const ActiveRequestDetailsPage = () => {
                           <button
                             onClick={() => {
                               setDealType('Cash');
-                              setUseWallet(true); // Default to check commission from wallet
+                              setUseWallet(false); // No wallet needed for cash
                             }}
                             className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${dealType === 'Cash' ? 'bg-amber-500 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50'}`}
                           >
