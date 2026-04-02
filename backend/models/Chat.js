@@ -5,7 +5,7 @@ const chatSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Order',
     required: true,
-    unique: true
+    index: true
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -65,6 +65,7 @@ const chatSchema = new mongoose.Schema({
 });
 
 // Indexes for better query performance
+chatSchema.index({ orderId: 1, user: 1, scrapper: 1 }); // Unique conversation per order stage
 chatSchema.index({ user: 1, lastMessageAt: -1 });
 chatSchema.index({ scrapper: 1, lastMessageAt: -1 });
 chatSchema.index({ status: 1, lastMessageAt: -1 });

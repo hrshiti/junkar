@@ -249,6 +249,28 @@ class SocketClient {
   }
 
   /**
+   * Universal event listener
+   * @param {string} event - Event name
+   * @param {Function} callback - Callback function
+   */
+  on(event, callback) {
+    if (this.socket) {
+      this.socket.on(event, callback);
+    }
+  }
+
+  /**
+   * Remove event listener
+   * @param {string} event - Event name
+   * @param {Function} callback - Callback function
+   */
+  off(event, callback) {
+    if (this.socket) {
+      this.socket.off(event, callback);
+    }
+  }
+
+  /**
    * Join a tracking room for an order
    * @param {string} orderId - Order ID
    */

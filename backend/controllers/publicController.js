@@ -25,7 +25,7 @@ export const getPublicPrices = asyncHandler(async (req, res) => {
         filter.showToUser = { $ne: false };
 
         const prices = await Price.find(filter)
-            .select('category pricePerKg price type regionCode effectiveDate updatedAt image minPrice maxPrice isNegotiable isActive showToUser')
+            .select('category pricePerKg price type regionCode effectiveDate updatedAt image minPrice maxPrice isNegotiable isActive showToUser unit')
             .sort({ category: 1 });
 
         sendSuccess(res, 'Public prices retrieved successfully', { prices });

@@ -138,55 +138,110 @@ export const getAvailableOrders = asyncHandler(async (req, res) => {
   }
 
   const services = scrapper.services || ['scrap_pickup']; // Default to scrap only if not set
-
-  // Build query
-  const query = {
-    status: ORDER_STATUS.PENDING,
-    assignmentStatus: 'unassigned',
-    scrapper: { $ne: scrapperId }
-  };
-
-  // Service filtering logic - only scrap orders
   const allowedOrderTypes = [];
 
   if (services.includes('scrap_pickup')) {
-    // Regular scrap orders usually don't have orderType or is 'scrap_pickup' or 'scrap'
     allowedOrderTypes.push(null, undefined, 'scrap_pickup', 'scrap', 'scrap_sell');
   }
 
-  // Apply filter
-  query.orderType = { $in: allowedOrderTypes };
+  const { lat, lng } = req.query;
+  const RADIUS_KM = 10;
+  
+  // 1. Definition for Public (Unassigned) Orders
+  // Must match distance, scrapper type (Big/Small), and categories
+  const publicMatch = {
+    status: ORDER_STATUS.PENDING,
+    assignmentStatus: 'unassigned',
+    scrapper: { $ne: scrapperId },
+    orderType: { $in: allowedOrderTypes } // Only show what this scrapper covers
+  };
 
-  // Filter based on Scrapper Type
-  // wholesaler & dukandaar act like 'big', feri_wala acts like 'small'
-  const isBigType = ['big', 'wholesaler', 'dukandaar'].includes(scrapper.scrapperType);
-
-  if (isBigType) {
-    // Big scrappers / wholesalers / dukandaars see Large requests OR forwarded requests
-    query.$or = [
-      { quantityType: 'large' },
-      { forwardedBy: { $ne: null } }
-    ];
-  } else {
-    // Feri wala / small scrappers see Small requests (default) AND NOT forwarded requests
-    query.quantityType = 'small';
-    query.forwardedBy = null;
+  // Add Distance Filter for Public Orders
+  if (lat && lng && parseFloat(lat) !== 0 && parseFloat(lng) !== 0) {
+    publicMatch.location = {
+      $nearSphere: {
+        $geometry: {
+          type: 'Point',
+          coordinates: [parseFloat(lng), parseFloat(lat)] // [lng, lat]
+        },
+        $maxDistance: RADIUS_KM * 1000 // In meters
+      }
+    };
   }
 
-  // Filter by scrapper's deal categories if they have specified any
+  // Add Scrapper Type (Big/Small) Filter for Public Orders
+  const isBigType = ['big', 'wholesaler', 'dukandaar'].includes(scrapper.scrapperType);
+  if (isBigType) {
+    publicMatch.$or = [{ quantityType: 'large' }, { forwardedBy: { $ne: null } }];
+  } else {
+    publicMatch.quantityType = 'small';
+    publicMatch.forwardedBy = null;
+  }
+
+  // Add Category Filter for Public Orders
   if (scrapper.dealCategories && scrapper.dealCategories.length > 0) {
     const normalizedCategories = normalizeDealCategories(scrapper.dealCategories);
     if (normalizedCategories.length > 0) {
-      query['scrapItems.category'] = { $in: normalizedCategories };
+      publicMatch['scrapItems.category'] = { $in: normalizedCategories };
     }
   }
 
-  const orders = await Order.find(query)
-    .populate('user', 'name phone')
-    .sort({ createdAt: -1 })
-    .limit(20);
+  // 2. Definition for Targeted (B2B) Orders
+  // These show regardless of distance/type/category since they were custom selected by the sender
+  // We use mongoose.Types.ObjectId to ensure exact match with the database array
+  const targetedMatch = {
+    status: ORDER_STATUS.PENDING,
+    $or: [
+      { targetedScrappers: scrapperId },
+      { targetedScrappers: new mongoose.Types.ObjectId(scrapperId) }
+    ],
+    scrapper: { $ne: scrapperId }
+  };
+
+  // 3. Best Approach: Fetch both sets separately and merge to handle specific requirements.
+  const [publicOrders, targetedOrders] = await Promise.all([
+    Order.find(publicMatch).populate('user', 'name phone profilePic').limit(15),
+    Order.find(targetedMatch).populate('user', 'name phone profilePic').limit(10)
+  ]);
+
+  // Merge and sort by creation time (newest first)
+  const orders = [...publicOrders, ...targetedOrders].sort((a, b) => b.createdAt - a.createdAt);
 
   sendSuccess(res, 'Available orders retrieved successfully', { orders });
+});
+
+// @desc    Get sent B2B requests for a scrapper
+// @route   GET /api/v1/orders/my-sent-requests
+// @access  Private (Scrapper)
+export const getMySentRequests = asyncHandler(async (req, res) => {
+    const scrapperId = req.user.id;
+    const { status, page = 1, limit = 20 } = req.query;
+
+    const query = { user: scrapperId };
+    if (status) {
+        query.status = status;
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const orders = await Order.find(query)
+        .populate('scrapper', 'name phone profilePic vehicleInfo')
+        .populate('targetedScrappers', 'name phone profilePic')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit));
+
+    const total = await Order.countDocuments(query);
+
+    sendSuccess(res, 'Sent requests retrieved successfully', {
+        orders,
+        pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total,
+            pages: Math.ceil(total / parseInt(limit))
+        }
+    });
 });
 
 // @desc    Get scrapper's assigned orders
@@ -241,7 +296,7 @@ export const getOrderById = asyncHandler(async (req, res) => {
 
   const order = await Order.findById(id)
     .populate('user', 'name phone email')
-    .populate('scrapper', 'name phone liveLocation');
+    .populate('scrapper', 'name phone liveLocation businessLocation');
 
   if (!order) {
     return sendError(res, 'Order not found', 404);
@@ -252,8 +307,13 @@ export const getOrderById = asyncHandler(async (req, res) => {
     return sendError(res, 'Not authorized to access this order', 403);
   }
 
-  if (userRole === 'scrapper' && order.scrapper && order.scrapper._id.toString() !== scrapperId) {
-    return sendError(res, 'Not authorized to access this order', 403);
+  if (userRole === 'scrapper') {
+    const isOrderCreator = order.user && order.user._id.toString() === userId;
+    const isAssignedScrapper = order.scrapper && order.scrapper._id.toString() === scrapperId;
+    
+    if (order.scrapper && !isOrderCreator && !isAssignedScrapper) {
+      return sendError(res, 'Not authorized to access this order', 403);
+    }
   }
 
   sendSuccess(res, 'Order retrieved successfully', { order });
@@ -522,6 +582,23 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 
   await order.populate('user', 'name phone');
   await order.populate('scrapper', 'name phone');
+
+  // TRIGGER SOCKET UPDATE for both parties to see real-time status change
+  import('../services/socketService.js').then(({ notifyUser, getIO }) => {
+    try {
+      const io = getIO();
+      const orderIdStr = order._id.toString();
+
+      // Emit to shared tracking room (this is the most reliable way)
+      io.to(`tracking_${orderIdStr}`).emit('order_status_update', { orderId: orderIdStr, status });
+
+      // Also notify individual users as a secondary channel
+      if (order.user) notifyUser(order.user._id.toString(), 'order_status_update', { orderId: orderIdStr, status });
+      if (order.scrapper) notifyUser(order.scrapper._id.toString(), 'order_status_update', { orderId: orderIdStr, status });
+    } catch (err) {
+      logger.error('[Socket] Status update emission failed:', err);
+    }
+  }).catch(err => logger.error('[Socket] Dynamic import failed:', err));
 
   logger.info(`Order ${id} status updated to ${status} (Payment: ${order.paymentStatus}) by ${userRole} ${userId}`);
 

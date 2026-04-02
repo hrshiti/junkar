@@ -81,6 +81,11 @@ const priceSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
     index: true
+  },
+  unit: {
+    type: String,
+    trim: true,
+    default: 'kg'
   }
 }, {
   timestamps: true

@@ -4,8 +4,14 @@ import { ORDER_STATUS, PAYMENT_STATUS, SCRAP_CATEGORIES, PRICING_TYPES, ITEM_CON
 const orderSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    refPath: 'userModel',
     required: true
+  },
+  userModel: {
+    type: String,
+    required: true,
+    enum: ['User', 'Scrapper'],
+    default: 'User'
   },
   scrapper: {
     type: mongoose.Schema.Types.ObjectId,

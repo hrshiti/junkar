@@ -11,7 +11,8 @@ import {
   cancelOrder,
   updateOrder,
   forwardToBigScrapper,
-  getTargetedOrders
+  getTargetedOrders,
+  getMySentRequests
 } from '../controllers/orderController.js';
 import { reportFakeLead } from '../controllers/fakeLeadReportController.js';
 import { protect, isUser, isScrapper } from '../middleware/auth.js';
@@ -33,6 +34,7 @@ router.get('/available', isScrapper, getAvailableOrders);
 router.get('/my-assigned', isScrapper, getMyAssignedOrders);
 router.get('/my-forwarded', isScrapper, getMyForwardedOrders);
 router.get('/targeted', isScrapper, getTargetedOrders);
+router.get('/my-sent-requests', isScrapper, getMySentRequests);
 
 // User routes & Generic ID routes
 // User routes & Generic ID routes

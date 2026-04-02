@@ -14,16 +14,7 @@ import logger from '../utils/logger.js';
  */
 export const getOrCreateChat = async (orderId, userId, userType) => {
   try {
-    // Check if chat already exists
-    let chat = await Chat.findOne({ orderId })
-      .populate('user', 'name phone email')
-      .populate('scrapper', 'name phone email');
-
-    if (chat) {
-      return chat;
-    }
-
-    // Get order to find participants
+    // 1. Get order to find participants (Essential for defining the "Chat Pair")
     const order = await Order.findById(orderId)
       .populate('user', 'name phone email')
       .populate('scrapper', 'name phone email');
@@ -32,18 +23,25 @@ export const getOrCreateChat = async (orderId, userId, userType) => {
       throw new Error('Order not found');
     }
 
-    // Verify user has access to this order
-    if (userType === 'user' && order.user._id.toString() !== userId) {
-      throw new Error('Unauthorized access to order');
-    }
+    // 2. Define the exact pair (Privacy Check)
+    const orderUserId = order.user?._id || order.user;
+    const orderScrapperId = order.scrapper?._id || order.scrapper;
 
-    if (userType === 'scrapper' && order.scrapper && order.scrapper._id.toString() !== userId) {
-      throw new Error('Unauthorized access to order');
-    }
-
-    // Check if scrapper is assigned
-    if (!order.scrapper) {
+    if (!orderScrapperId) {
       throw new Error('No scrapper assigned to this order yet');
+    }
+
+    // 3. Find chat by Order AND Participants (This is the "Uniqueness" logic)
+    let chat = await Chat.findOne({ 
+      orderId, 
+      user: orderUserId, 
+      scrapper: orderScrapperId 
+    })
+      .populate('user', 'name phone email')
+      .populate('scrapper', 'name phone email');
+
+    if (chat) {
+      return chat;
     }
 
     // Create new chat

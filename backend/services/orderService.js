@@ -76,6 +76,7 @@ class OrderService {
         // Build order payload
         const orderPayload = {
             user: userId,
+            userModel: 'User', // Default
             scrapItems: scrapItems || [],
             totalWeight,
             totalAmount,
@@ -87,6 +88,16 @@ class OrderService {
             assignmentStatus: targetScrapperIds && targetScrapperIds.length > 0 ? 'targeted' : 'unassigned',
             status: ORDER_STATUS.PENDING
         };
+
+        // Determine if sender is scrapper
+        const senderScrapper = await Scrapper.findById(userId);
+        if (senderScrapper) {
+            orderPayload.userModel = 'Scrapper';
+        } else {
+            // Confirm it's a regular user for absolute safety (optional but good)
+            const senderUser = await User.findById(userId);
+            if (senderUser) orderPayload.userModel = 'User';
+        }
 
         if (targetScrapperIds && targetScrapperIds.length > 0) {
             orderPayload.targetedScrappers = targetScrapperIds;
@@ -356,7 +367,8 @@ class OrderService {
         };
 
         // Filter by scrapper type
-        if (scrapper.scrapperType === 'big') {
+        const bigRoles = ['big', 'wholesaler', 'dukandaar', 'industrial'];
+        if (bigRoles.includes(scrapper.scrapperType)) {
             query.$or = [
                 { quantityType: 'large' },
                 { forwardedBy: { $ne: null } },

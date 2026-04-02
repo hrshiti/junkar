@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
 import {
@@ -9,7 +9,7 @@ import { orderAPI, scrapperOrdersAPI } from '../../shared/utils/api';
 import { walletService } from '../../shared/services/wallet.service';
 import ScrapperMap from './GoogleMaps/ScrapperMap';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
-
+import socketClient from '../../shared/utils/socketClient';
 // Load Razorpay Script
 const loadRazorpay = () => {
   return new Promise((resolve) => {
@@ -87,13 +87,16 @@ const ActiveRequestDetailsPage = () => {
     "Failed to submit report.",
     "Complete Donation",
     "This is a donation request. No payment is required.",
-    "Confirm Pickup & Thank User"
+    "Confirm Pickup & Thank User",
+    "Confirm Partner Arrival",
+    "Partner is on the way. Tracking active."
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
   const location = useLocation();
   const { requestId } = useParams();
   const { user } = useAuth();
+  const [isMinimized, setIsMinimized] = useState(false);
   const [requestData, setRequestData] = useState(null);
   const [scrapperLocation, setScrapperLocation] = useState(null);
   const [userLiveLocation, setUserLiveLocation] = useState(null);
@@ -113,12 +116,16 @@ const ActiveRequestDetailsPage = () => {
   const [useWallet, setUseWallet] = useState(true);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [partnerLocation, setPartnerLocation] = useState(null);
+  const [isB2B, setIsB2B] = useState(false);
+  const [stage, setStage] = useState('request');
   const [isNegotiated, setIsNegotiated] = useState(false);
   const [dealType, setDealType] = useState('Cash');
   const [showFakeLeadModal, setShowFakeLeadModal] = useState(false);
   const [fakeLeadReason, setFakeLeadReason] = useState('wrong_item');
   const [fakeLeadNotes, setFakeLeadNotes] = useState('');
   const [fakeLeadSubmitting, setFakeLeadSubmitting] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('scrapperUser');
@@ -153,126 +160,160 @@ const ActiveRequestDetailsPage = () => {
   }, []);
 
   // Load order data from backend
-  useEffect(() => {
-    const loadOrderData = async () => {
-      if (!requestId) {
-        // Try navigation state first
-        if (location.state?.request) {
-          const request = location.state.request;
-          setRequestData(request);
-          setUserLiveLocation({
-            lat: request.location?.lat || 19.0760,
-            lng: request.location?.lng || 72.8777
-          });
-          return;
-        }
-        navigate('/scrapper/my-active-requests', { replace: true });
+  const loadOrderData = useCallback(async () => {
+    if (!requestId) {
+      // Try navigation state first
+      if (location.state?.request) {
+        const request = location.state.request;
+        setRequestData(request);
+        setUserLiveLocation({
+          lat: request.location?.lat || 19.0760,
+          lng: request.location?.lng || 72.8777
+        });
         return;
       }
+      navigate('/scrapper/my-active-requests', { replace: true });
+      return;
+    }
 
-      try {
-        // Load order from backend
-        const response = await orderAPI.getById(requestId);
+    try {
+      // Load order from backend
+      const response = await orderAPI.getById(requestId);
 
-        if (response.success && response.data?.order) {
-          const order = response.data.order;
+      if (response.success && response.data?.order) {
+        const order = response.data.order;
+        setIsB2B(order.userModel === 'Scrapper');
+        setIsCompleted(order.status === 'completed');
 
-          // Map backend order to frontend format
-          const mappedRequest = {
-            id: order._id || order.id,
-            _id: order._id || order.id,
-            requestId: `REQ - ${(order._id || order.id).toString().slice(-6).toUpperCase()}`,
-            orderType: order.orderType || 'scrap_sell',
-            serviceDetails: order.serviceDetails,
-            userName: order.user?.name || 'User',
-            userPhone: order.user?.phone || '',
-            userEmail: order.user?.email || '',
-            scrapType: order.orderType === 'cleaning_service'
-              ? (getTranslatedText(order.serviceDetails?.serviceType || 'Cleaning Service'))
-              : (order.scrapItems?.map(item => getTranslatedText(item.category)).join(', ') || getTranslatedText('Scrap')),
-            weight: order.totalWeight,
-            pickupSlot: order.pickupSlot || null,
-            preferredTime: order.preferredTime || null,
-            images: order.images?.map(img => ({
-              id: img.publicId || img.url,
-              preview: img.url,
-              url: img.url
-            })) || [],
-            location: {
-              address: [
-                order.pickupAddress?.street,
-                order.pickupAddress?.city,
-                order.pickupAddress?.state,
-                order.pickupAddress?.pincode
-              ].filter(Boolean).join(', ') || 'Address not available',
-              lat: order.pickupAddress?.coordinates?.lat || 19.0760,
-              lng: order.pickupAddress?.coordinates?.lng || 72.8777
-            },
-            estimatedEarnings: order.orderType === 'cleaning_service'
-              ? `₹${order.serviceFee || 0}`
-              : `₹${order.totalAmount || 0}`,
-            status: order.status,
-            paymentStatus: order.paymentStatus,
-            // Backend fields
-            assignmentStatus: order.assignmentStatus,
-            acceptedAt: order.acceptedAt,
-            notes: order.notes || '',
-            // Model B fields
-            isNegotiated: order.isNegotiated || order.scrapItems?.some(item => item.pricingType === 'negotiable'),
-            scrapItems: order.scrapItems || [],
-            isDonation: order.isDonation || order.scrapItems?.some(item => item.pricingType === 'donate'),
-            hasNegotiableItems: order.isNegotiated || order.scrapItems?.some(item => item.pricingType === 'negotiable')
-          };
+        // Map backend order to frontend format
+        const mappedRequest = {
+          id: order._id || order.id,
+          _id: order._id || order.id,
+          requestId: `REQ - ${(order._id || order.id).toString().slice(-6).toUpperCase()}`,
+          orderType: order.orderType || 'scrap_sell',
+          serviceDetails: order.serviceDetails,
+          userName: order.user?.name || 'User',
+          userPhone: order.user?.phone || '',
+          userEmail: order.user?.email || '',
+          scrapType: order.orderType === 'cleaning_service'
+            ? (getTranslatedText(order.serviceDetails?.serviceType || 'Cleaning Service'))
+            : (order.scrapItems?.map(item => getTranslatedText(item.category)).join(', ') || getTranslatedText('Scrap')),
+          weight: order.totalWeight,
+          pickupSlot: order.pickupSlot || null,
+          preferredTime: order.preferredTime || null,
+          images: order.images?.map(img => ({
+            id: img.publicId || img.url,
+            preview: img.url,
+            url: img.url
+          })) || [],
+          location: {
+            address: [
+              order.pickupAddress?.street,
+              order.pickupAddress?.city,
+              order.pickupAddress?.state,
+              order.pickupAddress?.pincode
+            ].filter(Boolean).join(', ') || 'Address not available',
+            lat: order.pickupAddress?.coordinates?.lat || 19.0760,
+            lng: order.pickupAddress?.coordinates?.lng || 72.8777
+          },
+          estimatedEarnings: order.orderType === 'cleaning_service'
+            ? `₹${order.serviceFee || 0}`
+            : `₹${order.totalAmount || 0}`,
+          status: order.status,
+          paymentStatus: order.paymentStatus,
+          // Backend fields
+          assignmentStatus: order.assignmentStatus,
+          acceptedAt: order.acceptedAt,
+          notes: order.notes || '',
+          // Model B fields
+          isNegotiated: order.isNegotiated || order.scrapItems?.some(item => item.pricingType === 'negotiable'),
+          scrapItems: order.scrapItems || [],
+          isDonation: order.isDonation || order.scrapItems?.some(item => item.pricingType === 'donate'),
+          hasNegotiableItems: order.isNegotiated || order.scrapItems?.some(item => item.pricingType === 'negotiable')
+        };
 
-          setRequestData(mappedRequest);
-          setUserLiveLocation({
-            lat: mappedRequest.location.lat,
-            lng: mappedRequest.location.lng
-          });
+        setRequestData(mappedRequest);
+        setUserLiveLocation({
+          lat: mappedRequest.location.lat,
+          lng: mappedRequest.location.lng
+        });
 
-          // Check if already picked up (status is in_progress or completed)
-          if (order.status === 'in_progress' || order.status === 'completed') {
-            setIsPickedUp(true);
-            setPaymentStatus(order.paymentStatus || 'pending');
-            const amount = order.orderType === 'cleaning_service' ? (order.serviceFee || 0) : (order.totalAmount || 0);
-            setFinalAmount(`₹${amount}`);
-            setShowPaymentInput(order.paymentStatus === 'pending');
-          }
-
-          // Load all active requests for navigation
-          const allActiveResponse = await scrapperOrdersAPI.getMyAssigned('status=IN_PROGRESS');
-          if (allActiveResponse.success && allActiveResponse.data?.orders) {
-            const allRequests = allActiveResponse.data.orders
-              .map(o => ({
-                id: o._id || o.id,
-                status: o.status
-              }))
-              .filter(req => req.status !== 'completed');
-            setAllActiveRequests(allRequests);
-            const index = allRequests.findIndex(req => req.id === mappedRequest.id);
-            setCurrentRequestIndex(index >= 0 ? index : 0);
-          }
-        } else {
-          throw new Error(getTranslatedText('Order not found'));
+        // Check if already picked up (status is in_progress or completed)
+        if (order.status === 'in_progress' || order.status === 'completed') {
+          setIsPickedUp(true);
+          setPaymentStatus(order.paymentStatus || 'pending');
+          const amount = order.orderType === 'cleaning_service' ? (order.serviceFee || 0) : (order.totalAmount || 0);
+          setFinalAmount(`₹${amount}`);
         }
-      } catch (error) {
-        console.error('Failed to load order:', error);
-        // Fallback to localStorage if backend fails
-        const localRequest = getScrapperRequestById(requestId);
-        if (localRequest) {
-          setRequestData(localRequest);
-          setUserLiveLocation({
-            lat: localRequest.location?.lat || 19.0760,
-            lng: localRequest.location?.lng || 72.8777
-          });
-        } else {
-          navigate('/scrapper/my-active-requests', { replace: true });
+
+        // Load all active requests for navigation
+        const allActiveResponse = await scrapperOrdersAPI.getMyAssigned('status=IN_PROGRESS');
+        if (allActiveResponse.success && allActiveResponse.data?.orders) {
+          const allRequests = allActiveResponse.data.orders
+            .map(o => ({
+              id: o._id || o.id,
+              status: o.status
+            }))
+            .filter(req => req.status !== 'completed');
+          setAllActiveRequests(allRequests);
+          const index = allRequests.findIndex(req => req.id === mappedRequest.id);
+          setCurrentRequestIndex(index >= 0 ? index : 0);
         }
+      } else {
+        throw new Error(getTranslatedText('Order not found'));
       }
-    };
+    } catch (error) {
+      console.error('Failed to load order:', error);
+      // Fallback to localStorage if backend fails
+      const localRequest = getScrapperRequestById(requestId);
+      if (localRequest) {
+        setRequestData(localRequest);
+        setUserLiveLocation({
+          lat: localRequest.location?.lat || 19.0760,
+          lng: localRequest.location?.lng || 72.8777
+        });
+      } else {
+        navigate('/scrapper/my-active-requests', { replace: true });
+      }
+    }
+  }, [requestId, location, navigate, getTranslatedText]);
 
+  useEffect(() => {
     loadOrderData();
-  }, [requestId, location, navigate]);
+  }, [loadOrderData]);
+
+  // Socket setup for tracking and status updates
+  useEffect(() => {
+    if (requestData?.id || requestData?._id) {
+      const orderId = requestData._id || requestData.id;
+      socketClient.joinTracking(orderId);
+
+      // Listen for partner's location if it's a B2B order
+      const handleLocationUpdate = (data) => {
+        if (data.orderId === orderId) {
+          setPartnerLocation(data.location || data.coords);
+          if (stage !== 'pickup' && !isPickedUp) {
+            setStage('pickup');
+          }
+        }
+      };
+
+      const handleStatusUpdate = (data) => {
+        if (data.orderId === orderId) {
+          loadOrderData();
+        }
+      };
+
+      socketClient.on('scrapper_location_update', handleLocationUpdate);
+      socketClient.on('order_status_update', handleStatusUpdate);
+
+      return () => {
+        socketClient.leaveTracking(orderId);
+        socketClient.off('order_status_update', handleStatusUpdate);
+        socketClient.off('scrapper_location_update', handleLocationUpdate);
+      };
+    }
+  }, [requestData?._id, requestData?.id, stage, isPickedUp, loadOrderData]);
 
   // Refresh request data from backend periodically
   useEffect(() => {
@@ -337,7 +378,6 @@ const ActiveRequestDetailsPage = () => {
             setPaymentStatus(order.paymentStatus || 'pending');
             const amount = order.orderType === 'cleaning_service' ? (order.serviceFee || 0) : (order.totalAmount || 0);
             setFinalAmount(`₹${amount}`);
-            setShowPaymentInput(order.paymentStatus === 'pending');
           }
         }
       } catch (error) {
@@ -355,15 +395,15 @@ const ActiveRequestDetailsPage = () => {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', refreshRequest);
 
-    // Also refresh every 5 seconds
-    const interval = setInterval(refreshRequest, 5000);
+    // Also refresh every 10 seconds (reduced from 5s to alleviate server load)
+    const interval = setInterval(refreshRequest, 10000);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', refreshRequest);
       clearInterval(interval);
     };
-  }, [requestData?._id, requestData?.id]);
+  }, [requestData?._id, requestData?.id, requestId]); // Ensure stable dependencies
 
   // Auto-redirect if order is completed
   useEffect(() => {
@@ -386,7 +426,7 @@ const ActiveRequestDetailsPage = () => {
           });
         },
         (error) => {
-          console.error('Error getting location:', error);
+          // Silence verbose console logging for expected GPS unavailability
           // Default location (Mumbai)
           setScrapperLocation({
             lat: 19.0760,
@@ -404,7 +444,7 @@ const ActiveRequestDetailsPage = () => {
           });
         },
         (error) => {
-          console.error('Error watching location:', error);
+          // Silent failure for watchPosition to prevent log spamming
         }
       );
 
@@ -458,8 +498,9 @@ const ActiveRequestDetailsPage = () => {
 
   const handleChat = () => {
     if (requestData?.id || requestData?._id) {
-      navigate(`/scrapper/chat`, {
-        state: { orderId: requestData.id || requestData._id }
+      const oid = requestData.id || requestData._id;
+      navigate(`/scrapper/chat?orderId=${oid}`, {
+        state: { orderId: oid }
       });
     }
   };
@@ -823,17 +864,21 @@ const ActiveRequestDetailsPage = () => {
       {/* Map Container - Full Screen */}
       <div className="w-full h-screen">
         <ScrapperMap
-          stage="pickup"
+          stage={isB2B ? 'pickup' : (stage || 'pickup')}
           orderId={requestData?.id || requestData?._id}
-          scrapperLocation={scrapperLocation}
-          userLocation={userLiveLocation}
+          // In B2B, the viewer is scrapper (Dukandar) but tracking THEIR partner (Pheriwala)
+          // FALLBACK: Use requestData.location (Pheriwala's pickup address) instead of viewer's scrapperLocation
+          scrapperLocation={isB2B ? (partnerLocation || requestData?.location) : scrapperLocation}
+          userLocation={isB2B ? scrapperLocation : userLiveLocation}
           userName={requestData?.userName}
+          enableTracking={true}
+          hideRoute={isB2B}
         />
       </div>
 
-      {/* Payment Page - Full Screen (when payment pending) */}
+      {/* Payment Page - Full Screen */}
       {
-        isPickedUp && paymentStatus === 'pending' ? (
+        showPaymentInput ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -849,8 +894,6 @@ const ActiveRequestDetailsPage = () => {
               <button
                 onClick={() => {
                   setShowPaymentInput(false);
-                  setIsPickedUp(false);
-                  setPaymentStatus('pending');
                 }}
                 className="w-10 h-10 rounded-full flex items-center justify-center shadow-md border border-slate-100"
                 style={{ backgroundColor: '#ffffff' }}
@@ -1080,14 +1123,20 @@ const ActiveRequestDetailsPage = () => {
           <>
             {/* Request Details & Contact Info - Bottom Slide (when payment not pending) */}
             <motion.div
+              key="details-sheet"
               initial={{ y: '100%' }}
-              animate={{ y: 0 }}
+              animate={{ y: isMinimized ? 'calc(100% - 100px)' : 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute bottom-0 left-0 right-0 z-30 rounded-t-2xl shadow-2xl flex flex-col bg-white border-t border-slate-200"
-              style={{ maxHeight: '65vh', overflow: 'hidden' }}
+              className="sheet-container absolute bottom-0 left-0 right-0 z-30 rounded-t-2xl shadow-2xl flex flex-col bg-white border-t border-slate-200"
+              style={{ height: '65vh', overflow: 'hidden', touchAction: 'none' }}
             >
               {/* Slide Handle */}
-              <div className="w-12 h-1.5 mx-auto mt-2 rounded-full flex-shrink-0 bg-slate-300" />
+              <div 
+                className="w-full py-4 cursor-pointer"
+                onClick={() => setIsMinimized(!isMinimized)}
+              >
+                <div className="w-12 h-1.5 mx-auto rounded-full flex-shrink-0 bg-slate-300" />
+              </div>
 
               {/* Request Content - Compact - Scrollable */}
               <div className="p-4 pb-2 overflow-y-auto flex-1" style={{ minHeight: 0, WebkitOverflowScrolling: 'touch' }}>
@@ -1104,8 +1153,21 @@ const ActiveRequestDetailsPage = () => {
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate text-slate-800">{requestData.userName}</p>
-                      <p className="text-xs truncate text-slate-500">{requestData.scrapType}</p>
+                      <p className="text-sm font-semibold truncate text-slate-800">
+                        {requestData.userName}
+                        {requestData.userModel === 'Scrapper' && (
+                          <span className="text-[10px] ml-1.5 px-1.5 py-0.5 bg-sky-50 text-sky-600 rounded font-bold uppercase tracking-wider border border-sky-100">
+                            Partner Store
+                          </span>
+                        )}
+                      </p>
+                      {isPickedUp && requestData.userPhone && (
+                        <p className="text-[10px] font-bold text-slate-500 mb-0.5">{requestData.userPhone}</p>
+                      )}
+                      <p className="text-xs truncate text-slate-500">
+                        {requestData.scrapType}
+                        {requestData.weight ? ` (${requestData.weight} Kg)` : ''}
+                      </p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-bold text-sky-600">
@@ -1268,9 +1330,24 @@ const ActiveRequestDetailsPage = () => {
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: '#ffffff' }}>
                       <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                    {requestData.orderType === 'cleaning_service' ? getTranslatedText('Start Service') : getTranslatedText('Pickup Scrap')}
+                    {isB2B 
+                      ? getTranslatedText('Confirm Partner Arrival') 
+                      : (requestData.orderType === 'cleaning_service' ? getTranslatedText('Start Service') : getTranslatedText('Pickup Scrap'))
+                    }
                   </motion.button>
-                ) : null}
+                ) : (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setShowPaymentInput(true)}
+                    className="w-full mb-3 py-3 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: '#ffffff' }}>
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {getTranslatedText('Make Payment / Complete')}
+                  </motion.button>
+                )}
 
                 <div className="grid grid-cols-2 gap-3">
                   <motion.button
@@ -1296,22 +1373,24 @@ const ActiveRequestDetailsPage = () => {
                     {getTranslatedText("Chat")}
                   </motion.button>
                 </div>
-                <div className="flex gap-2 mt-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowFakeLeadModal(true)}
-                    className="flex-1 py-3 rounded-lg text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors"
-                  >
-                    {getTranslatedText("Report Fake Lead")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCancelOrder}
-                    className="flex-1 py-3 rounded-lg text-xs font-bold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors"
-                  >
-                    {getTranslatedText("Cancel Order")}
-                  </button>
-                </div>
+                {!isCompleted && !isPickedUp && (
+                  <div className="flex gap-2 mt-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowFakeLeadModal(true)}
+                      className="flex-1 py-3 rounded-lg text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors"
+                    >
+                      {getTranslatedText("Report Fake Lead")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCancelOrder}
+                      className="flex-1 py-3 rounded-lg text-xs font-bold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors"
+                    >
+                      {getTranslatedText("Cancel Order")}
+                    </button>
+                  </div>
+                )}
               </div>
             </motion.div>
           </>

@@ -271,8 +271,8 @@ export const getNearbyBigScrappers = asyncHandler(async (req, res) => {
                 key: 'businessLocation',
                 query: {
                     scrapperType: { $in: targetRoleTypes },
-                    'kyc.status': 'verified'
-                    // isOnline: true removed to show offline scrappers as well
+                    'kyc.status': 'verified',
+                    receptionMode: true
                 },
                 spherical: true
             }
@@ -284,7 +284,8 @@ export const getNearbyBigScrappers = asyncHandler(async (req, res) => {
                 businessLocation: 1,
                 rating: 1,
                 services: 1,
-                isOnline: 1, // Include online status for UI badging
+                isOnline: 1, 
+                receptionMode: 1, // Added for discovery status
                 distance: { $divide: ['$distance', 1000] } // Convert to KM
             }
         }
@@ -342,8 +343,9 @@ export const searchScrappersByCity = asyncHandler(async (req, res) => {
     const searchResults = await Scrapper.find({
         scrapperType: { $in: targetRoleTypes },
         'businessLocation.city': cityRegex,
-        'kyc.status': 'verified'
-    }).select('name phone businessLocation rating services isOnline').lean();
+        'kyc.status': 'verified',
+        receptionMode: true
+    }).select('name phone businessLocation rating services isOnline receptionMode').lean();
     
     // Default the distance to N/A or compute basic empty response for frontend format
     // Because this isn't geo-based, there is no real distance.

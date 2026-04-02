@@ -319,6 +319,7 @@ const MyActiveRequestsPage = () => {
                         </div>
                         <p className="text-sm md:text-base mb-2 text-slate-500">
                           {getTranslatedText(request.scrapType) || getTranslatedText('Scrap')}
+                          {request.weight ? ` (${request.weight} Kg)` : ''}
                         </p>
                         <div className="flex items-center gap-2 mb-2">
                            {request.isDonation ? (

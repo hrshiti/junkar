@@ -28,7 +28,7 @@ const PriceTicker = () => {
               price: item.pricePerKg || 0,
               minPrice: item.minPrice,
               maxPrice: item.maxPrice,
-              unit: 'kg',
+              unit: item.unit || 'kg',
               isNegotiable: item.isNegotiable || false,
               change: null
             }))
@@ -103,8 +103,17 @@ const PriceTicker = () => {
                 className="text-sm md:text-base font-bold"
                 style={{ color: "#1e293b" }}>
                 {item.isNegotiable ? (
-                  <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-[#fef3c7] text-[#92400e] border border-amber-200 w-fit">
-                    <span className="text-amber-500 text-[10px]">💛</span> {getTranslatedText('Negotiable')}
+                  <div className="flex flex-col items-start gap-1">
+                    {item.unit && (item.unit.toLowerCase().includes('pic') || item.unit.toLowerCase().includes('pc')) && (
+                      <span className="text-[10px] md:text-xs font-bold text-slate-700">
+                         {item.minPrice && item.maxPrice 
+                           ? `₹${item.minPrice}-${item.maxPrice}/${item.unit}` 
+                           : `₹${item.price.toFixed(0)}/${item.unit}`}
+                      </span>
+                    )}
+                    <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-[#fef3c7] text-[#92400e] border border-amber-200 w-fit">
+                      <span className="text-amber-500 text-[10px]">💛</span> {getTranslatedText('Negotiable')}
+                    </div>
                   </div>
                 ) : (
                   item.minPrice && item.maxPrice

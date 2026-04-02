@@ -27,7 +27,7 @@ export const getNotifications = asyncHandler(async (req, res) => {
         isRead: false
     });
 
-    sendSuccess(res, 200, {
+    sendSuccess(res, 'Notifications retrieved successfully', {
         notifications,
         pagination: {
             page,

@@ -2,12 +2,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
-import { FaGift, FaChartLine, FaCheck, FaBell, FaArrowLeft } from 'react-icons/fa';
+import { FaGift, FaChartLine, FaCheck, FaBell, FaArrowLeft, FaTimes } from 'react-icons/fa';
 import socketClient from '../../shared/utils/socketClient';
 import PriceTicker from '../../user/components/PriceTicker';
 import ScrapperSolutions from './ScrapperSolutions';
 import { getActiveRequestsCount, getScrapperAssignedRequests, migrateOldActiveRequest } from '../../shared/utils/scrapperRequestUtils';
-import { earningsAPI, scrapperOrdersAPI, subscriptionAPI, kycAPI, scrapperProfileAPI } from '../../shared/utils/api';
+import { earningsAPI, scrapperOrdersAPI, subscriptionAPI, kycAPI, scrapperProfileAPI, notificationAPI } from '../../shared/utils/api';
 import BannerSlider from '../../shared/components/BannerSlider';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import LanguageSelector from '../../shared/components/LanguageSelector';
@@ -291,39 +291,67 @@ const ScrapperDashboard = () => {
 
     const handleNewOrder = (data) => {
       console.log('🔔 Dashboard: New Request Received!', data);
+      const newRequest = {
+        orderId: data.orderId,
+        userName: data.userName || 'Customer',
+        city: data.city || '',
+        addressPreview: data.addressPreview || data.message || 'New pickup request',
+        receivedAt: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+      };
+      
+      setPendingRequests(prev => {
+        if (prev.some(r => r.orderId === newRequest.orderId)) return prev;
+        return [...prev, newRequest];
+      });
       setPendingRequestsCount(prev => prev + 1);
-      setPendingRequests(prev => [
-        ...prev,
-        {
-          orderId: data.orderId,
-          userName: data.userName || 'Customer',
-          city: data.city || '',
-          addressPreview: data.addressPreview || 'New pickup request',
-          receivedAt: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
-        }
-      ]);
     };
 
-    // Attach listener immediately (socket.io buffers events until connected)
     socket.on('new_order_request', handleNewOrder);
+    
+    // SYNC: Fetch existing available order notifications from DB on load
+    const syncNotifications = async () => {
+      try {
+        const response = await notificationAPI.getNotifications('limit=10');
+        if (response.success && response.data?.notifications) {
+          const freshNotifications = response.data.notifications
+            .filter(n => (n.type === 'new_order_request' || n.type === 'new_order' || n.title?.includes('New')) && !n.isRead)
+            .map(n => ({
+              notificationId: n._id,
+              orderId: n.data?.orderId || n.orderId,
+              userName: n.data?.userName || n.title?.split('from ')[1] || 'Customer',
+              city: n.data?.city || '',
+              addressPreview: n.message || 'New pickup request',
+              receivedAt: new Date(n.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+            }));
+          
+          if (freshNotifications.length > 0) {
+            setPendingRequests(prev => {
+              // Merge and avoid duplicates by orderId
+              const existingIds = new Set(prev.map(p => p.orderId));
+              const uniqueNew = freshNotifications.filter(n => n.orderId && !existingIds.has(n.orderId));
+              return [...prev, ...uniqueNew];
+            });
+            setPendingRequestsCount(prev => freshNotifications.length);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to sync notifications:', err);
+      }
+    };
+    syncNotifications();
 
     return () => {
       socket.off('new_order_request', handleNewOrder);
     };
   }, [isReadyForRequests]);
 
-  // FCM Foreground Push Notification Handler - runs ONCE on mount only
-  // Firebase's onMessage can only be registered once - re-registering causes silent failures
+  // FCM Registration and Setup - runs ONCE on mount only
   useEffect(() => {
     let active = true;
-    import('../../../services/pushNotificationService').then(({ setupForegroundNotificationHandler }) => {
+    import('../../../services/pushNotificationService').then(({ registerFCMToken }) => {
       if (!active) return;
-      setupForegroundNotificationHandler((payload) => {
-        const type = payload?.data?.type;
-        if (type === 'new_order' || type === 'donation_order') {
-          setPendingRequestsCount(prev => prev + 1);
-        }
-      });
+      // Refresh token registration for this scrapper on dashboard mount
+      registerFCMToken();
     }).catch(() => {});
     return () => { active = false; };
   }, []);
@@ -573,6 +601,24 @@ const ScrapperDashboard = () => {
     };
   }, []);
 
+  // Dismiss a single notification
+  const handleDismissRequest = async (e, orderId, notificationId) => {
+    e.stopPropagation(); // Don't navigate to map
+    
+    // 1. Update UI immediately
+    setPendingRequests(prev => prev.filter(r => r.orderId !== orderId));
+    setPendingRequestsCount(prev => Math.max(0, prev - 1));
+    
+    // 2. Mark as read in backend if we have a notificationId
+    if (notificationId) {
+      try {
+        await notificationAPI.markRead(notificationId);
+      } catch (err) {
+        console.error('Failed to mark notification as read:', err);
+      }
+    }
+  };
+
   // Show loading state while fetching status from backend
   if (isLoadingStatus) {
     return (
@@ -677,7 +723,7 @@ const ScrapperDashboard = () => {
                               setPendingRequestsCount(0);
                               setPendingRequests([]);
                               setShowNotificationDropdown(false);
-                              navigate('/scrapper/active-requests');
+                              navigate(`/scrapper/active-requests${req.orderId ? `?highlight=${req.orderId}` : ''}`);
                             }}
                             className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col relative overflow-hidden active:scale-[0.98] transition-all cursor-pointer hover:shadow-md group"
                           >
@@ -687,12 +733,21 @@ const ScrapperDashboard = () => {
                                 <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center">
                                   <FaBell size={18} />
                                 </div>
-                                <div>
+                                <div className="flex-1 min-w-0">
                                   <h4 className="text-sm font-extrabold text-slate-800">New Request Alert!</h4>
                                   <p className="text-[10px] text-slate-400 font-medium">{req.receivedAt}</p>
                                 </div>
                               </div>
-                              <span className="px-2 py-1 rounded-md bg-green-50 text-green-600 text-[10px] font-bold">New</span>
+                              <div className="flex items-center gap-2">
+                                <span className="px-2 py-1 rounded-md bg-green-50 text-green-600 text-[10px] font-bold">New</span>
+                                <button 
+                                  onClick={(e) => handleDismissRequest(e, req.orderId, req.notificationId)}
+                                  className="p-1.5 rounded-lg bg-slate-100 text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                  title="Dismiss"
+                                >
+                                  <FaTimes size={12} />
+                                </button>
+                              </div>
                             </div>
 
                             <div className="space-y-3">

@@ -126,6 +126,7 @@ const CategorySelectionPage = () => {
             price: p.pricePerKg || p.price || 0,
             minPrice: p.minPrice,
             maxPrice: p.maxPrice,
+            unit: p.unit || 'kg',
             pricingType: p.isNegotiable ? 'negotiable' : 'kg_based'
           }));
 
@@ -319,13 +320,20 @@ const CategorySelectionPage = () => {
                   {category.pricingType === 'negotiable'
                     ? (
                       <div className="flex flex-col items-center gap-0.5">
+                        {category.unit && (category.unit.toLowerCase().includes('pic') || category.unit.toLowerCase().includes('pc')) && (
+                          <span className="text-[9px] md:text-[10px] font-bold" style={{ color: '#1e293b' }}>
+                             {category.minPrice && category.maxPrice 
+                              ? `₹${category.minPrice}-${category.maxPrice}/${getTranslatedText(category.unit)}`
+                              : `₹${category.price || 0}/${getTranslatedText(category.unit)}`}
+                          </span>
+                        )}
                         <span className="flex items-center gap-1"><span className="text-amber-500 text-[8px] md:text-[10px]">💛</span> {getTranslatedText('Negotiable')}</span>
                       </div>
                     )
                     : (
                       category.minPrice && category.maxPrice 
-                        ? `₹${category.minPrice} - ${category.maxPrice}`
-                        : `₹${category.price}/${getTranslatedText('kg')}`
+                        ? `₹${category.minPrice} - ${category.maxPrice}/${getTranslatedText(category.unit || 'kg')}`
+                        : `₹${category.price}/${getTranslatedText(category.unit || 'kg')}`
                     )
                   }
                 </p>

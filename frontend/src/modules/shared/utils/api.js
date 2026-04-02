@@ -337,6 +337,10 @@ export const scrapperOrdersAPI = {
   getTargeted: async () => {
     return apiRequest('/orders/targeted', { method: 'GET' });
   },
+  getMySentRequests: async (query = '') => {
+    const suffix = query ? `?${query}` : '';
+    return apiRequest(`/orders/my-sent-requests${suffix}`, { method: 'GET' });
+  },
 };
 
 // Admin Orders API
@@ -680,6 +684,19 @@ export const scrapperProfileAPI = {
   },
   deleteMyAccount: async () => {
     return apiRequest('/scrappers/me', { method: 'DELETE' });
+  },
+};
+
+// Notification API
+export const notificationAPI = {
+  getNotifications: async (query = '') => {
+    return apiRequest(`${API_ENDPOINTS.notifications}${query ? `?${query}` : ''}`, { method: 'GET' });
+  },
+  markRead: async (id) => {
+    return apiRequest(`${API_ENDPOINTS.notifications}/${id}/read`, { method: 'PUT' });
+  },
+  markAllRead: async () => {
+    return apiRequest(`${API_ENDPOINTS.notifications}/read-all`, { method: 'PUT' });
   },
 };
 

@@ -535,8 +535,9 @@ const ChatPage = () => {
 
         <div className="space-y-3 pb-2">
           {messages.map((message) => {
-            const isScrapperMessage = message.senderId?._id === user._id || message.senderType === 'scrapper';
-            const senderName = message.senderId?.name || getTranslatedText('Unknown');
+            const senderId = message.senderId?._id || message.senderId || message.sender?._id || message.sender;
+            const isOwnMessage = senderId?.toString() === user?._id?.toString();
+            const senderName = message.senderId?.name || message.sender?.name || getTranslatedText('Unknown');
             const senderInitials = senderName.split(' ').map(n => n[0]).join('') || getTranslatedText('S');
 
             return (
@@ -545,12 +546,12 @@ const ChatPage = () => {
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.2 }}
-                className={`flex ${isScrapperMessage ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
               >
-                <div className={`flex items-end gap-2 max-w-[85%] ${isScrapperMessage ? 'flex-row-reverse' : 'flex-row'}`}>
+                <div className={`flex items-end gap-2 max-w-[85%] ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'}`}>
                   {/* Avatar */}
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${isScrapperMessage ? 'bg-sky-900/30 text-sky-400' : 'bg-sky-900/20 text-sky-600'}`}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${isOwnMessage ? 'bg-sky-900/30 text-sky-400' : 'bg-sky-900/20 text-sky-600'}`}
                   >
                     {senderInitials}
                   </div>
@@ -558,7 +559,7 @@ const ChatPage = () => {
                   {/* Message Bubble */}
                   <div className="flex flex-col">
                     <div
-                      className={`rounded-2xl px-4 py-2.5 shadow-sm ${isScrapperMessage
+                      className={`rounded-2xl px-4 py-2.5 shadow-sm ${isOwnMessage
                         ? 'rounded-tr-md bg-sky-600 text-white shadow-sky-900/20'
                         : 'rounded-tl-md bg-zinc-800 text-white shadow-black/20'
                         }`}
@@ -568,10 +569,10 @@ const ChatPage = () => {
                       </p>
                     </div>
                     <span
-                      className={`text-[10px] mt-1 px-1 ${isScrapperMessage ? 'text-right text-gray-500' : 'text-left text-gray-500'}`}
+                      className={`text-[10px] mt-1 px-1 ${isOwnMessage ? 'text-right text-gray-500' : 'text-left text-gray-500'}`}
                     >
                       {formatTime(message.createdAt)}
-                      {isScrapperMessage && message.read && (
+                      {isOwnMessage && message.read && (
                         <span className="ml-1">✓✓</span>
                       )}
                     </span>

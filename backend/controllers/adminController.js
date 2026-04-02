@@ -1014,7 +1014,7 @@ export const getAllPrices = asyncHandler(async (req, res) => {
 // @access  Private (Admin)
 export const createPrice = asyncHandler(async (req, res) => {
   try {
-    const { category, pricePerKg, price: fixedPrice, regionCode, effectiveDate, isActive, isNegotiable, image, type, minPrice, maxPrice, showToUser, showToDukandaar, showToWholesaler } = req.body;
+    const { category, pricePerKg, price: fixedPrice, regionCode, effectiveDate, isActive, isNegotiable, image, type, minPrice, maxPrice, showToUser, showToDukandaar, showToWholesaler, unit } = req.body;
 
     if (!category) {
       return sendError(res, 'Category is required', 400);
@@ -1042,6 +1042,7 @@ export const createPrice = asyncHandler(async (req, res) => {
       effectiveDate: effectiveDate ? new Date(effectiveDate) : new Date(),
       isActive: isActive !== undefined ? isActive : true,
       isNegotiable: isNegotiable || false,
+      unit: unit || 'kg',
       updatedBy: req.user.id,
       image,
       type: type || 'material',
@@ -1064,7 +1065,7 @@ export const createPrice = asyncHandler(async (req, res) => {
 // @access  Private (Admin)
 export const updatePrice = asyncHandler(async (req, res) => {
   try {
-    const { pricePerKg, price: fixedPrice, effectiveDate, isActive, isNegotiable, image, minPrice, maxPrice, showToUser, showToDukandaar, showToWholesaler } = req.body;
+    const { pricePerKg, price: fixedPrice, effectiveDate, isActive, isNegotiable, image, minPrice, maxPrice, showToUser, showToDukandaar, showToWholesaler, unit } = req.body;
     const priceId = req.params.id;
 
     const price = await Price.findById(priceId);
@@ -1083,6 +1084,7 @@ export const updatePrice = asyncHandler(async (req, res) => {
     if (showToUser !== undefined) price.showToUser = showToUser;
     if (showToDukandaar !== undefined) price.showToDukandaar = showToDukandaar;
     if (showToWholesaler !== undefined) price.showToWholesaler = showToWholesaler;
+    if (unit !== undefined) price.unit = unit;
     price.updatedBy = req.user.id;
 
     await price.save();

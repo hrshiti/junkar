@@ -90,7 +90,7 @@ const PriceFeedEditor = () => {
   const [activeTab, setActiveTab] = useState(PRICE_TYPES.MATERIAL);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // 'add' | 'edit'
-  const [currentPriceData, setCurrentPriceData] = useState({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '', isNegotiable: false, isActive: true, showToUser: true, showToDukandaar: false, showToWholesaler: false });
+  const [currentPriceData, setCurrentPriceData] = useState({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '', isNegotiable: false, isActive: true, showToUser: true, showToDukandaar: false, showToWholesaler: false, unit: 'kg' });
   const [isSaving, setIsSaving] = useState(false);
   const [showCSVModal, setShowCSVModal] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -235,7 +235,8 @@ const PriceFeedEditor = () => {
           originalMaxPrice: p.maxPrice || 0,
           showToUser: p.showToUser !== undefined ? p.showToUser : true,
           showToDukandaar: p.showToDukandaar || false,
-          showToWholesaler: p.showToWholesaler || false
+          showToWholesaler: p.showToWholesaler || false,
+          unit: p.unit || 'kg'
         }));
       }
 
@@ -250,7 +251,7 @@ const PriceFeedEditor = () => {
 
   const handleAddClick = () => {
     setModalMode('add');
-    setCurrentPriceData({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '', isNegotiable: false, isActive: true, showToUser: true, showToDukandaar: false, showToWholesaler: false });
+    setCurrentPriceData({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '', isNegotiable: false, isActive: true, showToUser: true, showToDukandaar: false, showToWholesaler: false, unit: 'kg' });
     setShowModal(true);
   };
 
@@ -264,6 +265,7 @@ const PriceFeedEditor = () => {
       image: price.image || '',
       minPrice: price.minPrice ? price.minPrice.toString() : '0',
       maxPrice: price.maxPrice ? price.maxPrice.toString() : '0',
+      unit: price.unit || 'kg',
       description: '',
       isActive: price.isActive !== false,
       isNegotiable: price.isNegotiable || false,
@@ -351,7 +353,8 @@ const PriceFeedEditor = () => {
         maxPrice: parseFloat(currentPriceData.maxPrice) || 0,
         showToUser: currentPriceData.showToUser,
         showToDukandaar: currentPriceData.showToDukandaar,
-        showToWholesaler: currentPriceData.showToWholesaler
+        showToWholesaler: currentPriceData.showToWholesaler,
+        unit: currentPriceData.unit || 'kg'
       };
 
       let response;
@@ -364,7 +367,7 @@ const PriceFeedEditor = () => {
       if (response.success) {
         await loadPrices();
         setShowModal(false);
-        setCurrentPriceData({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '', isNegotiable: false, isActive: true, showToUser: true, showToDukandaar: false, showToWholesaler: false });
+        setCurrentPriceData({ id: null, category: '', price: '', minPrice: '', maxPrice: '', image: '', description: '', isNegotiable: false, isActive: true, showToUser: true, showToDukandaar: false, showToWholesaler: false, unit: 'kg' });
         alert(modalMode === 'add' ? getTranslatedText('Item saved successfully!') : getTranslatedText('Item updated successfully!'));
       } else {
         throw new Error(response.message || getTranslatedText('Failed to save item. Please try again.'));
@@ -796,8 +799,8 @@ const PriceFeedEditor = () => {
                 }
               </h2>
               <form onSubmit={handleModalSubmit} className="space-y-3 overflow-y-auto pr-1 custom-scrollbar">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="sm:col-span-1">
                     <label className="block text-xs font-medium mb-1" style={{ color: '#4a5568' }}>
                       {activeTab === PRICE_TYPES.SERVICE ? getTranslatedText('Service Name') : getTranslatedText('Category Name')}
                     </label>
@@ -826,6 +829,20 @@ const PriceFeedEditor = () => {
                       required
                       min="0"
                       step="0.1"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium mb-1" style={{ color: '#4a5568' }}>
+                      {activeTab === PRICE_TYPES.SERVICE ? getTranslatedText('Unit (visit)') : getTranslatedText('Unit (kg, pics)')}
+                    </label>
+                    <input
+                      type="text"
+                      value={currentPriceData.unit}
+                      onChange={(e) => setCurrentPriceData(prev => ({ ...prev, unit: e.target.value }))}
+                      placeholder={activeTab === PRICE_TYPES.SERVICE ? getTranslatedText("e.g. visit") : getTranslatedText("e.g. pics")}
+                      className="w-full px-3 py-1.5 text-sm rounded-xl border-2 focus:outline-none focus:ring-2 focus:border-transparent transition-all"
+                      style={{ borderColor: '#e2e8f0', focusRingColor: '#64946e' }}
+                      required
                     />
                   </div>
                 </div>

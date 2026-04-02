@@ -693,6 +693,24 @@ const ScrapperProfile = () => {
 
             <button
               type="button"
+              onClick={() => navigate('/scrapper/my-sent-requests')}
+              className="w-full flex items-center justify-between px-3.5 py-3 text-left hover:bg-slate-50 transition-colors"
+            >
+              <div>
+                <p className="text-sm font-semibold text-slate-800 font-black text-sky-600">
+                  {getTranslatedText("My Sent Requests")}
+                </p>
+                <p className="text-xs text-slate-500">
+                  {getTranslatedText("Track your bulk scrap sell requests")}
+                </p>
+              </div>
+              <span className="text-sky-400">
+                ›
+              </span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => navigate('/scrapper/earnings')}
               className="w-full flex items-center justify-between px-3.5 py-3 text-left hover:bg-slate-50 transition-colors"
             >

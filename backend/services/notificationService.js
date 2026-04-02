@@ -16,23 +16,40 @@ class NotificationService {
      */
     async notifyOnlineScrappers(order) {
         try {
-            const query = {
+            const RADIUS_KM = 10;
+            const onlineScrappersQuery = {
                 status: 'active',
                 $and: [
                     { $or: [{ isOnline: true }, { receptionMode: true }] },
-                    { $or: [{ 'kyc.status': 'verified' }, { receptionMode: true }] }
+                    { $or: [{ 'kyc.status': 'verified' }, { receptionMode: true }] },
+                    // Exclude the sender themselves if they are a scrapper
+                    { _id: { $ne: order.user } }
                 ]
             };
 
-            // Only feri_wala and small scrappers get donation orders
-            if (order.isDonation) {
-                query.scrapperType = { $in: ['feri_wala', 'small'] };
+            // Apply 10km radius filter if order location is available
+            if (order.location && order.location.coordinates && 
+                order.location.coordinates[0] !== 0 && order.location.coordinates[1] !== 0) {
+                onlineScrappersQuery.liveLocation = {
+                    $nearSphere: {
+                        $geometry: {
+                            type: 'Point',
+                            coordinates: order.location.coordinates // [lng, lat]
+                        },
+                        $maxDistance: RADIUS_KM * 1000 // In meters
+                    }
+                };
             }
 
-            const onlineScrappers = await Scrapper.find(query).select('_id fcmTokens fcmTokenMobile');
+            // Only feri_wala and small scrappers get donation orders
+            if (order.isDonation) {
+                onlineScrappersQuery.scrapperType = { $in: ['feri_wala', 'small'] };
+            }
+
+            const onlineScrappers = await Scrapper.find(onlineScrappersQuery).select('_id fcmTokens fcmTokenMobile');
 
             if (onlineScrappers.length === 0) {
-                logger.info(`No online scrappers found for Order ${order._id}`);
+                logger.info(`No online scrappers found within ${RADIUS_KM}km for Order ${order._id}`);
                 return;
             }
 
@@ -70,7 +87,9 @@ class NotificationService {
                 $or: [{ isOnline: true }, { receptionMode: true }],
                 status: 'active',
                 'kyc.status': 'verified',
-                scrapperType: 'big'
+                scrapperType: 'big',
+                // Exclude the sender (likely a small scrapper/feri_wala)
+                _id: { $ne: order.user }
             }).select('_id fcmTokens fcmTokenMobile');
 
             if (bigScrappers.length === 0) {
@@ -107,37 +126,48 @@ class NotificationService {
      */
     async notifyTargetedScrappers(order) {
         try {
-            if (!order.targetedScrappers || order.targetedScrappers.length === 0) return;
+            // 1. Identify Targeted Scrappers (Standardize to strings)
+            const scrapperIds = (order.targetedScrappers || [])
+                .map(id => id.toString())
+                .filter(id => {
+                    const senderId = order.user?._id ? order.user._id.toString() : (order.user ? order.user.toString() : '');
+                    return id !== senderId;
+                });
 
-            const scrapperIds = order.targetedScrappers.map(id => id.toString());
+            if (scrapperIds.length === 0) return;
 
-            const targetedScrappers = await Scrapper.find({
+            // 2. Fetch Potential Recipients
+            const potentialScrappers = await Scrapper.find({
                 _id: { $in: scrapperIds }
-            }).select('_id fcmTokens fcmTokenMobile');
+            }).select('_id status receptionMode isOnline fcmTokens fcmTokenMobile');
 
-            if (targetedScrappers.length === 0) {
-                logger.info(`No targeted scrappers found for Order ${order._id}`);
-                return;
-            }
-
+            // 3. Dispatch Logic (Insurance Pattern)
+            const senderName = order.user?.name || 'Partner';
+            
             const notificationPayload = {
                 title: 'New Direct Request 🎯',
-                body: 'A retailer has sent you a direct B2B scrap request!',
+                body: `New bulk scrap request from ${senderName}`,
                 data: {
                     orderId: order._id.toString(),
-                    type: 'targeted_order'
+                    type: 'new_order',
+                    userName: senderName
                 }
             };
 
             await Promise.allSettled(
-                targetedScrappers.map(scrapper =>
-                    this.notifyScrapper(scrapper._id.toString(), order, notificationPayload)
-                )
+                potentialScrappers.map(scrapper => {
+                    const sid = scrapper._id.toString();
+                    const isReady = !!scrapper.receptionMode || !!scrapper.isOnline;
+                    
+                    // We ALWAYS notify the DB for targeted requests (Mailbox mode)
+                    // But we ONLY send real-time alerts if they are READY
+                    return this.notifyScrapper(sid, order, notificationPayload, isReady);
+                })
             );
 
-            logger.info(`Notified ${targetedScrappers.length} targeted scrappers for Order ${order._id}`);
+            logger.info(`[Notifications] B2B Insurance dispatch completed for Order ${order._id}`);
         } catch (error) {
-            logger.error('Error notifying targeted scrappers:', error);
+            logger.error(`[Notifications] B2B dispatch failed:`, error);
         }
     }
 
@@ -148,53 +178,54 @@ class NotificationService {
      * @param {Object} notificationPayload - FCM notification payload
      * @returns {Promise<void>}
      */
-    async notifyScrapper(scrapperId, order, notificationPayload) {
+    async notifyScrapper(scrapperId, order, notificationPayload, sendRealTime = true) {
         try {
-            // A. Fetch User Name if not already there (to show on notification card)
-            if (order.user && typeof order.user === 'object' && !order.user.name) {
-                await order.populate('user', 'name');
-            }
+            const targetId = scrapperId.toString();
 
-            // A. Send Socket Event
-            notifyUser(scrapperId, 'new_order_request', {
-                orderId: order._id,
-                userName: order.user?.name || 'Customer',
-                pickupAddress: order.pickupAddress,
-                orderType: order.orderType || 'scrap_pickup',
-                totalAmount: order.totalAmount,
-                message: notificationPayload.body,
-                city: order.pickupAddress?.city || '',
-                addressPreview: [order.pickupAddress?.street, order.pickupAddress?.city]
-                    .filter(Boolean).join(', ')
-            });
-
-            // B. Save to Database for the Bell Icon
+            // 1. ALWAYS Save Notification to Database (Mailbox Insurance)
             await Notification.create({
-                recipient: scrapperId,
+                recipient: targetId,
                 recipientModel: 'Scrapper',
                 type: 'new_order',
-                title: notificationPayload.title,
-                message: notificationPayload.body,
-                data: notificationPayload.data || {}
+                title: notificationPayload?.title || 'New Pickup Request',
+                message: notificationPayload?.body || 'New request received',
+                data: notificationPayload?.data || { orderId: order._id?.toString() }
             });
 
-            // C. Send Push Notification
-            await sendNotificationToUser(scrapperId, notificationPayload, 'scrapper');
+            // 2. Conditional Socket Event (Doorbell Alert)
+            if (sendRealTime) {
+                notifyUser(targetId, 'new_order_request', {
+                    orderId: order._id.toString(),
+                    userName: order.user?.name || notificationPayload?.data?.userName || 'Customer',
+                    pickupAddress: order.pickupAddress,
+                    orderType: 'new_order',
+                    message: notificationPayload?.body || 'New direct request received',
+                    receivedAt: new Date().toISOString(),
+                    city: order.pickupAddress?.city || '',
+                    addressPreview: [order.pickupAddress?.street, order.pickupAddress?.city]
+                        .filter(Boolean).join(', ')
+                });
+
+                // 3. Conditional Push Notification
+                if (notificationPayload) {
+                    await sendNotificationToUser(targetId, notificationPayload, 'scrapper');
+                }
+            }
         } catch (error) {
-            logger.error(`Failed to notify scrapper ${scrapperId}:`, error);
-            // Don't throw - allow other notifications to proceed
+            logger.error(`[Notifications] Scrapper dispatch failed for ${scrapperId}:`, error);
         }
     }
 
     /**
      * Notify a user about order updates
-     * @param {String} userId - User ID
+     * @param {String} userId - Recipient ID
      * @param {String} event - Event type
      * @param {Object} data - Event data
      * @param {Object} pushPayload - Optional FCM payload
+     * @param {String} recipientModel - 'User' or 'Scrapper'
      * @returns {Promise<void>}
      */
-    async notifyUser(userId, event, data, pushPayload = null) {
+    async notifyUser(userId, event, data, pushPayload = null, recipientModel = 'User') {
         try {
             // Socket notification
             notifyUser(userId, event, data);
@@ -203,7 +234,7 @@ class NotificationService {
             if (pushPayload) {
                 await Notification.create({
                     recipient: userId,
-                    recipientModel: 'User',
+                    recipientModel: recipientModel,
                     type: 'system',
                     title: pushPayload.title || 'Notification',
                     message: pushPayload.body || JSON.stringify(data),
@@ -213,7 +244,7 @@ class NotificationService {
 
             // Push notification if payload provided
             if (pushPayload) {
-                await sendNotificationToUser(userId, pushPayload, 'user');
+                await sendNotificationToUser(userId, pushPayload, recipientModel.toLowerCase());
             }
         } catch (error) {
             logger.error(`Failed to notify user ${userId}:`, error);
@@ -280,7 +311,8 @@ class NotificationService {
                         status: newStatus,
                         isDonation: order.isDonation ? 'true' : 'false'
                     }
-                }
+                },
+                order.userModel || 'User'
             );
         } catch (error) {
             logger.error('Failed to notify order status change:', error);

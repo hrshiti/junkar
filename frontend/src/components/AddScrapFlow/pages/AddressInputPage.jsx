@@ -1,8 +1,10 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaMapMarkerAlt, FaLocationArrow } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaLocationArrow, FaSearchLocation } from 'react-icons/fa';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import { Autocomplete, useJsApiLoader } from '@react-google-maps/api';
+import { useRef } from 'react';
 
 const AddressInputPage = () => {
     const staticTexts = [
@@ -36,7 +38,8 @@ const AddressInputPage = () => {
         "Enable Device Location",
         "To find your address automatically, please enable your device location and allow browser access.",
         "Enable Now",
-        "Maybe Later"
+        "Maybe Later",
+        "Search your pickup location (e.g. Lajpat Nagar)",
     ];
     const { getTranslatedText } = usePageTranslation(staticTexts);
     const navigate = useNavigate();
@@ -48,6 +51,12 @@ const AddressInputPage = () => {
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [weightData, setWeightData] = useState(null);
     const [showPermissionModal, setShowPermissionModal] = useState(false);
+    const autocompleteRef = useRef(null);
+
+    const { isLoaded } = useJsApiLoader({
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+        libraries: ['places']
+    });
 
     // Load data from sessionStorage
     useEffect(() => {
@@ -184,6 +193,20 @@ const AddressInputPage = () => {
         );
     };
 
+    const handlePlaceSelect = () => {
+        if (autocompleteRef.current) {
+            const place = autocompleteRef.current.getPlace();
+            if (place.geometry) {
+                const coords = {
+                    lat: place.geometry.location.lat(),
+                    lng: place.geometry.location.lng()
+                };
+                setCoordinates(coords);
+                setAddress(place.formatted_address || '');
+            }
+        }
+    };
+
     const handleContinue = () => {
         if (!address.trim()) {
             alert(getTranslatedText('Please enter your pickup address'));
@@ -282,6 +305,33 @@ const AddressInputPage = () => {
                             </>
                         )}
                     </button>
+                </motion.div>
+
+                {/* Add Search Bar for Address Suggestion */}
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.05 }}
+                    className="mb-4 md:mb-6"
+                >
+                    {isLoaded && (
+                        <div className="relative group">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-sky-500">
+                                <FaSearchLocation className="text-xl" />
+                            </div>
+                            <Autocomplete
+                                onLoad={(ref) => (autocompleteRef.current = ref)}
+                                onPlaceChanged={handlePlaceSelect}
+                            >
+                                <input
+                                    type="text"
+                                    placeholder={getTranslatedText("Search your pickup location (e.g. Lajpat Nagar)")}
+                                    className="w-full pl-12 pr-4 py-4 rounded-xl border-2 bg-white font-medium text-sm md:text-base shadow-md focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-100 transition-all placeholder-gray-400"
+                                    style={{ color: '#2d3748' }}
+                                />
+                            </Autocomplete>
+                        </div>
+                    )}
                 </motion.div>
 
                 {/* Location Error */}

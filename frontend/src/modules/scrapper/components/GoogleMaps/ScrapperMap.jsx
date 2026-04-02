@@ -54,7 +54,8 @@ const ScrapperMap = ({
     stage, // 'request' | 'pickup' | 'arrived'
     userName,
     enableTracking = true,
-    showTrail = true
+    showTrail = true,
+    hideRoute = false
 }) => {
     const staticTexts = [
         "Error loading map",
@@ -304,8 +305,13 @@ const ScrapperMap = ({
                 {stage === 'request' && (
                     <>
                         {availableOrders?.map(order => {
-                            if (!order?.location?.lat || !order?.location?.lng) return null;
-                            const pos = { lat: Number(order.location.lat), lng: Number(order.location.lng) };
+                            const lat = order?.location?.lat;
+                            const lng = order?.location?.lng;
+                            
+                            // More robust check: only skip if values are truly missing (undefined or null)
+                            if (lat === undefined || lat === null || lng === undefined || lng === null) return null;
+                            
+                            const pos = { lat: Number(lat), lng: Number(lng) };
                             if (isNaN(pos.lat) || isNaN(pos.lng)) return null;
 
                             return (
@@ -324,18 +330,34 @@ const ScrapperMap = ({
                 {/* Pickup Stage: Show both + Route */}
                 {stage === 'pickup' && (
                     <>
-                        {/* Animated Scrapper Marker with 3D truck icon */}
+                        {/* Animated Scrapper Marker (Truck or Red Pin for B2B) */}
                         {animatedPosition && (
                             <Marker
                                 position={animatedPosition}
-                                title={getTranslatedText("Scrapper (You)")}
-                                icon={getScrapperIcon()}
+                                title={getTranslatedText("Scrapper (Partner)")}
+                                label={hideRoute ? {
+                                    text: getTranslatedText("Pheriwala"),
+                                    color: "#ef4444",
+                                    fontWeight: "bold",
+                                    fontSize: "14px"
+                                } : null}
+                                icon={hideRoute ? {
+                                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                                        <svg width="40" height="48" viewBox="0 0 40 48" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M20 0 C11 0 4 7 4 16 C4 28 20 48 20 48 C20 48 36 28 36 16 C36 7 29 0 20 0 Z" fill="#ef4444" stroke="#ffffff" stroke-width="2"/>
+                                            <circle cx="20" cy="16" r="6" fill="#ffffff"/>
+                                        </svg>
+                                    `),
+                                    scaledSize: new window.google.maps.Size(40, 48),
+                                    anchor: new window.google.maps.Point(20, 48),
+                                    labelOrigin: new window.google.maps.Point(20, -15)
+                                } : getScrapperIcon()}
                                 zIndex={1000}
                             />
                         )}
 
-                        {/* User Marker with 3D pin */}
-                        {userLocation && (
+                        {/* User Marker with 3D pin (Hidden if hideRoute is active) */}
+                        {userLocation && !hideRoute && (
                             <Marker
                                 position={userLocation}
                                 title={userName || getTranslatedText("Pickup Location")}
@@ -344,8 +366,8 @@ const ScrapperMap = ({
                             />
                         )}
 
-                        {/* Route Line with premium opaque style */}
-                        {directions && (
+                        {/* Route Line with premium opaque style (Hidden if hideRoute is active) */}
+                        {directions && !hideRoute && (
                             <DirectionsRenderer
                                 directions={directions}
                                 options={{
@@ -382,8 +404,8 @@ const ScrapperMap = ({
                 )}
             </GoogleMap>
 
-            {/* Stats Overlay for Pickup Status */}
-            {stage === 'pickup' && routeStats && (
+            {/* Stats Overlay for Pickup Status (Hidden if hideRoute is active) */}
+            {stage === 'pickup' && routeStats && !hideRoute && (
                 <div className="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-md px-4 py-3 rounded-xl shadow-lg border border-gray-100/50">
                     <div className="flex items-center gap-4">
                         <div>

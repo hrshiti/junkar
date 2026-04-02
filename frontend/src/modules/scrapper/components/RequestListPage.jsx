@@ -13,7 +13,23 @@ const RequestListPage = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const response = await scrapperOrdersAPI.getAvailable();
+      // Get scrapper's current location to fetch only nearby requests (10km radius)
+      let queryParams = '';
+      if (navigator.geolocation) {
+        try {
+          const position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { 
+              timeout: 5000, 
+              maximumAge: 60000 
+            });
+          });
+          queryParams = `lat=${position.coords.latitude}&lng=${position.coords.longitude}`;
+        } catch (geoErr) {
+          console.warn('Geolocation failed, fetching all available orders:', geoErr);
+        }
+      }
+
+      const response = await scrapperOrdersAPI.getAvailable(queryParams);
       const list = response?.data?.orders || response?.orders || [];
       setOrders(list);
     } catch (err) {

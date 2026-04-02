@@ -248,8 +248,16 @@ const ActiveRequestsPage = () => {
 
           const conflictCheckList = currentAssigned.length > 0 ? currentAssigned : existingRequests;
 
+          // If we arrived with a highlighted order, remove it from dismissed list
+          let currentDismissed = [...dismissedOrderIds];
+          if (highlightedOrderId && currentDismissed.includes(highlightedOrderId)) {
+             currentDismissed = currentDismissed.filter(id => id !== highlightedOrderId);
+             setDismissedOrderIds(currentDismissed);
+             sessionStorage.setItem('dismissedOrderIds', JSON.stringify(currentDismissed));
+          }
+
           // Filter out orders that were already dismissed by the scrapper in this session
-          const filteredOrders = orders.filter(o => !dismissedOrderIds.includes(o._id || o.id));
+          const filteredOrders = orders.filter(o => !currentDismissed.includes(o._id || o.id));
 
           if (filteredOrders.length > 0) {
             // Map all filtered orders instead of just the first one
@@ -386,7 +394,7 @@ const ActiveRequestsPage = () => {
         socketClient.socket.off('new_order_request');
       }
     };
-  }, [isOnline, incomingRequest, dismissedOrderIds]);
+  }, [isOnline, dismissedOrderIds]); 
 
   // Handle sound playback - Voice alert + vibration instead of ringtone
   useEffect(() => {

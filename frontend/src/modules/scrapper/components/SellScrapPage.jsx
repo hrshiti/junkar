@@ -5,7 +5,7 @@ import { orderAPI, uploadAPI, publicAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
 const SellScrapPage = () => {
-    const { getTranslatedText } = usePageTranslation(["Sell Bulk Scrap", "Select Categories", "Approx Weight (kg)", "Upload Images", "Self-delivery to Partner's Location", "Create Request", "Processing...", "Request Created Successfully!"]);
+    const { getTranslatedText } = usePageTranslation(["Sell Bulk Scrap", "Select Categories", "Approx Weight (kg)", "Upload Images", "Self-delivery to Partner's Location", "Create Request", "Processing...", "Request Created Successfully!", "Self-delivery to Wholesaler's Location", "Nearby Wholesalers"]);
     const navigate = useNavigate();
     const [categories, setCategories] = useState([]);
     const [categoryWeights, setCategoryWeights] = useState({});
@@ -221,7 +221,13 @@ const SellScrapPage = () => {
             const payload = {
                 scrapItems: scrapItems,
                 totalWeight: totalWeightCalculated,
-                pickupAddress: { street: 'Self-delivery' }, // Default for scrapper delivery
+                pickupAddress: { 
+                    street: 'Self-delivery',
+                    coordinates: {
+                        lat: userLocation?.latitude || 22.7196, // Fallback to Indore/Dev location if null
+                        lng: userLocation?.longitude || 75.8577
+                    }
+                },
                 images: images,
                 quantityType: 'large',
                 targetScrapperIds: selectedPartnerIds,
@@ -231,7 +237,7 @@ const SellScrapPage = () => {
             const response = await orderAPI.create(payload);
             if (response.success) {
                 alert(getTranslatedText("Request Created Successfully!"));
-                navigate('/scrapper/my-active-requests');
+                navigate('/scrapper/my-sent-requests', { replace: true });
             }
         } catch (error) {
             console.error("Creation failed", error);
@@ -347,10 +353,10 @@ const SellScrapPage = () => {
                     </div>
                     <div>
                         <h2 className="text-sm font-bold text-sky-900 leading-tight">
-                            {getTranslatedText("Self-delivery to Partner's Location")}
+                            {scrapperRole === 'dukandaar' ? getTranslatedText("Self-delivery to Wholesaler's Location") : getTranslatedText("Self-delivery to Partner's Location")}
                         </h2>
                         <p className="text-[11px] text-sky-700 mt-1 font-medium italic">
-                            Note: No pickup will be provided. You (Retailer) must deliver scrap to the partner after acceptance.
+                            Note: No pickup will be provided. You (Retailer) must deliver scrap to the {scrapperRole === 'dukandaar' ? 'wholesaler' : 'partner'} after acceptance.
                         </p>
                     </div>
                 </section>
@@ -358,7 +364,9 @@ const SellScrapPage = () => {
                 {/* Nearby Partners Discovery */}
                 <section className="bg-white p-3.5 rounded-xl shadow-sm">
                     <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-sm font-semibold text-slate-700">{getTranslatedText("Nearby Partners")}</h2>
+                        <h2 className="text-sm font-semibold text-slate-700">
+                            {scrapperRole === 'dukandaar' ? getTranslatedText("Nearby Wholesalers") : getTranslatedText("Nearby Partners")}
+                        </h2>
                         {isLocating && <span className="text-[10px] text-sky-500 animate-pulse">Locating...</span>}
                     </div>
 
@@ -376,13 +384,16 @@ const SellScrapPage = () => {
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-xl shadow-sm relative">
                                             🏢
-                                            <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white shadow-sm ${partner.isOnline ? 'bg-green-500' : 'bg-slate-300'}`}></span>
+                                            <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white shadow-sm ${partner.receptionMode ? 'bg-green-500' : 'bg-slate-300'}`}></span>
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-1.5">
                                                 <p className="text-xs font-bold text-slate-800">{partner.name || 'Big Scrapper'}</p>
-                                                {!partner.isOnline && (
+                                                {!partner.receptionMode && (
                                                     <span className="text-[9px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded font-medium uppercase tracking-tight">Offline</span>
+                                                )}
+                                                {partner.receptionMode && (
+                                                    <span className="text-[9px] px-1.5 py-0.5 bg-green-50 text-green-600 rounded font-bold uppercase tracking-tight">Ready</span>
                                                 )}
                                             </div>
                                             <div className="flex items-center gap-2 mt-0.5">
@@ -484,13 +495,16 @@ const SellScrapPage = () => {
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-xl shadow-inner relative">
                                                 🏢
-                                                <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white shadow-sm ${partner.isOnline ? 'bg-green-500' : 'bg-slate-300'}`}></span>
+                                                <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white shadow-sm ${partner.receptionMode ? 'bg-green-500' : 'bg-slate-300'}`}></span>
                                             </div>
                                             <div>
                                                 <div className="flex items-center gap-1.5">
                                                     <p className="text-xs font-bold text-slate-800 line-clamp-1">{partner.name || 'Partner'}</p>
-                                                    {!partner.isOnline && (
+                                                    {!partner.receptionMode && (
                                                         <span className="text-[9px] px-1 py-0.5 bg-slate-200 text-slate-500 rounded font-medium uppercase tracking-tight">Offline</span>
+                                                    )}
+                                                    {partner.receptionMode && (
+                                                        <span className="text-[9px] px-1.5 py-0.5 bg-green-50 text-green-600 rounded font-bold uppercase tracking-tight">Ready</span>
                                                     )}
                                                 </div>
                                                 <div className="flex items-center gap-2 mt-0.5">

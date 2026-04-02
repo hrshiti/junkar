@@ -136,6 +136,7 @@ const AllCategoriesPage = () => {
             isNegotiable: price.isNegotiable || false,
             minPrice: price.minPrice,
             maxPrice: price.maxPrice,
+            unit: price.unit || 'kg',
             price: price.pricePerKg || price.price || 0
           }));
 
@@ -230,7 +231,14 @@ const AllCategoriesPage = () => {
                       style={{ color: "#1e293b" }}>
                       {getTranslatedText(category.name)}
                       {category.isNegotiable ? (
-                        <div className="mt-1 flex flex-col items-center gap-0.5">
+                        <div className="mt-1 flex flex-col items-center gap-1">
+                          {category.unit && (category.unit.toLowerCase().includes('pic') || category.unit.toLowerCase().includes('pc')) && (
+                            <div className="text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded-md bg-slate-50 text-slate-700 border border-slate-100 w-fit mx-auto">
+                               {category.minPrice && category.maxPrice 
+                                 ? `₹${category.minPrice} - ${category.maxPrice}/${getTranslatedText(category.unit)}` 
+                                 : `₹${category.price || 0}/${getTranslatedText(category.unit)}`}
+                            </div>
+                          )}
                           <div className="flex items-center justify-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-[#fef3c7] text-[#92400e] border border-amber-200 w-fit mx-auto">
                             <span className="text-amber-500">💛</span> {getTranslatedText('Negotiable')}
                           </div>
@@ -238,8 +246,8 @@ const AllCategoriesPage = () => {
                       ) : (
                         <div className="mt-1 flex justify-center text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded-md bg-slate-50 text-slate-700 border border-slate-100 w-fit mx-auto">
                            {category.minPrice && category.maxPrice 
-                             ? `₹${category.minPrice} - ${category.maxPrice}` 
-                             : `₹${category.price || 0}/${getTranslatedText('kg')}`}
+                             ? `₹${category.minPrice} - ${category.maxPrice}/${getTranslatedText(category.unit || 'kg')}` 
+                             : `₹${category.price || 0}/${getTranslatedText(category.unit || 'kg')}`}
                         </div>
                       )}
                     </p>
