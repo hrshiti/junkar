@@ -48,7 +48,7 @@ const KYCStatusPage = () => {
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, login } = useAuth();
   const [kycData, setKycData] = useState(null);
   const [kycStatus, setKycStatus] = useState('pending');
 
@@ -76,6 +76,12 @@ const KYCStatusPage = () => {
               const scrUser = JSON.parse(localStorage.getItem('scrapperUser') || '{}');
               if (scrUser.phone || scrUser.id) {
                 checkAndProcessMilestone(scrUser.phone || scrUser.id, 'scrapper', 'kycVerified');
+                
+                // Also update the isVerified flag in local user object via auth login
+                // This ensures all components react immediately
+                const updatedUser = { ...scrUser, isVerified: true };
+                login(updatedUser, localStorage.getItem('token'));
+                localStorage.setItem('scrapperUser', JSON.stringify(updatedUser)); // Sync scrapperUser too
               }
             } catch (err) {
               console.error('Milestone error:', err);
@@ -83,16 +89,19 @@ const KYCStatusPage = () => {
 
             // Check subscription status relative to backend data
             let isActive = false;
-            if (subscription && subscription.status === 'active' && subscription.expiryDate) {
-              const expiry = new Date(subscription.expiryDate);
+            const subData = subscription || res.data?.subscription;
+            if (subData && subData.status === 'active' && subData.expiryDate) {
+              const expiry = new Date(subData.expiryDate);
               if (expiry > new Date()) {
                 isActive = true;
+                localStorage.setItem('scrapperSubscriptionStatus', 'active');
+                localStorage.setItem('scrapperSubscription', JSON.stringify(subData));
               }
             }
 
             if (kyc.status === 'verified') {
-              if (subscription && subscription.status === 'active') {
-                navigate('/scrapper', { replace: true });
+              if (isActive) {
+                navigate('/scrapper/dashboard', { replace: true });
               } else {
                 navigate('/scrapper/subscription', { replace: true });
               }
@@ -110,10 +119,13 @@ const KYCStatusPage = () => {
     };
 
     fetchKyc();
-    // interval = setInterval(fetchKyc, 5000); // REPLACED: Polling stopped to prevent 429 errors. Using Push Notifications now.
+    // Enable polling to auto-detect KYC approval
+    interval = setInterval(fetchKyc, 15000); // Poll every 15 seconds
 
-    // return () => clearInterval(interval);
-  }, [navigate]);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [navigate, login]);
 
   const handleRefresh = () => {
     setKycStatus('loading');

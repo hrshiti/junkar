@@ -218,6 +218,13 @@ export const verifyKyc = async (req, res) => {
     scrapper.kyc.resendReason = null;
     await scrapper.save();
 
+    // 2. Sync with User Document - Mark user as verified
+    const user = await User.findById(id);
+    if (user) {
+      user.isVerified = true;
+      await user.save();
+    }
+
     // [NOTIFICATION-1] KYC approved -> Scrapper ko push notification (non-blocking)
     sendNotificationToUser(id, {
       title: '🎉 KYC Verified!',
@@ -248,6 +255,13 @@ export const rejectKyc = async (req, res) => {
     scrapper.kyc.verifiedAt = null;
     scrapper.kyc.verifiedBy = req.user.id;
     await scrapper.save();
+
+    // 2. Sync with User Document - Mark user as unverified
+    const user = await User.findById(id);
+    if (user) {
+      user.isVerified = false;
+      await user.save();
+    }
 
     // [NOTIFICATION-1] KYC rejected -> Scrapper ko push notification (non-blocking)
     const rejectionMsg = reason ? `Reason: ${reason}` : 'Reason: Not specified';
@@ -325,6 +339,13 @@ export const requestKycResend = async (req, res) => {
     scrapper.kyc.verifiedAt = null;
     scrapper.kyc.verifiedBy = req.user.id;
     await scrapper.save();
+
+    // 2. Sync with User Document - Mark user as unverified
+    const user = await User.findById(id);
+    if (user) {
+      user.isVerified = false;
+      await user.save();
+    }
 
     // Push notification to scrapper
     const reasonMsg = reason ? `Reason: ${reason}` : 'Please review the instructions.';

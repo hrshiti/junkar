@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }) => {
     verifyToken();
   }, [logout]);
 
-  const login = (userData, token = null) => {
+  const login = useCallback((userData, token = null) => {
     setIsAuthenticated(true);
     setUser(userData);
     localStorage.setItem('isAuthenticated', 'true');
@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }) => {
     } else {
       console.warn('⚠️ No token provided to login function');
     }
-  };
+  }, []);
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, user, login, logout, loading }}>
