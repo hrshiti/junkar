@@ -7,7 +7,7 @@ import socketClient from '../../shared/utils/socketClient';
 import PriceTicker from '../../user/components/PriceTicker';
 import ScrapperSolutions from './ScrapperSolutions';
 import { getActiveRequestsCount, getScrapperAssignedRequests, migrateOldActiveRequest } from '../../shared/utils/scrapperRequestUtils';
-import { earningsAPI, scrapperOrdersAPI, subscriptionAPI, kycAPI, scrapperProfileAPI, notificationAPI } from '../../shared/utils/api';
+import { earningsAPI, scrapperOrdersAPI, subscriptionAPI, kycAPI, scrapperProfileAPI, notificationAPI, orderAPI } from '../../shared/utils/api';
 import BannerSlider from '../../shared/components/BannerSlider';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import LanguageSelector from '../../shared/components/LanguageSelector';
@@ -73,7 +73,6 @@ const ScrapperDashboard = () => {
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [isAvailable, setIsAvailable] = useState(false);
   const [isReadyForRequests, setIsReadyForRequests] = useState(() => {
     return localStorage.getItem('scrapperReceptionMode') === 'true';
   });
@@ -245,22 +244,7 @@ const ScrapperDashboard = () => {
     setMarketSubStatus(marketStatus);
   };
 
-  const handleAvailabilityToggle = async () => {
-    const newAvailability = !isAvailable;
-    setIsAvailable(newAvailability);
 
-    // Sync with backend
-    try {
-      await scrapperProfileAPI.updateMyProfile({ isOnline: newAvailability });
-    } catch (error) {
-      console.error('Failed to update availability status:', error);
-    }
-
-    // If turning ON, navigate to active requests page
-    if (newAvailability) {
-      navigate('/scrapper/active-requests', { replace: false });
-    }
-  };
 
   const handleReceptionToggle = async () => {
     const newState = !isReadyForRequests;
@@ -273,7 +257,10 @@ const ScrapperDashboard = () => {
     
     // Sync with backend so push notifications work correctly
     try {
-      await scrapperProfileAPI.updateMyProfile({ receptionMode: newState });
+      await scrapperProfileAPI.updateMyProfile({ 
+        receptionMode: newState,
+        isOnline: newState
+      });
     } catch (error) {
       console.error('Failed to update availability status via reception toggle:', error);
     }
@@ -320,7 +307,7 @@ const ScrapperDashboard = () => {
               orderId: n.data?.orderId || n.orderId,
               userName: n.data?.userName || n.title?.split('from ')[1] || 'Customer',
               city: n.data?.city || '',
-              addressPreview: n.message || 'New pickup request',
+              addressPreview: n.data?.addressPreview || n.message || 'New pickup request',
               receivedAt: new Date(n.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
             }));
           
@@ -619,6 +606,55 @@ const ScrapperDashboard = () => {
     }
   };
 
+  // Smart Reject: B2B cancels order, B2C just hides it for current scrapper
+  const handleRejectRequestShortcut = async (e, req) => {
+    e.stopPropagation(); 
+    try {
+      // 1. If it's a B2B direct request, we call cancel API to notify the sender
+      if (req.type === 'new_order') {
+        await orderAPI.cancel(req.orderId, 'Partner rejected from dashboard');
+      }
+
+      // 2. Clear from UI immediately
+      setPendingRequests(prev => prev.filter(r => r.orderId !== req.orderId));
+      setPendingRequestsCount(prev => Math.max(0, prev - 1));
+
+      // 3. Mark notification as read in DB
+      if (req.notificationId) {
+        notificationAPI.markRead(req.notificationId).catch(console.error);
+      }
+    } catch (err) {
+      console.error('Reject error:', err);
+      // Even if API fails, clear from UI for UX
+      setPendingRequests(prev => prev.filter(r => r.orderId !== req.orderId));
+    }
+  };
+
+  // Shortcut to accept request from dashboard notification
+  const handleAcceptRequestShortcut = async (e, req) => {
+    e.stopPropagation(); // Don't navigate to map
+    try {
+      const response = await scrapperOrdersAPI.accept(req.orderId);
+      if (response.success || response.order) {
+        // Remove from pending list
+        setPendingRequests(prev => prev.filter(r => r.orderId !== req.orderId));
+        setPendingRequestsCount(prev => Math.max(0, prev - 1));
+        
+        // Mark notification as read
+        if (req.notificationId) {
+          notificationAPI.markRead(req.notificationId).catch(console.error);
+        }
+        
+        // Navigate directly to my active requests
+        setShowNotificationDropdown(false);
+        navigate(`/scrapper/my-active-requests`);
+      }
+    } catch (err) {
+      console.error('Accept error:', err);
+      alert(err.message || getTranslatedText('Failed to accept order'));
+    }
+  };
+
   // Show loading state while fetching status from backend
   if (isLoadingStatus) {
     return (
@@ -763,10 +799,26 @@ const ScrapperDashboard = () => {
                               </div>
                             </div>
 
-                            <div className="mt-4 pt-3 border-t border-slate-50 flex items-center justify-between">
-                              <span className="text-[10px] font-bold text-sky-500">View on Map</span>
-                              <div className="w-6 h-6 rounded-full bg-sky-50 flex items-center justify-center text-sky-500 transition-transform group-hover:translate-x-1">
-                                <span className="text-lg font-bold leading-none">›</span>
+                            <div className="mt-4 pt-3 border-t border-slate-50 flex items-center justify-between gap-2">
+                              <div className="flex gap-2 flex-grow">
+                                <button 
+                                  onClick={(e) => handleAcceptRequestShortcut(e, req)}
+                                  className="flex-1 py-1.5 bg-sky-500 hover:bg-sky-600 text-white rounded-lg text-[11px] font-bold transition-all shadow-sm active:scale-95 text-center"
+                                >
+                                  {getTranslatedText("Accept Pickup")}
+                                </button>
+                                <button 
+                                  onClick={(e) => handleRejectRequestShortcut(e, req)}
+                                  className="px-3 py-1.5 border border-red-200 text-red-500 hover:bg-red-50 rounded-lg text-[11px] font-bold transition-all active:scale-95"
+                                >
+                                  {getTranslatedText("Reject")}
+                                </button>
+                              </div>
+                              <div className="flex items-center gap-1 transition-transform group-hover:translate-x-1 flex-shrink-0">
+                                <span className="text-[10px] font-bold text-sky-500">Map</span>
+                                <div className="w-5 h-5 rounded-full bg-sky-50 flex items-center justify-center text-sky-500">
+                                  <span className="text-sm font-bold leading-none">›</span>
+                                </div>
                               </div>
                             </div>
                           </motion.div>
@@ -807,19 +859,19 @@ const ScrapperDashboard = () => {
         >
           <div className="flex items-center gap-3">
             <div
-              className={`w-3 h-3 rounded-full ${isAvailable ? 'animate-pulse bg-sky-500' : 'bg-red-500'}`}
+              className={`w-3 h-3 rounded-full ${isReadyForRequests ? 'animate-pulse bg-sky-500' : 'bg-red-500'}`}
             />
             <div>
               <p className="text-sm font-semibold text-slate-800">
-                {isAvailable ? getTranslatedText('Available for Pickups') : getTranslatedText('Currently Offline')}
+                {isReadyForRequests ? getTranslatedText('Available for Pickups') : getTranslatedText('Currently Offline')}
               </p>
               <p className="text-xs text-slate-500">
-                {isAvailable ? getTranslatedText('You will receive requests') : getTranslatedText('Turn on to receive requests')}
+                {isReadyForRequests ? getTranslatedText('You will receive requests') : getTranslatedText('Turn on to receive requests')}
               </p>
             </div>
           </div>
                   {/* New Toggle Button for Premium Feel (Center Ready Mode) */}
-          <div className="flex-1 flex flex-col items-center justify-center px-2">
+          <div className="flex flex-col items-center justify-center pl-8">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-1">Reception</p>
             <motion.div
               initial={false}
@@ -834,17 +886,6 @@ const ScrapperDashboard = () => {
                 {isReadyForRequests && <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-ping" />}
               </motion.div>
             </motion.div>
-          </div>
-
-          <div className="flex flex-col items-center">
-             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-1">Map</p>
-             <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={handleAvailabilityToggle}
-              className={`px-6 py-2 rounded-full font-semibold text-sm transition-all duration-300 ${isAvailable ? 'shadow-lg bg-sky-600 text-white border-none' : 'bg-sky-500/10 text-sky-600 border border-sky-500/20'}`}
-            >
-              {isAvailable ? getTranslatedText('ON') : getTranslatedText('OFF')}
-            </motion.button>
           </div>
         </motion.div>
 

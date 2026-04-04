@@ -75,7 +75,7 @@ const RequestStatusPage = () => {
       case 'completed':
         return 'completed';
       case 'cancelled':
-        return 'completed';
+        return 'cancelled';
       default:
         return 'pending';
     }
@@ -274,6 +274,12 @@ const RequestStatusPage = () => {
           <path d="M9 12l2 2 4-4" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           <path d="M12 2v4M12 18v4M22 12h-4M6 12H2" stroke={color} strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
         </svg>
+      ),
+      cancelled: (
+        <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2" fill={color} fillOpacity="0.1" />
+          <path d="M15 9l-6 6M9 9l6 6" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       )
     };
     return icons[status] || icons.pending;
@@ -309,18 +315,29 @@ const RequestStatusPage = () => {
       color: '#0ea5e9',
       description: 'Pickup completed successfully',
       progress: 100
+    },
+    cancelled: {
+      label: 'Cancelled',
+      color: '#ef4444',
+      description: requestData?.cancellationReason || 'The request was cancelled',
+      progress: 0
     }
   };
 
   const currentStatus = statusConfig[status];
 
-  const timelineSteps = [
-    { id: 'pending', label: 'Request Sent', completed: true },
-    { id: 'accepted', label: 'Accepted', completed: status !== 'pending' },
-    { id: 'on_way', label: 'On the Way', completed: ['on_way', 'arrived', 'completed'].includes(status) },
-    { id: 'arrived', label: 'Arrived', completed: ['arrived', 'completed'].includes(status) },
-    { id: 'completed', label: 'Completed', completed: status === 'completed' }
-  ];
+  const timelineSteps = status === 'cancelled'
+    ? [
+        { id: 'pending', label: 'Request Sent', completed: true },
+        { id: 'cancelled', label: 'Cancelled', completed: true }
+      ]
+    : [
+        { id: 'pending', label: 'Request Sent', completed: true },
+        { id: 'accepted', label: 'Accepted', completed: status !== 'pending' },
+        { id: 'on_way', label: 'On the Way', completed: ['on_way', 'arrived', 'completed'].includes(status) },
+        { id: 'arrived', label: 'Arrived', completed: ['arrived', 'completed'].includes(status) },
+        { id: 'completed', label: 'Completed', completed: status === 'completed' }
+      ];
 
   return (
     <motion.div

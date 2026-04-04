@@ -189,7 +189,12 @@ class NotificationService {
                 type: 'new_order',
                 title: notificationPayload?.title || 'New Pickup Request',
                 message: notificationPayload?.body || 'New request received',
-                data: notificationPayload?.data || { orderId: order._id?.toString() }
+                data: {
+                    ...(notificationPayload?.data || { orderId: order._id?.toString() }),
+                    userName: order.user?.name || notificationPayload?.data?.userName || 'Customer',
+                    city: order.pickupAddress?.city || '',
+                    addressPreview: [order.pickupAddress?.street, order.pickupAddress?.city].filter(Boolean).join(', ')
+                }
             });
 
             // 2. Conditional Socket Event (Doorbell Alert)
@@ -348,6 +353,27 @@ class NotificationService {
             logger.info(`[Notification-10] Subscription expiry warning sent to scrapper ${scrapperId} (${daysLeft} days left)`);
         } catch (error) {
             logger.error(`Failed to send subscription expiry warning to scrapper ${scrapperId}:`, error);
+        }
+    }
+
+    /**
+     * Clear unread notifications (e.g. New Pickup Request) for a specific order
+     * @param {String} orderId - Order ID
+     * @returns {Promise<void>}
+     */
+    async clearOrderNotifications(orderId) {
+        try {
+            await Notification.updateMany(
+                { 
+                    'data.orderId': orderId.toString(), 
+                    type: { $in: ['new_order', 'new_order_request', 'donation_order'] },
+                    isRead: false 
+                },
+                { $set: { isRead: true } }
+            );
+            logger.info(`[Notifications] Cleared pending bell notifications for Order ${orderId}`);
+        } catch (error) {
+            logger.error(`[Notifications] Failed to clear order notifications for ${orderId}:`, error);
         }
     }
 }

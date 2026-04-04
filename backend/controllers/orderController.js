@@ -328,6 +328,10 @@ export const acceptOrder = asyncHandler(async (req, res) => {
 
   try {
     const order = await orderService.acceptOrder(id, scrapperId);
+    
+    // Unread requests in bell icon should clear immediately after accepting
+    notificationService.clearOrderNotifications(id).catch(err => logger.error(err));
+
     sendSuccess(res, 'Order accepted successfully', { order });
   } catch (error) {
     if (error.message === 'Order not found') {
@@ -637,6 +641,9 @@ export const cancelOrder = asyncHandler(async (req, res) => {
   }
 
   await order.save();
+
+  // Clear unread bell notifications for this order
+  notificationService.clearOrderNotifications(id).catch(err => logger.error(err));
 
   logger.info(`Order ${id} cancelled by ${userRole} ${userId}`);
 
