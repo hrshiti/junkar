@@ -24,11 +24,6 @@ class NotificationService {
                 $and: [
                     { $or: [{ isOnline: true }, { receptionMode: true }] },
                     { $or: [{ 'kyc.status': 'verified' }, { receptionMode: true }] },
-                    // Subscription active OR wallet balance >= 100 (approximate: only subscription check here for speed)
-                    { $or: [
-                        { 'subscription.status': 'active' },
-                        { 'wallet.balance': { $gte: 100 } }
-                    ]},
                     // Exclude the sender themselves if they are a scrapper
                     { _id: { $ne: order.user } }
                 ]
@@ -61,24 +56,24 @@ class NotificationService {
                             type: 'Point',
                             coordinates: order.location.coordinates // [lng, lat]
                         },
-                        $maxDistance: RADIUS_KM * 1000 // In meters
+                        $maxDistance: 10 * 1000 // In meters (10 km initially)
                     }
                 };
             }
 
             let onlineScrappers = await Scrapper.find(onlineScrappersQuery).select('_id fcmTokens fcmTokenMobile');
 
-            // Fallback: If no scrapper found within 10km, try 25km
+            // Fallback: If no scrapper found within 10km, try 20km
             if (onlineScrappers.length === 0 && hasValidLocation) {
-                logger.info(`No scrappers in 10km for Order ${order._id}, expanding to 25km...`);
-                onlineScrappersQuery.liveLocation.$nearSphere.$maxDistance = 25 * 1000;
+                logger.info(`No scrappers in 10km for Order ${order._id}, expanding to 20km...`);
+                onlineScrappersQuery.liveLocation.$nearSphere.$maxDistance = 20 * 1000;
                 onlineScrappers = await Scrapper.find(onlineScrappersQuery).select('_id fcmTokens fcmTokenMobile');
             }
 
-            // Final Fallback: If still no scrapper found (e.g. no valid location), notify all matching type
+            // Final Fallback: ONLY if order has NO valid location (user denied GPS). 
+            // If GPS is valid but no one in 20km, we DO NOT send to everyone.
             if (onlineScrappers.length === 0 && !hasValidLocation) {
-                logger.info(`Order ${order._id} has no valid location — notifying all matching online scrappers...`);
-                // Remove liveLocation filter (already not set), just query as-is
+                logger.info(`Order ${order._id} has no valid location — notifying nearest online scrappers (limited)...`);
                 onlineScrappers = await Scrapper.find(onlineScrappersQuery).select('_id fcmTokens fcmTokenMobile').limit(20);
             }
 
