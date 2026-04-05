@@ -72,7 +72,9 @@ const normalizeDealCategories = (rawCategories) => {
 // Order State Machine - Valid Status Transitions
 const ORDER_STATUS_TRANSITIONS = {
   [ORDER_STATUS.PENDING]: [ORDER_STATUS.CONFIRMED, ORDER_STATUS.CANCELLED],
-  [ORDER_STATUS.CONFIRMED]: [ORDER_STATUS.IN_PROGRESS, ORDER_STATUS.CANCELLED],
+  [ORDER_STATUS.CONFIRMED]: [ORDER_STATUS.ON_WAY, ORDER_STATUS.IN_PROGRESS, ORDER_STATUS.CANCELLED],
+  [ORDER_STATUS.ON_WAY]: [ORDER_STATUS.ARRIVED, ORDER_STATUS.IN_PROGRESS, ORDER_STATUS.CANCELLED],
+  [ORDER_STATUS.ARRIVED]: [ORDER_STATUS.IN_PROGRESS, ORDER_STATUS.CANCELLED],
   [ORDER_STATUS.IN_PROGRESS]: [ORDER_STATUS.COMPLETED, ORDER_STATUS.CANCELLED],
   [ORDER_STATUS.COMPLETED]: [], // Terminal state
   [ORDER_STATUS.CANCELLED]: []  // Terminal state
@@ -145,7 +147,7 @@ export const getAvailableOrders = asyncHandler(async (req, res) => {
   }
 
   const { lat, lng } = req.query;
-  const RADIUS_KM = 10;
+  const RADIUS_KM = 20; // 20KM Radius logically set for Feriwala moving around
   
   // 1. Definition for Public (Unassigned) Orders
   // Must match distance, scrapper type (Big/Small), and categories
@@ -495,9 +497,12 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
             }
 
             order.paymentStatus = PAYMENT_STATUS.COMPLETED;
+          } else if (isDonation || orderAmount === 0) {
+            // FIX: Handle donations and zero-amount orders explicitly
+            order.paymentStatus = PAYMENT_STATUS.COMPLETED;
           }
 
-          logger.info(`[Wallet] Deducted total ₹${totalDeduction} from Scrapper ${scrapper._id} for Order ${lockedOrder._id}`);
+          logger.info(`[Order Completion] Status set to COMPLETED for Order ${lockedOrder._id} (Donation: ${isDonation})`);
         }
 
         // Save order state
@@ -542,6 +547,23 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
       });
     }
 
+    // NEW Tracking stage notifications for user
+    if (status === ORDER_STATUS.ON_WAY && order.user) {
+      sendNotificationToUser(order.user._id.toString(), {
+        title: '🚚 Scrapper is on the Way!',
+        body: `Scrapper has started their journey to your location. Aap unhe track kar sakte hain.`,
+        data: { type: 'order_update', orderId: order._id, status: 'on_way' }
+      }, order.userModel?.toLowerCase() || 'user').catch(err => logger.error('[Notification] on_way notification failed:', err));
+    }
+
+    if (status === ORDER_STATUS.ARRIVED && order.user) {
+      sendNotificationToUser(order.user._id.toString(), {
+        title: '📍 Scrapper has Arrived!',
+        body: `Scrapper aapki location par pahunch gaya hai.`,
+        data: { type: 'order_update', orderId: order._id, status: 'arrived' }
+      }, order.userModel?.toLowerCase() || 'user').catch(err => logger.error('[Notification] arrived notification failed:', err));
+    }
+
     // Send Completion Notification
     if (status === ORDER_STATUS.COMPLETED && order.user) {
       if (order.isDonation) {
@@ -549,13 +571,13 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
           title: '💚 Thank you for donating!',
           body: `Aapka donation request successful raha. Thank you for donating and ${order.scrapper?.name || 'our partner'} for pick-up.`,
           data: { type: 'order_completed', orderId: order._id }
-        }, 'user').catch(err => logger.error('[Notification] Donation completion notification failed:', err));
+        }, order.userModel?.toLowerCase() || 'user').catch(err => logger.error('[Notification] Donation completion notification failed:', err));
       } else {
         sendNotificationToUser(order.user._id.toString(), {
           title: '✅ Order Successful',
           body: `Aapka order REQ-${order._id.toString().slice(-6)} successfully complete ho gaya hai.`,
           data: { type: 'order_completed', orderId: order._id }
-        }, 'user').catch(err => logger.error('[Notification] Order completion notification failed:', err));
+        }, order.userModel?.toLowerCase() || 'user').catch(err => logger.error('[Notification] Order completion notification failed:', err));
       }
     }
   }

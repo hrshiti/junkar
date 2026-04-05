@@ -160,14 +160,14 @@ const ActiveRequestsPage = () => {
   }, []);
 
   // Get current location
+  const currentLocationRef = useRef(null);
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setCurrentLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
+          const loc = { lat: position.coords.latitude, lng: position.coords.longitude };
+          setCurrentLocation(loc);
+          currentLocationRef.current = loc;
         },
         (error) => {
           console.error('Error getting location:', error);
@@ -182,10 +182,9 @@ const ActiveRequestsPage = () => {
       // Watch position for live updates
       const watchId = navigator.geolocation.watchPosition(
         (position) => {
-          setCurrentLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
+          const loc = { lat: position.coords.latitude, lng: position.coords.longitude };
+          setCurrentLocation(loc);
+          currentLocationRef.current = loc;
         },
         (error) => {
           console.error('Error watching location:', error);
@@ -210,10 +209,24 @@ const ActiveRequestsPage = () => {
 
     const loadAvailableOrders = async () => {
       try {
-        const response = await scrapperOrdersAPI.getAvailable();
+        let queryParams = '';
+        const locForQuery = currentLocationRef.current || currentLocation;
+        if (locForQuery) {
+          queryParams = `lat=${locForQuery.lat}&lng=${locForQuery.lng}`;
+        } else if (navigator.geolocation) {
+          try {
+            const position = await new Promise((resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000, maximumAge: 60000 });
+            });
+            const freshLoc = { lat: position.coords.latitude, lng: position.coords.longitude };
+            currentLocationRef.current = freshLoc;
+            setCurrentLocation(freshLoc);
+            queryParams = `lat=${freshLoc.lat}&lng=${freshLoc.lng}`;
+          } catch(e) {}
+        }
+        const response = await scrapperOrdersAPI.getAvailable(queryParams);
         if (response.success && response.data?.orders) {
           const orders = response.data.orders;
-
 
           // Get existing assigned requests from backend for conflict checking
           let currentAssigned = [];

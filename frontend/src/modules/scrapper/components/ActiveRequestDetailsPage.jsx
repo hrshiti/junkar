@@ -505,11 +505,23 @@ const ActiveRequestDetailsPage = () => {
     }
   };
 
+  const handleStartJourney = () => {
+    setConfirmAction('start_journey');
+    setConfirmMessage(getTranslatedText('Are you starting the journey to the pickup location?'));
+    setShowConfirmModal(true);
+  };
+
+  const handleArrived = () => {
+    setConfirmAction('arrived');
+    setConfirmMessage(getTranslatedText('Have you arrived at the pickup location?'));
+    setShowConfirmModal(true);
+  };
+
   const handleScrapPickedUp = () => {
     setConfirmAction('pickup');
     const isService = requestData.orderType === 'cleaning_service';
     setConfirmMessage(isService
-      ? getTranslatedText('Have you arrived and started the cleaning service?')
+      ? getTranslatedText('Have you started the cleaning service?')
       : getTranslatedText('Have you picked up the scrap from the customer?')
     );
     setShowConfirmModal(true);
@@ -635,8 +647,9 @@ const ActiveRequestDetailsPage = () => {
   const completePaymentSuccess = async (amount) => {
     const orderId = requestData._id || requestData.id;
     // Update order status
+    const targetStatus = (requestData.isDonation || amount === 0) ? 'completed' : 'in_progress';
     try {
-      await orderAPI.updateStatus(orderId, 'in_progress', 'completed', amount, {
+      await orderAPI.updateStatus(orderId, targetStatus, 'completed', amount, {
         isNegotiated,
         dealType,
         finalPrice: amount
@@ -644,12 +657,19 @@ const ActiveRequestDetailsPage = () => {
       setPaymentStatus('completed');
       setShowPaymentInput(false);
       setIsProcessingPayment(false);
-      setRequestData({
-        ...requestData,
-        status: 'in_progress',
-        paymentStatus: 'completed',
-        paidAmount: amount
-      });
+      
+      if (targetStatus === 'completed') {
+        // Redirect or show success
+        alert(getTranslatedText('Order Completed!'));
+        navigate('/scrapper/dashboard');
+      } else {
+        setRequestData({
+          ...requestData,
+          status: targetStatus,
+          paymentStatus: 'completed',
+          paidAmount: amount
+        });
+      }
     } catch (err) {
       console.error(err);
       alert('Failed to update order status');
@@ -671,7 +691,27 @@ const ActiveRequestDetailsPage = () => {
     }
 
     try {
-      if (confirmAction === 'pickup') {
+      if (confirmAction === 'start_journey') {
+        const response = await orderAPI.updateStatus(orderId, 'on_way');
+        if (response.success) {
+          setRequestData({
+            ...requestData,
+            status: 'on_way'
+          });
+        } else {
+          throw new Error(getTranslatedText('Failed to update order status'));
+        }
+      } else if (confirmAction === 'arrived') {
+        const response = await orderAPI.updateStatus(orderId, 'arrived');
+        if (response.success) {
+          setRequestData({
+            ...requestData,
+            status: 'arrived'
+          });
+        } else {
+          throw new Error(getTranslatedText('Failed to update order status'));
+        }
+      } else if (confirmAction === 'pickup') {
         const response = await orderAPI.updateStatus(orderId, 'in_progress');
 
         if (response.success) {
@@ -1309,33 +1349,71 @@ const ActiveRequestDetailsPage = () => {
                   </motion.button>
                 )}
 
-                {/* Scrap Picked Up Button - Primary Action */}
+                {/* Dynamic Tracking Step Buttons */}
                 {!isPickedUp ? (
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleScrapPickedUp}
-                    className="w-full mb-3 py-3 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 bg-sky-600 text-white hover:bg-sky-700 transition-colors"
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: '#ffffff' }}>
-                      <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    {isB2B 
-                      ? getTranslatedText('Confirm Partner Arrival') 
-                      : (requestData.orderType === 'cleaning_service' ? getTranslatedText('Start Service') : getTranslatedText('Pickup Scrap'))
-                    }
-                  </motion.button>
+                  <>
+                    {requestData?.status === 'confirmed' || requestData?.status === 'pending' || requestData?.assignmentStatus === 'accepted' && requestData?.status !== 'on_way' && requestData?.status !== 'arrived' && requestData?.status !== 'in_progress' ? (
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleStartJourney}
+                        className="w-full mb-3 py-3 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        {getTranslatedText('Start Journey')}
+                      </motion.button>
+                    ) : requestData?.status === 'on_way' ? (
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleArrived}
+                        className="w-full mb-3 py-3 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 bg-amber-600 text-white hover:bg-amber-700 transition-colors"
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" strokeLinecap="round" strokeLinejoin="round" />
+                          <circle cx="12" cy="10" r="3" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        {getTranslatedText('Reached Location')}
+                      </motion.button>
+                    ) : (
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleScrapPickedUp}
+                        className="w-full mb-3 py-3 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 bg-sky-600 text-white hover:bg-sky-700 transition-colors"
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: '#ffffff' }}>
+                          <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        {isB2B 
+                          ? getTranslatedText('Confirm Partner Arrival') 
+                          : (requestData.orderType === 'cleaning_service' ? getTranslatedText('Start Service') : getTranslatedText('Pickup Scrap'))
+                        }
+                      </motion.button>
+                    )}
+                  </>
                 ) : (
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => setShowPaymentInput(true)}
-                    className="w-full mb-3 py-3 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+                    onClick={() => {
+                      if (paymentStatus === 'completed') {
+                        handleCompleteOrder();
+                      } else {
+                        setShowPaymentInput(true);
+                      }
+                    }}
+                    className={`w-full mb-3 py-3 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 ${paymentStatus === 'completed' ? 'bg-sky-600' : 'bg-emerald-600'} text-white transition-colors`}
                   >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: '#ffffff' }}>
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                    {getTranslatedText('Make Payment / Complete')}
+                    {paymentStatus === 'completed' 
+                      ? getTranslatedText('Complete Order') 
+                      : (requestData.isDonation ? getTranslatedText('Complete Donation') : getTranslatedText('Make Payment / Complete'))
+                    }
                   </motion.button>
                 )}
 

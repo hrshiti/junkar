@@ -70,8 +70,11 @@ const RequestStatusPage = () => {
         return 'pending';
       case 'confirmed':
         return 'accepted';
-      case 'in_progress':
+      case 'on_way':
         return 'on_way';
+      case 'arrived':
+      case 'in_progress':
+        return 'arrived';
       case 'completed':
         return 'completed';
       case 'cancelled':

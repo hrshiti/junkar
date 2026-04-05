@@ -327,8 +327,56 @@ const ScrapperDashboard = () => {
     };
     syncNotifications();
 
+    // LIVE POLLING: Same as Desktop View to guarantee UI consistency in Mobile
+    const fetchLiveOrders = async () => {
+      try {
+        let queryParams = '';
+        if (navigator.geolocation) {
+          try {
+            const position = await new Promise((resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000, maximumAge: 60000 });
+            });
+            queryParams = `lat=${position.coords.latitude}&lng=${position.coords.longitude}`;
+          } catch (geoErr) {
+            console.warn('Geolocation failed for Dashboard sync:', geoErr);
+          }
+        }
+        
+        const { scrapperOrdersAPI } = await import('../../shared/utils/api');
+        const response = await scrapperOrdersAPI.getAvailable(queryParams);
+        const orders = response?.data?.orders || response?.orders || [];
+        
+        if (orders && orders.length > 0) {
+          const liveOrders = orders.map(order => ({
+            notificationId: null, // Real-time fetch, no DB notification id
+            orderId: order._id || order.id,
+            userName: order.user?.name || 'Customer',
+            city: order.pickupAddress?.city || '',
+            addressPreview: [order.pickupAddress?.street, order.pickupAddress?.city].filter(Boolean).join(', ') || 'New pickup request',
+            receivedAt: new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+          }));
+
+          setPendingRequests(prevArray => {
+            const existingIds = new Set(prevArray.map(p => p.orderId));
+            const uniqueNew = liveOrders.filter(n => n.orderId && !existingIds.has(n.orderId));
+            
+            if (uniqueNew.length > 0) {
+              setPendingRequestsCount(prevCount => prevCount + uniqueNew.length);
+              return [...uniqueNew, ...prevArray];
+            }
+            return prevArray;
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch live orders:', err);
+      }
+    };
+    fetchLiveOrders();
+    const interval = setInterval(fetchLiveOrders, 15000);
+
     return () => {
       socket.off('new_order_request', handleNewOrder);
+      clearInterval(interval);
     };
   }, [isReadyForRequests]);
 
@@ -700,7 +748,7 @@ const ScrapperDashboard = () => {
                 onClick={() => setShowNotificationDropdown(prev => !prev)}
               >
                 <FaBell className={`text-xl ${pendingRequestsCount > 0 ? 'text-sky-600 animate-bounce' : 'text-slate-400'}`} />
-                {isReadyForRequests && pendingRequestsCount > 0 && (
+                {pendingRequestsCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border-2 border-white">
                     {pendingRequestsCount > 10 ? '10+' : pendingRequestsCount}
                   </span>
@@ -1109,6 +1157,8 @@ const ScrapperDashboard = () => {
                 {activeRequests.slice(0, 3).map((request, index) => {
                   const statusColors = {
                     accepted: { bg: 'rgba(59, 130, 246, 0.1)', color: '#2563eb', label: getTranslatedText('Accepted') },
+                    on_way: { bg: 'rgba(99, 102, 241, 0.1)', color: '#6366f1', label: getTranslatedText('On the Way') },
+                    arrived: { bg: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', label: getTranslatedText('Reached') },
                     picked_up: { bg: 'rgba(234, 179, 8, 0.1)', color: '#ca8a04', label: getTranslatedText('Picked Up') },
                     payment_pending: { bg: 'rgba(249, 115, 22, 0.1)', color: '#f97316', label: getTranslatedText('Payment Pending') }
                   };

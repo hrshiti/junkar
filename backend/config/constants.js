@@ -27,8 +27,10 @@ export const VEHICLE_TYPES = {
 
 export const ORDER_STATUS = {
   PENDING: 'pending',
-  CONFIRMED: 'confirmed',
-  IN_PROGRESS: 'in_progress',
+  CONFIRMED: 'confirmed',     // Accepted
+  ON_WAY: 'on_way',           // Scrapper started journey
+  ARRIVED: 'arrived',         // Scrapper arrived at location
+  IN_PROGRESS: 'in_progress', // Picking up scrap
   COMPLETED: 'completed',
   CANCELLED: 'cancelled'
 };

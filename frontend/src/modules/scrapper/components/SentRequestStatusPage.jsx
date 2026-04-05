@@ -102,12 +102,12 @@ const SentRequestStatusPage = () => {
             return;
         }
 
-        // Update status to 'in_progress' so it persists on refresh
+        // Update status to 'on_way' so it persists on refresh
         try {
-            await orderAPI.updateStatus(orderId, 'in_progress');
+            await orderAPI.updateStatus(orderId, 'on_way');
             fetchOrder(); // Sync local state
         } catch (error) {
-            console.error("Failed to update status to in_progress:", error);
+            console.error("Failed to update status to on_way:", error);
         }
 
         const id = navigator.geolocation.watchPosition(
@@ -137,6 +137,16 @@ const SentRequestStatusPage = () => {
         setWatchId(null);
         setIsTracking(false);
     }, [watchId]);
+
+    const handleReached = async () => {
+        try {
+            await orderAPI.updateStatus(orderId, 'arrived');
+            stopTracking();
+            fetchOrder();
+        } catch (error) {
+            console.error("Failed to update status to arrived:", error);
+        }
+    };
 
     useEffect(() => {
         return () => {
@@ -219,7 +229,7 @@ const SentRequestStatusPage = () => {
 
     // Auto-restart tracking if order is in progress
     useEffect(() => {
-        if (order?.status === 'in_progress' && !isTracking) {
+        if (order?.status === 'on_way' && !isTracking) {
              startTracking();
         }
     }, [order?.status, isTracking, startTracking]);
@@ -256,10 +266,12 @@ const SentRequestStatusPage = () => {
 
     const getTimelineStep = () => {
         if (isCancelled) return 0;
-        if (isCompleted) return 4;
-        if (currentStatus === 'in_progress' || isTracking) return 3;
-        if (isAccepted) return 2;
-        return 1; // Pending
+        if (isCompleted) return 5;
+        if (currentStatus === 'in_progress') return 4;
+        if (currentStatus === 'arrived') return 3;
+        if (currentStatus === 'on_way' || isTracking) return 2;
+        if (isAccepted) return 1;
+        return 0; // Pending
     };
 
     const step = getTimelineStep();
@@ -435,20 +447,42 @@ const SentRequestStatusPage = () => {
                         </p>
                     </div>
 
-                    {/* Start Journey Button */}
+                    {/* Start Journey / Reached Buttons */}
                     {isAccepted && !isCompleted && !isCancelled && (
-                        <motion.button
-                            whileTap={{ scale: 0.95 }}
-                            onClick={isTracking ? stopTracking : startTracking}
-                            className={`w-full py-4 rounded-2xl font-black text-sm mb-8 flex items-center justify-center gap-3 shadow-lg shadow-sky-100 transition-colors ${(isTracking || order.status === 'in_progress') ? 'bg-emerald-500 text-white' : 'bg-sky-600 text-white'}`}
-                        >
-                            <div className={`w-2 h-2 rounded-full bg-white ${(isTracking || order.status === 'in_progress') ? 'animate-ping' : ''}`} />
-                            {(isTracking || order.status === 'in_progress') 
-                                ? getTranslatedText("Stop Sharing Location") 
-                                : (order.scrapper?.scrapperType === 'wholesaler' 
-                                    ? getTranslatedText("Start Journey to Wholesaler") 
-                                    : getTranslatedText("Start Journey to Shop"))}
-                        </motion.button>
+                        <div className="flex flex-col gap-3 mb-8">
+                            {!isTracking && currentStatus !== 'on_way' && currentStatus !== 'arrived' && currentStatus !== 'in_progress' && (
+                                <motion.button
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={startTracking}
+                                    className="w-full py-4 rounded-2xl bg-sky-600 text-white font-black text-sm flex items-center justify-center gap-3 shadow-lg shadow-sky-100"
+                                >
+                                    <div className="w-2 h-2 rounded-full bg-white" />
+                                    {order.scrapper?.scrapperType === 'wholesaler' 
+                                        ? getTranslatedText("Start Journey to Wholesaler") 
+                                        : getTranslatedText("Start Journey to Shop")}
+                                </motion.button>
+                            )}
+
+                            {isTracking && currentStatus === 'on_way' && (
+                                <motion.button
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={handleReached}
+                                    className="w-full py-4 rounded-2xl bg-amber-500 text-white font-black text-sm flex items-center justify-center gap-3 shadow-lg shadow-amber-100"
+                                >
+                                    <FaCheckCircle />
+                                    {getTranslatedText("I Have Reached")}
+                                </motion.button>
+                            )}
+
+                            {(isTracking || currentStatus === 'on_way' || currentStatus === 'arrived') && (
+                                <button
+                                    onClick={stopTracking}
+                                    className="w-full py-3 rounded-xl bg-slate-100 text-slate-500 font-bold text-xs"
+                                >
+                                    {getTranslatedText("Stop Sharing Location")}
+                                </button>
+                            )}
+                        </div>
                     )}
 
                     {/* Timeline Steps */}
@@ -461,10 +495,12 @@ const SentRequestStatusPage = () => {
                         />
 
                         {/* Steps */}
-                        <TimelineStep index={1} currentStep={step} label={getTranslatedText("Request Sent")} time={new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} />
-                        <TimelineStep index={2} currentStep={step} label={getTranslatedText("Accepted By Partner")} />
-                        <TimelineStep index={3} currentStep={step} label={getTranslatedText("Delivery in Progress")} />
-                        <TimelineStep index={4} currentStep={step} label={getTranslatedText("Completed")} />
+                        <TimelineStep index={0} currentStep={step} label={getTranslatedText("Request Sent")} time={new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} />
+                        <TimelineStep index={1} currentStep={step} label={getTranslatedText("Accepted By Partner")} />
+                        <TimelineStep index={2} currentStep={step} label={getTranslatedText("On the Way")} />
+                        <TimelineStep index={3} currentStep={step} label={getTranslatedText("Arrived at Shop")} />
+                        <TimelineStep index={4} currentStep={step} label={getTranslatedText("Stock Verification")} />
+                        <TimelineStep index={5} currentStep={step} label={getTranslatedText("Completed")} />
                     </div>
 
                     {/* Partner Details Card */}

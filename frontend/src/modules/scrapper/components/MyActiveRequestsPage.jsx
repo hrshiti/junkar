@@ -35,6 +35,7 @@ const MyActiveRequestsPage = () => {
   const [activeRequests, setActiveRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('all');
 
   // Check authentication
   useEffect(() => {
@@ -66,7 +67,7 @@ const MyActiveRequestsPage = () => {
     const statusLower = order.status?.toLowerCase();
     const paymentStatusLower = order.paymentStatus?.toLowerCase();
 
-    let uiStatus = 'accepted'; // Default status
+    let uiStatus = statusLower; // Default status matches backend for common cases
 
     if (statusLower === 'completed') {
       uiStatus = 'completed';
@@ -76,6 +77,10 @@ const MyActiveRequestsPage = () => {
       } else {
         uiStatus = 'picked_up';
       }
+    } else if (['on_way', 'arrived', 'accepted'].includes(statusLower)) {
+      uiStatus = statusLower;
+    } else {
+      uiStatus = 'accepted'; // Fallback
     }
 
     const estimatedAmount =
@@ -174,6 +179,18 @@ const MyActiveRequestsPage = () => {
         label: getTranslatedText('Accepted'),
         icon: '✓'
       },
+      on_way: {
+        bg: 'rgba(99, 102, 241, 0.1)',
+        color: '#6366f1',
+        label: getTranslatedText('On the Way'),
+        icon: '🚚'
+      },
+      arrived: {
+        bg: 'rgba(245, 158, 11, 0.1)',
+        color: '#f59e0b',
+        label: getTranslatedText('Reached'),
+        icon: '📍'
+      },
       picked_up: {
         bg: 'rgba(234, 179, 8, 0.1)',
         color: '#ca8a04',
@@ -254,9 +271,35 @@ const MyActiveRequestsPage = () => {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto mb-4 overflow-x-auto no-scrollbar scroll-smooth">
+        <div className="flex gap-2 min-w-max pb-1">
+          {[
+            { id: 'all', label: getTranslatedText('All') },
+            { id: 'on_way', label: getTranslatedText('On the Way') },
+            { id: 'arrived', label: getTranslatedText('Arrived') },
+            { id: 'in_progress', label: getTranslatedText('In Progress') }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${activeTab === tab.id 
+                ? 'bg-sky-600 text-white border-transparent shadow-md' 
+                : 'bg-white/80 text-slate-500 border-slate-100 hover:bg-white hover:text-sky-600'}`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Content */}
-      <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto py-6">
-        {activeRequests.length === 0 ? (
+      <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto py-2">
+        {activeRequests.filter(req => {
+          if (activeTab === 'all') return true;
+          if (activeTab === 'in_progress') return ['accepted', 'picked_up', 'payment_pending', 'payment_done'].includes(req.status);
+          return req.status === activeTab;
+        }).length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -282,7 +325,11 @@ const MyActiveRequestsPage = () => {
           </motion.div>
         ) : (
           <div className="space-y-4">
-            {activeRequests.map((request, index) => {
+            {activeRequests.filter(req => {
+              if (activeTab === 'all') return true;
+              if (activeTab === 'in_progress') return ['accepted', 'picked_up', 'payment_pending', 'payment_done'].includes(req.status);
+              return req.status === activeTab;
+            }).map((request, index) => {
               const statusConfig = getStatusConfig(request.status);
               const pickupTime = formatPickupTime(request);
 
