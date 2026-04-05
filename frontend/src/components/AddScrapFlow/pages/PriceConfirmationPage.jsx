@@ -326,13 +326,24 @@ const PriceConfirmationPage = () => {
     }));
 
     // Prepare pickup address from addressData
+    // ⚠️ IMPORTANT: Only include coordinates if genuinely captured (not 0,0 fallback)
+    const hasCoords = addressData?.coordinates?.lat && addressData?.coordinates?.lng &&
+      addressData.coordinates.lat !== 0 && addressData.coordinates.lng !== 0;
+
     const pickupAddress = {
       street: addressData?.address || getTranslatedText('Address not provided'),
-      coordinates: {
-        lat: addressData?.coordinates?.lat || 0,
-        lng: addressData?.coordinates?.lng || 0
-      }
+      ...(hasCoords && {
+        coordinates: {
+          lat: addressData.coordinates.lat,
+          lng: addressData.coordinates.lng
+        }
+      })
     };
+
+    // Warn user if no location — nearest scrapper won't be found accurately
+    if (!hasCoords) {
+      console.warn('[Order] No GPS coordinates captured. Nearest scrapper detection will be approximate.');
+    }
 
     const payload = {
       scrapItems,

@@ -200,10 +200,18 @@ orderSchema.index({ location: '2dsphere' }); // Geospacial Index
 
 // Pre-save hook to sync pickupAddress coordinates to GeoJSON location
 orderSchema.pre('save', function (next) {
-  if (this.pickupAddress && this.pickupAddress.coordinates && this.pickupAddress.coordinates.lat && this.pickupAddress.coordinates.lng) {
+  const coords = this.pickupAddress?.coordinates;
+  const lat = coords?.lat;
+  const lng = coords?.lng;
+
+  // Only sync if coordinates are valid, non-zero numbers (0,0 = no location set)
+  if (
+    typeof lat === 'number' && isFinite(lat) && lat !== 0 &&
+    typeof lng === 'number' && isFinite(lng) && lng !== 0
+  ) {
     this.location = {
       type: 'Point',
-      coordinates: [this.pickupAddress.coordinates.lng, this.pickupAddress.coordinates.lat]
+      coordinates: [lng, lat] // GeoJSON format: [longitude, latitude]
     };
   }
   next();

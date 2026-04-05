@@ -17,19 +17,44 @@ class NotificationService {
     async notifyOnlineScrappers(order) {
         try {
             const RADIUS_KM = 10;
+            const isSmallOrder = order.quantityType !== 'large';
+
             const onlineScrappersQuery = {
                 status: 'active',
                 $and: [
                     { $or: [{ isOnline: true }, { receptionMode: true }] },
                     { $or: [{ 'kyc.status': 'verified' }, { receptionMode: true }] },
+                    // Subscription active OR wallet balance >= 100 (approximate: only subscription check here for speed)
+                    { $or: [
+                        { 'subscription.status': 'active' },
+                        { 'wallet.balance': { $gte: 100 } }
+                    ]},
                     // Exclude the sender themselves if they are a scrapper
                     { _id: { $ne: order.user } }
                 ]
             };
 
+            // 🔑 KEY FIX: Only notify Feri Walas / Small scrappers for small orders
+            // Big scrappers (dukandaar, wholesaler) cannot accept small orders — so don't spam them
+            if (isSmallOrder) {
+                onlineScrappersQuery.scrapperType = { $in: ['feri_wala', 'small'] };
+            } else {
+                // Large/forwarded orders go to big scrappers
+                onlineScrappersQuery.scrapperType = { $in: ['big', 'dukandaar', 'wholesaler'] };
+            }
+
+            // Only feri_wala and small scrappers get donation orders (override above)
+            if (order.isDonation) {
+                onlineScrappersQuery.scrapperType = { $in: ['feri_wala', 'small'] };
+            }
+
             // Apply 10km radius filter if order location is available
-            if (order.location && order.location.coordinates && 
-                order.location.coordinates[0] !== 0 && order.location.coordinates[1] !== 0) {
+            const hasValidLocation = order.location &&
+                order.location.coordinates &&
+                order.location.coordinates[0] !== 0 &&
+                order.location.coordinates[1] !== 0;
+
+            if (hasValidLocation) {
                 onlineScrappersQuery.liveLocation = {
                     $nearSphere: {
                         $geometry: {
@@ -41,15 +66,24 @@ class NotificationService {
                 };
             }
 
-            // Only feri_wala and small scrappers get donation orders
-            if (order.isDonation) {
-                onlineScrappersQuery.scrapperType = { $in: ['feri_wala', 'small'] };
+            let onlineScrappers = await Scrapper.find(onlineScrappersQuery).select('_id fcmTokens fcmTokenMobile');
+
+            // Fallback: If no scrapper found within 10km, try 25km
+            if (onlineScrappers.length === 0 && hasValidLocation) {
+                logger.info(`No scrappers in 10km for Order ${order._id}, expanding to 25km...`);
+                onlineScrappersQuery.liveLocation.$nearSphere.$maxDistance = 25 * 1000;
+                onlineScrappers = await Scrapper.find(onlineScrappersQuery).select('_id fcmTokens fcmTokenMobile');
             }
 
-            const onlineScrappers = await Scrapper.find(onlineScrappersQuery).select('_id fcmTokens fcmTokenMobile');
+            // Final Fallback: If still no scrapper found (e.g. no valid location), notify all matching type
+            if (onlineScrappers.length === 0 && !hasValidLocation) {
+                logger.info(`Order ${order._id} has no valid location — notifying all matching online scrappers...`);
+                // Remove liveLocation filter (already not set), just query as-is
+                onlineScrappers = await Scrapper.find(onlineScrappersQuery).select('_id fcmTokens fcmTokenMobile').limit(20);
+            }
 
             if (onlineScrappers.length === 0) {
-                logger.info(`No online scrappers found within ${RADIUS_KM}km for Order ${order._id}`);
+                logger.info(`No online scrappers found for Order ${order._id} (quantityType: ${order.quantityType})`);
                 return;
             }
 
@@ -69,7 +103,7 @@ class NotificationService {
                 )
             );
 
-            logger.info(`Notified ${onlineScrappers.length} online scrappers for Order ${order._id}`);
+            logger.info(`Notified ${onlineScrappers.length} online scrappers (type: ${isSmallOrder ? 'feri_wala/small' : 'big'}) for Order ${order._id} (hasLocation: ${hasValidLocation})`);
         } catch (error) {
             logger.error('Error notifying online scrappers:', error);
             throw error;

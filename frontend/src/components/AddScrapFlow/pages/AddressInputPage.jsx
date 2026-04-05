@@ -214,14 +214,17 @@ const AddressInputPage = () => {
         }
 
         if (!coordinates) {
-            alert(getTranslatedText('Please allow location access or enter your location manually'));
-            return;
+            // ⚠️ Warn user but don't block — order can still be placed without GPS
+            const proceed = window.confirm(
+                'Location not detected. Without GPS, we cannot send your request to the NEAREST scrapper — any available scrapper may pick it up.\n\nContinue anyway?'
+            );
+            if (!proceed) return;
         }
 
         // Save address data to sessionStorage
         const addressData = {
             address: address.trim(),
-            coordinates: coordinates,
+            coordinates: coordinates, // null if not captured — handled gracefully in backend
             timestamp: new Date().toISOString()
         };
         sessionStorage.setItem('addressData', JSON.stringify(addressData));
@@ -463,18 +466,18 @@ const AddressInputPage = () => {
                     backgroundColor: '#f4ebe2'
                 }}
             >
-                {address && coordinates ? (
+                {address.trim() ? (
                     <motion.button
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3 }}
                         onClick={handleContinue}
                         className="w-full py-3 md:py-4 rounded-full text-white font-semibold text-sm md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                        style={{ backgroundColor: '#38bdf8' }}
-                        onMouseEnter={(e) => e.target.style.backgroundColor = '#5a8263'}
-                        onMouseLeave={(e) => e.target.style.backgroundColor = '#38bdf8'}
+                        style={{ backgroundColor: coordinates ? '#38bdf8' : '#f59e0b' }}
                     >
-                        {getTranslatedText("Continue to Confirmation")}
+                        {coordinates
+                            ? getTranslatedText("Continue to Confirmation")
+                            : '⚠️ Continue without GPS Location'}
                     </motion.button>
                 ) : (
                     <p
