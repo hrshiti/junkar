@@ -3,6 +3,43 @@ import { apiRequest } from '../modules/shared/utils/api';
 
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 
+export async function showBrowserNotification(title, options = {}) {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+        return false;
+    }
+
+    if (Notification.permission !== 'granted') {
+        return false;
+    }
+
+    const notificationTitle = title || 'New Request';
+    const notificationOptions = {
+        icon: '/favicon.png',
+        badge: '/favicon.png',
+        requireInteraction: true,
+        ...options
+    };
+
+    try {
+        if ('serviceWorker' in navigator) {
+            const registration =
+                await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js') ||
+                await navigator.serviceWorker.getRegistration();
+
+            if (registration && (registration.active || registration.waiting || registration.installing)) {
+                await registration.showNotification(notificationTitle, notificationOptions);
+                return true;
+            }
+        }
+
+        new Notification(notificationTitle, notificationOptions);
+        return true;
+    } catch (error) {
+        console.warn('Browser notification display failed:', error);
+        return false;
+    }
+}
+
 // Register service worker
 async function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
@@ -65,13 +102,6 @@ async function getFCMToken() {
 // Register FCM token with backend
 export async function registerFCMToken(forceUpdate = false) {
     try {
-        // Check if already registered
-        const savedToken = localStorage.getItem('fcm_token_web');
-        if (savedToken && !forceUpdate) {
-            console.log('FCM token already registered');
-            return savedToken;
-        }
-
         // Request permission
         const hasPermission = await requestNotificationPermission();
         if (!hasPermission) {
@@ -82,6 +112,12 @@ export async function registerFCMToken(forceUpdate = false) {
         const token = await getFCMToken();
         if (!token) {
             throw new Error('Failed to get FCM token');
+        }
+
+        const savedToken = localStorage.getItem('fcm_token_web');
+        if (savedToken === token && !forceUpdate) {
+            console.log('FCM token already registered');
+            return savedToken;
         }
 
         // Save to backend
@@ -118,41 +154,14 @@ export function setupForegroundNotificationHandler(handler) {
     onMessage(messaging, async (payload) => {
         console.log('Foreground FCM message received:', payload);
 
-        if ('Notification' in window && Notification.permission === 'granted') {
-            try {
-                let showViaSW = false;
-                if ('serviceWorker' in navigator) {
-                    const registration = await navigator.serviceWorker.getRegistration();
-                    if (registration && registration.active) {
-                        showViaSW = true;
-                        await registration.showNotification(
-                            payload.notification?.title || 'New Request 🔔',
-                            {
-                                body: payload.notification?.body || '',
-                                icon: '/favicon.png',
-                                badge: '/favicon.png',
-                                data: { ...payload.data, link: '/scrapper/request-list' },
-                                tag: 'new-order-' + (payload.data?.orderId || Date.now()),
-                                requireInteraction: true,
-                            }
-                        );
-                    }
-                }
-                
-                if (!showViaSW) {
-                    new Notification(payload.notification?.title || 'New Request 🔔', {
-                        body: payload.notification?.body || '',
-                        icon: '/favicon.png',
-                    });
-                }
-            } catch (err) {
-                console.warn('Push notification display failed, falling back:', err);
-                new Notification(payload.notification?.title || 'New Request 🔔', {
-                    body: payload.notification?.body || '',
-                    icon: '/favicon.png',
-                });
+        await showBrowserNotification(
+            payload.notification?.title || 'New Request 🔔',
+            {
+                body: payload.notification?.body || '',
+                data: { ...payload.data, link: '/scrapper/request-list' },
+                tag: 'new-order-' + (payload.data?.orderId || Date.now()),
             }
-        }
+        );
 
         // Call custom in-app handler (updates badge count etc.)
         if (handler) {

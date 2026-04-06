@@ -12,6 +12,7 @@ import BannerSlider from '../../shared/components/BannerSlider';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import LanguageSelector from '../../shared/components/LanguageSelector';
 import ScrapperBottomNav from './ScrapperBottomNav';
+import { showBrowserNotification } from '../../../services/pushNotificationService';
 const siteLogo = '/junker.png';
 
 const ScrapperDashboard = () => {
@@ -78,6 +79,14 @@ const ScrapperDashboard = () => {
   });
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
   const [pendingRequests, setPendingRequests] = useState([]);
+  const [dismissedRequestIds, setDismissedRequestIds] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('scrapperDismissedRequestIds');
+      return saved ? JSON.parse(saved) : [];
+    } catch (error) {
+      return [];
+    }
+  });
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
   const [kycStatus, setKycStatus] = useState(null); // Backend KYC status
   const [subscriptionData, setSubscriptionData] = useState(null); // Backend subscription data
@@ -101,6 +110,10 @@ const ScrapperDashboard = () => {
   const [completedOrders, setCompletedOrders] = useState([]);
   const [activeRequests, setActiveRequests] = useState([]);
   const [targetedRequests, setTargetedRequests] = useState([]);
+
+  useEffect(() => {
+    sessionStorage.setItem('scrapperDismissedRequestIds', JSON.stringify(dismissedRequestIds));
+  }, [dismissedRequestIds]);
 
   // Function to load and update dashboard data
   const loadDashboardData = async () => {
@@ -275,6 +288,24 @@ const ScrapperDashboard = () => {
 
     // Connect socket (idempotent - won't reconnect if already connected)
     const socket = socketClient.connect(jwtToken);
+    const notifiedOrderIds = new Set();
+
+    const notifyForRequest = async (request) => {
+      const orderId = request?.orderId;
+      if (!orderId || notifiedOrderIds.has(orderId)) return;
+
+      notifiedOrderIds.add(orderId);
+
+      await showBrowserNotification('New Request Alert!', {
+        body: `${request.userName || 'Customer'} - ${request.addressPreview || request.city || 'Location available on map'}`,
+        data: {
+          orderId,
+          type: 'new_order',
+          link: `/scrapper/active-requests?highlight=${orderId}`
+        },
+        tag: `new-order-${orderId}`
+      });
+    };
 
     const handleNewOrder = (data) => {
       console.log('🔔 Dashboard: New Request Received!', data);
@@ -291,6 +322,7 @@ const ScrapperDashboard = () => {
         return [...prev, newRequest];
       });
       setPendingRequestsCount(prev => prev + 1);
+      notifyForRequest(newRequest).catch(console.error);
     };
 
     socket.on('new_order_request', handleNewOrder);
@@ -315,7 +347,12 @@ const ScrapperDashboard = () => {
             setPendingRequests(prev => {
               // Merge and avoid duplicates by orderId
               const existingIds = new Set(prev.map(p => p.orderId));
-              const uniqueNew = freshNotifications.filter(n => n.orderId && !existingIds.has(n.orderId));
+              const uniqueNew = freshNotifications.filter(
+                n => n.orderId && !existingIds.has(n.orderId) && !dismissedRequestIds.includes(n.orderId)
+              );
+              uniqueNew.forEach(req => {
+                notifyForRequest(req).catch(console.error);
+              });
               return [...prev, ...uniqueNew];
             });
             setPendingRequestsCount(prev => freshNotifications.length);
@@ -358,9 +395,14 @@ const ScrapperDashboard = () => {
 
           setPendingRequests(prevArray => {
             const existingIds = new Set(prevArray.map(p => p.orderId));
-            const uniqueNew = liveOrders.filter(n => n.orderId && !existingIds.has(n.orderId));
+            const uniqueNew = liveOrders.filter(
+              n => n.orderId && !existingIds.has(n.orderId) && !dismissedRequestIds.includes(n.orderId)
+            );
             
             if (uniqueNew.length > 0) {
+              uniqueNew.forEach(req => {
+                notifyForRequest(req).catch(console.error);
+              });
               setPendingRequestsCount(prevCount => prevCount + uniqueNew.length);
               return [...uniqueNew, ...prevArray];
             }
@@ -378,7 +420,7 @@ const ScrapperDashboard = () => {
       socket.off('new_order_request', handleNewOrder);
       clearInterval(interval);
     };
-  }, [isReadyForRequests]);
+  }, [isReadyForRequests, dismissedRequestIds]);
 
   // FCM Registration and Setup - runs ONCE on mount only
   useEffect(() => {
@@ -637,12 +679,36 @@ const ScrapperDashboard = () => {
   }, []);
 
   // Dismiss a single notification
+  const dismissRequestLocally = (orderId) => {
+    if (!orderId) return;
+    setDismissedRequestIds(prev => [...new Set([...prev, orderId])]);
+    setPendingRequests(prev => prev.filter(r => r.orderId !== orderId));
+    setPendingRequestsCount(prev => Math.max(0, prev - 1));
+  };
+
+  const handleClearAllRequests = async () => {
+    const idsToDismiss = pendingRequests.map(req => req.orderId).filter(Boolean);
+
+    if (idsToDismiss.length > 0) {
+      setDismissedRequestIds(prev => [...new Set([...prev, ...idsToDismiss])]);
+    }
+
+    setPendingRequests([]);
+    setPendingRequestsCount(0);
+    setShowNotificationDropdown(false);
+
+    try {
+      await notificationAPI.markAllRead();
+    } catch (err) {
+      console.error('Failed to mark all notifications as read:', err);
+    }
+  };
+
   const handleDismissRequest = async (e, orderId, notificationId) => {
     e.stopPropagation(); // Don't navigate to map
     
     // 1. Update UI immediately
-    setPendingRequests(prev => prev.filter(r => r.orderId !== orderId));
-    setPendingRequestsCount(prev => Math.max(0, prev - 1));
+    dismissRequestLocally(orderId);
     
     // 2. Mark as read in backend if we have a notificationId
     if (notificationId) {
@@ -664,8 +730,7 @@ const ScrapperDashboard = () => {
       }
 
       // 2. Clear from UI immediately
-      setPendingRequests(prev => prev.filter(r => r.orderId !== req.orderId));
-      setPendingRequestsCount(prev => Math.max(0, prev - 1));
+      dismissRequestLocally(req.orderId);
 
       // 3. Mark notification as read in DB
       if (req.notificationId) {
@@ -674,7 +739,7 @@ const ScrapperDashboard = () => {
     } catch (err) {
       console.error('Reject error:', err);
       // Even if API fails, clear from UI for UX
-      setPendingRequests(prev => prev.filter(r => r.orderId !== req.orderId));
+      dismissRequestLocally(req.orderId);
     }
   };
 
@@ -685,8 +750,7 @@ const ScrapperDashboard = () => {
       const response = await scrapperOrdersAPI.accept(req.orderId);
       if (response.success || response.order) {
         // Remove from pending list
-        setPendingRequests(prev => prev.filter(r => r.orderId !== req.orderId));
-        setPendingRequestsCount(prev => Math.max(0, prev - 1));
+        dismissRequestLocally(req.orderId);
         
         // Mark notification as read
         if (req.notificationId) {
@@ -778,7 +842,7 @@ const ScrapperDashboard = () => {
                       </div>
                       {pendingRequests.length > 0 && (
                         <button
-                          onClick={() => { setPendingRequests([]); setPendingRequestsCount(0); setShowNotificationDropdown(false); }}
+                          onClick={handleClearAllRequests}
                           className="text-sm font-bold text-red-500 bg-red-50 px-3 py-1.5 rounded-lg active:scale-95 transition-transform"
                         >
                           Clear All
