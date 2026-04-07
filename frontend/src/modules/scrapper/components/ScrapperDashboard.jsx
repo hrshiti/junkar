@@ -91,6 +91,8 @@ const ScrapperDashboard = () => {
   const [kycStatus, setKycStatus] = useState(null); // Backend KYC status
   const [subscriptionData, setSubscriptionData] = useState(null); // Backend subscription data
   const [isLoadingStatus, setIsLoadingStatus] = useState(true);
+  const [detailOrder, setDetailOrder] = useState(null); // Full order data for detail modal
+  const [loadingDetailId, setLoadingDetailId] = useState(null); // orderId currently being fetched
 
   // Load earnings and stats from localStorage
   const [earnings, setEarnings] = useState({
@@ -767,6 +769,32 @@ const ScrapperDashboard = () => {
     }
   };
 
+  // Fetch full order details for the detail bottom sheet
+  const handleViewRequestDetail = async (e, orderId) => {
+    e.stopPropagation(); // Don't navigate to map
+    if (!orderId || loadingDetailId) return;
+    setLoadingDetailId(orderId);
+    try {
+      const response = await orderAPI.getById(orderId);
+      const order = response?.data?.order || response?.order || null;
+      if (order) {
+        setDetailOrder(order);
+      } else {
+        alert('Could not load request details');
+      }
+    } catch (err) {
+      console.error('Failed to fetch order detail:', err);
+      alert(err.message || 'Failed to load request details');
+    } finally {
+      setLoadingDetailId(null);
+    }
+  };
+
+  const capitalizeFirst = (str) => {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1).replace(/_/g, ' ');
+  };
+
   // Show loading state while fetching status from backend
   if (isLoadingStatus) {
     return (
@@ -911,7 +939,29 @@ const ScrapperDashboard = () => {
                               </div>
                             </div>
 
-                            <div className="mt-4 pt-3 border-t border-slate-50 flex items-center justify-between gap-2">
+                            {/* View Request Detail Button */}
+                            <button
+                              onClick={(e) => handleViewRequestDetail(e, req.orderId)}
+                              disabled={loadingDetailId === req.orderId}
+                              className="mt-3 w-full py-2 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold text-[11px] flex items-center justify-center gap-1.5 hover:bg-indigo-100 active:scale-95 transition-all disabled:opacity-60"
+                            >
+                              {loadingDetailId === req.orderId ? (
+                                <>
+                                  <div className="w-3.5 h-3.5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+                                  Loading...
+                                </>
+                              ) : (
+                                <>
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
+                                  </svg>
+                                  View Request Detail
+                                </>
+                              )}
+                            </button>
+
+                            <div className="mt-3 pt-3 border-t border-slate-50 flex items-center justify-between gap-2">
                               <div className="flex gap-2 flex-grow">
                                 <button 
                                   onClick={(e) => handleAcceptRequestShortcut(e, req)}
@@ -1601,6 +1651,266 @@ const ScrapperDashboard = () => {
           )}
         </div>
       </div >
+
+      {/* ========== Request Detail Bottom Sheet Modal ========== */}
+      <AnimatePresence>
+        {detailOrder && (() => {
+          const o = detailOrder;
+          const orderId = o._id || o.id;
+          const reqId = `REQ-${orderId.toString().slice(-6).toUpperCase()}`;
+
+          return (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                key="detail-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/50 z-[99999]"
+                onClick={() => setDetailOrder(null)}
+              />
+
+              {/* Bottom Sheet */}
+              <motion.div
+                key="detail-sheet"
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+                className="fixed inset-x-0 bottom-0 z-[100000] bg-white rounded-t-3xl max-h-[88vh] flex flex-col shadow-2xl"
+              >
+                {/* Handle Bar */}
+                <div className="flex justify-center pt-3 pb-1">
+                  <div className="w-10 h-1 rounded-full bg-gray-300" />
+                </div>
+
+                {/* Header */}
+                <div className="flex items-center justify-between px-5 pb-3 border-b border-gray-100">
+                  <div>
+                    <h2 className="text-base font-bold text-gray-900">Request Detail</h2>
+                    <p className="text-[11px] text-gray-400">{reqId}</p>
+                  </div>
+                  <button
+                    onClick={() => setDetailOrder(null)}
+                    className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path d="M18 6L6 18M6 6l12 12" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 text-left">
+
+                  {/* Customer Info */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                      <span className="text-emerald-700 font-bold text-base">
+                        {(o.user?.name || 'U')[0].toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 text-sm">{o.user?.name || 'Customer'}</p>
+                      <p className="text-xs text-gray-400">{o.user?.phone || ''}</p>
+                    </div>
+                    <div className="text-right">
+                      {o.isDonation ? (
+                        <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-bold">🎁 Donation</span>
+                      ) : (
+                        <p className="font-bold text-emerald-600 text-lg">₹{o.totalAmount || 0}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* ---- Scrap Items Detail ---- */}
+                  <div className="bg-gray-50 rounded-2xl p-3.5">
+                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2.5">📦 Items Detail</h3>
+                    <div className="space-y-2.5">
+                      {Array.isArray(o.scrapItems) && o.scrapItems.map((item, idx) => (
+                        <div key={idx} className="flex items-center gap-3 bg-white rounded-xl p-3 border border-gray-100">
+                          {/* Item Icon */}
+                          <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                            <span className="text-base">
+                              {item.category === 'plastic' ? '♻️' :
+                               item.category === 'metal' ? '🔩' :
+                               item.category === 'paper' || item.category === 'raddi' ? '📄' :
+                               item.category === 'electronic' || item.category === 'e_waste' ? '💻' :
+                               item.category === 'glass' ? '🪟' :
+                               item.category === 'furniture' ? '🪑' :
+                               item.category === 'vehicle_scrap' ? '🚗' :
+                               item.category === 'home_appliance' ? '🏠' :
+                               item.category === 'scrap_iron' ? '⚙️' : '📦'}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-gray-800 text-sm truncate">
+                              {item.name || capitalizeFirst(item.category)}
+                            </p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              {item.pricingType === 'negotiable' ? (
+                                <span className="text-[11px] px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded font-medium">🤝 Negotiable</span>
+                              ) : (
+                                <>
+                                  {item.weight > 0 && (
+                                    <span className="text-[11px] text-gray-400">{item.weight} kg</span>
+                                  )}
+                                  {item.rate > 0 && (
+                                    <span className="text-[11px] text-gray-400">@ ₹{item.rate}/kg</span>
+                                  )}
+                                </>
+                              )}
+                              {item.itemCondition && (
+                                <span className={`text-[11px] px-1.5 py-0.5 rounded font-medium ${
+                                  item.itemCondition === 'good' ? 'bg-green-50 text-green-700' :
+                                  item.itemCondition === 'average' ? 'bg-yellow-50 text-yellow-700' :
+                                  'bg-red-50 text-red-700'
+                                }`}>
+                                  {capitalizeFirst(item.itemCondition)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            {item.pricingType === 'negotiable' ? (
+                              <p className="text-sm font-bold text-amber-600">
+                                {item.expectedPrice ? `₹${item.expectedPrice}` : '—'}
+                              </p>
+                            ) : (
+                              <p className="text-sm font-bold text-emerald-600">₹{item.total || 0}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Total row */}
+                    {!o.isDonation && (
+                      <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-gray-200">
+                        <span className="text-xs font-bold text-gray-600 uppercase">Total Amount</span>
+                        <span className="text-base font-extrabold text-emerald-600">₹{o.totalAmount || 0}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ---- Photos ---- */}
+                  {Array.isArray(o.images) && o.images.length > 0 && (
+                    <div>
+                      <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">📷 Photos</h3>
+                      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                        {o.images.map((img, idx) => (
+                          <div key={idx} className="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                            <img
+                              src={img.url}
+                              alt={`Scrap photo ${idx + 1}`}
+                              className="w-full h-full object-cover"
+                              onError={(e) => { e.target.style.display = 'none'; }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ---- Pickup Info ---- */}
+                  <div className="bg-gray-50 rounded-2xl p-3.5 space-y-2.5">
+                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide">📍 Pickup Info</h3>
+                    {/* Address */}
+                    <div className="flex items-start gap-2">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-red-400 mt-0.5 flex-shrink-0">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor" />
+                      </svg>
+                      <p className="text-xs text-gray-700 leading-relaxed">
+                        {(() => {
+                          if (!o.pickupAddress) return 'Location not available';
+                          const parts = [o.pickupAddress.street, o.pickupAddress.city].filter(Boolean);
+                          return parts.join(', ') || 'Location on Map';
+                        })()}
+                        {o.pickupAddress?.state && `, ${o.pickupAddress.state}`}
+                        {o.pickupAddress?.pincode && ` - ${o.pickupAddress.pincode}`}
+                      </p>
+                    </div>
+                    {/* Time */}
+                    <div className="flex items-center gap-2">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-blue-400 flex-shrink-0">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                        <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                      </svg>
+                      <p className="text-xs text-gray-700">
+                        {o.pickupSlot
+                          ? `${o.pickupSlot.dayName || ''} ${o.pickupSlot.date || ''} • ${o.pickupSlot.slot || ''}`.trim()
+                          : o.preferredTime || 'Time not specified'}
+                      </p>
+                    </div>
+                    {/* Quantity Type */}
+                    {o.quantityType && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">📏</span>
+                        <p className="text-xs text-gray-700">Quantity: <span className="font-semibold capitalize">{o.quantityType}</span></p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ---- Notes ---- */}
+                  {o.notes && o.notes.trim() && (
+                    <div className="bg-yellow-50 rounded-2xl p-3.5 border border-yellow-100">
+                      <h3 className="text-xs font-bold text-yellow-700 uppercase tracking-wide mb-1">📝 Notes</h3>
+                      <p className="text-xs text-yellow-800 leading-relaxed">{o.notes}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Bottom Action */}
+                <div className="px-5 py-4 border-t border-gray-100 bg-white flex gap-3">
+                  <button
+                    onClick={() => {
+                      const oid = o._id || o.id;
+                      // Accept directly via scrapperOrdersAPI (since we're already viewing it)
+                      // First close the modal and then accept. Notification from socket should hit but we'll manually route.
+                      setDetailOrder(null);
+                      
+                      // Using accept logic
+                      scrapperOrdersAPI.accept(oid).then(res => {
+                          if(res.success || res.order) {
+                              dismissRequestLocally(oid);
+                              setShowNotificationDropdown(false);
+                              navigate(`/scrapper/my-active-requests`);
+                          }
+                      }).catch((err) => {
+                          console.error(err);
+                          alert(err.message || 'Failed to accept order');
+                      });
+                    }}
+                    className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm flex items-center justify-center gap-2 hover:bg-emerald-700 active:scale-95 transition-all"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Accept Pickup
+                  </button>
+                  <button
+                    onClick={() => {
+                      const oid = o._id || o.id;
+                      setDetailOrder(null);
+                      // Clear the active dropdown and navigate to map
+                      setShowNotificationDropdown(false);
+                      navigate(`/scrapper/active-requests?highlight=${oid}`);
+                    }}
+                    className="flex-1 py-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 font-bold text-sm flex items-center justify-center gap-2 hover:bg-blue-100 active:scale-95 transition-all"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6-10l6 3m0 10l4.553 2.276A1 1 0 0021 21.382V10.618a1 1 0 00-.553-.894L15 7m0 13V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    View Map
+                  </button>
+                </div>
+              </motion.div>
+            </>
+          );
+        })()}
+      </AnimatePresence>
+
     </motion.div >
   );
 };
