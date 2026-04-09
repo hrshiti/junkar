@@ -73,9 +73,23 @@ const SellScrapPage = () => {
                         plastic: '🥤', metal: '⚙️', paper: '📄', 
                         electronic: '🔌', default: '📦'
                     };
-                    
+                    const formatCategoryName = (name) => {
+                        if(!name) return '';
+                        const fixes = {
+                            'Bettry': 'Battery', 'Leptop': 'Laptop', 'Human haire': 'Human Hair',
+                            'Iran / MS Scrap / Lokhand': 'Iron / MS Scrap / Lokhand', 
+                            'Iran / MS Scrap / Lokhan': 'Iron / MS Scrap / Lokhand',
+                            'Ac': 'AC', 'Fridge Defridge': 'Fridge / Deep Freezer',
+                            '4 Wheelers comercial vehicle': '4 Wheelers Commercial Vehicles',
+                            '4 Wheelers Comercial Vehicles': '4 Wheelers Commercial Vehicles'
+                        };
+                        if(fixes[name]) return fixes[name];
+                        return name.replace('Bettry', 'Battery').replace('Leptop', 'Laptop').replace('Human haire', 'Human Hair').replace('Iran', 'Iron').replace('Comercial', 'Commercial');
+                    };
+
                     const formattedCategories = response.data.categories.map(cat => ({
                         ...cat,
+                        name: formatCategoryName(cat.name),
                         // Store only strings: URL or emoji
                         icon: cat.icon ? cat.icon : (defaultIcons[cat.id] || defaultIcons.default)
                     }));

@@ -119,9 +119,23 @@ const CategorySelectionPage = () => {
         if (response.success && response.data?.prices) {
           const apiMaterials = response.data.prices.filter(p => p.isActive !== false && (!p.type || p.type === 'material'));
 
+          const formatCategoryName = (name) => {
+            if(!name) return '';
+            const fixes = {
+              'Bettry': 'Battery', 'Leptop': 'Laptop', 'Human haire': 'Human Hair',
+              'Iran / MS Scrap / Lokhand': 'Iron / MS Scrap / Lokhand', 
+              'Iran / MS Scrap / Lokhan': 'Iron / MS Scrap / Lokhand',
+              'Ac': 'AC', 'Fridge Defridge': 'Fridge / Deep Freezer',
+              '4 Wheelers comercial vehicle': '4 Wheelers Commercial Vehicles',
+              '4 Wheelers Comercial Vehicles': '4 Wheelers Commercial Vehicles'
+            };
+            if(fixes[name]) return fixes[name];
+            return name.replace('Bettry', 'Battery').replace('Leptop', 'Laptop').replace('Human haire', 'Human Hair').replace('Iran', 'Iron').replace('Comercial', 'Commercial');
+          };
+
           const mapped = apiMaterials.map(p => ({
             id: p._id,
-            name: p.category,
+            name: formatCategoryName(p.category),
             image: p.image || getCategoryImage(p.category),
             price: p.pricePerKg || p.price || 0,
             minPrice: p.minPrice,
@@ -303,13 +317,24 @@ const CategorySelectionPage = () => {
               </div>
 
               {/* Compact Category Info */}
-              <div className="mt-1.5 md:mt-2 text-center">
-                <p
-                  className="text-xs md:text-sm font-bold mb-0.5 truncate max-w-full"
-                  style={{ color: '#1e293b' }}
-                >
-                  {getTranslatedText(category.name)}
-                </p>
+              <div className="mt-1.5 md:mt-2 text-center w-full px-1 flex flex-col items-center">
+                <div className="w-full min-h-[32px] mb-1 flex items-start justify-center">
+                  <p
+                    className="text-[11px] md:text-xs font-bold leading-tight text-center"
+                    style={{ 
+                      color: '#1e293b', 
+                      wordBreak: 'break-word', 
+                      overflowWrap: 'anywhere',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      whiteSpace: 'normal'
+                    }}
+                  >
+                    {getTranslatedText(category.name)}
+                  </p>
+                </div>
                 <p
                   className="text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded-md inline-block"
                   style={{
@@ -350,10 +375,12 @@ const CategorySelectionPage = () => {
             >
               <span className="text-2xl text-sky-500">➕</span>
             </div>
-            <div className="mt-1.5 md:mt-2 text-center">
-              <p className="text-[10px] md:text-xs font-bold text-sky-600 line-clamp-2">
-                {getTranslatedText("Something else?")}
-              </p>
+            <div className="mt-1.5 md:mt-2 text-center w-full px-1 flex flex-col items-center">
+              <div className="w-full min-h-[32px] mb-1 flex items-start justify-center">
+                <p className="text-[10px] md:text-xs font-bold text-sky-600 line-clamp-2 leading-tight">
+                  {getTranslatedText("Something else?")}
+                </p>
+              </div>
             </div>
           </div>
         </div>

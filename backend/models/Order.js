@@ -36,7 +36,6 @@ const orderSchema = new mongoose.Schema({
   scrapItems: [{
     category: {
       type: String,
-      enum: Object.values(SCRAP_CATEGORIES),
       required: true
     },
     name: String,
