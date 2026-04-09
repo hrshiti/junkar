@@ -419,7 +419,8 @@ const ScrapperLogin = (props) => {
           referralCode: referralCode,
           scrapperType: scrapperType,
           city: city || '',
-          state: state || ''
+          state: state || '',
+          vehicleInfo: { type: 'truck', number: vehicleInfo }
         };
 
         if ((scrapperType === 'dukandaar' || scrapperType === 'wholesaler') && businessCoordinates) {
@@ -750,12 +751,6 @@ const ScrapperLogin = (props) => {
                           const cleaned = e.target.value.replace(/[^a-zA-Z\u0900-\u097F\u0980-\u09FF\u0A00-\u0A7F\u0A80-\u0AFF\u0B00-\u0B7F\u0B80-\u0BFF\u0C00-\u0C7F\u0C80-\u0CFF\u0D00-\u0D7F ]/g, '');
                           setName(cleaned);
                         }}
-                        onKeyDown={(e) => {
-                          // Block digit keys directly
-                          if (e.key >= '0' && e.key <= '9') {
-                            e.preventDefault();
-                          }
-                        }}
                         placeholder={getTranslatedText("Enter your full name")}
                         className="w-full px-4 py-3 rounded-xl border-2 border-zinc-700 focus:border-sky-500 focus:ring-2 focus:ring-sky-900/20 focus:outline-none transition-all text-sm md:text-base bg-black text-white placeholder-gray-600"
                         required={!isLogin}
@@ -982,9 +977,6 @@ const ScrapperLogin = (props) => {
                                     const cleaned = e.target.value.replace(/[^a-zA-Z\u0900-\u097F\u0980-\u09FF ]/g, '');
                                     setCity(cleaned);
                                   }}
-                                  onKeyDown={(e) => {
-                                    if (e.key >= '0' && e.key <= '9') e.preventDefault();
-                                  }}
                                   placeholder="City"
                                   className="w-full px-4 py-3 rounded-xl border-2 border-zinc-700 focus:border-sky-500 bg-black/50 text-white text-sm outline-none transition-all"
                                   required={scrapperType === 'dukandaar' || scrapperType === 'wholesaler'}
@@ -998,9 +990,6 @@ const ScrapperLogin = (props) => {
                                   onChange={(e) => {
                                     const cleaned = e.target.value.replace(/[^a-zA-Z\u0900-\u097F\u0980-\u09FF ]/g, '');
                                     setState(cleaned);
-                                  }}
-                                  onKeyDown={(e) => {
-                                    if (e.key >= '0' && e.key <= '9') e.preventDefault();
                                   }}
                                   placeholder="State"
                                   className="w-full px-4 py-3 rounded-xl border-2 border-zinc-700 focus:border-sky-500 bg-black/50 text-white text-sm outline-none transition-all"
@@ -1121,17 +1110,8 @@ const ScrapperLogin = (props) => {
                         value={vehicleInfo}
                         onChange={(e) => {
                           // Allow only letters, digits, spaces and hyphens (Indian vehicle number format)
-                          const cleaned = e.target.value.replace(/[^a-zA-Z0-9\- ]/g, '');
+                          const cleaned = e.target.value.replace(/[^a-zA-Z0-9\- ]/g, '').toUpperCase();
                           setVehicleInfo(cleaned);
-                        }}
-                        onKeyDown={(e) => {
-                          // Block special characters — allow letters, digits, hyphen, space, and control keys
-                          const allowed = /^[a-zA-Z0-9\- ]$/.test(e.key);
-                          const isControl = e.ctrlKey || e.metaKey || e.altKey ||
-                            ['Backspace','Delete','Tab','Enter','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(e.key);
-                          if (!allowed && !isControl) {
-                            e.preventDefault();
-                          }
                         }}
                         placeholder={getTranslatedText("e.g., Truck - MH-12-AB-1234")}
                         className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${vehicleInfo ? 'border-sky-500 ring-sky-900/20' : 'border-zinc-700 focus:border-sky-500'} `}
