@@ -52,7 +52,8 @@ const defaultOrigins = [
   'http://localhost:3000',
   'https://junkar.vercel.app',
   'https://www.junkar.in',
-  'https://junkar.in'
+  'https://junkar.in',
+  'https://app.junkar.in'
 ];
 
 const envOrigins = process.env.FRONTEND_URL
