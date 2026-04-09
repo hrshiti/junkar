@@ -185,6 +185,10 @@ const orderSchema = new mongoose.Schema({
   targetedScrappers: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Scrapper'
+  }],
+  rejectedBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Scrapper'
   }]
 }, {
   timestamps: true

@@ -155,7 +155,8 @@ export const getAvailableOrders = asyncHandler(async (req, res) => {
     status: ORDER_STATUS.PENDING,
     assignmentStatus: 'unassigned',
     scrapper: { $ne: scrapperId },
-    orderType: { $in: allowedOrderTypes } // Only show what this scrapper covers
+    orderType: { $in: allowedOrderTypes }, // Only show what this scrapper covers
+    rejectedBy: { $nin: [scrapperId] }     // KEY FIX: Never show orders this scrapper rejected
   };
 
   // Add Distance Filter for Public Orders
@@ -197,7 +198,8 @@ export const getAvailableOrders = asyncHandler(async (req, res) => {
       { targetedScrappers: scrapperId },
       { targetedScrappers: new mongoose.Types.ObjectId(scrapperId) }
     ],
-    scrapper: { $ne: scrapperId }
+    scrapper: { $ne: scrapperId },
+    rejectedBy: { $nin: [scrapperId] }  // KEY FIX: Never show rejected B2B orders again
   };
 
   // 3. Best Approach: Fetch both sets separately and merge to handle specific requirements.
@@ -210,6 +212,17 @@ export const getAvailableOrders = asyncHandler(async (req, res) => {
   const orders = [...publicOrders, ...targetedOrders].sort((a, b) => b.createdAt - a.createdAt);
 
   sendSuccess(res, 'Available orders retrieved successfully', { orders });
+});
+
+// @desc    Permanently reject an order for this scrapper (DB-level, won't come back)
+// @route   POST /api/orders/:id/reject
+// @access  Private (Scrapper)
+export const rejectOrder = asyncHandler(async (req, res) => {
+  const scrapperId = req.user.id;
+  const { id: orderId } = req.params;
+
+  const result = await orderService.rejectOrder(orderId, scrapperId);
+  sendSuccess(res, 'Order rejected successfully', result);
 });
 
 // @desc    Get sent B2B requests for a scrapper

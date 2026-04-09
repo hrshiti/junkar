@@ -722,13 +722,13 @@ const ScrapperDashboard = () => {
     }
   };
 
-  // Smart Reject: B2B cancels order, B2C just hides it for current scrapper
+  // Smart Reject: Permanently saves rejection in DB so this order never comes back to this scrapper
   const handleRejectRequestShortcut = async (e, req) => {
     e.stopPropagation(); 
     try {
-      // 1. If it's a B2B direct request, we call cancel API to notify the sender
-      if (req.type === 'new_order') {
-        await orderAPI.cancel(req.orderId, 'Partner rejected from dashboard');
+      // 1. Permanently reject in DB (works for both B2B and B2C)
+      if (req.orderId) {
+        await scrapperOrdersAPI.reject(req.orderId);
       }
 
       // 2. Clear from UI immediately

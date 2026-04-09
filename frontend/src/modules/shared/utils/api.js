@@ -334,6 +334,9 @@ export const scrapperOrdersAPI = {
   accept: async (id) => {
     return apiRequest(API_ENDPOINTS.orders.accept(id), { method: 'POST' });
   },
+  reject: async (id) => {
+    return apiRequest(`/orders/${id}/reject`, { method: 'POST' });
+  },
   getTargeted: async () => {
     return apiRequest('/orders/targeted', { method: 'GET' });
   },

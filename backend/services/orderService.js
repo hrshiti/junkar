@@ -333,6 +333,39 @@ class OrderService {
     }
 
     /**
+     * Reject an order permanently for this scrapper (saves to DB)
+     * @param {String} orderId - Order ID
+     * @param {String} scrapperId - Scrapper rejecting the order
+     * @returns {Object} Updated order
+     */
+    async rejectOrder(orderId, scrapperId) {
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+            throw new Error('Order not found');
+        }
+
+        // Only reject PENDING orders
+        if (order.status !== ORDER_STATUS.PENDING) {
+            throw new Error('Order is no longer pending');
+        }
+
+        // Add scrapper to rejectedBy if not already there
+        const alreadyRejected = order.rejectedBy?.some(
+            id => id.toString() === scrapperId.toString()
+        );
+
+        if (!alreadyRejected) {
+            await Order.findByIdAndUpdate(orderId, {
+                $addToSet: { rejectedBy: scrapperId }
+            });
+        }
+
+        logger.info(`Order ${orderId} rejected by scrapper ${scrapperId}`);
+        return { success: true };
+    }
+
+    /**
      * Get available orders for a scrapper
      * @param {String} scrapperId - Scrapper ID
      * @param {Object} filters - Additional filters
@@ -348,7 +381,9 @@ class OrderService {
         const query = {
             status: ORDER_STATUS.PENDING,
             assignmentStatus: { $in: ['unassigned', null] },
-            scrapper: null
+            scrapper: null,
+            // KEY FIX: Exclude orders this scrapper has already rejected permanently
+            rejectedBy: { $nin: [scrapperId] }
         };
 
         // Filter by scrapper type

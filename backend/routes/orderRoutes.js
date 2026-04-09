@@ -7,6 +7,7 @@ import {
   getMyForwardedOrders,
   getOrderById,
   acceptOrder,
+  rejectOrder,
   updateOrderStatus,
   cancelOrder,
   updateOrder,
@@ -48,6 +49,7 @@ router.put('/:id', isUser, updateOrderValidator, validate, updateOrder);
 router.put('/:id/status', updateOrderStatusValidator, validate, updateOrderStatus);
 router.post('/:id/cancel', cancelOrderValidator, validate, cancelOrder);
 router.post('/:id/accept', isScrapper, acceptOrder);
+router.post('/:id/reject', isScrapper, rejectOrder);
 router.post('/:id/forward', isScrapper, forwardToBigScrapper);
 router.post('/:id/report-fake-lead', isScrapper, reportFakeLead);
 
