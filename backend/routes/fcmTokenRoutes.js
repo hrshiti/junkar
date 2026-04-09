@@ -63,21 +63,7 @@ router.post('/save', protect, async (req, res) => {
             }
         }
 
-        // Send Test Notification
-        try {
-            await sendPushNotification([token], {
-                title: 'Welcome to Junkar!',
-                body: `Hello ${user.name}, you are now ready to receive notifications.`,
-                data: {
-                    type: 'welcome',
-                    userId: user._id.toString()
-                }
-            });
-        } catch (notifErr) {
-            console.error('Failed to send welcome notification:', notifErr);
-        }
-
-        res.json({ success: true, message: 'FCM token saved & test notification sent' });
+        res.json({ success: true, message: 'FCM token saved successfully' });
     } catch (error) {
         console.error('Error saving FCM token:', error);
         res.status(500).json({ error: 'Failed to save token' });

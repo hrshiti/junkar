@@ -329,7 +329,7 @@ class NotificationService {
             const pushBody = (newStatus === 'completed' && pushMessages[newStatus]) || message;
 
             await this.notifyUser(
-                order.user.toString(),
+                order.user._id ? order.user._id.toString() : order.user.toString(),
                 'order_status_update',
                 {
                     orderId: order._id,

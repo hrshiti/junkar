@@ -562,7 +562,8 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 
     // NEW Tracking stage notifications for user
     if (status === ORDER_STATUS.ON_WAY && order.user) {
-      sendNotificationToUser(order.user._id.toString(), {
+      const safeUserId = order.user._id ? order.user._id.toString() : order.user.toString();
+      sendNotificationToUser(safeUserId, {
         title: '🚚 Scrapper is on the Way!',
         body: `Scrapper has started their journey to your location. Aap unhe track kar sakte hain.`,
         data: { type: 'order_update', orderId: order._id, status: 'on_way' }
@@ -570,7 +571,8 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     }
 
     if (status === ORDER_STATUS.ARRIVED && order.user) {
-      sendNotificationToUser(order.user._id.toString(), {
+      const safeUserId = order.user._id ? order.user._id.toString() : order.user.toString();
+      sendNotificationToUser(safeUserId, {
         title: '📍 Scrapper has Arrived!',
         body: `Scrapper aapki location par pahunch gaya hai.`,
         data: { type: 'order_update', orderId: order._id, status: 'arrived' }
@@ -579,14 +581,15 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 
     // Send Completion Notification
     if (status === ORDER_STATUS.COMPLETED && order.user) {
+      const safeUserId = order.user._id ? order.user._id.toString() : order.user.toString();
       if (order.isDonation) {
-        sendNotificationToUser(order.user._id.toString(), {
+        sendNotificationToUser(safeUserId, {
           title: '💚 Thank you for donating!',
           body: `Aapka donation request successful raha. Thank you for donating and ${order.scrapper?.name || 'our partner'} for pick-up.`,
           data: { type: 'order_completed', orderId: order._id }
         }, order.userModel?.toLowerCase() || 'user').catch(err => logger.error('[Notification] Donation completion notification failed:', err));
       } else {
-        sendNotificationToUser(order.user._id.toString(), {
+        sendNotificationToUser(safeUserId, {
           title: '✅ Order Successful',
           body: `Aapka order REQ-${order._id.toString().slice(-6)} successfully complete ho gaya hai.`,
           data: { type: 'order_completed', orderId: order._id }

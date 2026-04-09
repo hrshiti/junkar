@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Autocomplete, useJsApiLoader } from '@react-google-maps/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
-import { scrapperProfileAPI, uploadAPI } from '../../shared/utils/api';
+import { scrapperProfileAPI, uploadAPI, publicAPI } from '../../shared/utils/api';
 import { useAuth } from '../../shared/context/AuthContext';
 
 const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
@@ -61,6 +61,7 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
     const [vehiclePhotoFile, setVehiclePhotoFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [availableCategories, setAvailableCategories] = useState([]);
     const [showRequestForm, setShowRequestForm] = useState(false);
     const [requestAddress, setRequestAddress] = useState('');
     const [requestCoordinates, setRequestCoordinates] = useState(null);
@@ -88,6 +89,34 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
             setVehiclePhotoFile(null);
         }
     }, [initialData, isOpen]);
+
+    // Fetch dynamic categories from admin price feed based on scrapper role
+    useEffect(() => {
+        const role = initialData?.scrapperType;
+        if (!role || !['dukandaar', 'wholesaler', 'industrial'].includes(role)) return;
+
+        const fetchCategories = async () => {
+            try {
+                const response = await publicAPI.getScrapperCategories(role);
+                if (response.success && response.data?.categories?.length > 0) {
+                    const iconMap = {
+                        'Paper': '📄', 'Plastic': '♻️', 'Metal': '⛓️',
+                        'Electronics': '💻', 'Furniture': '🪑', 'Iron': '⛓️',
+                        'Copper': '⛓️', 'Battery': '🔋', 'Others': '📦'
+                    };
+                    setAvailableCategories(response.data.categories.map(c => ({
+                        id: c.name,
+                        label: c.name,
+                        icon: c.icon || iconMap[c.name] || '♻️'
+                    })));
+                }
+            } catch (err) {
+                console.error('Failed to fetch categories:', err);
+            }
+        };
+
+        fetchCategories();
+    }, [initialData?.scrapperType]);
 
     const handlePlaceSelect = () => {
         if (autocompleteRef.current) {
@@ -538,17 +567,31 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                                         <>
                                             {/* Deal Categories Selection */}
                                             <div className="pt-2 border-t border-slate-100 space-y-3">
-                                                <label className="text-sm font-medium text-slate-700 block">
-                                                    {getTranslatedText("Deal Categories (Specialties)")}
-                                                </label>
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    {[
-                                                        { id: 'Paper', label: 'Paper / Raddi', icon: '📄' },
-                                                        { id: 'Plastic', label: 'Plastic', icon: '♻️' },
-                                                        { id: 'Metal', label: 'Metal', icon: '⛓️' },
-                                                        { id: 'Electronics', label: 'Electronics', icon: '💻' },
-                                                        { id: 'Others', label: 'Furniture / Others', icon: '🪑' }
-                                                    ].map((cat) => (
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <label className="text-sm font-medium text-slate-700">
+                                                        {getTranslatedText("Deal Categories (Specialties)")}
+                                                    </label>
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setFormData({ ...formData, dealCategories: availableCategories.map(c => c.id) })}
+                                                            className="text-[10px] px-2 py-1 bg-sky-100 text-sky-600 rounded hover:bg-sky-200 transition"
+                                                        >
+                                                            Select All
+                                                        </button>
+                                                        {formData.dealCategories?.length > 0 && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setFormData({ ...formData, dealCategories: [] })}
+                                                                className="text-[10px] px-2 py-1 bg-red-50 text-red-400 rounded hover:bg-red-100 transition"
+                                                            >
+                                                                Clear
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-2 max-h-[200px] overflow-y-auto pr-1 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                                                    {availableCategories.map((cat) => (
                                                         <button
                                                             key={cat.id}
                                                             type="button"
@@ -560,15 +603,23 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                                                                     setFormData({ ...formData, dealCategories: [...current, cat.id] });
                                                                 }
                                                             }}
-                                                            className={`flex items-center gap-2 px-3 py-2 rounded-xl border-2 transition-all ${formData.dealCategories?.includes(cat.id)
-                                                                ? 'border-sky-500 bg-sky-50 text-sky-700 shadow-sm'
-                                                                : 'border-slate-100 bg-slate-50/50 text-slate-500 hover:border-slate-200'
-                                                                }`}
+                                                            className={`flex items-center gap-2 px-2 py-2 rounded-lg border transition-all ${
+                                                                formData.dealCategories?.includes(cat.id)
+                                                                    ? 'border-sky-500 bg-sky-50 text-sky-700 shadow-sm'
+                                                                    : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'
+                                                            }`}
                                                         >
-                                                            <span className="text-base">{cat.icon}</span>
-                                                            <span className="text-xs font-medium truncate">{cat.label}</span>
+                                                            {cat.icon && (cat.icon.startsWith('http') || cat.icon.startsWith('/')) ? (
+                                                                <img src={cat.icon} alt={cat.label} className="w-5 h-5 object-contain flex-shrink-0" />
+                                                            ) : (
+                                                                <span className="text-base flex-shrink-0">{cat.icon}</span>
+                                                            )}
+                                                            <span className="text-[11px] font-medium truncate text-left w-full">{cat.label}</span>
                                                         </button>
                                                     ))}
+                                                    {availableCategories.length === 0 && (
+                                                        <p className="col-span-2 text-center text-xs text-slate-400 py-3">Loading categories...</p>
+                                                    )}
                                                 </div>
                                                 <p className="text-[10px] text-slate-400 italic">
                                                     * {getTranslatedText("Selection will filter available orders in your area.")}
