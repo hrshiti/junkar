@@ -1058,10 +1058,31 @@ const ScrapperLogin = (props) => {
 
                             {/* Deal Categories - Only for Wholesalers/Shopkeepers */}
                             <div className="pt-2">
-                              <label className="block text-xs font-semibold mb-2 text-gray-400">
-                                {getTranslatedText("Deal Categories (What do you buy?)")}
-                              </label>
-                              <div className="grid grid-cols-2 gap-2">
+                              <div className="flex items-center justify-between mb-2">
+                                <label className="block text-xs font-semibold text-gray-400">
+                                  {getTranslatedText("Deal Categories")}
+                                </label>
+                                <div className="flex gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => setDealCategories(availableCategories.map(c => c.id))}
+                                    className="text-[10px] px-2 py-1 bg-sky-900/40 text-sky-300 rounded hover:bg-sky-900/60 transition"
+                                  >
+                                    {getTranslatedText("Select All")}
+                                  </button>
+                                  {(dealCategories.length > 0) && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setDealCategories([])}
+                                      className="text-[10px] px-2 py-1 bg-red-900/30 text-red-400 rounded hover:bg-red-900/50 transition"
+                                    >
+                                      {getTranslatedText("Clear")}
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[220px] overflow-y-auto pr-1 bg-black/20 p-2 rounded-xl border border-zinc-800">
                                 {availableCategories.map((cat) => (
                                   <button
                                     key={cat.id}
@@ -1073,17 +1094,17 @@ const ScrapperLogin = (props) => {
                                         setDealCategories([...dealCategories, cat.id]);
                                       }
                                     }}
-                                    className={`flex items-center gap-2 px-3 py-2 rounded-xl border-2 transition-all ${dealCategories.includes(cat.id)
-                                      ? 'border-sky-500 bg-sky-900/20 text-sky-400'
-                                      : 'border-zinc-700 bg-zinc-800/30 text-gray-400 hover:border-zinc-600'
+                                    className={`flex items-center gap-2 px-2 py-2 rounded-lg border transition-all ${dealCategories.includes(cat.id)
+                                      ? 'border-sky-500 bg-sky-900/20 text-sky-400 shadow-[0_0_8px_rgba(14,165,233,0.15)]'
+                                      : 'border-zinc-700 bg-zinc-800/40 text-gray-400 hover:border-zinc-600 hover:bg-zinc-800'
                                       }`}
                                   >
                                     {cat.icon && (cat.icon.startsWith('http') || cat.icon.startsWith('/')) ? (
-                                      <img src={cat.icon} alt={cat.label} className="w-5 h-5 object-contain" />
+                                      <img src={cat.icon} alt={cat.label} className="w-5 h-5 object-contain flex-shrink-0" />
                                     ) : (
-                                      <span className="text-base">{cat.icon}</span>
+                                      <span className="text-base flex-shrink-0">{cat.icon}</span>
                                     )}
-                                    <span className="text-xs font-medium truncate">{cat.label}</span>
+                                    <span className="text-[11px] font-medium truncate text-left w-full">{cat.label}</span>
                                   </button>
                                 ))}
                               </div>
