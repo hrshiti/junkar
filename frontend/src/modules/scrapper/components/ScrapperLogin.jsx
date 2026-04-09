@@ -200,49 +200,46 @@ const ScrapperLogin = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  // Fetch dynamic scrap categories for registration
+  // Fetch dynamic scrap categories for registration based on scrapper role
   useEffect(() => {
     const fetchCategories = async () => {
+      if (scrapperType === 'feri_wala') return; // Deal categories not shown for feri_wala
       try {
-        const response = await publicAPI.getActivePrices();
-        if (response.success && response.data?.prices) {
-          const prices = response.data.prices;
+        const response = await publicAPI.getScrapperCategories(scrapperType);
+        if (response.success && response.data?.categories) {
+          const mappedCategories = response.data.categories.map(c => {
+             // Extract icon mapping or default
+             const iconMap = {
+               'Paper': '📄',
+               'Plastic': '♻️',
+               'Metal': '⛓️',
+               'Electronics': '💻',
+               'Furniture': '🪑',
+               'Iron': '⛓️',
+               'Copper': '⛓️',
+               'Battery': '🔋',
+               'Others': '📦'
+             };
+             
+             return {
+               id: c.name, // Use the raw category name (c.name) as ID to store in dealCategories array
+               label: c.name,
+               icon: c.icon || iconMap[c.name] || '♻️'
+             };
+          });
           
-          // Map to unique categories for scrapper deal selection
-          const uniqueCategories = Array.from(new Set(prices.map(p => p.category)))
-            .map(catName => {
-              // Extract icon mapping or default
-              const iconMap = {
-                'Paper': '📄',
-                'Plastic': '♻️',
-                'Metal': '⛓️',
-                'Electronics': '💻',
-                'Furniture': '🪑',
-                'Iron': '⛓️',
-                'Copper': '⛓️',
-                'Battery': '🔋',
-                'Others': '📦'
-              };
-              
-              return {
-                id: catName,
-                label: catName,
-                icon: iconMap[catName] || '♻️'
-              };
-            });
-            
-          if (uniqueCategories.length > 0) {
-            setAvailableCategories(uniqueCategories);
+          if (mappedCategories.length > 0) {
+            setAvailableCategories(mappedCategories);
           }
         }
       } catch (err) {
         console.error('Failed to fetch dynamic categories:', err);
-        // Fallback to static list (already in state)
+        // Fallback to static list automatically handled by initial state
       }
     };
 
     fetchCategories();
-  }, []);
+  }, [scrapperType]);
 
   // Helper function to check KYC status
   const getKYCStatus = () => {
@@ -1081,7 +1078,11 @@ const ScrapperLogin = (props) => {
                                       : 'border-zinc-700 bg-zinc-800/30 text-gray-400 hover:border-zinc-600'
                                       }`}
                                   >
-                                    <span className="text-base">{cat.icon}</span>
+                                    {cat.icon && (cat.icon.startsWith('http') || cat.icon.startsWith('/')) ? (
+                                      <img src={cat.icon} alt={cat.label} className="w-5 h-5 object-contain" />
+                                    ) : (
+                                      <span className="text-base">{cat.icon}</span>
+                                    )}
                                     <span className="text-xs font-medium truncate">{cat.label}</span>
                                   </button>
                                 ))}
