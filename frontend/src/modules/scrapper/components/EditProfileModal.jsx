@@ -104,8 +104,19 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                         'Electronics': '💻', 'Furniture': '🪑', 'Iron': '⛓️',
                         'Copper': '⛓️', 'Battery': '🔋', 'Others': '📦'
                     };
+                    
+                    // Custom normalization to match what backend saves
+                    const normalizeCat = (val) => {
+                        const lower = String(val).toLowerCase().trim();
+                        if (['paper', 'raddi', 'paper / raddi'].includes(lower)) return 'paper';
+                        if (['electronics', 'electronic', 'e-waste', 'e_waste'].includes(lower)) return 'electronic';
+                        if (['others', 'furniture', 'furniture / others', 'vehicle scrap', 'vehicle_scrap', 'home appliance', 'home_appliance'].includes(lower)) return 'furniture';
+                        return lower;
+                    };
+
                     setAvailableCategories(response.data.categories.map(c => ({
-                        id: c.name,
+                        id: normalizeCat(c.name),
+                        originalName: c.name,
                         label: c.name,
                         icon: c.icon || iconMap[c.name] || '♻️'
                     })));
