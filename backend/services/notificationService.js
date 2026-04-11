@@ -29,16 +29,9 @@ class NotificationService {
                 ]
             };
 
-            // 🔑 KEY FIX: Only notify Feri Walas / Small scrappers for small orders
-            // Big scrappers (dukandaar, wholesaler) cannot accept small orders — so don't spam them
-            if (isSmallOrder) {
-                onlineScrappersQuery.scrapperType = { $in: ['feri_wala', 'small'] };
-            } else {
-                // Large/forwarded orders go to big scrappers
-                onlineScrappersQuery.scrapperType = { $in: ['big', 'dukandaar', 'wholesaler'] };
-            }
-
-            // Only feri_wala and small scrappers get donation orders (override above)
+            // Cross-role logic: Notify ALL nearby online scrappers for common pickups
+            // Normal orders (small or large) will go to anyone nearby
+            // But donations still usually go only to small scrappers/feri wala
             if (order.isDonation) {
                 onlineScrappersQuery.scrapperType = { $in: ['feri_wala', 'small'] };
             }

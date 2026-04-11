@@ -314,7 +314,7 @@ const ActiveRequestsPage = () => {
                   lat: order.pickupAddress?.coordinates?.lat || 19.0760,
                   lng: order.pickupAddress?.coordinates?.lng || 72.8777
                 },
-                distance: getTranslatedText('Calculating...'),
+                distance: order.distanceText || getTranslatedText('Calculating...'),
                 estimatedEarnings: `₹${order.totalAmount || 0}`,
                 status: order.status,
                 assignmentStatus: order.assignmentStatus,
@@ -755,16 +755,24 @@ const ActiveRequestsPage = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 p-2 rounded-lg" style={{ backgroundColor: 'rgba(31, 41, 55, 0.9)' }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ color: '#9ca3af', flexShrink: 0 }}>
-                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor" />
-                    </svg>
-                    <p className="text-xs flex-1 truncate" style={{ color: '#e5e7eb' }}>
-                      {[
-                        incomingRequest.location.address?.split(',')[0], // Street
-                        incomingRequest.location.address?.split(',')[1], // City
-                      ].filter(Boolean).join(', ')}
-                    </p>
+                  <div className="flex items-center justify-between gap-2 p-2 rounded-lg" style={{ backgroundColor: 'rgba(31, 41, 55, 0.9)' }}>
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ color: '#9ca3af', flexShrink: 0 }}>
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor" />
+                      </svg>
+                      <p className="text-xs truncate flex-1" style={{ color: '#e5e7eb' }}>
+                        {[
+                          incomingRequest.location.address?.split(',')[0], // Street
+                          incomingRequest.location.address?.split(',')[1], // City
+                        ].filter(Boolean).join(', ')}
+                      </p>
+                    </div>
+                    {incomingRequest.distance && incomingRequest.distance !== 'Calculating...' && (
+                      <div className="flex items-center gap-1 bg-sky-500/20 px-2 py-0.5 rounded text-xs font-bold text-sky-400 whitespace-nowrap">
+                        <span>📍</span>
+                        <span>{incomingRequest.distance}</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Pickup slot / preferred time info (always show if user sent any time) */}

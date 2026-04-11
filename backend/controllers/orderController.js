@@ -172,12 +172,10 @@ export const getAvailableOrders = asyncHandler(async (req, res) => {
     };
   }
 
-  // Add Scrapper Type (Big/Small) Filter for Public Orders
+  // Add Scrapper Type Filter - ALL online scrappers can now see small and large orders
   const isBigType = ['big', 'wholesaler', 'dukandaar'].includes(scrapper.scrapperType);
-  if (isBigType) {
-    publicMatch.$or = [{ quantityType: 'large' }, { forwardedBy: { $ne: null } }];
-  } else {
-    publicMatch.quantityType = 'small';
+  if (!isBigType) {
+    // Only exception: Small scrappers shouldn't see B2B forwarded orders
     publicMatch.forwardedBy = null;
   }
 
@@ -209,9 +207,55 @@ export const getAvailableOrders = asyncHandler(async (req, res) => {
   ]);
 
   // Merge and sort by creation time (newest first)
-  const orders = [...publicOrders, ...targetedOrders].sort((a, b) => b.createdAt - a.createdAt);
+  let ordersList = [...publicOrders, ...targetedOrders].sort((a, b) => b.createdAt - a.createdAt);
 
-  sendSuccess(res, 'Available orders retrieved successfully', { orders });
+  // Helper for Distance calculation
+  const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
+    if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+    const R = 6371; // Radius of earth in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    let d = R * c; 
+    return Number(d.toFixed(1));
+  };
+
+  const scrapperLat = lat ? parseFloat(lat) : null;
+  const scrapperLng = lng ? parseFloat(lng) : null;
+
+  // Map to basic JS objects and add distanceText
+  ordersList = ordersList.map(orderDoc => {
+    const orderObj = orderDoc.toObject ? orderDoc.toObject() : orderDoc;
+    let distanceText = null;
+
+    if (scrapperLat && scrapperLng && orderObj.pickupAddress?.coordinates) {
+        const orderLat = orderObj.pickupAddress.coordinates.lat || orderObj.pickupAddress.coordinates.coordinates?.[1];
+        const orderLng = orderObj.pickupAddress.coordinates.lng || orderObj.pickupAddress.coordinates.coordinates?.[0];
+        
+        const distKm = getDistanceFromLatLonInKm(scrapperLat, scrapperLng, orderLat, orderLng);
+        if (distKm !== null) {
+          distanceText = distKm < 1 ? 'Less than 1 km' : `${distKm} km`;
+        }
+    }
+    // Backward compatibility for location
+    if (!distanceText && scrapperLat && scrapperLng && orderObj.location?.coordinates) {
+        const orderLat = orderObj.location.coordinates[1];
+        const orderLng = orderObj.location.coordinates[0];
+        const distKm = getDistanceFromLatLonInKm(scrapperLat, scrapperLng, orderLat, orderLng);
+        if (distKm !== null) {
+          distanceText = distKm < 1 ? 'Less than 1 km' : `${distKm} km`;
+        }
+    }
+
+    orderObj.distanceText = distanceText;
+    return orderObj;
+  });
+
+  sendSuccess(res, 'Available orders retrieved successfully', { orders: ordersList });
 });
 
 // @desc    Permanently reject an order for this scrapper (DB-level, won't come back)
