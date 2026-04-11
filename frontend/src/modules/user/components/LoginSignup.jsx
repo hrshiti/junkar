@@ -153,7 +153,7 @@ const LoginSignup = () => {
       return;
     }
 
-    if (!isLogin && email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!isLogin && email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       setError(getTranslatedText("Please enter a valid email address"));
       return;
     }

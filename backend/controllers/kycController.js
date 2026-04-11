@@ -42,6 +42,7 @@ export const submitKyc = async (req, res) => {
     // 2. Validate Files
     const files = req.files || {};
     const aadhaarFile = files['aadhaar'] ? files['aadhaar'][0] : null;
+    const aadhaarBackFile = files['aadhaarBack'] ? files['aadhaarBack'][0] : null;
     const selfieFile = files['selfie'] ? files['selfie'][0] : null;
     const panFile = files['pan'] ? files['pan'][0] : null;
     const shopLicenseFile = files['shopLicense'] ? files['shopLicense'][0] : null;
@@ -50,10 +51,15 @@ export const submitKyc = async (req, res) => {
 
     // Validation: Check if we have the documents either in this request OR already in DB
     const hasAadhaar = aadhaarFile || scrapper.kyc?.aadhaarPhotoUrl;
+    const hasAadhaarBack = aadhaarBackFile || scrapper.kyc?.aadhaarBackPhotoUrl;
     const hasSelfie = selfieFile || scrapper.kyc?.selfieUrl;
 
     if (!hasAadhaar || !hasSelfie) {
-      return sendError(res, 'Aadhaar and Selfie photos are required.', 400);
+      return sendError(res, 'Aadhaar (front) and Selfie photos are required.', 400);
+    }
+
+    if (!hasAadhaarBack) {
+      return sendError(res, 'Aadhaar back photo (with address) is required.', 400);
     }
 
     if (!aadhaarNumber && !scrapper.kyc?.aadhaarNumber) {
@@ -78,6 +84,7 @@ export const submitKyc = async (req, res) => {
     // 3. Upload to Cloudinary
     // We update fields one by one to ensure we have the URLs
     let aadhaarUrl = scrapper.kyc?.aadhaarPhotoUrl;
+    let aadhaarBackUrl = scrapper.kyc?.aadhaarBackPhotoUrl;
     let selfieUrl = scrapper.kyc?.selfieUrl;
     let panUrl = scrapper.kyc?.panPhotoUrl;
     let shopLicenseUrl = scrapper.kyc?.shopLicenseUrl;
@@ -90,6 +97,9 @@ export const submitKyc = async (req, res) => {
 
       if (aadhaarFile) {
         uploadTasks.push(uploadFile(aadhaarFile, { folder: 'scrapto/kyc/aadhaar' }).then(res => { aadhaarUrl = res.secure_url; }));
+      }
+      if (aadhaarBackFile) {
+        uploadTasks.push(uploadFile(aadhaarBackFile, { folder: 'scrapto/kyc/aadhaar_back' }).then(res => { aadhaarBackUrl = res.secure_url; }));
       }
       if (selfieFile) {
         uploadTasks.push(uploadFile(selfieFile, { folder: 'scrapto/kyc/selfie' }).then(res => { selfieUrl = res.secure_url; }));
@@ -120,6 +130,7 @@ export const submitKyc = async (req, res) => {
     scrapper.kyc = {
       aadhaarNumber: aadhaarNumber || scrapper.kyc?.aadhaarNumber,
       aadhaarPhotoUrl: aadhaarUrl,
+      aadhaarBackPhotoUrl: aadhaarBackUrl,
       selfieUrl: selfieUrl,
       panNumber: panNumber || scrapper.kyc?.panNumber || null,
       panPhotoUrl: panUrl,
@@ -160,10 +171,10 @@ export const getMyKyc = async (req, res) => {
 
   // Select kyc fields explicitly to include ones with select: false if needed
   let scrapper = await Scrapper.findById(user._id)
-    .select('subscription kyc.status kyc.aadhaarPhotoUrl kyc.selfieUrl kyc.licenseUrl kyc.panPhotoUrl kyc.shopLicenseUrl kyc.shopPhotoUrl kyc.gstNumber kyc.gstCertificateUrl kyc.udyamAadhaarNumber kyc.submittedAt kyc.verifiedAt kyc.verifiedBy kyc.rejectionReason kyc.resendReason +kyc.aadhaarNumber +kyc.panNumber');
+    .select('subscription kyc.status kyc.aadhaarPhotoUrl kyc.aadhaarBackPhotoUrl kyc.selfieUrl kyc.licenseUrl kyc.panPhotoUrl kyc.shopLicenseUrl kyc.shopPhotoUrl kyc.gstNumber kyc.gstCertificateUrl kyc.udyamAadhaarNumber kyc.submittedAt kyc.verifiedAt kyc.verifiedBy kyc.rejectionReason kyc.resendReason +kyc.aadhaarNumber +kyc.panNumber');
   if (!scrapper && user.phone) {
     scrapper = await Scrapper.findOne({ phone: user.phone })
-      .select('subscription kyc.status kyc.aadhaarPhotoUrl kyc.selfieUrl kyc.licenseUrl kyc.panPhotoUrl kyc.shopLicenseUrl kyc.shopPhotoUrl kyc.gstNumber kyc.gstCertificateUrl kyc.udyamAadhaarNumber kyc.submittedAt kyc.verifiedAt kyc.verifiedBy kyc.rejectionReason kyc.resendReason +kyc.aadhaarNumber +kyc.panNumber');
+      .select('subscription kyc.status kyc.aadhaarPhotoUrl kyc.aadhaarBackPhotoUrl kyc.selfieUrl kyc.licenseUrl kyc.panPhotoUrl kyc.shopLicenseUrl kyc.shopPhotoUrl kyc.gstNumber kyc.gstCertificateUrl kyc.udyamAadhaarNumber kyc.submittedAt kyc.verifiedAt kyc.verifiedBy kyc.rejectionReason kyc.resendReason +kyc.aadhaarNumber +kyc.panNumber');
   }
 
   // Auto-provision scrapper profile if missing
@@ -294,7 +305,7 @@ export const getAllScrappersWithKyc = async (req, res) => {
 
     // Get scrappers with KYC info
     const scrappers = await Scrapper.find(query)
-      .select('name phone email scrapperType dealCategories businessLocation subscription status totalPickups earnings rating badges createdAt vehicleInfo kyc.aadhaarNumber kyc.aadhaarPhotoUrl kyc.selfieUrl kyc.panNumber kyc.panPhotoUrl kyc.shopLicenseUrl kyc.shopPhotoUrl kyc.gstNumber kyc.gstCertificateUrl kyc.udyamAadhaarNumber kyc.status kyc.verifiedAt kyc.rejectionReason kyc.resendReason')
+      .select('name phone email scrapperType dealCategories businessLocation subscription status totalPickups earnings rating badges createdAt vehicleInfo kyc.aadhaarNumber kyc.aadhaarPhotoUrl kyc.aadhaarBackPhotoUrl kyc.selfieUrl kyc.panNumber kyc.panPhotoUrl kyc.shopLicenseUrl kyc.shopPhotoUrl kyc.gstNumber kyc.gstCertificateUrl kyc.udyamAadhaarNumber kyc.status kyc.verifiedAt kyc.rejectionReason kyc.resendReason')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))

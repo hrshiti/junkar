@@ -64,6 +64,7 @@ const KYCUploadPage = () => {
   const { user } = useAuth();
   const [aadhaarNumber, setAadhaarNumber] = useState('');
   const [aadhaarPhoto, setAadhaarPhoto] = useState(null);
+  const [aadhaarBackPhoto, setAadhaarBackPhoto] = useState(null);
   const [selfiePhoto, setSelfiePhoto] = useState(null);
   const [panNumber, setPanNumber] = useState('');
   const [panPhoto, setPanPhoto] = useState(null);
@@ -73,6 +74,7 @@ const KYCUploadPage = () => {
   const [gstCertificate, setGstCertificate] = useState(null);
   const [scrapperType, setScrapperType] = useState(null);
   const [aadhaarPreview, setAadhaarPreview] = useState(null);
+  const [aadhaarBackPreview, setAadhaarBackPreview] = useState(null);
   const [selfiePreview, setSelfiePreview] = useState(null);
   const [panPreview, setPanPreview] = useState(null);
   const [shopLicensePreview, setShopLicensePreview] = useState(null);
@@ -133,7 +135,8 @@ const KYCUploadPage = () => {
   // Helper to check for duplicate document uploads
   const isDocumentDuplicate = (newFile, currentFieldName) => {
     const allFiles = [
-      { file: aadhaarPhoto, name: 'Aadhaar' },
+      { file: aadhaarPhoto, name: 'Aadhaar Front' },
+      { file: aadhaarBackPhoto, name: 'Aadhaar Back' },
       { file: selfiePhoto, name: 'Selfie' },
       { file: panPhoto, name: 'PAN' },
       { file: shopLicenseFile, name: 'Shop License' },
@@ -188,10 +191,9 @@ const KYCUploadPage = () => {
   const handleAadhaarPhotoChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Check for duplicate document
-      const duplicateOrigin = isDocumentDuplicate(file, 'Aadhaar');
+      const duplicateOrigin = isDocumentDuplicate(file, 'Aadhaar Front');
       if (duplicateOrigin) {
-        alert(`${getTranslatedText('This image is already uploaded as')} ${duplicateOrigin}. ${getTranslatedText('Please upload a unique document.')}`);
+        alert(`This image is already uploaded as ${duplicateOrigin}. Please upload a unique document.`);
         e.target.value = '';
         return;
       }
@@ -199,6 +201,23 @@ const KYCUploadPage = () => {
       setAadhaarPhoto(compressed);
       const reader = new FileReader();
       reader.onloadend = () => setAadhaarPreview(reader.result);
+      reader.readAsDataURL(compressed);
+    }
+  };
+
+  const handleAadhaarBackPhotoChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const duplicateOrigin = isDocumentDuplicate(file, 'Aadhaar Back');
+      if (duplicateOrigin) {
+        alert(`This image is already uploaded as ${duplicateOrigin}. Please upload a unique document.`);
+        e.target.value = '';
+        return;
+      }
+      const compressed = await compressImage(file);
+      setAadhaarBackPhoto(compressed);
+      const reader = new FileReader();
+      reader.onloadend = () => setAadhaarBackPreview(reader.result);
       reader.readAsDataURL(compressed);
     }
   };
@@ -316,6 +335,11 @@ const KYCUploadPage = () => {
       return;
     }
 
+    if (!aadhaarBackPhoto) {
+      alert('Please upload Aadhaar back photo (which shows your address)');
+      return;
+    }
+
     if (!selfiePhoto) {
       alert(getTranslatedText('Please upload selfie photo'));
       return;
@@ -359,6 +383,7 @@ const KYCUploadPage = () => {
       const formData = new FormData();
       formData.append('aadhaarNumber', aadhaarNumber);
       formData.append('aadhaar', aadhaarPhoto);
+      formData.append('aadhaarBack', aadhaarBackPhoto);
       formData.append('selfie', selfiePhoto);
       formData.append('panNumber', panNumber);
       formData.append('pan', panPhoto);
@@ -517,6 +542,51 @@ const KYCUploadPage = () => {
                   style={{ color: '#ef4444' }}
                 >
                   {getTranslatedText("Remove Photo")}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Aadhaar Back Photo Upload */}
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-white">
+              Aadhaar Card Back Photo <span className="text-red-500">*</span>
+            </label>
+            <div className="space-y-3">
+              <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all hover:border-sky-500 bg-black ${aadhaarBackPhoto ? 'border-sky-500' : 'border-zinc-700'}`}>
+                {aadhaarBackPreview ? (
+                  <img src={aadhaarBackPreview} alt="Aadhaar Back preview" className="w-full h-full object-cover rounded-xl" />
+                ) : (
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <svg className="w-10 h-10 mb-3 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <p className="mb-2 text-sm text-gray-400">
+                      <span className="font-semibold">Click to upload</span> Aadhaar back photo
+                    </p>
+                    <p className="text-xs text-gray-500">PNG, JPG or JPEG (MAX. 50MB)</p>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleAadhaarBackPhotoChange}
+                  required
+                />
+              </label>
+              {aadhaarBackPhoto && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAadhaarBackPhoto(null);
+                    setAadhaarBackPreview(null);
+                  }}
+                  className="text-xs font-semibold"
+                  style={{ color: '#ef4444' }}
+                >
+                  Remove Back Photo
                 </button>
               )}
             </div>

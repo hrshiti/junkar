@@ -162,6 +162,11 @@ class OrderService {
             throw new Error('Please go online to accept this request');
         }
 
+        // Enforce KYC check before accepting order
+        if (!scrapper.kyc || scrapper.kyc.status !== 'verified') {
+            throw new Error('Your KYC is not verified. Please complete KYC to accept requests.');
+        }
+
         // Validate scrapper wallet balance
         // If the scrapper has an active subscription (e.g., 1-month free trial), bypass the Rs 100 requirement
         if (scrapper.subscription && scrapper.subscription.status === 'active') {

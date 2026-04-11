@@ -79,6 +79,7 @@ const KYCQueue = () => {
               `${scrapper.kyc.aadhaarNumber.substring(0, 4)}-****-${scrapper.kyc.aadhaarNumber.substring(8)}` :
               'N/A',
             aadhaarPhotoUrl: scrapper.kyc?.aadhaarPhotoUrl || null,
+            aadhaarBackPhotoUrl: scrapper.kyc?.aadhaarBackPhotoUrl || null,
             selfieUrl: scrapper.kyc?.selfieUrl || null,
             licenseUrl: scrapper.kyc?.licenseUrl || null,
             panNumber: scrapper.kyc?.panNumber || 'N/A',

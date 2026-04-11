@@ -159,8 +159,11 @@ class NotificationService {
             const scrapperIds = (order.targetedScrappers || [])
                 .map(id => id.toString())
                 .filter(id => {
-                    const senderId = order.user?._id ? order.user._id.toString() : (order.user ? order.user.toString() : '');
-                    return id !== senderId;
+                    const userField = order.user;
+                    const senderId = userField?._id
+                        ? userField._id.toString()
+                        : (userField ? userField.toString() : null);
+                    return senderId ? id !== senderId : true; // if no sender, notify all
                 });
 
             if (scrapperIds.length === 0) return;

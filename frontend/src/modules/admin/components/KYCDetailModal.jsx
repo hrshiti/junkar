@@ -413,11 +413,11 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject, onResend }) => {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Aadhaar Photo (Reference) */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Aadhaar Photo (Front) */}
                   <div className="space-y-2">
                     <label className="text-sm font-semibold" style={{ color: '#0c4a6e' }}>
-                      {getTranslatedText("Aadhaar Card Photo")}
+                      {getTranslatedText("Aadhaar Card Front")}
                     </label>
                     <div className="relative rounded-xl overflow-hidden border-2 hover:border-sky-400 transition-colors" style={{ borderColor: '#bae6fd' }}>
                       <img
@@ -428,6 +428,24 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject, onResend }) => {
                           e.target.src = 'https://via.placeholder.com/400x300?text=Aadhaar+Card';
                         }}
                         onClick={() => window.open(kyc.aadhaarPhotoUrl, '_blank')}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Aadhaar Photo (Back) */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold" style={{ color: '#0c4a6e' }}>
+                      {getTranslatedText("Aadhaar Card Back")}
+                    </label>
+                    <div className="relative rounded-xl overflow-hidden border-2 hover:border-sky-400 transition-colors" style={{ borderColor: '#bae6fd' }}>
+                      <img
+                        src={getImageUrl(kyc.aadhaarBackPhotoUrl)}
+                        alt="Aadhaar Card Back"
+                        className="w-full h-64 object-contain bg-white cursor-pointer hover:scale-105 transition-transform"
+                        onError={(e) => {
+                          e.target.src = 'https://via.placeholder.com/400x300?text=Aadhaar+Back';
+                        }}
+                        onClick={() => window.open(kyc.aadhaarBackPhotoUrl, '_blank')}
                       />
                     </div>
                   </div>

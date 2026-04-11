@@ -19,7 +19,7 @@ const scrapperSchema = new mongoose.Schema({
     type: String,
     lowercase: true,
     trim: true,
-    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please provide a valid email']
+    match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email']
   },
   profilePic: {
     type: String,
@@ -68,6 +68,10 @@ const scrapperSchema = new mongoose.Schema({
       select: false
     },
     aadhaarPhotoUrl: {
+      type: String,
+      default: null
+    },
+    aadhaarBackPhotoUrl: {
       type: String,
       default: null
     },
