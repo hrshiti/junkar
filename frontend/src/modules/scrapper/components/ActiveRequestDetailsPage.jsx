@@ -416,6 +416,15 @@ const ActiveRequestDetailsPage = () => {
       }, 2000);
       return () => clearTimeout(timer);
     }
+
+    // Sync map stage with order status
+    if (requestData?.status === 'on_way' || requestData?.status === 'in_progress') {
+      setStage('pickup');
+    } else if (requestData?.status === 'arrived') {
+      setStage('arrived');
+    } else if (requestData?.status === 'confirmed' || requestData?.status === 'pending') {
+      setStage('request');
+    }
   }, [requestData?.status, navigate]);
 
   // Get scrapper's current location
@@ -701,6 +710,7 @@ const ActiveRequestDetailsPage = () => {
             ...requestData,
             status: 'on_way'
           });
+          setStage('pickup');
         } else {
           throw new Error(getTranslatedText('Failed to update order status'));
         }
@@ -711,6 +721,7 @@ const ActiveRequestDetailsPage = () => {
             ...requestData,
             status: 'arrived'
           });
+          setStage('arrived');
         } else {
           throw new Error(getTranslatedText('Failed to update order status'));
         }
