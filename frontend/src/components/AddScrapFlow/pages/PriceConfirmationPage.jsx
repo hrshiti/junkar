@@ -298,12 +298,14 @@ const PriceConfirmationPage = () => {
           rate: 0,
           total: 0,
           itemCondition: weightData?.itemCondition || 'average',
-          expectedPrice: weightData?.expectedPrice || null
+          expectedPrice: weightData?.expectedPrice || null,
+          quantity: isCatNegotiable ? (weightData?.negotiableCategories?.find(nw => nw.categoryId === cat.id)?.quantity || 0) : 0
         };
       } else {
-        // Find specific weight for this category
+        // Find specific weight/quantity for this category
         const catWeightData = weightData?.categoryWeights?.find(w => w.categoryId === cat.id);
         const weightValue = catWeightData ? Number(catWeightData.weight) : (Number(weightData?.weight || 0) / selectedCategories.length);
+        const quantityValue = catWeightData ? Number(catWeightData.quantity) : 0;
 
         const rateNode = marketPrices[cat.name];
         const rate = (typeof rateNode === 'object' ? rateNode.pricePerKg : rateNode) || cat.price || 0;
@@ -314,6 +316,7 @@ const PriceConfirmationPage = () => {
           name: cat.name,
           pricingType: 'kg_based',
           weight: weightValue,
+          quantity: quantityValue,
           rate,
           total
         };
@@ -521,14 +524,36 @@ const PriceConfirmationPage = () => {
                   <div className="space-y-1">
                     {weightData.categoryWeights.map(w => (
                       <p key={w.categoryId} className="text-sm font-semibold" style={{ color: '#2d3748' }}>
-                        {getTranslatedText(w.categoryName)}: {w.weight} {getTranslatedText("kg")}
+                        {getTranslatedText(w.categoryName)}: 
+                        {w.weight > 0 && ` ${w.weight} ${getTranslatedText("kg")}`}
+                        {w.weight > 0 && w.quantity > 0 && " + "}
+                        {w.quantity > 0 && ` ${w.quantity} ${getTranslatedText("Nos/Units")}`}
                       </p>
                     ))}
-                    {weightData.categoryWeights.length > 1 && (
+                    {weightData.categoryWeights.length > 1 && weightData.weight > 0 && (
                       <p className="text-base font-bold mt-1 pt-1 border-t" style={{ color: '#38bdf8' }}>
                         {getTranslatedText("Total Weight:")} {weightData.weight} {getTranslatedText("kg")}
                       </p>
                     )}
+                  </div>
+                </div>
+              )}
+
+              {/* Check for negotiable items details if they exist */}
+              {weightData.negotiableCategories?.some(nw => nw.quantity > 0 || nw.weight > 0) && (
+                <div className="mt-3">
+                  <p className="text-xs md:text-sm mb-1" style={{ color: '#718096' }}>
+                    {getTranslatedText("Items Details (Negotiable):")}
+                  </p>
+                  <div className="space-y-1">
+                    {weightData.negotiableCategories.filter(nw => nw.quantity > 0 || nw.weight > 0).map(nw => (
+                      <p key={nw.categoryId} className="text-sm font-semibold" style={{ color: '#2d3748' }}>
+                        {getTranslatedText(nw.categoryName)}: 
+                        {nw.weight > 0 && ` ${nw.weight} ${getTranslatedText("kg")}`}
+                        {nw.weight > 0 && nw.quantity > 0 && " + "}
+                        {nw.quantity > 0 && ` ${nw.quantity} ${getTranslatedText("Nos")}`}
+                      </p>
+                    ))}
                   </div>
                 </div>
               )}

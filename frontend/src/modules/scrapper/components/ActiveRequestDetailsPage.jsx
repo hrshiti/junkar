@@ -89,7 +89,10 @@ const ActiveRequestDetailsPage = () => {
     "This is a donation request. No payment is required.",
     "Confirm Pickup & Thank User",
     "Confirm Partner Arrival",
-    "Partner is on the way. Tracking active."
+    "Partner is on the way. Tracking active.",
+    "Qty:",
+    "Nos",
+    "Units"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -1197,6 +1200,7 @@ const ActiveRequestDetailsPage = () => {
                       <p className="text-xs truncate text-slate-500">
                         {requestData.scrapType}
                         {requestData.weight ? ` (${requestData.weight} Kg)` : ''}
+                        {requestData.scrapItems?.some(item => item.quantity > 0) && ` (${requestData.scrapItems.filter(item => item.quantity > 0).map(item => `${item.quantity} Nos`).join(', ')})`}
                       </p>
                     </div>
                     <div className="text-right">
@@ -1230,6 +1234,16 @@ const ActiveRequestDetailsPage = () => {
                           {item.expectedPrice && (
                             <p>
                               <span className="font-semibold">Expected Price:</span> ₹{item.expectedPrice}
+                            </p>
+                          )}
+                          {item.weight > 0 && (
+                            <p>
+                              <span className="font-semibold">{getTranslatedText("Weight")}:</span> {item.weight} {getTranslatedText("kg")}
+                            </p>
+                          )}
+                          {item.quantity > 0 && (
+                            <p>
+                              <span className="font-semibold">{getTranslatedText("Quantity")}:</span> {item.quantity} {getTranslatedText("Nos")}
                             </p>
                           )}
                         </div>

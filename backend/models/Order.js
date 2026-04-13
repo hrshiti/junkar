@@ -59,6 +59,11 @@ const orderSchema = new mongoose.Schema({
       default: 0,
       min: 0
     },
+    quantity: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
     itemCondition: {
       type: String,
       enum: [...Object.values(ITEM_CONDITIONS), null],

@@ -135,7 +135,13 @@ const MyRequestsPage = () => {
       address,
       notes: order.notes || "",
       hasReview: !!order.review, // Check if review ID exists
-      isDonation: order.isDonation
+      isDonation: order.isDonation,
+      totalQuantity: order.scrapItems?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0,
+      itemDetails: order.scrapItems?.map(item => ({
+        category: item.category,
+        quantity: item.quantity,
+        weight: item.weight
+      })) || []
     };
   };
 
@@ -608,8 +614,19 @@ const MyRequestsPage = () => {
                           <p
                             className="text-sm font-semibold"
                             style={{ color: "#1e293b" }}>
-                            {request.weight.toFixed(1)}{" "}
-                            {getTranslatedText("kg")}
+                            {request.weight > 0 ? (
+                              <>
+                                {request.weight.toFixed(1)}{" "}
+                                {getTranslatedText("kg")}
+                              </>
+                            ) : request.totalQuantity > 0 ? (
+                              <>
+                                {request.totalQuantity}{" "}
+                                {getTranslatedText("Nos/Units")}
+                              </>
+                            ) : (
+                              getTranslatedText("Negotiable")
+                            )}
                           </p>
                         </div>
                       </div>

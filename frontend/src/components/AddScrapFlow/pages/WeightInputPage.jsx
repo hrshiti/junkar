@@ -66,7 +66,9 @@ const WeightInputPage = () => {
 
   // Per-category weight state: { [categoryId]: string }
   const [categoryWeights, setCategoryWeights] = useState({});
-
+  // Per-category quantity state (for items like AC/Fridge): { [categoryId]: string }
+  const [categoryQuantities, setCategoryQuantities] = useState({});
+  
   // Model B states (negotiable)
   const [itemCondition, setItemCondition] = useState('');
   const [expectedPrice, setExpectedPrice] = useState('');
@@ -107,10 +109,13 @@ const WeightInputPage = () => {
         const parsed = JSON.parse(storedWeightData);
         if (parsed.categoryWeights) {
           const weightsMap = {};
+          const quantitiesMap = {};
           parsed.categoryWeights.forEach(item => {
-            weightsMap[item.categoryId] = item.weight.toString();
+            if (item.weight) weightsMap[item.categoryId] = item.weight.toString();
+            if (item.quantity) quantitiesMap[item.categoryId] = item.quantity.toString();
           });
           setCategoryWeights(weightsMap);
+          setCategoryQuantities(quantitiesMap);
         }
         if (parsed.itemCondition) setItemCondition(parsed.itemCondition);
         if (parsed.expectedPrice) setExpectedPrice(parsed.expectedPrice.toString());
@@ -135,19 +140,21 @@ const WeightInputPage = () => {
         categoryId: cat.id,
         categoryName: cat.name,
         weight: parseFloat(categoryWeights[cat.id]) || 0,
+        quantity: parseInt(categoryQuantities[cat.id]) || 0,
         price: getCategoryPrice(cat),
         estimatedPayout: (parseFloat(categoryWeights[cat.id]) || 0) * getCategoryPrice(cat),
       })),
       negotiableCategories: negotiableCategories.map(cat => ({
         categoryId: cat.id,
         categoryName: cat.name,
+        quantity: parseInt(categoryQuantities[cat.id]) || 0,
       })),
       itemCondition: negotiableCategories.length > 0 ? itemCondition : null,
       expectedPrice: expectedPrice ? parseFloat(expectedPrice) : null,
     };
 
     sessionStorage.setItem('weightData', JSON.stringify(currentWeightData));
-  }, [categoryWeights, itemCondition, expectedPrice, requestType, selectedCategories]);
+  }, [categoryWeights, categoryQuantities, itemCondition, expectedPrice, requestType, selectedCategories]);
 
   // Fetch market prices from backend
   useEffect(() => {
@@ -215,17 +222,27 @@ const WeightInputPage = () => {
     }
   };
 
+  const handleQuantityChange = (catId, value) => {
+    const regex = /^\d*$/;
+    if (regex.test(value) || value === '') {
+      setCategoryQuantities(prev => ({ ...prev, [catId]: value }));
+    }
+  };
+
   // Commercial validation: total weight must be >= 100kg for commercial requests (if items are kg-based)
   const isWeightValidForRequestType = (requestType === 'commercial' && nonNegotiableCategories.length > 0)
     ? totalWeight >= 100
     : true;
 
-  // canContinue logic
-  const allKgWeightsFilled = nonNegotiableCategories.every(cat =>
-    parseFloat(categoryWeights[cat.id]) > 0
+  // canContinue logic: Check if each non-negotiable category has either weight or quantity filled
+  const allKgInputsFilled = nonNegotiableCategories.every(cat =>
+    (parseFloat(categoryWeights[cat.id]) > 0) || (parseInt(categoryQuantities[cat.id]) > 0)
   );
+
+  // For negotiable items, condition is mandatory
   const conditionFilled = negotiableCategories.length === 0 || !!itemCondition;
-  const canContinue = (nonNegotiableCategories.length === 0 || allKgWeightsFilled) && conditionFilled && isWeightValidForRequestType;
+
+  const canContinue = (nonNegotiableCategories.length === 0 || allKgInputsFilled) && conditionFilled && isWeightValidForRequestType;
 
   const handleContinue = () => {
     if (!canContinue) return;
@@ -239,8 +256,16 @@ const WeightInputPage = () => {
       categoryId: cat.id,
       categoryName: cat.name,
       weight: parseFloat(categoryWeights[cat.id]) || 0,
+      quantity: parseInt(categoryQuantities[cat.id]) || 0,
       price: getCategoryPrice(cat),
       estimatedPayout: getCategoryPayout(cat),
+    }));
+
+    const negotiableCategoryDetails = negotiableCategories.map(cat => ({
+      categoryId: cat.id,
+      categoryName: cat.name,
+      weight: parseFloat(categoryWeights[cat.id]) || 0,
+      quantity: parseInt(categoryQuantities[cat.id]) || 0,
     }));
 
     const weightData = {
@@ -253,10 +278,7 @@ const WeightInputPage = () => {
 
       // New structured per-category data
       categoryWeights: categoryWeightDetails,
-      negotiableCategories: negotiableCategories.map(cat => ({
-        categoryId: cat.id,
-        categoryName: cat.name,
-      })),
+      negotiableCategories: negotiableCategoryDetails,
 
       // Negotiable-specific
       itemCondition: negotiableCategories.length > 0 ? itemCondition : null,
@@ -420,23 +442,50 @@ const WeightInputPage = () => {
                       )}
                     </div>
 
-                    {/* Weight Input */}
-                    <div className="relative mb-3">
-                      <input
-                        type="text"
-                        value={categoryWeights[cat.id] || ''}
-                        onChange={(e) => handleWeightChange(cat.id, e.target.value)}
-                        placeholder="0.0"
-                        className="w-full py-3 px-4 text-2xl font-bold rounded-lg border-2 focus:outline-none focus:ring-2 transition-all"
-                        style={{
-                          borderColor: categoryWeights[cat.id] ? '#38bdf8' : 'rgba(100, 148, 110, 0.3)',
-                          color: '#2d3748',
-                          backgroundColor: '#f9f9f9'
-                        }}
-                      />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-lg font-semibold" style={{ color: '#718096' }}>
-                        {getTranslatedText("kg")}
-                      </span>
+                    <div className="grid grid-cols-2 gap-4 mb-3">
+                      {/* Weight Input */}
+                      <div className="relative">
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">{getTranslatedText("Weight")}</label>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={categoryWeights[cat.id] || ''}
+                            onChange={(e) => handleWeightChange(cat.id, e.target.value)}
+                            placeholder="0.0"
+                            className="w-full py-3 px-3 text-lg font-bold rounded-lg border-2 focus:outline-none focus:ring-2 transition-all"
+                            style={{
+                              borderColor: categoryWeights[cat.id] ? '#38bdf8' : 'rgba(100, 148, 110, 0.3)',
+                              color: '#2d3748',
+                              backgroundColor: '#f9f9f9'
+                            }}
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold" style={{ color: '#718096' }}>
+                            {getTranslatedText("kg")}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Quantity Input */}
+                      <div className="relative">
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">{getTranslatedText("Quantity")}</label>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={categoryQuantities[cat.id] || ''}
+                            onChange={(e) => handleQuantityChange(cat.id, e.target.value)}
+                            placeholder="0"
+                            className="w-full py-3 px-3 text-lg font-bold rounded-lg border-2 focus:outline-none focus:ring-2 transition-all"
+                            style={{
+                              borderColor: categoryQuantities[cat.id] ? '#38bdf8' : 'rgba(100, 148, 110, 0.2)',
+                              color: '#2d3748',
+                              backgroundColor: '#f9f9f9'
+                            }}
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold" style={{ color: '#718096' }}>
+                            {getTranslatedText("Nos")}
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Quick Weight Buttons */}
@@ -544,6 +593,62 @@ const WeightInputPage = () => {
                 ))}
               </div>
             )}
+
+            <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: '#ffffff' }}>
+              <p className="text-xs font-bold mb-3 uppercase tracking-wider" style={{ color: '#38bdf8' }}>
+                📏 Enter Item Details (Fill either or both)
+              </p>
+              <div className="space-y-6">
+                {negotiableCategories.map(cat => (
+                  <div key={cat.id} className="p-3 rounded-lg border border-slate-100 bg-slate-50/50">
+                    <p className="text-sm font-bold mb-3 text-slate-800">{cat.name}</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Weight for Negotiable */}
+                      <div className="relative">
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">{getTranslatedText("Weight")}</label>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={categoryWeights[cat.id] || ''}
+                            onChange={(e) => handleWeightChange(cat.id, e.target.value)}
+                            placeholder="0.0"
+                            className="w-full py-2 px-3 text-sm font-bold rounded-lg border-2 focus:outline-none focus:ring-2 transition-all bg-white"
+                            style={{
+                              borderColor: categoryWeights[cat.id] ? '#38bdf8' : 'rgba(100, 148, 110, 0.2)',
+                              color: '#2d3748'
+                            }}
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">
+                            {getTranslatedText("kg")}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Quantity for Negotiable */}
+                      <div className="relative">
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">{getTranslatedText("Quantity")}</label>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={categoryQuantities[cat.id] || ''}
+                            onChange={(e) => handleQuantityChange(cat.id, e.target.value)}
+                            placeholder="0"
+                            className="w-full py-2 px-3 text-sm font-bold rounded-lg border-2 focus:outline-none focus:ring-2 transition-all bg-white"
+                            style={{
+                              borderColor: categoryQuantities[cat.id] ? '#38bdf8' : 'rgba(100, 148, 110, 0.2)',
+                              color: '#2d3748'
+                            }}
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">
+                            {getTranslatedText("Nos")}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
             {/* Negotiable Badge */}
             <div className="flex items-center gap-2 px-4 py-3 rounded-xl"
@@ -679,7 +784,7 @@ const WeightInputPage = () => {
                   ? getTranslatedText("Enter weight for all materials to continue")
                   : hasMixed && !conditionFilled
                     ? getTranslatedText("Select item condition to continue")
-                    : getTranslatedText("Enter weight to continue")
+                    : getTranslatedText("Enter weight or quantity to continue")
             }
           </p>
         )}
