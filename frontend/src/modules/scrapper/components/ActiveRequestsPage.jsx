@@ -171,11 +171,8 @@ const ActiveRequestsPage = () => {
         },
         (error) => {
           console.error('Error getting location:', error);
-          // Default location (Mumbai)
-          setCurrentLocation({
-            lat: 19.0760,
-            lng: 72.8777
-          });
+          // Location denied or unavailable, leave as null to trigger backend smart fallback
+          setCurrentLocation(null);
         }
       );
 
@@ -195,11 +192,8 @@ const ActiveRequestsPage = () => {
         navigator.geolocation.clearWatch(watchId);
       };
     } else {
-      // Default location if geolocation not supported
-      setCurrentLocation({
-        lat: 19.0760,
-        lng: 72.8777
-      });
+      // Location not supported, leave as null to trigger backend smart fallback
+      setCurrentLocation(null);
     }
   }, []);
 
@@ -349,7 +343,15 @@ const ActiveRequestsPage = () => {
               const activeRequest = mappedOrders[initialIndex];
               const hasConflict = checkTimeConflict(activeRequest, conflictCheckList);
               setTimeConflict(hasConflict);
-              setAudioPlaying(true);
+              
+              // Prevent continuous loop: Only play audio if this specific order hasn't been announced yet
+              const announcedList = JSON.parse(sessionStorage.getItem('_announcedOrderIds') || '[]');
+              const activeReqId = activeRequest.id || activeRequest._id;
+              if (!announcedList.includes(activeReqId)) {
+                announcedList.push(activeReqId);
+                sessionStorage.setItem('_announcedOrderIds', JSON.stringify(announcedList));
+                setAudioPlaying(true);
+              }
             }
           } else {
             setAvailableOrders([]);

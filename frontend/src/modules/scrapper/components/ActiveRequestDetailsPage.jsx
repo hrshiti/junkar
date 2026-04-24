@@ -558,7 +558,10 @@ const ActiveRequestDetailsPage = () => {
       }
       // Logic handled in handleRazorpayPayment or handleWalletPayment
       setConfirmAction('payment_scrap');
-      setConfirmMessage(getTranslatedText("Pay ₹{amount} to User?", { amount: paidAmount }));
+      setConfirmMessage(isB2B 
+        ? getTranslatedText("Pay ₹{amount} to Partner?", { amount: paidAmount })
+        : getTranslatedText("Pay ₹{amount} to User?", { amount: paidAmount })
+      );
       setShowConfirmModal(true);
       return;
     }
@@ -1050,7 +1053,7 @@ const ActiveRequestDetailsPage = () => {
                           className="w-5 h-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
                         />
                         <label htmlFor="negotiated" className="text-sm font-semibold text-amber-900">
-                          {getTranslatedText("Price Negotiated with User?")}
+                          {isB2B ? getTranslatedText("Price Negotiated with Partner?") : getTranslatedText("Price Negotiated with User?")}
                         </label>
                       </div>
                     </div>
@@ -1108,7 +1111,9 @@ const ActiveRequestDetailsPage = () => {
                         <p className="text-sm mt-2 text-center" style={{ color: '#64748b' }}>
                           {requestData.orderType === 'cleaning_service'
                             ? getTranslatedText("You collected ₹{amount} from the customer", { amount: parseFloat(paidAmount) || 0 })
-                            : getTranslatedText("You will pay ₹{amount} to the customer", { amount: parseFloat(paidAmount) || 0 })
+                            : (isB2B 
+                                ? getTranslatedText("You will pay ₹{amount} to the partner", { amount: parseFloat(paidAmount) || 0 }) 
+                                : getTranslatedText("You will pay ₹{amount} to the customer", { amount: parseFloat(paidAmount) || 0 }))
                           }
                         </p>
                       )}
@@ -1377,31 +1382,44 @@ const ActiveRequestDetailsPage = () => {
                 {/* Dynamic Tracking Step Buttons */}
                 {!isPickedUp ? (
                   <>
-                    {requestData?.status === 'confirmed' || requestData?.status === 'pending' || requestData?.assignmentStatus === 'accepted' && requestData?.status !== 'on_way' && requestData?.status !== 'arrived' && requestData?.status !== 'in_progress' ? (
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleStartJourney}
-                        className="w-full mb-3 py-3 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
-                      >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        {getTranslatedText('Start Journey')}
-                      </motion.button>
+                    {(requestData?.status === 'confirmed' || requestData?.status === 'pending' || requestData?.assignmentStatus === 'accepted') && requestData?.status !== 'on_way' && requestData?.status !== 'arrived' && requestData?.status !== 'in_progress' ? (
+                      // IF Self Delivery, Receiver shouldn't start journey
+                      requestData?.pickupAddress?.street === 'Self-delivery' ? (
+                        <div className="w-full mb-3 py-3 rounded-xl font-bold text-sm text-center bg-indigo-50 text-indigo-700 border border-indigo-100">
+                          {getTranslatedText('Waiting for Partner to Arrive...')}
+                        </div>
+                      ) : (
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={handleStartJourney}
+                          className="w-full mb-3 py-3 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                          {getTranslatedText('Start Journey')}
+                        </motion.button>
+                      )
                     ) : requestData?.status === 'on_way' ? (
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleArrived}
-                        className="w-full mb-3 py-3 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 bg-amber-600 text-white hover:bg-amber-700 transition-colors"
-                      >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" strokeLinecap="round" strokeLinejoin="round" />
-                          <circle cx="12" cy="10" r="3" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        {getTranslatedText('Reached Location')}
-                      </motion.button>
+                      requestData?.pickupAddress?.street === 'Self-delivery' ? (
+                        <div className="w-full mb-3 py-3 rounded-xl font-bold text-sm text-center bg-amber-50 text-amber-700 border border-amber-100">
+                          {getTranslatedText('Partner is on the way...')}
+                        </div>
+                      ) : (
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={handleArrived}
+                          className="w-full mb-3 py-3 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 bg-amber-600 text-white hover:bg-amber-700 transition-colors"
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" strokeLinecap="round" strokeLinejoin="round" />
+                            <circle cx="12" cy="10" r="3" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                          {getTranslatedText('Reached Location')}
+                        </motion.button>
+                      )
                     ) : (
                       <motion.button
                         whileHover={{ scale: 1.02 }}

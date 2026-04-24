@@ -159,17 +159,36 @@ export const getAvailableOrders = asyncHandler(async (req, res) => {
     rejectedBy: { $nin: [scrapperId] }     // KEY FIX: Never show orders this scrapper rejected
   };
 
+  // Smart Location Fallback Logic
+  let filterLat = lat ? parseFloat(lat) : null;
+  let filterLng = lng ? parseFloat(lng) : null;
+
+  if (!filterLat || !filterLng || filterLat === 0 || filterLng === 0) {
+    // Fallback to scrapper's live location from DB
+    if (scrapper.liveLocation?.coordinates && scrapper.liveLocation.coordinates[0] !== 0) {
+      filterLng = scrapper.liveLocation.coordinates[0]; // GeoJSON is [lng, lat]
+      filterLat = scrapper.liveLocation.coordinates[1];
+    } else if (scrapper.businessLocation?.coordinates && scrapper.businessLocation.coordinates[0] !== 0) {
+      // Fallback to scrapper's business location
+      filterLng = scrapper.businessLocation.coordinates[0];
+      filterLat = scrapper.businessLocation.coordinates[1];
+    }
+  }
+
   // Add Distance Filter for Public Orders
-  if (lat && lng && parseFloat(lat) !== 0 && parseFloat(lng) !== 0) {
+  if (filterLat && filterLng && filterLat !== 0 && filterLng !== 0) {
     publicMatch.location = {
       $nearSphere: {
         $geometry: {
           type: 'Point',
-          coordinates: [parseFloat(lng), parseFloat(lat)] // [lng, lat]
+          coordinates: [filterLng, filterLat] // [lng, lat]
         },
         $maxDistance: RADIUS_KM * 1000 // In meters
       }
     };
+  } else {
+    // If no valid location can be determined, return no public orders to avoid out-of-state spam
+    publicMatch._id = null;
   }
 
   // Add Scrapper Type Filter - ALL online scrappers can now see small and large orders
@@ -224,8 +243,8 @@ export const getAvailableOrders = asyncHandler(async (req, res) => {
     return Number(d.toFixed(1));
   };
 
-  const scrapperLat = lat ? parseFloat(lat) : null;
-  const scrapperLng = lng ? parseFloat(lng) : null;
+  const scrapperLat = filterLat;
+  const scrapperLng = filterLng;
 
   // Map to basic JS objects and add distanceText
   ordersList = ordersList.map(orderDoc => {
