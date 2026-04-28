@@ -170,8 +170,8 @@ const ActiveRequestDetailsPage = () => {
         const request = location.state.request;
         setRequestData(request);
         setUserLiveLocation({
-          lat: request.location?.lat || 19.0760,
-          lng: request.location?.lng || 72.8777
+          lat: Number(request.location?.lat) || 19.0760,
+          lng: Number(request.location?.lng) || 72.8777
         });
         return;
       }
@@ -237,8 +237,8 @@ const ActiveRequestDetailsPage = () => {
 
         setRequestData(mappedRequest);
         setUserLiveLocation({
-          lat: mappedRequest.location.lat,
-          lng: mappedRequest.location.lng
+          lat: Number(mappedRequest.location.lat),
+          lng: Number(mappedRequest.location.lng)
         });
 
         // Check if already picked up (status is in_progress or completed)
@@ -272,8 +272,8 @@ const ActiveRequestDetailsPage = () => {
       if (localRequest) {
         setRequestData(localRequest);
         setUserLiveLocation({
-          lat: localRequest.location?.lat || 19.0760,
-          lng: localRequest.location?.lng || 72.8777
+          lat: Number(localRequest.location?.lat) || 19.0760,
+          lng: Number(localRequest.location?.lng) || 72.8777
         });
       } else {
         navigate('/scrapper/my-active-requests', { replace: true });
@@ -433,8 +433,8 @@ const ActiveRequestDetailsPage = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setScrapperLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
+            lat: Number(position.coords.latitude),
+            lng: Number(position.coords.longitude)
           });
         },
         (error) => {
@@ -451,8 +451,8 @@ const ActiveRequestDetailsPage = () => {
       const watchId = navigator.geolocation.watchPosition(
         (position) => {
           setScrapperLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
+            lat: Number(position.coords.latitude),
+            lng: Number(position.coords.longitude)
           });
         },
         (error) => {

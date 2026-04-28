@@ -76,6 +76,7 @@ const ScrapperMap = ({
     const [routeStats, setRouteStats] = useState(null);
     const animationRef = useRef(null);
     const lastPositionRef = useRef(scrapperLocation);
+    const lastRouteCalcPos = useRef(null);
 
     const onLoad = useCallback((map) => {
         setMap(map);
@@ -166,12 +167,23 @@ const ScrapperMap = ({
     // Calculate Route when in pickup stage
     useEffect(() => {
         if (stage === 'pickup' && isLoaded && scrapperLocation && userLocation) {
+            // Check distance from last calculated position to avoid rate limiting
+            if (lastRouteCalcPos.current) {
+                const deltaLat = Math.abs(scrapperLocation.lat - lastRouteCalcPos.current.lat);
+                const deltaLng = Math.abs(scrapperLocation.lng - lastRouteCalcPos.current.lng);
+                // ~50-100 meters is roughly 0.0005 to 0.001 degrees
+                if (deltaLat < 0.001 && deltaLng < 0.001) {
+                    return; // Don't recalculate if moved less than ~100m
+                }
+            }
+            lastRouteCalcPos.current = scrapperLocation;
+
             const directionsService = new window.google.maps.DirectionsService();
 
             directionsService.route(
                 {
-                    origin: scrapperLocation,
-                    destination: userLocation,
+                    origin: { lat: Number(scrapperLocation.lat), lng: Number(scrapperLocation.lng) },
+                    destination: { lat: Number(userLocation.lat), lng: Number(userLocation.lng) },
                     travelMode: window.google.maps.TravelMode.DRIVING,
                 },
                 (result, status) => {
@@ -200,8 +212,11 @@ const ScrapperMap = ({
             let hasPoints = false;
 
             if (userLocation) {
-                bounds.extend(userLocation);
-                hasPoints = true;
+                const pos = { lat: Number(userLocation.lat), lng: Number(userLocation.lng) };
+                if (!isNaN(pos.lat) && !isNaN(pos.lng)) {
+                    bounds.extend(pos);
+                    hasPoints = true;
+                }
             }
 
             if (availableOrders && availableOrders.length > 0) {
@@ -217,8 +232,11 @@ const ScrapperMap = ({
             }
 
             if (animatedPosition) {
-                bounds.extend(animatedPosition);
-                hasPoints = true;
+                const pos = { lat: Number(animatedPosition.lat), lng: Number(animatedPosition.lng) };
+                if (!isNaN(pos.lat) && !isNaN(pos.lng)) {
+                    bounds.extend(pos);
+                    hasPoints = true;
+                }
             }
 
             if (hasPoints) {
@@ -266,7 +284,7 @@ const ScrapperMap = ({
             <GoogleMap
                 mapContainerStyle={mapContainerStyle}
                 zoom={14}
-                center={animatedPosition || userLocation || defaultCenter}
+                center={animatedPosition ? { lat: Number(animatedPosition.lat), lng: Number(animatedPosition.lng) } : (userLocation ? { lat: Number(userLocation.lat), lng: Number(userLocation.lng) } : defaultCenter)}
                 options={{
                     ...mapOptions,
                     tilt: 45, // 3D view
@@ -331,9 +349,9 @@ const ScrapperMap = ({
                 {stage === 'pickup' && (
                     <>
                         {/* Animated Scrapper Marker (Truck or Red Pin for B2B) */}
-                        {animatedPosition && (
+                        {animatedPosition && !isNaN(Number(animatedPosition.lat)) && (
                             <Marker
-                                position={animatedPosition}
+                                position={{ lat: Number(animatedPosition.lat), lng: Number(animatedPosition.lng) }}
                                 title={getTranslatedText("Scrapper (Partner)")}
                                 label={hideRoute ? {
                                     text: getTranslatedText("Pheriwala"),
@@ -357,9 +375,9 @@ const ScrapperMap = ({
                         )}
 
                         {/* User Marker with 3D pin (Hidden if hideRoute is active) */}
-                        {userLocation && !hideRoute && (
+                        {userLocation && !hideRoute && !isNaN(Number(userLocation.lat)) && (
                             <Marker
-                                position={userLocation}
+                                position={{ lat: Number(userLocation.lat), lng: Number(userLocation.lng) }}
                                 title={userName || getTranslatedText("Pickup Location")}
                                 icon={getUserIcon()}
                                 animation={window.google.maps.Animation.BOUNCE}
@@ -385,9 +403,9 @@ const ScrapperMap = ({
                 )}
 
                 {/* Arrived Stage: Show celebration */}
-                {stage === 'arrived' && userLocation && (
+                {stage === 'arrived' && userLocation && !isNaN(Number(userLocation.lat)) && (
                     <Marker
-                        position={userLocation}
+                        position={{ lat: Number(userLocation.lat), lng: Number(userLocation.lng) }}
                         title={getTranslatedText("Arrived! 🎉")}
                         icon={{
                             url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
