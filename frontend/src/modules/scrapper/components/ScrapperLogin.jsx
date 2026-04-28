@@ -26,6 +26,8 @@ const ScrapperLogin = (props) => {
     "Quick signup – just your basic details and phone number.",
     "Login",
     "Register",
+    "Don't have an account?",
+    "Already have an account?",
     "Full Name",
     "Enter your full name",
     "Email Address",
@@ -675,42 +677,47 @@ const ScrapperLogin = (props) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="flex items-center justify-center md:justify-start gap-3 mb-6"
+            className="flex items-center justify-center md:justify-start gap-2 mb-6"
           >
-            <button
-              onClick={() => {
-                setIsLogin(true);
-                setOtpSent(false);
-                setOtp(['', '', '', '', '', '']);
-                setName('');
-                setEmail('');
-                setVehicleInfo('');
-                setSelectedServices(['scrap_pickup']);
-              }}
-              className={`px-5 py-2.5 rounded-full font-semibold text-xs md:text-sm transition-all duration-300 ${isLogin
-                ? 'bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-md'
-                : 'bg-zinc-800 text-gray-400 hover:bg-zinc-700'
-                }`}
-            >
-              {getTranslatedText("Login")}
-            </button>
-            <button
-              onClick={() => {
-                setIsLogin(false);
-                setOtpSent(false);
-                setOtp(['', '', '', '', '', '']);
-                setName('');
-                setEmail('');
-                setVehicleInfo('');
-                setSelectedServices(['scrap_pickup']);
-              }}
-              className={`px-5 py-2.5 rounded-full font-semibold text-xs md:text-sm transition-all duration-300 ${!isLogin
-                ? 'bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-md'
-                : 'bg-zinc-800 text-gray-400 hover:bg-zinc-700'
-                }`}
-            >
-              {getTranslatedText("Register")}
-            </button>
+            {isLogin ? (
+              <p className="text-sm text-gray-400">
+                {getTranslatedText("Don't have an account?")}{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsLogin(false);
+                    setOtpSent(false);
+                    setOtp(['', '', '', '', '', '']);
+                    setName('');
+                    setEmail('');
+                    setVehicleInfo('');
+                    setSelectedServices(['scrap_pickup']);
+                  }}
+                  className="text-sky-400 hover:text-sky-300 font-semibold underline-offset-4 hover:underline transition-all"
+                >
+                  {getTranslatedText("Register")}
+                </button>
+              </p>
+            ) : (
+              <p className="text-sm text-gray-400">
+                {getTranslatedText("Already have an account?")}{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsLogin(true);
+                    setOtpSent(false);
+                    setOtp(['', '', '', '', '', '']);
+                    setName('');
+                    setEmail('');
+                    setVehicleInfo('');
+                    setSelectedServices(['scrap_pickup']);
+                  }}
+                  className="text-sky-400 hover:text-sky-300 font-semibold underline-offset-4 hover:underline transition-all"
+                >
+                  {getTranslatedText("Login")}
+                </button>
+              </p>
+            )}
           </motion.div>
 
           {/* Form Card */}

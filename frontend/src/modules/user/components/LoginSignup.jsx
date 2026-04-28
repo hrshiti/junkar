@@ -500,31 +500,38 @@ const LoginSignup = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.18 }}
-            className="flex items-center justify-center md:justify-start gap-3 mb-6">
-            <button
-              onClick={() => {
-                setIsLogin(true);
-                setOtpSent(false);
-                setOtp(["", "", "", "", "", ""]);
-              }}
-              className={`px-5 py-2.5 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 ${isLogin
-                ? "bg-sky-600 text-white shadow-md"
-                : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                }`}>
-              {getTranslatedText("Login")}
-            </button>
-            <button
-              onClick={() => {
-                setIsLogin(false);
-                setOtpSent(false);
-                setOtp(["", "", "", "", "", ""]);
-              }}
-              className={`px-5 py-2.5 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 ${!isLogin
-                ? "bg-sky-600 text-white shadow-md"
-                : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                }`}>
-              {getTranslatedText("Sign Up")}
-            </button>
+            className="flex items-center justify-center md:justify-start gap-2 mb-6">
+            {isLogin ? (
+              <p className="text-sm" style={{ color: "#6b7280" }}>
+                {getTranslatedText("Don't have an account?")}{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsLogin(false);
+                    setOtpSent(false);
+                    setOtp(["", "", "", "", "", ""]);
+                  }}
+                  className="font-semibold underline-offset-4 hover:underline transition-all"
+                  style={{ color: "#0ea5e9" }}>
+                  {getTranslatedText("Sign Up")}
+                </button>
+              </p>
+            ) : (
+              <p className="text-sm" style={{ color: "#6b7280" }}>
+                {getTranslatedText("Already have an account?")}{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsLogin(true);
+                    setOtpSent(false);
+                    setOtp(["", "", "", "", "", ""]);
+                  }}
+                  className="font-semibold underline-offset-4 hover:underline transition-all"
+                  style={{ color: "#0ea5e9" }}>
+                  {getTranslatedText("Login")}
+                </button>
+              </p>
+            )}
           </motion.div>
 
           <motion.form
