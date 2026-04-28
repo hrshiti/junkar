@@ -56,6 +56,46 @@ class OrderService {
                     }
                 }
             }
+        } else {
+            // Validate scrapper availability before order creation for general requests
+            const lat = pickupAddress?.coordinates?.lat;
+            const lng = pickupAddress?.coordinates?.lng;
+
+            if (typeof lat !== 'number' || typeof lng !== 'number' || lat === 0 || lng === 0) {
+                 throw new Error('Valid pickup location coordinates are required to find nearby scrappers.');
+            }
+
+            const MAX_DISTANCE_METERS = 15 * 1000; // 15 km limit
+
+            const scrapperQuery = {
+                status: 'active',
+                $and: [
+                    { $or: [{ isOnline: true }, { receptionMode: true }] },
+                    { $or: [{ 'kyc.status': 'verified' }, { receptionMode: true }] },
+                    { _id: { $ne: userId } },
+                    {
+                        liveLocation: {
+                            $nearSphere: {
+                                $geometry: {
+                                    type: 'Point',
+                                    coordinates: [lng, lat]
+                                },
+                                $maxDistance: MAX_DISTANCE_METERS
+                            }
+                        }
+                    }
+                ]
+            };
+
+            // If it's a donation, typically goes to small/feri_wala
+            if (isDonation === true) {
+                scrapperQuery.scrapperType = { $in: ['feri_wala', 'small'] };
+            }
+
+            const nearbyScrapper = await Scrapper.findOne(scrapperQuery).select('_id');
+            if (!nearbyScrapper) {
+                throw new Error('No scrapper is available near your location right now. Please try again later.');
+            }
         }
 
         // Calculate totals
