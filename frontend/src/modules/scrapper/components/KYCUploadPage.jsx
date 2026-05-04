@@ -356,26 +356,9 @@ const KYCUploadPage = () => {
       return;
     }
 
-    if (!shopLicenseFile) {
-      alert(getTranslatedText('Please upload Shop License photo'));
-      return;
-    }
-
-    if (scrapperType === 'dukandaar' && !shopPhotoFile) {
-      alert(getTranslatedText('Shop Photo (required for shopkeeper)'));
-      return;
-    }
-
-    if (['wholesaler', 'industrial'].includes(scrapperType)) {
-      if (!gstNumber || gstNumber.length !== 15) {
-        alert(getTranslatedText('Please enter a valid 15-digit GST number'));
-        return;
-      }
-      if (!gstCertificate) {
-        alert(getTranslatedText('Please upload GST Certificate photo'));
-        return;
-      }
-    }
+    // Shop License is now optional
+    // Shop Photo (Dukandaar) is now optional
+    // GST Details (Wholesaler/Industrial) are now optional
 
     setIsSubmitting(true);
 
@@ -703,7 +686,7 @@ const KYCUploadPage = () => {
           {/* Shop License Upload */}
           <div>
             <label className="block text-sm font-semibold mb-2 text-white">
-              {getTranslatedText("Shop License")} <span className="text-red-500">*</span>
+              {getTranslatedText("Shop License")}
             </label>
             <div className="space-y-3">
               <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all hover:border-sky-500 bg-black ${shopLicenseFile ? 'border-sky-500' : 'border-zinc-700'}`}
@@ -726,7 +709,6 @@ const KYCUploadPage = () => {
                   className="hidden"
                   accept="image/*"
                   onChange={handleShopLicensePhotoChange}
-                  required
                 />
               </label>
               {shopLicenseFile && (
@@ -749,7 +731,7 @@ const KYCUploadPage = () => {
           {scrapperType === 'dukandaar' && (
             <div>
               <label className="block text-sm font-semibold mb-2 text-white">
-                {getTranslatedText("Shop Photo")} <span className="text-red-500">*</span>
+                {getTranslatedText("Shop Photo")}
               </label>
               <div className="space-y-3">
                 <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all hover:border-sky-500 bg-black ${shopPhotoFile ? 'border-sky-500' : 'border-zinc-700'}`}
@@ -773,7 +755,6 @@ const KYCUploadPage = () => {
                     className="hidden"
                     accept="image/*"
                     onChange={handleShopPhotoChange}
-                    required={scrapperType === 'dukandaar'}
                   />
                 </label>
                 {shopPhotoFile && (
@@ -803,7 +784,7 @@ const KYCUploadPage = () => {
               {/* GST Number */}
               <div>
                 <label className="block text-sm font-semibold mb-2 text-white">
-                  {getTranslatedText("GST Number")} <span className="text-red-500">*</span>
+                  {getTranslatedText("GST Number")}
                 </label>
                 <input
                   type="text"
@@ -812,14 +793,13 @@ const KYCUploadPage = () => {
                   placeholder={getTranslatedText("Enter 15-digit GST number")}
                   maxLength={15}
                   className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${gstNumber.length === 15 ? 'border-sky-500' : 'border-zinc-700'}`}
-                  required={['wholesaler', 'industrial'].includes(scrapperType)}
                 />
               </div>
 
               {/* GST Certificate Photo */}
               <div>
                 <label className="block text-sm font-semibold mb-2 text-white">
-                  {getTranslatedText("GST Certificate Photo")} <span className="text-red-500">*</span>
+                  {getTranslatedText("GST Certificate Photo")}
                 </label>
                 <div className="space-y-3">
                   <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all hover:border-sky-500 bg-black ${gstCertificate ? 'border-sky-500' : 'border-zinc-700'}`}
@@ -842,7 +822,6 @@ const KYCUploadPage = () => {
                       className="hidden"
                       accept="image/*"
                       onChange={handleGstCertificateChange}
-                      required={['wholesaler', 'industrial'].includes(scrapperType)}
                     />
                   </label>
                   {gstCertificate && (
@@ -888,7 +867,7 @@ const KYCUploadPage = () => {
             type="submit"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            disabled={isSubmitting || !aadhaarNumber || aadhaarNumber.length !== 12 || !aadhaarPhoto || !selfiePhoto || !panNumber || panNumber.length !== 10 || !panPhoto || !shopLicenseFile || (scrapperType === 'dukandaar' && !shopPhotoFile) || (['wholesaler', 'industrial'].includes(scrapperType) && (!gstNumber || gstNumber.length !== 15 || !gstCertificate))}
+            disabled={isSubmitting || !aadhaarNumber || aadhaarNumber.length !== 12 || !aadhaarPhoto || !selfiePhoto || !panNumber || panNumber.length !== 10 || !panPhoto}
             className="w-full py-4 md:py-5 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-sky-600 text-white hover:bg-sky-700"
           >
             {isSubmitting ? (

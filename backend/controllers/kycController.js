@@ -66,20 +66,9 @@ export const submitKyc = async (req, res) => {
       return sendError(res, 'Aadhaar number is required.', 400);
     }
 
-    // Dukandaar must upload shop photo
-    if (scrapper.scrapperType === 'dukandaar' && !shopPhotoFile && !scrapper.kyc?.shopPhotoUrl) {
-      return sendError(res, 'Shop photo is required for Dukandaar (shopkeeper).', 400);
-    }
-
-    // Wholesaler or Industrial must provide GST details
-    if (['wholesaler', 'industrial'].includes(scrapper.scrapperType)) {
-      if (!gstNumber && !scrapper.kyc?.gstNumber) {
-        return sendError(res, 'GST number is required for Wholesaler/Industrial partners.', 400);
-      }
-      if (!gstCertificateFile && !scrapper.kyc?.gstCertificateUrl) {
-        return sendError(res, 'GST Certificate photo is required for Wholesaler/Industrial partners.', 400);
-      }
-    }
+    // Shop License is optional
+    // Shop Photo (Dukandaar) is optional
+    // GST Details (Wholesaler/Industrial) are optional
 
     // 3. Upload to Cloudinary
     // We update fields one by one to ensure we have the URLs
