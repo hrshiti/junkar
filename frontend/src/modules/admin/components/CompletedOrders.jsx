@@ -16,6 +16,7 @@ const CompletedOrders = () => {
   const [locations, setLocations] = useState({ states: [], cities: [] });
   const [selectedState, setSelectedState] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
+  const [selectedImages, setSelectedImages] = useState(null);
   const staticTexts = [
     "Failed to load completed orders",
     "Completed Orders",
@@ -345,6 +346,18 @@ const CompletedOrders = () => {
 
                   {/* Actions */}
                   <div className="flex gap-2">
+                    {order.images && order.images.length > 0 && (
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setSelectedImages(order.images.map(img => img.url || img))}
+                        className="px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl font-semibold text-xs md:text-sm flex items-center gap-1.5 md:gap-2 transition-all"
+                        style={{ backgroundColor: '#f3f4f6', color: '#374151' }}
+                      >
+                        <FaEye className="text-xs md:text-sm" />
+                        <span className="hidden sm:inline">{getTranslatedText("Images")} ({order.images.length})</span>
+                      </motion.button>
+                    )}
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -362,6 +375,58 @@ const CompletedOrders = () => {
           )}
         </AnimatePresence>
       </motion.div>
+
+      {/* Image Gallery Modal */}
+      <AnimatePresence>
+        {selectedImages && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={() => setSelectedImages(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative max-w-4xl w-full bg-zinc-900 rounded-3xl overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-4 border-b border-white/10 flex items-center justify-between">
+                <h3 className="text-lg font-bold text-white">Item Images ({selectedImages.length})</h3>
+                <button
+                  onClick={() => setSelectedImages(null)}
+                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+                >
+                  <FaCheckCircle className="rotate-45" /> {/* Using rotate-45 as close icon replacement if FaTimes is not imported */}
+                </button>
+              </div>
+              <div className="p-6 overflow-y-auto max-h-[70vh]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {selectedImages.map((img, idx) => (
+                    <div key={idx} className="group relative aspect-square rounded-2xl overflow-hidden bg-black border border-white/5">
+                      <img
+                        src={img}
+                        alt={`Item ${idx + 1}`}
+                        className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <a
+                        href={img}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="absolute bottom-4 right-4 p-2 rounded-lg bg-black/50 text-white backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <FaEye />
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

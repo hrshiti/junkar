@@ -16,6 +16,7 @@ const UserDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [selectedImages, setSelectedImages] = useState(null);
 
   const staticTexts = [
     "User not found",
@@ -326,6 +327,7 @@ const UserDetail = () => {
                 <th className="px-4 py-3">{getTranslatedText("Scrap Items")}</th>
                 <th className="px-4 py-3">{getTranslatedText("Amount")}</th>
                 <th className="px-4 py-3">{getTranslatedText("Scrapper")}</th>
+                <th className="px-4 py-3">{getTranslatedText("Images")}</th>
                 <th className="px-4 py-3 rounded-r-lg">{getTranslatedText("Status")}</th>
               </tr>
             </thead>
@@ -358,6 +360,20 @@ const UserDetail = () => {
                       {order.scrapper ? order.scrapper.name || getTranslatedText('Unknown') : getTranslatedText('Unassigned')}
                     </td>
                     <td className="px-4 py-3">
+                      {order.images && order.images.length > 0 ? (
+                        <button
+                          onClick={() => setSelectedImages(order.images.map(img => img.url || img))}
+                          className="p-1.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                          title="View Images"
+                        >
+                          <FaShoppingBag className="text-xs" />
+                          <span className="ml-1 text-[10px] font-bold">{order.images.length}</span>
+                        </button>
+                      ) : (
+                        <span className="text-[10px] text-gray-400">No images</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
                       {getOrderStatusBadge(order.status)}
                     </td>
                   </tr>
@@ -367,6 +383,44 @@ const UserDetail = () => {
           </table>
         </div>
       </motion.div>
+
+      {/* Image Gallery Modal */}
+      {selectedImages && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          onClick={() => setSelectedImages(null)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="relative max-w-4xl w-full bg-white rounded-3xl overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-4 border-b flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-800">Order Images ({selectedImages.length})</h3>
+              <button
+                onClick={() => setSelectedImages(null)}
+                className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors"
+              >
+                <FaBan />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[70vh]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {selectedImages.map((img, idx) => (
+                  <div key={idx} className="aspect-square rounded-2xl overflow-hidden bg-gray-100 border border-gray-200">
+                    <img
+                      src={img}
+                      alt={`Order Item ${idx + 1}`}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };
