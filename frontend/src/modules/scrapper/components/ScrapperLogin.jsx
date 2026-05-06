@@ -366,7 +366,7 @@ const ScrapperLogin = (props) => {
       return;
     }
 
-    if (!isLogin && (!name.trim() || !email.trim() || !vehicleInfo.trim())) {
+    if (!isLogin && !name.trim()) {
       setError(getTranslatedText('Please fill in all required fields'));
       return;
     }
@@ -780,7 +780,6 @@ const ScrapperLogin = (props) => {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder={getTranslatedText("Enter your email address")}
                         className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${email ? 'border-sky-500 ring-sky-900/20' : 'border-zinc-700 focus:border-sky-500'} `}
-                        required={!isLogin}
                       />
                     </motion.div>
                   )}
@@ -1144,7 +1143,6 @@ const ScrapperLogin = (props) => {
                         }}
                         placeholder={getTranslatedText("e.g., Truck - MH-12-AB-1234")}
                         className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${vehicleInfo ? 'border-sky-500 ring-sky-900/20' : 'border-zinc-700 focus:border-sky-500'} `}
-                        required={!isLogin}
                       />
                       <p className="text-xs text-gray-500 mt-1">
                         {getTranslatedText("Format: Vehicle Type - State-District-Series-Number (e.g., Truck - MH-12-AB-1234)")}
@@ -1247,7 +1245,7 @@ const ScrapperLogin = (props) => {
                     type="submit"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    disabled={loading || phone.length !== 10 || (!isLogin && (!name.trim() || !vehicleInfo.trim()))}
+                    disabled={loading || phone.length !== 10 || (!isLogin && !name.trim())}
                     className="w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-sky-500 to-sky-600 text-white"
                   >
                     {loading ? getTranslatedText('Processing...') : (isLogin ? getTranslatedText('Send OTP') : getTranslatedText('Register & Send OTP'))}

@@ -43,8 +43,7 @@ const scrapperSchema = new mongoose.Schema({
   vehicleInfo: {
     type: {
       type: String,
-      enum: ['cycle', 'thela', 'e_rickshaw', 'tempo', 'bike', 'auto', 'truck'],
-      required: true
+      enum: ['cycle', 'thela', 'e_rickshaw', 'tempo', 'bike', 'auto', 'truck']
     },
     photoUrl: {
       type: String,
@@ -52,12 +51,10 @@ const scrapperSchema = new mongoose.Schema({
     },
     number: {
       type: String,
-      required: true,
       trim: true
     },
     capacity: {
       type: Number,
-      required: true,
       min: 0
     }
   },

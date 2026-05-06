@@ -59,9 +59,13 @@ export const register = asyncHandler(async (req, res) => {
       return sendError(res, 'This phone number is already registered as a scrapper. Please use a different number or login as scrapper.', 400);
     }
     // Check if user exists
-    const userExists = await User.findOne({ $or: [{ email }, { phone }] });
+    const query = { phone };
+    if (email) {
+      query.$or = [{ email }, { phone }];
+    }
+    const userExists = await User.findOne(query);
     if (userExists) {
-      return sendError(res, 'User already exists with this email or phone', 400);
+      return sendError(res, `User already exists with this ${userExists.phone === phone ? 'phone' : 'email'}`, 400);
     }
   } else if (userRole === USER_ROLES.SCRAPPER) {
     // If registering as scrapper, check if phone exists in User collection
