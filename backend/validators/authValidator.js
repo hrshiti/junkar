@@ -9,9 +9,8 @@ export const registerValidator = [
     .withMessage('Name must be between 2 and 50 characters'),
   
   body('email')
+    .optional({ checkFalsy: true })
     .trim()
-    .notEmpty()
-    .withMessage('Email is required')
     .isEmail()
     .withMessage('Please provide a valid email')
     .normalizeEmail(),
@@ -118,4 +117,3 @@ export const refreshTokenValidator = [
     .notEmpty()
     .withMessage('Refresh token is required')
 ];
-

@@ -409,7 +409,6 @@ const ScrapperLogin = (props) => {
 
         const registrationData = {
           name,
-          email: email.trim(),
           phone,
           password,
           role: 'scrapper',
@@ -419,8 +418,12 @@ const ScrapperLogin = (props) => {
           scrapperType: scrapperType,
           city: city || '',
           state: state || '',
-          vehicleInfo: { type: 'truck', number: vehicleInfo }
+          vehicleInfo: { type: 'truck', number: vehicleInfo.trim() || 'NA' }
         };
+
+        if (email.trim()) {
+          registrationData.email = email.trim();
+        }
 
         if ((scrapperType === 'dukandaar' || scrapperType === 'wholesaler') && businessCoordinates) {
           registrationData.businessLocation = {
