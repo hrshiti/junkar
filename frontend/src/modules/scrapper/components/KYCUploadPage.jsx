@@ -325,7 +325,8 @@ const KYCUploadPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!aadhaarNumber || aadhaarNumber.length !== 12) {
+    // Aadhaar Number is now optional
+    if (aadhaarNumber && aadhaarNumber.length !== 12) {
       alert(getTranslatedText('Please enter a valid 12-digit Aadhaar number'));
       return;
     }
@@ -345,14 +346,10 @@ const KYCUploadPage = () => {
       return;
     }
 
+    // PAN is now optional
     const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
-    if (!panNumber || !panRegex.test(panNumber)) {
+    if (panNumber && !panRegex.test(panNumber)) {
       alert(getTranslatedText('Please enter a valid PAN number in format (e.g., ABCDE1234F)'));
-      return;
-    }
-
-    if (!panPhoto) {
-      alert(getTranslatedText('Please upload PAN photo'));
       return;
     }
 
@@ -467,7 +464,7 @@ const KYCUploadPage = () => {
           {/* Aadhaar Number */}
           <div>
             <label className="block text-sm font-semibold mb-2 text-white">
-              {getTranslatedText("Aadhaar Number")} <span className="text-red-500">*</span>
+              {getTranslatedText("Aadhaar Number")}
             </label>
             <input
               type="text"
@@ -476,7 +473,6 @@ const KYCUploadPage = () => {
               placeholder={getTranslatedText("Enter 12-digit Aadhaar number")}
               maxLength={12}
               className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${aadhaarNumber.length === 12 ? 'border-sky-500' : 'border-zinc-700'}`}
-              required
             />
             {aadhaarNumber.length === 12 && (
               <p className="text-xs mt-1 text-gray-400">
@@ -622,7 +618,7 @@ const KYCUploadPage = () => {
 
           <div>
             <label className="block text-sm font-semibold mb-2 text-white">
-              {getTranslatedText("PAN Number")} <span className="text-red-500">*</span>
+              {getTranslatedText("PAN Number")}
             </label>
             <input
               type="text"
@@ -631,7 +627,6 @@ const KYCUploadPage = () => {
               placeholder={getTranslatedText("Enter 10-digit PAN number")}
               maxLength={10}
               className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${panNumber.length === 10 && /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(panNumber) ? 'border-sky-500' : panNumber.length > 0 && (panNumber.length < 10 || !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(panNumber)) ? 'border-red-500/50' : 'border-zinc-700'}`}
-              required
             />
             <p className="text-[10px] mt-1 text-gray-400">
               Format: 5 letters, 4 digits, 1 letter (e.g., ABCDE1234F)
@@ -641,7 +636,7 @@ const KYCUploadPage = () => {
           {/* PAN Photo Upload */}
           <div>
             <label className="block text-sm font-semibold mb-2 text-white">
-              {getTranslatedText("PAN Card Photo")} <span className="text-red-500">*</span>
+              {getTranslatedText("PAN Card Photo")}
             </label>
             <div className="space-y-3">
               <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all hover:border-sky-500 bg-black ${panPhoto ? 'border-sky-500' : 'border-zinc-700'}`}
@@ -664,7 +659,6 @@ const KYCUploadPage = () => {
                   className="hidden"
                   accept="image/*"
                   onChange={handlePanPhotoChange}
-                  required
                 />
               </label>
               {panPhoto && (

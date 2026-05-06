@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   FaArrowLeft, FaTruck, FaPhone, FaIdCard, FaStar, FaRupeeSign,
-  FaCheckCircle, FaTimesCircle, FaClock, FaUserTimes, FaCar, FaCreditCard, FaChartLine, FaMapMarkerAlt
+  FaCheckCircle, FaTimesCircle, FaClock, FaUserTimes, FaCar, FaCreditCard, FaChartLine, FaMapMarkerAlt, FaEdit, FaSave
 } from 'react-icons/fa';
 import { adminAPI, earningsAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
@@ -16,6 +16,8 @@ const ScrapperDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [isEditingType, setIsEditingType] = useState(false);
+  const [newType, setNewType] = useState('');
 
   const staticTexts = [
     "Scrapper not found",
@@ -205,6 +207,31 @@ const ScrapperDetail = () => {
     }
   };
 
+  const handleUpdateType = async () => {
+    if (!newType) return;
+    if (newType === scrapper.scrapperType) {
+      setIsEditingType(false);
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      const res = await adminAPI.updateScrapper(scrapperId, { scrapperType: newType });
+      if (res.success) {
+        setScrapper(prev => ({ ...prev, scrapperType: newType }));
+        setIsEditingType(false);
+        alert(getTranslatedText('Scrapper type updated successfully'));
+      } else {
+        throw new Error(res.message || 'Failed to update type');
+      }
+    } catch (err) {
+      console.error('Error updating scrapper type:', err);
+      alert('Error: ' + err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const getKYCStatusBadge = (status) => {
     if (status === 'verified') {
       return (
@@ -302,9 +329,56 @@ const ScrapperDetail = () => {
                 {scrapper.name}
               </h1>
               {getKYCStatusBadge(scrapper.kycStatus)}
-              <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: '#e0f2fe', color: '#0369a1' }}>
-                {scrapper.scrapperType === 'feri_wala' ? '🚲 फेरी wala' : scrapper.scrapperType === 'dukandaar' ? '🏪 दुकानदार' : scrapper.scrapperType === 'wholesaler' ? '🏭 थोक व्यापारी' : scrapper.scrapperType === 'industrial' ? '🏭 औद्योगिक' : scrapper.scrapperType === 'big' ? '🏭 Dealer' : '🚲 Small'}
-              </span>
+              <div className="flex items-center gap-2">
+                {isEditingType ? (
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={newType}
+                      onChange={(e) => setNewType(e.target.value)}
+                      className="text-xs px-2 py-1 rounded border-2 border-sky-500 focus:outline-none bg-white"
+                      disabled={actionLoading}
+                    >
+                      <option value="feri_wala">🚲 फेरी wala</option>
+                      <option value="dukandaar">🏪 दुकानदार</option>
+                      <option value="wholesaler">🏭 थोक व्यापारी</option>
+                      <option value="industrial">🏭 औद्योगिक</option>
+                      <option value="big">🏭 Dealer</option>
+                    </select>
+                    <button
+                      onClick={handleUpdateType}
+                      disabled={actionLoading}
+                      className="p-1.5 rounded-full bg-green-500 text-white hover:bg-green-600 transition-colors"
+                      title="Save"
+                    >
+                      <FaSave className="text-xs" />
+                    </button>
+                    <button
+                      onClick={() => setIsEditingType(false)}
+                      disabled={actionLoading}
+                      className="p-1.5 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
+                      title="Cancel"
+                    >
+                      <FaTimesCircle className="text-xs" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: '#e0f2fe', color: '#0369a1' }}>
+                      {scrapper.scrapperType === 'feri_wala' ? '🚲 फेरी wala' : scrapper.scrapperType === 'dukandaar' ? '🏪 दुकानदार' : scrapper.scrapperType === 'wholesaler' ? '🏭 थोक व्यापारी' : scrapper.scrapperType === 'industrial' ? '🏭 औद्योगिक' : scrapper.scrapperType === 'big' ? '🏭 Dealer' : '🚲 Small'}
+                    </span>
+                    <button
+                      onClick={() => {
+                        setNewType(scrapper.scrapperType);
+                        setIsEditingType(true);
+                      }}
+                      className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 transition-colors"
+                      title="Edit Type"
+                    >
+                      <FaEdit className="text-sm" />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">

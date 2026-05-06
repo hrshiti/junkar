@@ -62,9 +62,7 @@ export const submitKyc = async (req, res) => {
       return sendError(res, 'Aadhaar back photo (with address) is required.', 400);
     }
 
-    if (!aadhaarNumber && !scrapper.kyc?.aadhaarNumber) {
-      return sendError(res, 'Aadhaar number is required.', 400);
-    }
+    // Aadhaar number is now optional
 
     // Shop License is optional
     // Shop Photo (Dukandaar) is optional

@@ -565,7 +565,7 @@ export const getScrapperById = asyncHandler(async (req, res) => {
 // @access  Private (Admin)
 export const updateScrapper = asyncHandler(async (req, res) => {
   try {
-    const { name, email, phone, status, vehicleInfo, address, kyc } = req.body;
+    const { name, email, phone, status, vehicleInfo, address, kyc, scrapperType } = req.body;
     const scrapperId = req.params.id;
 
     const scrapper = await Scrapper.findById(scrapperId);
@@ -581,6 +581,15 @@ export const updateScrapper = asyncHandler(async (req, res) => {
     if (vehicleInfo) scrapper.vehicleInfo = { ...scrapper.vehicleInfo, ...vehicleInfo };
     if (address) scrapper.address = { ...scrapper.address, ...address };
     if (kyc) scrapper.kyc = { ...scrapper.kyc, ...kyc };
+    
+    // Admin can change scrapper type (role)
+    if (scrapperType) {
+      const allowedTypes = ['feri_wala', 'dukandaar', 'wholesaler', 'industrial', 'big'];
+      if (!allowedTypes.includes(scrapperType)) {
+        return sendError(res, `Invalid scrapper type. Allowed: ${allowedTypes.join(', ')}`, 400);
+      }
+      scrapper.scrapperType = scrapperType;
+    }
 
     await scrapper.save();
 
