@@ -325,8 +325,8 @@ const KYCUploadPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Aadhaar Number is now optional
-    if (aadhaarNumber && aadhaarNumber.length !== 12) {
+    // Aadhaar Number is mandatory
+    if (!aadhaarNumber || aadhaarNumber.length !== 12) {
       alert(getTranslatedText('Please enter a valid 12-digit Aadhaar number'));
       return;
     }
@@ -861,7 +861,7 @@ const KYCUploadPage = () => {
             type="submit"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            disabled={isSubmitting || !aadhaarNumber || aadhaarNumber.length !== 12 || !aadhaarPhoto || !selfiePhoto || !panNumber || panNumber.length !== 10 || !panPhoto}
+            disabled={isSubmitting || !aadhaarNumber || aadhaarNumber.length !== 12 || !aadhaarPhoto || !aadhaarBackPhoto || !selfiePhoto}
             className="w-full py-4 md:py-5 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-sky-600 text-white hover:bg-sky-700"
           >
             {isSubmitting ? (

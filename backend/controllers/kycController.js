@@ -62,7 +62,10 @@ export const submitKyc = async (req, res) => {
       return sendError(res, 'Aadhaar back photo (with address) is required.', 400);
     }
 
-    // Aadhaar number is now optional
+    // Aadhaar number is mandatory
+    if (!aadhaarNumber || aadhaarNumber.length !== 12) {
+      return sendError(res, 'Valid 12-digit Aadhaar number is required.', 400);
+    }
 
     // Shop License is optional
     // Shop Photo (Dukandaar) is optional
