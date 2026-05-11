@@ -520,27 +520,52 @@ const ScrapperProfile = () => {
             </div>
 
             {/* Subscription */}
-            <button
-              type="button"
-              onClick={() => navigate('/scrapper/subscription')}
-              className="w-full flex items-center justify-between px-3.5 py-3 text-left hover:bg-slate-50 transition-colors"
-            >
-              <div>
-                <p className="text-sm font-semibold text-slate-800">
-                  {getTranslatedText("Subscription")}
-                </p>
-                <p className="text-xs text-slate-500">
-                  {subscription
-                    ? getTranslatedText("{planName} • ₹{price}/month", { planName: subscription.planName, price: subscription.price })
-                    : getTranslatedText('No active subscription')}
-                </p>
-              </div>
-              <span
-                className="px-3 py-1.5 rounded-full text-xs font-semibold bg-sky-100 text-sky-700"
+            <div className="flex flex-col border-b border-slate-100">
+              <button
+                type="button"
+                onClick={() => navigate('/scrapper/subscription')}
+                className="w-full flex items-center justify-between px-3.5 py-3 text-left hover:bg-slate-50 transition-colors"
               >
-                {getTranslatedText("Manage")}
-              </span>
-            </button>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-slate-800">
+                    {getTranslatedText("Subscription")}
+                  </p>
+                  <div className="mt-0.5">
+                    {subscription ? (
+                      <div className="space-y-0.5">
+                        <p className="text-xs text-sky-700 font-medium">
+                          {subscription.planName} • ₹{subscription.price}/month
+                        </p>
+                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
+                          <p className="text-[10px] text-slate-500">
+                            {getTranslatedText("Active from:")} {subscription.startDate ? new Date(subscription.startDate).toLocaleDateString() : '-'}
+                          </p>
+                          <p className={`text-[10px] font-semibold ${subscription.status === 'expired' ? 'text-red-500' : 'text-slate-500'}`}>
+                            {getTranslatedText("Expires on:")} {subscription.expiryDate ? new Date(subscription.expiryDate).toLocaleDateString() : '-'}
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-500">
+                        {getTranslatedText('No active subscription')}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {subscription?.status === 'expired' && (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-600 border border-red-200">
+                      EXPIRED
+                    </span>
+                  )}
+                  <span
+                    className="px-3 py-1.5 rounded-full text-xs font-semibold bg-sky-100 text-sky-700"
+                  >
+                    {getTranslatedText("Manage")}
+                  </span>
+                </div>
+              </button>
+            </div>
 
             {/* Scrap Statistics */}
             <div className="flex flex-col border-b border-slate-100">

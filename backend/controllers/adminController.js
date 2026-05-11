@@ -537,6 +537,7 @@ export const getScrapperById = asyncHandler(async (req, res) => {
     // Admin needs to see full details including hidden fields like aadhaarNumber
     const scrapper = await Scrapper.findById(req.params.id)
       .select('+kyc.aadhaarNumber +kyc.panNumber')
+      .populate('subscription.planId', 'name price duration durationType')
       .lean();
 
     if (!scrapper) {

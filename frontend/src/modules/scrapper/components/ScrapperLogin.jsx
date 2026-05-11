@@ -425,7 +425,7 @@ const ScrapperLogin = (props) => {
           registrationData.email = email.trim();
         }
 
-        if ((scrapperType === 'dukandaar' || scrapperType === 'wholesaler') && businessCoordinates) {
+        if (businessCoordinates) {
           registrationData.businessLocation = {
             type: 'Point',
             coordinates: businessCoordinates,
@@ -928,7 +928,7 @@ const ScrapperLogin = (props) => {
                       </div>
 
                       <AnimatePresence>
-                        {(scrapperType === 'dukandaar' || scrapperType === 'wholesaler') && (
+                        {scrapperType && (
                           <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
@@ -937,7 +937,7 @@ const ScrapperLogin = (props) => {
                           >
                             <div>
                               <label className="block text-xs font-semibold mb-1 text-gray-400">
-                                {scrapperType === 'dukandaar' ? getTranslatedText("Shop / Warehouse Address") : getTranslatedText("Godown / Factory Address")}
+                                {scrapperType === 'feri_wala' ? getTranslatedText("Home / Operating Area Address") : scrapperType === 'dukandaar' ? getTranslatedText("Shop / Warehouse Address") : getTranslatedText("Godown / Factory Address")}
                               </label>
                               {isLoaded ? (
                                 <Autocomplete
@@ -951,7 +951,7 @@ const ScrapperLogin = (props) => {
                                       onChange={(e) => setBusinessAddress(e.target.value)}
                                       placeholder={getTranslatedText("Search shop location (e.g. Bhopal)")}
                                       className="w-full px-4 py-3 pr-10 rounded-xl border-2 border-zinc-700 focus:border-sky-500 bg-black/50 text-white text-sm outline-none transition-all"
-                                      required={scrapperType === 'dukandaar' || scrapperType === 'wholesaler'}
+                                      required={!!scrapperType}
                                     />
                                     <FaSearchLocation className="absolute right-4 top-1/2 -translate-y-1/2 text-sky-500" />
                                   </div>
@@ -963,7 +963,7 @@ const ScrapperLogin = (props) => {
                                   placeholder={getTranslatedText("Enter full business address")}
                                   className="w-full px-4 py-2 rounded-xl border-2 border-zinc-700 focus:border-sky-500 bg-black text-white text-sm resize-none"
                                   rows="2"
-                                  required={scrapperType === 'dukandaar' || scrapperType === 'wholesaler'}
+                                  required={!!scrapperType}
                                 />
                               )}
                               {businessCoordinates && (
@@ -985,7 +985,7 @@ const ScrapperLogin = (props) => {
                                   }}
                                   placeholder="City"
                                   className="w-full px-4 py-3 rounded-xl border-2 border-zinc-700 focus:border-sky-500 bg-black/50 text-white text-sm outline-none transition-all"
-                                  required={scrapperType === 'dukandaar' || scrapperType === 'wholesaler'}
+                                  required={!!scrapperType}
                                 />
                               </div>
                               <div className="space-y-1">
@@ -999,7 +999,7 @@ const ScrapperLogin = (props) => {
                                   }}
                                   placeholder="State"
                                   className="w-full px-4 py-3 rounded-xl border-2 border-zinc-700 focus:border-sky-500 bg-black/50 text-white text-sm outline-none transition-all"
-                                  required={scrapperType === 'dukandaar' || scrapperType === 'wholesaler'}
+                                  required={!!scrapperType}
                                 />
                               </div>
                             </div>
@@ -1060,67 +1060,69 @@ const ScrapperLogin = (props) => {
                               ) : (
                                 <>
                                   <span className="text-lg">📍</span>
-                                  {businessCoordinates ? "Location Set Successfully" : "Pin Shop Location on Map"}
+                                  {businessCoordinates ? "Location Set Successfully" : "Pin My Operating Area on Map"}
                                 </>
                               )}
                             </button>
 
                             {/* Deal Categories - Only for Wholesalers/Shopkeepers */}
-                            <div className="pt-2">
-                              <div className="flex items-center justify-between mb-2">
-                                <label className="block text-xs font-semibold text-gray-400">
-                                  {getTranslatedText("Deal Categories")}
-                                </label>
-                                <div className="flex gap-2">
-                                  <button
-                                    type="button"
-                                    onClick={() => setDealCategories(availableCategories.map(c => c.id))}
-                                    className="text-[10px] px-2 py-1 bg-sky-900/40 text-sky-300 rounded hover:bg-sky-900/60 transition"
-                                  >
-                                    {getTranslatedText("Select All")}
-                                  </button>
-                                  {(dealCategories.length > 0) && (
+                            {['dukandaar', 'wholesaler', 'industrial'].includes(scrapperType) && (
+                              <div className="pt-2">
+                                <div className="flex items-center justify-between mb-2">
+                                  <label className="block text-xs font-semibold text-gray-400">
+                                    {getTranslatedText("Deal Categories")}
+                                  </label>
+                                  <div className="flex gap-2">
                                     <button
                                       type="button"
-                                      onClick={() => setDealCategories([])}
-                                      className="text-[10px] px-2 py-1 bg-red-900/30 text-red-400 rounded hover:bg-red-900/50 transition"
+                                      onClick={() => setDealCategories(availableCategories.map(c => c.id))}
+                                      className="text-[10px] px-2 py-1 bg-sky-900/40 text-sky-300 rounded hover:bg-sky-900/60 transition"
                                     >
-                                      {getTranslatedText("Clear")}
+                                      {getTranslatedText("Select All")}
                                     </button>
-                                  )}
-                                </div>
-                              </div>
-                              
-                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[220px] overflow-y-auto pr-1 bg-black/20 p-2 rounded-xl border border-zinc-800">
-                                {availableCategories.map((cat) => (
-                                  <button
-                                    key={cat.id}
-                                    type="button"
-                                    onClick={() => {
-                                      if (dealCategories.includes(cat.id)) {
-                                        setDealCategories(dealCategories.filter(c => c !== cat.id));
-                                      } else {
-                                        setDealCategories([...dealCategories, cat.id]);
-                                      }
-                                    }}
-                                    className={`flex items-center gap-2 px-2 py-2 rounded-lg border transition-all ${dealCategories.includes(cat.id)
-                                      ? 'border-sky-500 bg-sky-900/20 text-sky-400 shadow-[0_0_8px_rgba(14,165,233,0.15)]'
-                                      : 'border-zinc-700 bg-zinc-800/40 text-gray-400 hover:border-zinc-600 hover:bg-zinc-800'
-                                      }`}
-                                  >
-                                    {cat.icon && (cat.icon.startsWith('http') || cat.icon.startsWith('/')) ? (
-                                      <img src={cat.icon} alt={cat.label} className="w-5 h-5 object-contain flex-shrink-0" />
-                                    ) : (
-                                      <span className="text-base flex-shrink-0">{cat.icon}</span>
+                                    {(dealCategories.length > 0) && (
+                                      <button
+                                        type="button"
+                                        onClick={() => setDealCategories([])}
+                                        className="text-[10px] px-2 py-1 bg-red-900/30 text-red-400 rounded hover:bg-red-900/50 transition"
+                                      >
+                                        {getTranslatedText("Clear")}
+                                      </button>
                                     )}
-                                    <span className="text-[11px] font-medium truncate text-left w-full">{cat.label}</span>
-                                  </button>
-                                ))}
+                                  </div>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[220px] overflow-y-auto pr-1 bg-black/20 p-2 rounded-xl border border-zinc-800">
+                                  {availableCategories.map((cat) => (
+                                    <button
+                                      key={cat.id}
+                                      type="button"
+                                      onClick={() => {
+                                        if (dealCategories.includes(cat.id)) {
+                                          setDealCategories(dealCategories.filter(c => c !== cat.id));
+                                        } else {
+                                          setDealCategories([...dealCategories, cat.id]);
+                                        }
+                                      }}
+                                      className={`flex items-center gap-2 px-2 py-2 rounded-lg border transition-all ${dealCategories.includes(cat.id)
+                                        ? 'border-sky-500 bg-sky-900/20 text-sky-400 shadow-[0_0_8px_rgba(14,165,233,0.15)]'
+                                        : 'border-zinc-700 bg-zinc-800/40 text-gray-400 hover:border-zinc-600 hover:bg-zinc-800'
+                                        }`}
+                                    >
+                                      {cat.icon && (cat.icon.startsWith('http') || cat.icon.startsWith('/')) ? (
+                                        <img src={cat.icon} alt={cat.label} className="w-5 h-5 object-contain flex-shrink-0" />
+                                      ) : (
+                                        <span className="text-base flex-shrink-0">{cat.icon}</span>
+                                      )}
+                                      <span className="text-[11px] font-medium truncate text-left w-full">{cat.label}</span>
+                                    </button>
+                                  ))}
+                                </div>
+                                <p className="mt-2 text-[10px] text-gray-500 italic">
+                                  * {getTranslatedText("You will only see orders containing these categories.")}
+                                </p>
                               </div>
-                              <p className="mt-2 text-[10px] text-gray-500 italic">
-                                * {getTranslatedText("You will only see orders containing these categories.")}
-                              </p>
-                            </div>
+                            )}
                           </motion.div>
                         )}
                       </AnimatePresence>

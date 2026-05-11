@@ -430,15 +430,19 @@ const ScrapperDetail = () => {
                   )}
                 </div>
               </div>
-              {['big', 'dukandaar', 'wholesaler', 'industrial'].includes(scrapper.scrapperType) && scrapper.businessLocation && (
+              {scrapper.businessLocation && (
                 <div className="flex items-start gap-3 md:col-span-2">
                   <FaMapMarkerAlt style={{ color: '#64946e', marginTop: '4px' }} />
                   <div>
                     <p className="text-xs" style={{ color: '#718096' }}>{getTranslatedText("Business Location")}</p>
-                    <p className="font-semibold" style={{ color: '#2d3748' }}>{scrapper.businessLocation.address || getTranslatedText('N/A')}</p>
+                    <p className="font-semibold" style={{ color: '#2d3748' }}>
+                      {scrapper.businessLocation.address || 
+                       `${scrapper.businessLocation.city}${scrapper.businessLocation.city && scrapper.businessLocation.state ? ', ' : ''}${scrapper.businessLocation.state}` || 
+                       getTranslatedText('N/A')}
+                    </p>
                     {scrapper.businessLocation.coordinates && (
                       <p className="text-[10px] text-gray-400">
-                        {getTranslatedText("Coordinates")}: {scrapper.businessLocation.coordinates[1].toFixed(6)}, {scrapper.businessLocation.coordinates[0].toFixed(6)}
+                        {getTranslatedText("Coordinates")}: {scrapper.businessLocation.coordinates[1]?.toFixed(6)}, {scrapper.businessLocation.coordinates[0]?.toFixed(6)}
                       </p>
                     )}
                   </div>
@@ -638,23 +642,39 @@ const ScrapperDetail = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p className="text-xs mb-1" style={{ color: '#718096' }}>{getTranslatedText("Plan")}</p>
-              <p className="font-semibold" style={{ color: '#2d3748' }}>{scrapper.subscription.plan}</p>
+              <p className="font-semibold" style={{ color: '#2d3748' }}>
+                {scrapper.subscription.planId?.name || scrapper.subscription.plan || getTranslatedText('Unknown Plan')}
+              </p>
             </div>
             <div>
               <p className="text-xs mb-1" style={{ color: '#718096' }}>{getTranslatedText("Status")}</p>
-              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold inline-block" style={{ backgroundColor: '#d1fae5', color: '#10b981' }}>
-                <FaCheckCircle className="text-xs" />
+              <span 
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold inline-block" 
+                style={{ 
+                  backgroundColor: scrapper.subscription.status === 'active' ? '#d1fae5' : scrapper.subscription.status === 'expired' ? '#fee2e2' : '#f3f4f6', 
+                  color: scrapper.subscription.status === 'active' ? '#10b981' : scrapper.subscription.status === 'expired' ? '#b91c1c' : '#4b5563' 
+                }}
+              >
+                {scrapper.subscription.status === 'active' && <FaCheckCircle className="text-xs" />}
                 {getTranslatedText(scrapper.subscription.status.charAt(0).toUpperCase() + scrapper.subscription.status.slice(1))}
               </span>
             </div>
             <div>
-              <p className="text-xs mb-1" style={{ color: '#718096' }}>{getTranslatedText("Price")}</p>
-              <p className="font-semibold" style={{ color: '#2d3748' }}>₹{scrapper.subscription.price}{getTranslatedText("/month")}</p>
+              <p className="text-xs mb-1" style={{ color: '#718096' }}>{getTranslatedText("Activated On")}</p>
+              <p className="font-semibold" style={{ color: '#2d3748' }}>
+                {scrapper.subscription.startDate ? new Date(scrapper.subscription.startDate).toLocaleDateString() : getTranslatedText('N/A')}
+              </p>
             </div>
             <div>
               <p className="text-xs mb-1" style={{ color: '#718096' }}>{getTranslatedText("Expires On")}</p>
               <p className="font-semibold" style={{ color: '#2d3748' }}>
-                {new Date(scrapper.subscription.expiryDate).toLocaleDateString()}
+                {scrapper.subscription.expiryDate ? new Date(scrapper.subscription.expiryDate).toLocaleDateString() : getTranslatedText('N/A')}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs mb-1" style={{ color: '#718096' }}>{getTranslatedText("Price")}</p>
+              <p className="font-semibold" style={{ color: '#2d3748' }}>
+                ₹{scrapper.subscription.planId?.price ?? scrapper.subscription.price ?? 0}{getTranslatedText("/month")}
               </p>
             </div>
           </div>
