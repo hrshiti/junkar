@@ -32,6 +32,7 @@ import fcmTokenRoutes from "./routes/fcmTokenRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import categoryRequestRoutes from "./routes/categoryRequestRoutes.js";
 import { initializeSocket } from "./services/socketService.js";
+import { initializeCronJobs } from "./utils/cronJobs.js";
 
 // Validate environment variables
 try {
@@ -260,7 +261,9 @@ const startServer = async () => {
 
     // Initialize Socket.io
     initializeSocket(server);
-    logger.info("✅ Socket.io initialized");
+    // Initialize Cron Jobs (Automated Tasks)
+    initializeCronJobs();
+
   } catch (error) {
     logger.error("❌ Failed to start server:", error);
     process.exit(1);

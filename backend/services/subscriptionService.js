@@ -278,38 +278,41 @@ export const renewSubscription = async (scrapperId, planId) => {
 export const checkExpiredSubscriptions = async () => {
   try {
     const now = new Date();
-    const expiredScrappers = await Scrapper.find({
-      'subscription.status': 'active',
-      'subscription.expiryDate': { $lt: now }
-    });
-
-    if (expiredScrappers.length === 0) {
-      return {
-        success: true,
-        expiredCount: 0,
-        message: 'No expired subscriptions found'
-      };
-    }
-
-    // Update all expired subscriptions
-    const updateResult = await Scrapper.updateMany(
+    
+    // 1. Update Platform Subscriptions
+    const platformResult = await Scrapper.updateMany(
       {
         'subscription.status': 'active',
         'subscription.expiryDate': { $lt: now }
       },
       {
-        $set: {
-          'subscription.status': 'expired'
-        }
+        $set: { 'subscription.status': 'expired' }
       }
     );
 
-    logger.info(`[Subscription] Marked ${updateResult.modifiedCount} subscriptions as expired`);
+    // 2. Update Market Subscriptions
+    const marketResult = await Scrapper.updateMany(
+      {
+        'marketSubscription.status': 'active',
+        'marketSubscription.expiryDate': { $lt: now }
+      },
+      {
+        $set: { 'marketSubscription.status': 'expired' }
+      }
+    );
+
+    const totalModified = platformResult.modifiedCount + marketResult.modifiedCount;
+
+    if (totalModified > 0) {
+      logger.info(`[Subscription] Expired sync: ${platformResult.modifiedCount} platform, ${marketResult.modifiedCount} market subscriptions marked as expired`);
+    }
 
     return {
       success: true,
-      expiredCount: updateResult.modifiedCount,
-      message: `Marked ${updateResult.modifiedCount} subscriptions as expired`
+      platformExpired: platformResult.modifiedCount,
+      marketExpired: marketResult.modifiedCount,
+      totalExpired: totalModified,
+      message: `Sync completed. ${totalModified} subscriptions updated.`
     };
   } catch (error) {
     logger.error('[Subscription] Error checking expired subscriptions:', error);
