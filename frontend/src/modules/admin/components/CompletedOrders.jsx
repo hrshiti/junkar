@@ -70,7 +70,7 @@ const CompletedOrders = () => {
     setLoading(true);
     setError(null);
     try {
-      let query = 'status=completed';
+      let query = 'status=completed&limit=1000';
 
       // Apply date filters
       const now = new Date();

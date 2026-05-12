@@ -66,7 +66,7 @@ export const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 export const PAGINATION = {
   DEFAULT_PAGE: 1,
-  DEFAULT_LIMIT: 10
+  DEFAULT_LIMIT: 1000
 };
 
 export const ORDER_TYPES = {

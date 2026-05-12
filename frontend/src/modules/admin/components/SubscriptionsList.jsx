@@ -14,6 +14,7 @@ const SubscriptionsList = () => {
   const [subscriptions, setSubscriptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, active, expired, cancelled
+  const [totalCount, setTotalCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
 
   const staticTexts = [
@@ -42,13 +43,14 @@ const SubscriptionsList = () => {
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
   useEffect(() => {
-    loadSubscriptions();
-  }, []);
+    loadSubscriptions(filter);
+  }, [filter]);
 
-  const loadSubscriptions = async () => {
+  const loadSubscriptions = async (statusFilter = 'all') => {
     setLoading(true);
     try {
-      const response = await adminAPI.getAllSubscriptions();
+      const query = `limit=1000${statusFilter !== 'all' ? `&status=${statusFilter}` : ''}`;
+      const response = await adminAPI.getAllSubscriptions(query);
       if (response.success && response.data?.subscriptions) {
         const mappedSubscriptions = response.data.subscriptions.map((item, index) => {
           const sub = item.subscription;
@@ -70,6 +72,9 @@ const SubscriptionsList = () => {
           };
         });
         setSubscriptions(mappedSubscriptions);
+        if (response.data.pagination) {
+          setTotalCount(response.data.pagination.total);
+        }
       }
     } catch (error) {
       console.error('Failed to load subscriptions:', error);
@@ -170,9 +175,14 @@ const SubscriptionsList = () => {
               {getTranslatedText("Manage all scrapper subscriptions")}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <div className="px-3 py-1.5 md:px-4 md:py-2 rounded-xl" style={{ backgroundColor: '#f7fafc' }}>
               <span className="text-xs md:text-sm font-semibold" style={{ color: '#2d3748' }}>
+                {getTranslatedText("{count} Total Subscriptions", { count: totalCount })}
+              </span>
+            </div>
+            <div className="px-3 py-1.5 md:px-4 md:py-2 rounded-xl" style={{ backgroundColor: '#f0fff4' }}>
+              <span className="text-xs md:text-sm font-semibold" style={{ color: '#276749' }}>
                 {getTranslatedText("Monthly Revenue: ₹{amount}", { amount: totalRevenue })}
               </span>
             </div>

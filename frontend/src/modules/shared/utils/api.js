@@ -585,8 +585,8 @@ export const adminAPI = {
   deletePrice: async (id) => {
     return apiRequest(API_ENDPOINTS.admin.priceById(id), { method: 'DELETE' });
   },
-  getAllSubscriptions: async () => {
-    return apiRequest(API_ENDPOINTS.admin.subscriptionsAll, { method: 'GET' });
+  getAllSubscriptions: async (query = '') => {
+    return apiRequest(`${API_ENDPOINTS.admin.subscriptionsAll}${query ? `?${query}` : ''}`, { method: 'GET' });
   },
   getAllSubscriptionPlans: async () => {
     return apiRequest(API_ENDPOINTS.admin.subscriptionPlans, { method: 'GET' });

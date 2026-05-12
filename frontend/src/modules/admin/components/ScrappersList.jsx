@@ -15,6 +15,7 @@ const ScrappersList = () => {
   const [filter, setFilter] = useState('all'); // all, verified, pending, rejected, blocked
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
   const [error, setError] = useState(null);
   const [locations, setLocations] = useState({ states: [], cities: [] });
   const [selectedState, setSelectedState] = useState('');
@@ -97,7 +98,7 @@ const ScrappersList = () => {
         queryParams.append('city', selectedCity);
       }
       queryParams.append('page', '1');
-      queryParams.append('limit', '100');
+      queryParams.append('limit', '1000');
 
       const response = await adminAPI.getScrappersWithKyc(queryParams.toString());
 
@@ -124,6 +125,9 @@ const ScrappersList = () => {
           badges: Array.isArray(scrapper.badges) ? scrapper.badges : []
         }));
         setScrappers(transformedScrappers);
+        if (response.data.pagination) {
+          setTotalCount(response.data.pagination.total);
+        }
       } else {
         setError(getTranslatedText('Failed to load scrappers'));
         setScrappers([]);
@@ -233,7 +237,7 @@ const ScrappersList = () => {
           <div className="flex items-center gap-2">
             <div className="px-3 py-1.5 md:px-4 md:py-2 rounded-xl" style={{ backgroundColor: '#f7fafc' }}>
               <span className="text-xs md:text-sm font-semibold" style={{ color: '#2d3748' }}>
-                {getTranslatedText("{count} Total Scrappers", { count: scrappers.length })}
+                {getTranslatedText("{count} Total Scrappers", { count: totalCount })}
               </span>
             </div>
           </div>

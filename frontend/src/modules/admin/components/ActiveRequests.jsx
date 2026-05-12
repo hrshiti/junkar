@@ -124,7 +124,7 @@ const ActiveRequests = () => {
     setError('');
     try {
       // Load orders from admin orders API
-      const response = await adminOrdersAPI.getAll();
+      const response = await adminOrdersAPI.getAll('limit=1000');
       const rawOrders = response?.data?.orders || response?.orders || response || [];
 
       const mapped = (rawOrders || []).map(mapOrderToRequest).filter(Boolean);

@@ -13,6 +13,7 @@ import mongoose from 'mongoose';
 import { createContact, createFundAccount, initiatePayout } from '../services/payoutService.js';
 import WithdrawalRequest from '../models/WithdrawalRequest.js';
 import { sendNotificationToUser } from '../utils/pushNotificationHelper.js';
+import { checkExpiredSubscriptions } from '../services/subscriptionService.js';
 
 // ============================================
 // DASHBOARD & ANALYTICS
@@ -1473,6 +1474,9 @@ export const deletePlan = asyncHandler(async (req, res) => {
 // @access  Private (Admin)
 export const getAllSubscriptions = asyncHandler(async (req, res) => {
   try {
+    // Sync expired subscriptions before fetching to ensure real-time accuracy in the admin panel
+    await checkExpiredSubscriptions();
+
     const page = parseInt(req.query.page) || PAGINATION.DEFAULT_PAGE;
     const limit = parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT;
     const skip = (page - 1) * limit;

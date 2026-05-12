@@ -12,6 +12,7 @@ const UsersList = () => {
   const [filter, setFilter] = useState('all'); // all, active, blocked
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
   const [error, setError] = useState(null);
   const [locations, setLocations] = useState({ states: [], cities: [] });
   const [selectedState, setSelectedState] = useState('');
@@ -99,7 +100,7 @@ const UsersList = () => {
         queryParams.append('city', selectedCity);
       }
       queryParams.append('page', '1');
-      queryParams.append('limit', '100');
+      queryParams.append('limit', '1000');
 
       const response = await adminAPI.getAllUsers(queryParams.toString());
 
@@ -119,6 +120,9 @@ const UsersList = () => {
           blockReason: user.blockReason || null
         }));
         setUsers(transformedUsers);
+        if (response.data.pagination) {
+          setTotalCount(response.data.pagination.total);
+        }
       } else {
         setError(getTranslatedText('Failed to load users'));
         setUsers([]);
@@ -272,7 +276,7 @@ const UsersList = () => {
           <div className="flex items-center gap-2">
             <div className="px-3 py-1.5 md:px-4 md:py-2 rounded-xl" style={{ backgroundColor: '#f7fafc' }}>
               <span className="text-xs md:text-sm font-semibold" style={{ color: '#2d3748' }}>
-                {getTranslatedText("{count} Total Users", { count: users.length })}
+                {getTranslatedText("{count} Total Users", { count: totalCount })}
               </span>
             </div>
           </div>
