@@ -163,6 +163,19 @@ export const getAvailableOrders = asyncHandler(async (req, res) => {
   let filterLat = lat ? parseFloat(lat) : null;
   let filterLng = lng ? parseFloat(lng) : null;
 
+  // PERSISTENCE FIX: Update scrapper's live location in DB whenever they provide it.
+  // This ensures OrderService.createOrder (User side) can find them via geo-query.
+  // We use findByIdAndUpdate with $set to avoid triggering middleware unnecessarily.
+  if (filterLat && filterLng && filterLat !== 0 && filterLng !== 0) {
+    Scrapper.findByIdAndUpdate(scrapperId, {
+      $set: {
+        'liveLocation.type': 'Point',
+        'liveLocation.coordinates': [filterLng, filterLat],
+        'liveLocation.updatedAt': new Date()
+      }
+    }).catch(err => logger.error(`[LocationSync] Failed to update scrapper ${scrapperId}:`, err));
+  }
+
   if (!filterLat || !filterLng || filterLat === 0 || filterLng === 0) {
     // Fallback to scrapper's live location from DB
     if (scrapper.liveLocation?.coordinates && scrapper.liveLocation.coordinates[0] !== 0) {
