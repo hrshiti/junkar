@@ -37,7 +37,7 @@ const getBypassOtp = (phone) => {
 // @route   POST /api/auth/register
 // @access  Public
 export const register = asyncHandler(async (req, res) => {
-  const { name, email, phone, password, role, referralCode } = req.body;
+  const { name, email, phone, password, role, referralCode, city, state } = req.body;
   const userRole = role || USER_ROLES.USER;
 
   // Validate referral code if provided
@@ -87,7 +87,11 @@ export const register = asyncHandler(async (req, res) => {
     phone,
     password,
     role: userRole,
-    referredBy: referrerId
+    referredBy: referrerId,
+    address: {
+      city: city || '',
+      state: state || ''
+    }
   });
 
   // If registering as scrapper, also create scrapper profile (if not already created)

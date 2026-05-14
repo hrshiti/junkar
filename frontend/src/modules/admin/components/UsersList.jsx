@@ -116,6 +116,7 @@ const UsersList = () => {
           walletBalance: user.walletBalance || 0,
           joinedAt: user.createdAt || new Date().toISOString(),
           lastActive: user.lastActive || user.updatedAt || new Date().toISOString(),
+          address: user.address,
           blockedAt: user.blockedAt || null,
           blockReason: user.blockReason || null
         }));

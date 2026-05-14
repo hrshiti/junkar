@@ -80,11 +80,17 @@ const LoginSignup = () => {
     "Verify & Login",
     "Enter OTP",
     "Processing...",
+    "City",
+    "State",
+    "Please enter your city",
+    "Please enter your state",
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
   const [heardFrom, setHeardFrom] = useState("");
   const [heardFromOther, setHeardFromOther] = useState("");
   const [referralCode, setReferralCode] = useState("");
@@ -157,6 +163,16 @@ const LoginSignup = () => {
       setError(getTranslatedText("Please enter a valid email address"));
       return;
     }
+    
+    if (!isLogin && !city.trim()) {
+      setError(getTranslatedText("Please enter your city"));
+      return;
+    }
+
+    if (!isLogin && !state.trim()) {
+      setError(getTranslatedText("Please enter your state"));
+      return;
+    }
 
     setLoading(true);
 
@@ -181,7 +197,9 @@ const LoginSignup = () => {
           phone,
           password,
           role: "user",
-          referralCode: referralCode // Send referral code to backend
+          referralCode: referralCode, // Send referral code to backend
+          city,
+          state
         });
 
         if (response.success) {
@@ -629,6 +647,65 @@ const LoginSignup = () => {
                     placeholder={getTranslatedText("Email Address")}
                     className="flex-1 bg-transparent border-none outline-none text-base md:text-lg"
                     style={{ color: "#2d3748" }}
+                  />
+                </div>
+              </motion.div>
+            )}
+
+            {/* City & State Input (Signup only) */}
+            {!isLogin && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="grid grid-cols-2 gap-3">
+                <div
+                  className="flex items-center px-4 py-3 md:py-3.5 rounded-xl border transition-all"
+                  style={{
+                    backgroundColor: "#ffffff",
+                    borderColor: "#e5ddd4",
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = "#38bdf8";
+                    e.currentTarget.style.boxShadow =
+                      "0 0 0 2px rgba(100, 148, 110, 0.2)";
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = "#e5ddd4";
+                    e.currentTarget.style.boxShadow = "none";
+                  }}>
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
+                    placeholder={getTranslatedText("City")}
+                    className="flex-1 bg-transparent border-none outline-none text-base md:text-lg"
+                    style={{ color: "#2d3748" }}
+                    required={!isLogin}
+                  />
+                </div>
+                <div
+                  className="flex items-center px-4 py-3 md:py-3.5 rounded-xl border transition-all"
+                  style={{
+                    backgroundColor: "#ffffff",
+                    borderColor: "#e5ddd4",
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = "#38bdf8";
+                    e.currentTarget.style.boxShadow =
+                      "0 0 0 2px rgba(100, 148, 110, 0.2)";
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = "#e5ddd4";
+                    e.currentTarget.style.boxShadow = "none";
+                  }}>
+                  <input
+                    type="text"
+                    value={state}
+                    onChange={(e) => setState(e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
+                    placeholder={getTranslatedText("State")}
+                    className="flex-1 bg-transparent border-none outline-none text-base md:text-lg"
+                    style={{ color: "#2d3748" }}
+                    required={!isLogin}
                   />
                 </div>
               </motion.div>
