@@ -10,16 +10,10 @@ import { walletService } from '../../shared/services/wallet.service';
 import ScrapperMap from './GoogleMaps/ScrapperMap';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import socketClient from '../../shared/utils/socketClient';
-// Load Razorpay Script
-const loadRazorpay = () => {
-  return new Promise((resolve) => {
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
-};
+import useRazorpay from '../../../hooks/useRazorpay';
+
+// Razorpay utility now handled via hook
+
 
 const ActiveRequestDetailsPage = () => {
   const staticTexts = [
@@ -99,6 +93,8 @@ const ActiveRequestDetailsPage = () => {
   const location = useLocation();
   const { requestId } = useParams();
   const { user } = useAuth();
+  const { initializePayment } = useRazorpay();
+
   const [isMinimized, setIsMinimized] = useState(false);
   const [requestData, setRequestData] = useState(null);
   const [scrapperLocation, setScrapperLocation] = useState(null);
@@ -603,13 +599,7 @@ const ActiveRequestDetailsPage = () => {
       // Case 3: Pay via Razorpay (Online)
       try {
         setIsProcessingPayment(true);
-        const res = await loadRazorpay();
-        if (!res) {
-          alert('Razorpay SDK failed to load');
-          setIsProcessingPayment(false);
-          return;
-        }
-
+        
         // Recharge wallet first (Amount to ensure success on backend)
         const rechargeAmount = amount;
         const orderData = await walletService.createRechargeOrder(rechargeAmount);
@@ -621,25 +611,6 @@ const ActiveRequestDetailsPage = () => {
           name: "Junkar",
           description: "Order Payment to User",
           order_id: orderData.data.orderId,
-          handler: async function (response) {
-            try {
-              // Verify and Complete
-              await walletService.verifyRecharge({
-                ...response,
-                amount: rechargeAmount
-              });
-
-              // FIX: Now that wallet is recharged, actually PAY the order
-              // This transfers from Scrapper -> User
-              await walletService.payOrderViaWallet((requestData._id || requestData.id), amount);
-
-              await completePaymentSuccess(amount);
-            } catch (err) {
-              console.error("Payment Error:", err);
-              alert(err.response?.data?.message || 'Payment processing failed. If money was deducted, it is in your wallet.');
-              setIsProcessingPayment(false);
-            }
-          },
           prefill: {
             name: "Scrapper",
             contact: user?.phone
@@ -649,13 +620,33 @@ const ActiveRequestDetailsPage = () => {
           }
         };
 
-        const paymentObject = new window.Razorpay(options);
-        paymentObject.open();
+        await initializePayment(options, async (response) => {
+          try {
+            // Verify and Complete
+            await walletService.verifyRecharge({
+              ...response,
+              amount: rechargeAmount
+            });
+
+            // Now that wallet is recharged, actually PAY the order
+            await walletService.payOrderViaWallet((requestData._id || requestData.id), amount);
+
+            await completePaymentSuccess(amount);
+          } catch (err) {
+            console.error("Payment Error:", err);
+            alert(err.response?.data?.message || 'Payment processing failed. If money was deducted, it is in your wallet.');
+            setIsProcessingPayment(false);
+          }
+        }, (err) => {
+          console.error("Razorpay Error:", err);
+          setIsProcessingPayment(false);
+        });
 
       } catch (error) {
         console.error(error);
         setIsProcessingPayment(false);
       }
+
     }
   };
 

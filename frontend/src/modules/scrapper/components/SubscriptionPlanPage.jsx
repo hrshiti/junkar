@@ -5,6 +5,8 @@ import { useAuth } from '../../shared/context/AuthContext';
 import { checkAndProcessMilestone } from '../../shared/utils/referralUtils';
 import { subscriptionAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import useRazorpay from '../../../hooks/useRazorpay';
+
 
 const SubscriptionPlanPage = () => {
   const staticTexts = [
@@ -141,19 +143,8 @@ const SubscriptionPlanPage = () => {
     setSelectedPlan(planId);
   };
 
-  const loadRazorpay = () => {
-    return new Promise((resolve, reject) => {
-      if (window.Razorpay) {
-        resolve(true);
-        return;
-      }
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.onload = () => resolve(true);
-      script.onerror = () => reject(new Error('Failed to load Razorpay SDK'));
-      document.body.appendChild(script);
-    });
-  };
+  const { initializePayment } = useRazorpay();
+
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -174,8 +165,6 @@ const SubscriptionPlanPage = () => {
     const scrapperUser = JSON.parse(localStorage.getItem('scrapperUser') || '{}');
 
     try {
-      await loadRazorpay();
-
       // Use new subscription API
       const createRes = await subscriptionAPI.subscribe(selectedPlan);
 
@@ -197,49 +186,6 @@ const SubscriptionPlanPage = () => {
           email: scrapperUser.email || 'scrapper@example.com',
           contact: scrapperUser.phone || ''
         },
-        handler: async (response) => {
-          try {
-            // Use new subscription API for verification
-            const verifyRes = await subscriptionAPI.verifyPayment({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature
-            });
-
-            if (!verifyRes.success) {
-              throw new Error(verifyRes.error || 'Payment verification failed');
-            }
-
-            // Update localStorage with subscription data
-            const subscription = verifyRes.data.subscription;
-            localStorage.setItem('scrapperSubscriptionStatus', 'active');
-            localStorage.setItem('scrapperSubscription', JSON.stringify({
-              status: subscription.status,
-              planId: subscription.planId?._id || subscription.planId,
-              planName: verifyRes.data.plan?.name || selectedPlanData.name,
-              startDate: subscription.startDate,
-              expiryDate: subscription.expiryDate,
-              autoRenew: subscription.autoRenew
-            }));
-
-            try {
-              checkAndProcessMilestone(scrapperUser.phone || scrapperUser.id, 'scrapper', 'subscription');
-            } catch (err) {
-              console.error('Error processing milestone:', err);
-            }
-
-            navigate('/scrapper', { replace: true });
-          } catch (err) {
-            console.error('Verification failed', err);
-            alert(err.message || getTranslatedText('Payment verification failed. Please contact support.'));
-            setIsProcessing(false);
-          }
-        },
-        modal: {
-          ondismiss: () => {
-            setIsProcessing(false);
-          }
-        },
         notes: {
           plan: selectedPlanData.name,
           entityType: 'subscription'
@@ -249,8 +195,48 @@ const SubscriptionPlanPage = () => {
         }
       };
 
-      const rzp = new window.Razorpay(options);
-      rzp.open();
+      await initializePayment(options, async (response) => {
+        try {
+          // Use new subscription API for verification
+          const verifyRes = await subscriptionAPI.verifyPayment({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature
+          });
+
+          if (!verifyRes.success) {
+            throw new Error(verifyRes.error || 'Payment verification failed');
+          }
+
+          // Update localStorage with subscription data
+          const subscription = verifyRes.data.subscription;
+          localStorage.setItem('scrapperSubscriptionStatus', 'active');
+          localStorage.setItem('scrapperSubscription', JSON.stringify({
+            status: subscription.status,
+            planId: subscription.planId?._id || subscription.planId,
+            planName: verifyRes.data.plan?.name || selectedPlanData.name,
+            startDate: subscription.startDate,
+            expiryDate: subscription.expiryDate,
+            autoRenew: subscription.autoRenew
+          }));
+
+          try {
+            checkAndProcessMilestone(scrapperUser.phone || scrapperUser.id, 'scrapper', 'subscription');
+          } catch (err) {
+            console.error('Error processing milestone:', err);
+          }
+
+          navigate('/scrapper', { replace: true });
+        } catch (err) {
+          console.error('Verification failed', err);
+          alert(err.message || getTranslatedText('Payment verification failed. Please contact support.'));
+          setIsProcessing(false);
+        }
+      }, (err) => {
+        console.error('Razorpay Error:', err);
+        setIsProcessing(false);
+      });
+
     } catch (error) {
       console.error('Subscription payment error:', error);
       const errorMsg = error.message || getTranslatedText('Failed to initiate payment. Please try again.');

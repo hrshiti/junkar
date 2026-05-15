@@ -159,7 +159,9 @@ const ScrapperWallet = () => {
                 theme: { color: "#0ea5e9" }
             };
 
+            setShowAddMoney(false); // Close modal before Razorpay opens
             await initializePayment(options, async (response) => {
+
                 // 3. Verify Payment
                 try {
                     const verifyRes = await walletAPI.verifyRecharge({

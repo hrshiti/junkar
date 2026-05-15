@@ -1,36 +1,15 @@
-import Razorpay from 'razorpay';
+import { razorpayService } from '../modules/payment/services/razorpayService.js';
 import crypto from 'crypto';
 import logger from '../utils/logger.js';
 
 /**
  * Get Razorpay client instance
- * Same pattern as createbharat project
+ * Uses the razorpayService singleton which handles re-initialization on env change
  */
 export const getRazorpayClient = () => {
-  const key_id = process.env.RAZORPAY_KEY_ID;
-  const key_secret = process.env.RAZORPAY_KEY_SECRET;
-
-  if (!key_id || !key_secret) {
-    throw new Error('Razorpay keys are not set. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env');
-  }
-
-  // Validate key format (Razorpay keys usually start with 'rzp_')
-  if (!key_id.startsWith('rzp_')) {
-    logger.warn('[Razorpay] Warning: Key ID does not start with "rzp_". Please verify your RAZORPAY_KEY_ID.');
-  }
-
-  try {
-    const razorpay = new Razorpay({
-      key_id: key_id.trim(),
-      key_secret: key_secret.trim()
-    });
-
-    return razorpay;
-  } catch (initError) {
-    logger.error('[Razorpay] Client initialization error:', initError);
-    throw new Error('Failed to initialize Razorpay client. Please check your API keys.');
-  }
+  return razorpayService.getInstance();
 };
+
 
 // Create Razorpay order
 export const createOrder = async (amount, currency = 'INR', receipt = null, notes = {}) => {

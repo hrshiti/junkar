@@ -4,6 +4,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { orderAPI, paymentAPI } from '../../../modules/shared/utils/api';
 import { useAuth } from '../../../modules/shared/context/AuthContext';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import useRazorpay from '../../../hooks/useRazorpay';
+
 
 const RequestStatusPage = () => {
   const staticTexts = [
@@ -105,19 +107,8 @@ const RequestStatusPage = () => {
     }
   }, [status]);
 
-  const loadRazorpay = () => {
-    return new Promise((resolve, reject) => {
-      if (window.Razorpay) {
-        resolve(true);
-        return;
-      }
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.onload = () => resolve(true);
-      script.onerror = () => reject(new Error('Failed to load Razorpay SDK'));
-      document.body.appendChild(script);
-    });
-  };
+  const { initializePayment } = useRazorpay();
+
 
   useEffect(() => {
     const initial = location.state?.requestData;
@@ -179,7 +170,6 @@ const RequestStatusPage = () => {
 
     try {
       setIsPaying(true);
-      await loadRazorpay();
 
       const createRes = await paymentAPI.createPaymentOrder(requestData._id);
       const { orderId: razorpayOrderId, amount, currency, keyId } = createRes.data || {};
@@ -196,44 +186,43 @@ const RequestStatusPage = () => {
           email: user?.email || 'user@example.com',
           contact: user?.phone || ''
         },
-        handler: async (response) => {
-          try {
-            await paymentAPI.verifyPayment({
-              orderId: requestData._id,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature
-            });
-            // Refresh order status
-            const refreshed = await orderAPI.getById(requestData._id);
-            const order = refreshed.data?.order;
-            if (order) {
-              setRequestData(order);
-              setStatus(mapStatus(order.status));
-              if (order.scrapper) {
-                setScrapperInfo({
-                  name: order.scrapper.name,
-                  phone: order.scrapper.phone
-                });
-              }
-            }
-          } catch (err) {
-            console.error('Payment verify failed', err);
-            alert(getTranslatedText(err.message || 'Payment verification failed. Please contact support.'));
-          } finally {
-            setIsPaying(false);
-          }
-        },
-        modal: {
-          ondismiss: () => setIsPaying(false)
-        },
         theme: {
           color: '#38bdf8'
         }
       };
 
-      const rzp = new window.Razorpay(options);
-      rzp.open();
+      await initializePayment(options, async (response) => {
+        try {
+          await paymentAPI.verifyPayment({
+            orderId: requestData._id,
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature
+          });
+          // Refresh order status
+          const refreshed = await orderAPI.getById(requestData._id);
+          const order = refreshed.data?.order;
+          if (order) {
+            setRequestData(order);
+            setStatus(mapStatus(order.status));
+            if (order.scrapper) {
+              setScrapperInfo({
+                name: order.scrapper.name,
+                phone: order.scrapper.phone
+              });
+            }
+          }
+        } catch (err) {
+          console.error('Payment verify failed', err);
+          alert(getTranslatedText(err.message || 'Payment verification failed. Please contact support.'));
+        } finally {
+          setIsPaying(false);
+        }
+      }, (err) => {
+        console.error('Razorpay Error:', err);
+        setIsPaying(false);
+      });
+
     } catch (error) {
       console.error('Payment error:', error);
       alert(getTranslatedText(error.message || 'Failed to initiate payment. Please try again.'));
