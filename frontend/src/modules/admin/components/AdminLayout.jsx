@@ -22,7 +22,7 @@ import {
   FaMapMarkerAlt,
   FaFlag
 } from 'react-icons/fa';
-const siteLogo = '/junker.png';
+const siteLogo = '/junkar.png';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -242,7 +242,7 @@ const AdminLayout = () => {
               {/* Mobile Header */}
               <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: '#e2e8f0' }}>
                 <div className="flex items-center justify-center">
-                  <img src={siteLogo} alt="Scrapto" className="h-12 w-auto object-contain" />
+                  <img src={siteLogo} alt="Junkar" className="h-12 w-auto object-contain" />
                 </div>
                 <button
                   onClick={() => setSidebarOpen(false)}
@@ -326,7 +326,7 @@ const AdminLayout = () => {
               <div className="p-4 border-t" style={{ borderColor: '#e2e8f0' }}>
                 <div className="mb-3 p-3 rounded-xl" style={{ backgroundColor: '#f7fafc' }}>
                   <p className="text-sm font-semibold" style={{ color: '#2d3748' }}>{admin?.name || 'Admin'}</p>
-                  <p className="text-xs" style={{ color: '#718096' }}>{admin?.email || 'admin@scrapto.com'}</p>
+                  <p className="text-xs" style={{ color: '#718096' }}>{admin?.email || 'admin@junkar.in'}</p>
                 </div>
                 <button
                   onClick={handleLogout}

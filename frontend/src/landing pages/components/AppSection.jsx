@@ -80,7 +80,7 @@ const AppSection = () => {
                                 <div style={{ width: '20px', height: '20px', background: 'rgba(255,255,255,0.3)', borderRadius: '50%' }}></div>
                             </div>
                             <div style={{ height: '130px', background: 'white', borderRadius: '12px', padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <img src="/junker.png" alt="Junkar Logo" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain' }} />
+                                <img src="/junkar.png" alt="Junkar Logo" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain' }} />
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                                 {[1, 2, 3, 4].map(i => <div key={i} style={{ height: '70px', background: 'rgba(255,255,255,0.2)', borderRadius: '12px' }}></div>)}

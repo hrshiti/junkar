@@ -6,7 +6,7 @@ import { usePageTranslation } from "../../../hooks/usePageTranslation";
 import { useAuth } from "../../shared/context/AuthContext";
 import { IoLanguageOutline, IoChevronDownOutline, IoNotificationsOutline } from "react-icons/io5";
 import LanguageSelector from "../../shared/components/LanguageSelector";
-const siteLogo = '/junker.png';
+const siteLogo = '/junkar.png';
 import notificationService from "../../../services/notificationService";
 
 const Header = () => {

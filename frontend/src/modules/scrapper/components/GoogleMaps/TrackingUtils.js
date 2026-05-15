@@ -1,5 +1,5 @@
 /**
- * Location Tracking & Simulation Utilities for Scrapto
+ * Location Tracking & Simulation Utilities for Junkar
  * Provides real-time tracking simulation and helper functions
  */
 

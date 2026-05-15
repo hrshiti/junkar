@@ -72,7 +72,7 @@ export const initRazorpayPayment = async (options) => {
       order_id: options.order_id,
       name: options.name || 'Junkar',
       description: options.description || 'Order Payment',
-      image: options.image || '/logo.png',
+      image: options.image || '/junkar.png',
       // Explicitly enable all commonly-used methods. Razorpay will hide methods not enabled on the account/device.
       // This fixes cases where some environments (e.g., in-app webviews) don't show UPI by default.
       method: {

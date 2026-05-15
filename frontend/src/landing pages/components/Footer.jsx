@@ -19,7 +19,7 @@ const Footer = () => {
                 <div className="footer-grid">
                     <div className="footer-brand">
                         <div className="logo footer-logo" style={{ color: 'white' }}>
-                            <img src="/junker.png" alt="Junkar" style={{ height: '4rem', filter: 'brightness(0) invert(1)' }} />
+                            <img src="/junkar.png" alt="Junkar" style={{ height: '4rem', filter: 'brightness(0) invert(1)' }} />
                         </div>
                         <p className="footer-text">
                             {getTranslatedText("Revolutionizing the scrap industry with transparency, efficiency, and sustainability. Turn your trash into cash and contribute to a greener planet.")}

@@ -787,7 +787,7 @@ const ScrapperLogin = (props) => {
                     </motion.div>
                   )}
 
-                  {/* How did you hear about Scrapto? (Signup only) */}
+                  {/* How did you hear about Junkar? (Signup only) */}
                   {!isLogin && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}

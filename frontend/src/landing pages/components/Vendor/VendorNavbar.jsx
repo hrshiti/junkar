@@ -33,7 +33,7 @@ const VendorNavbar = () => {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 3rem', width: '100%' }}>
                 <Link to="/" className="flex items-center gap-2 cursor-pointer">
                     <img
-                        src="/junker.png"
+                        src="/junkar.png"
                         alt="Junkar Vendor"
                         style={{ height: '5rem', width: 'auto', objectFit: 'contain', objectPosition: 'left', marginLeft: '-0.5rem' }}
                     />

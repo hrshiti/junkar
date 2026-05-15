@@ -105,7 +105,7 @@ const AdminLogin = () => {
           transition={{ delay: 0.1, duration: 0.4 }}
           className="text-center mb-8"
         >
-          <img src="/junker.png" alt="Admin Portal" className="h-32 w-auto mx-auto mb-4 object-contain" />
+          <img src="/junkar.png" alt="Admin Portal" className="h-32 w-auto mx-auto mb-4 object-contain" />
           <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: '#2d3748' }}>
             {getTranslatedText("Admin Portal")}
           </h1>

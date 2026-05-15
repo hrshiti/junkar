@@ -32,7 +32,7 @@ export const mapOptions = {
     streetViewControl: false,
     fullscreenControl: true,
     clickableIcons: false,
-    // Custom Scrapto green theme
+    // Custom Junkar green theme
     styles: [
         {
             "featureType": "landscape.natural",

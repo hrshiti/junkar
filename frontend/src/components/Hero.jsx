@@ -776,7 +776,7 @@ const Hero = () => {
               </motion.div>
             </div>
 
-            {/* Why Scrapto Section */}
+            {/* Why Junkar Section */}
             <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
               <motion.div
                 initial={{ y: 20 }}
