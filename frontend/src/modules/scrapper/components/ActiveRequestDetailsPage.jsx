@@ -86,7 +86,8 @@ const ActiveRequestDetailsPage = () => {
     "Partner is on the way. Tracking active.",
     "Qty:",
     "Nos",
-    "Units"
+    "Units",
+    "Navigate"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -511,6 +512,44 @@ const ActiveRequestDetailsPage = () => {
         state: { orderId: oid }
       });
     }
+  };
+
+  const handleOpenGoogleMaps = () => {
+    // User / Destination Location
+    let destLat = isB2B ? scrapperLocation?.lat : userLiveLocation?.lat;
+    let destLng = isB2B ? scrapperLocation?.lng : userLiveLocation?.lng;
+
+    // Fallbacks if above coordinates are not yet resolved
+    if (!destLat || !destLng) {
+      destLat = requestData?.location?.lat;
+      destLng = requestData?.location?.lng;
+    }
+
+    // Scrapper / Origin Location (partnerLocation in B2B or scrapperLocation in normal flows)
+    let originLat = isB2B ? partnerLocation?.lat : scrapperLocation?.lat;
+    let originLng = isB2B ? partnerLocation?.lng : scrapperLocation?.lng;
+
+    // Fallbacks if above coordinates are not yet resolved
+    if (!originLat || !originLng) {
+      if (isB2B) {
+        originLat = requestData?.location?.lat;
+        originLng = requestData?.location?.lng;
+      }
+    }
+
+    if (!destLat || !destLng) {
+      alert(getTranslatedText("Destination location not found."));
+      return;
+    }
+
+    let url = "";
+    if (originLat && originLng) {
+      url = `https://www.google.com/maps/dir/?api=1&origin=${originLat},${originLng}&destination=${destLat},${destLng}&travelmode=driving`;
+    } else {
+      url = `https://www.google.com/maps/dir/?api=1&destination=${destLat},${destLng}&travelmode=driving`;
+    }
+
+    window.open(url, '_blank');
   };
 
   const handleStartJourney = () => {
@@ -1451,12 +1490,12 @@ const ActiveRequestDetailsPage = () => {
                   </motion.button>
                 )}
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-2">
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleCall}
-                    className="py-3 rounded-xl font-semibold text-sm shadow-md flex items-center justify-center gap-2 bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    className="py-3 rounded-xl font-semibold text-xs shadow-md flex items-center justify-center gap-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200"
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-sky-500">
                       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1467,12 +1506,23 @@ const ActiveRequestDetailsPage = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleChat}
-                    className="py-3 rounded-xl font-semibold text-sm shadow-md flex items-center justify-center gap-2 bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    className="py-3 rounded-xl font-semibold text-xs shadow-md flex items-center justify-center gap-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200"
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-blue-500">
                       <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     {getTranslatedText("Chat")}
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleOpenGoogleMaps}
+                    className="py-3 rounded-xl font-semibold text-xs shadow-md flex items-center justify-center gap-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-emerald-500">
+                      <path d="M3 11l19-9-9 19-2-8-8-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {getTranslatedText("Navigate")}
                   </motion.button>
                 </div>
                 {!isCompleted && !isPickedUp && (
