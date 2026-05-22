@@ -454,19 +454,19 @@ class OrderService {
     }
 
     /**
-     * Automatically unassign orders that were accepted but not completed in 3 days.
+     * Automatically unassign orders that were accepted but not completed in 1 day.
      * This puts them back into the public pool for other scrappers to accept.
      */
     async autoUnassignOverdueOrders() {
         try {
-            const THREE_DAYS_AGO = new Date();
-            THREE_DAYS_AGO.setDate(THREE_DAYS_AGO.getDate() - 3);
+            const ONE_DAY_AGO = new Date();
+            ONE_DAY_AGO.setDate(ONE_DAY_AGO.getDate() - 1);
 
-            // Find orders accepted by a scraper but not completed/cancelled within 3 days
+            // Find orders accepted by a scraper but not completed/cancelled within 1 day
             // We target states: CONFIRMED and other transitionary states
             const overdueOrders = await Order.find({
                 status: { $in: [ORDER_STATUS.CONFIRMED, 'on_way', 'arrived', 'in_progress'] },
-                acceptedAt: { $lt: THREE_DAYS_AGO },
+                acceptedAt: { $lt: ONE_DAY_AGO },
                 scrapper: { $ne: null }
             });
 
@@ -484,7 +484,7 @@ class OrderService {
                 order.scrapper = null;
                 order.status = ORDER_STATUS.PENDING;
                 order.assignmentStatus = 'unassigned';
-                order.notes = (order.notes || '') + `\n[System]: Auto-unassigned from scrapper due to 3 days completion timeout.`;
+                order.notes = (order.notes || '') + `\n[System]: Auto-unassigned from scrapper due to 1 day completion timeout.`;
 
                 // 2. Track in assignment history
                 order.assignmentHistory.push({
@@ -502,7 +502,7 @@ class OrderService {
                         previousScrapperId.toString(),
                         {
                             title: '⚠️ Request Transferred',
-                            body: `Aapne 3 din me pickup complete nahi kiya, isliye order REQ-${order._id.toString().slice(-6)} public pool me transfer ho gaya hai.`,
+                            body: `Aapne 24 ghante me pickup complete nahi kiya, isliye order REQ-${order._id.toString().slice(-6)} public pool me transfer ho gaya hai.`,
                             data: { type: 'order_timeout', orderId: order._id }
                         },
                         'scrapper'
