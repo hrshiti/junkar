@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import { ORDER_STATUS } from '../config/constants.js';
 import walletService from './walletService.js';
 import notificationService from './notificationService.js';
+import { sendNotificationToUser } from '../utils/pushNotificationHelper.js';
 import logger from '../utils/logger.js';
 
 /**
@@ -450,6 +451,77 @@ class OrderService {
             .limit(20);
 
         return orders;
+    }
+
+    /**
+     * Automatically unassign orders that were accepted but not completed in 3 days.
+     * This puts them back into the public pool for other scrappers to accept.
+     */
+    async autoUnassignOverdueOrders() {
+        try {
+            const THREE_DAYS_AGO = new Date();
+            THREE_DAYS_AGO.setDate(THREE_DAYS_AGO.getDate() - 3);
+
+            // Find orders accepted by a scraper but not completed/cancelled within 3 days
+            // We target states: CONFIRMED and other transitionary states
+            const overdueOrders = await Order.find({
+                status: { $in: [ORDER_STATUS.CONFIRMED, 'on_way', 'arrived', 'in_progress'] },
+                acceptedAt: { $lt: THREE_DAYS_AGO },
+                scrapper: { $ne: null }
+            });
+
+            if (overdueOrders.length === 0) {
+                logger.info('[OrderTimeout] No overdue assigned orders found.');
+                return { success: true, processed: 0 };
+            }
+
+            logger.info(`[OrderTimeout] Found ${overdueOrders.length} overdue orders. Initiating auto-transfer...`);
+
+            for (const order of overdueOrders) {
+                const previousScrapperId = order.scrapper;
+
+                // 1. Reset the order fields to make it available for other scrappers
+                order.scrapper = null;
+                order.status = ORDER_STATUS.PENDING;
+                order.assignmentStatus = 'unassigned';
+                order.notes = (order.notes || '') + `\n[System]: Auto-unassigned from scrapper due to 3 days completion timeout.`;
+
+                // 2. Track in assignment history
+                order.assignmentHistory.push({
+                    scrapper: previousScrapperId,
+                    assignedAt: order.acceptedAt,
+                    status: 'timeout',
+                    timeoutAt: new Date()
+                });
+
+                await order.save();
+
+                // 3. Notify the inactive scraper (non-blocking)
+                if (previousScrapperId) {
+                    sendNotificationToUser(
+                        previousScrapperId.toString(),
+                        {
+                            title: '⚠️ Request Transferred',
+                            body: `Aapne 3 din me pickup complete nahi kiya, isliye order REQ-${order._id.toString().slice(-6)} public pool me transfer ho gaya hai.`,
+                            data: { type: 'order_timeout', orderId: order._id }
+                        },
+                        'scrapper'
+                    ).catch(err => logger.error('[OrderTimeout] Notification to scrapper failed:', err));
+                }
+
+                // 4. Notify all nearby online scrappers about the newly available order (non-blocking)
+                notificationService.notifyOnlineScrappers(order).catch(err => {
+                    logger.error('[OrderTimeout] Broadcast to online scrappers failed:', err);
+                });
+
+                logger.info(`[OrderTimeout] Order ${order._id} has been transferred back to public pool.`);
+            }
+
+            return { success: true, processed: overdueOrders.length };
+        } catch (error) {
+            logger.error('[OrderTimeout] Error during auto-unassign process:', error);
+            throw error;
+        }
     }
 }
 

@@ -1,4 +1,5 @@
 import { checkExpiredSubscriptions } from '../services/subscriptionService.js';
+import orderService from '../services/orderService.js';
 import logger from './logger.js';
 
 /**
@@ -32,5 +33,19 @@ export const initializeCronJobs = () => {
     }
   }, TWENTY_FOUR_HOURS);
 
-  logger.info('✅ Automated tasks scheduled successfully (Daily interval: 24h)');
+  // 2. Overdue Order Auto-Unassign Check (Runs every 1 hour)
+  const ONE_HOUR = 60 * 60 * 1000;
+  setInterval(async () => {
+    try {
+      logger.info('[Cron] Running hourly overdue order timeout check...');
+      const result = await orderService.autoUnassignOverdueOrders();
+      if (result.processed > 0) {
+        logger.info(`[Cron] Overdue order check completed: Released ${result.processed} orders.`);
+      }
+    } catch (error) {
+      logger.error('[Cron] Hourly overdue order check failed:', error);
+    }
+  }, ONE_HOUR);
+
+  logger.info('✅ Automated tasks scheduled successfully (Daily interval: 24h, Hourly interval: 1h)');
 };
