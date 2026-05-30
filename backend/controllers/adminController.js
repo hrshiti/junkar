@@ -382,8 +382,13 @@ export const deleteUser = asyncHandler(async (req, res) => {
       return sendError(res, 'Cannot delete user with existing orders', 400);
     }
 
-    // Also delete any potential scrapper profile linked to this user ID
-    await Scrapper.findByIdAndDelete(userId).catch(err => logger.info(`No scrapper profile found for user ${userId} during deletion`));
+    // Also delete any potential scrapper profile linked to this user ID or phone
+    const userPhone = user.phone;
+    if (userPhone) {
+      await Scrapper.deleteMany({ $or: [{ _id: userId }, { phone: userPhone }] });
+    } else {
+      await Scrapper.findByIdAndDelete(userId).catch(err => logger.info(`No scrapper profile found for user ${userId} during deletion`));
+    }
 
     await User.findByIdAndDelete(userId);
 
@@ -673,11 +678,15 @@ export const deleteScrapper = asyncHandler(async (req, res) => {
       return sendError(res, 'Cannot delete scrapper with existing orders', 400);
     }
 
-    // Delete scrapper profile
-    await Scrapper.findByIdAndDelete(scrapperId);
-    
-    // CRITICAL: Also delete corresponding auth record in User collection to allow re-registration
-    await User.findByIdAndDelete(scrapperId);
+    // Delete scrapper profile and corresponding user record by both _id and phone
+    const scrapperPhone = scrapper.phone;
+    if (scrapperPhone) {
+      await Scrapper.deleteMany({ $or: [{ _id: scrapperId }, { phone: scrapperPhone }] });
+      await User.deleteMany({ $or: [{ _id: scrapperId }, { phone: scrapperPhone }] });
+    } else {
+      await Scrapper.findByIdAndDelete(scrapperId);
+      await User.findByIdAndDelete(scrapperId);
+    }
 
     sendSuccess(res, 'Scrapper deleted successfully', {});
   } catch (error) {

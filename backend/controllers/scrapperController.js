@@ -302,11 +302,20 @@ export const getNearbyBigScrappers = asyncHandler(async (req, res) => {
 export const deleteMyAccount = asyncHandler(async (req, res) => {
     const scrapperId = req.user.id;
 
-    // 1. Delete the Scrapper profile (wipes rankings, ratings, vehicle info, kyc docs info)
-    await Scrapper.findByIdAndDelete(scrapperId);
+    // Fetch details to get the phone number
+    const user = await User.findById(scrapperId);
+    const scrapper = await Scrapper.findById(scrapperId);
+    const phone = user?.phone || scrapper?.phone;
 
-    // 2. Delete the User authentication profile (wipes phone, password, auth)
-    await User.findByIdAndDelete(scrapperId);
+    if (phone) {
+        // Delete the Scrapper profile (wipes rankings, ratings, vehicle info, kyc docs info)
+        await Scrapper.deleteMany({ $or: [{ _id: scrapperId }, { phone }] });
+        // Delete the User authentication profile (wipes phone, password, auth)
+        await User.deleteMany({ $or: [{ _id: scrapperId }, { phone }] });
+    } else {
+        await Scrapper.findByIdAndDelete(scrapperId);
+        await User.findByIdAndDelete(scrapperId);
+    }
 
     sendSuccess(res, 'Your scrapper account and all details have been successfully deleted.');
 });
