@@ -17,6 +17,17 @@ const ScrollToTop = () => {
         }
     }, [pathname, hash]);
 
+
+
+
+
+
+
+
+
+
+
+    
     return null;
 };
 

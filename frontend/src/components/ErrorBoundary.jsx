@@ -6,6 +6,18 @@ class ErrorBoundary extends Component {
     this.state = { hasError: false, error: null };
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
   static getDerivedStateFromError(error) {
     // Filter out browser extension errors
     if (error?.message?.includes('chrome-extension://') || 
