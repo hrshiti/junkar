@@ -1,27 +1,11 @@
-import React, { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import "./index.css";
-import "leaflet/dist/leaflet.css";
-import App from "./App.jsx";
+import React from "react";
 
-// Expose React globally to support third-party or legacy packages that expect it in scope
+// MUST be set before any other module imports are evaluated.
+// ESM imports are hoisted, so this runs after ALL imports resolve.
+// The only reliable fix is a bootstrap file pattern using dynamic import.
 window.React = React;
-import { AuthProvider } from "./modules/shared/context/AuthContext";
-import { LanguageProvider } from "./contexts/LanguageContext";
-import ErrorBoundary from "./components/ErrorBoundary.jsx";
-import { setupGlobalErrorHandlers } from "./utils/errorHandler.js";
 
-// Setup global error handlers to suppress browser extension errors
-setupGlobalErrorHandlers();
-
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <ErrorBoundary>
-      <LanguageProvider>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </LanguageProvider>
-    </ErrorBoundary>
-  </StrictMode>
-);
+// Now dynamically import the rest of the app — this guarantees
+// window.React is set before react-calendar, react-time-picker,
+// react-clock, and other UMD-style libraries initialize.
+import("./bootstrap.jsx");
