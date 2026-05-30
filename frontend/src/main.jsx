@@ -1,8 +1,11 @@
-import { StrictMode } from "react";
+import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import "leaflet/dist/leaflet.css";
 import App from "./App.jsx";
+
+// Expose React globally to support third-party or legacy packages that expect it in scope
+window.React = React;
 import { AuthProvider } from "./modules/shared/context/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
