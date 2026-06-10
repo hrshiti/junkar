@@ -11,7 +11,7 @@ import { sendNotificationToUser } from '../utils/pushNotificationHelper.js';
 export const submitKyc = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { aadhaarNumber, panNumber, gstNumber, udyamAadhaarNumber } = req.body;
+    const { aadhaarNumber, panNumber, gstNumber, udyamAadhaarNumber, skipKyc } = req.body;
 
     logger.info(`Starting KYC submission for user: ${userId}`);
     logger.info(`Files received: ${req.files ? Object.keys(req.files).join(',') : 'None'}`);
@@ -37,6 +37,16 @@ export const submitKyc = async (req, res) => {
         email: user.email,
         vehicleInfo: { type: 'bike', number: 'NA', capacity: 0 }
       });
+    }
+
+    if (skipKyc === 'true') {
+      logger.info(`User ${userId} chose to skip KYC`);
+      scrapper.kyc = {
+        ...(scrapper.kyc || {}),
+        status: 'skipped'
+      };
+      await scrapper.save();
+      return sendSuccess(res, 'KYC skipped successfully', { kyc: scrapper.kyc }, 200);
     }
 
     // 2. Validate Files

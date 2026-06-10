@@ -32,7 +32,8 @@ const getKYCStatus = () => {
   const kycStatus = localStorage.getItem('scrapperKYCStatus');
   const kycData = localStorage.getItem('scrapperKYC');
 
-  if (!kycData) return 'not_submitted';
+  if (!kycData && kycStatus !== 'skipped') return 'not_submitted';
+  if (kycStatus === 'skipped') return 'skipped';
   if (kycStatus === 'verified') return 'verified';
   if (kycStatus === 'pending') return 'pending';
   if (kycStatus === 'rejected') return 'rejected';
@@ -72,7 +73,7 @@ const RequireKycAndSubscription = ({ children }) => {
   if (kycStatus === 'verified' && subscriptionStatus !== 'active') {
     return <Navigate to="/scrapper/subscription" replace />;
   }
-  return children;
+  return children; // allows 'skipped' to pass through to dashboard
 };
 
 const ScrapperModule = () => {
@@ -302,7 +303,7 @@ const ScrapperModule = () => {
             <Navigate to="/scrapper/kyc-status" replace />
           ) : kycStatus === 'verified' && subscriptionStatus !== 'active' ? (
             <Navigate to="/scrapper/subscription" replace />
-          ) : kycStatus === 'verified' && subscriptionStatus === 'active' ? (
+          ) : (kycStatus === 'verified' && subscriptionStatus === 'active') || kycStatus === 'skipped' ? (
             <Navigate to="/scrapper" replace />
           ) : (
             <Navigate to="/scrapper/kyc" replace />

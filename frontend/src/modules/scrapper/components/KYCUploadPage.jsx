@@ -391,11 +391,38 @@ const KYCUploadPage = () => {
       setShowSuccess(true);
 
       setTimeout(() => {
-        window.location.href = '/scrapper/kyc-status';
+        navigate('/scrapper/kyc-status');
       }, 1200);
     } catch (error) {
       console.error('KYC submit failed:', error);
       alert(error.message || getTranslatedText('Failed to submit KYC. Please try again.'));
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSkip = async () => {
+    setIsSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append('skipKyc', 'true');
+      
+      // Send a dummy file or empty string just in case the backend multer complains about empty form data
+      // Actually multer handles empty form data if fields aren't strictly required
+      const res = await kycAPI.submit(formData);
+      const kyc = res.data?.kyc;
+
+      if (kyc) {
+        localStorage.setItem('scrapperKYCStatus', kyc.status || 'skipped');
+        localStorage.setItem('scrapperKYC', JSON.stringify(kyc));
+      } else {
+        localStorage.setItem('scrapperKYCStatus', 'skipped');
+      }
+
+      setIsSubmitting(false);
+      navigate('/scrapper'); // Redirect to dashboard
+    } catch (error) {
+      console.error('KYC skip failed:', error);
+      alert(error.message || getTranslatedText('Failed to skip KYC. Please try again.'));
       setIsSubmitting(false);
     }
   };
@@ -856,27 +883,40 @@ const KYCUploadPage = () => {
             </div>
           </div>
 
-          {/* Submit Button */}
-          <motion.button
-            type="submit"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            disabled={isSubmitting || !aadhaarNumber || aadhaarNumber.length !== 12 || !aadhaarPhoto || !aadhaarBackPhoto || !selfiePhoto}
-            className="w-full py-4 md:py-5 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-sky-600 text-white hover:bg-sky-700"
-          >
-            {isSubmitting ? (
-              <div className="flex items-center justify-center gap-2">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                  className="w-5 h-5 rounded-full border-2 border-white border-t-transparent"
-                />
-                <span>{getTranslatedText("Submitting...")}</span>
-              </div>
-            ) : (
-              getTranslatedText('Submit KYC')
-            )}
-          </motion.button>
+          {/* Action Buttons */}
+          <div className="flex flex-col gap-3">
+            <motion.button
+              type="submit"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              disabled={isSubmitting || !aadhaarNumber || aadhaarNumber.length !== 12 || !aadhaarPhoto || !aadhaarBackPhoto || !selfiePhoto}
+              className="w-full py-4 md:py-5 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-sky-600 text-white hover:bg-sky-700"
+            >
+              {isSubmitting ? (
+                <div className="flex items-center justify-center gap-2">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                    className="w-5 h-5 rounded-full border-2 border-white border-t-transparent"
+                  />
+                  <span>{getTranslatedText("Submitting...")}</span>
+                </div>
+              ) : (
+                getTranslatedText('Submit KYC')
+              )}
+            </motion.button>
+
+            <motion.button
+              type="button"
+              onClick={handleSkip}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              disabled={isSubmitting}
+              className="w-full py-3 md:py-4 rounded-xl font-bold text-sm md:text-base transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-zinc-700 text-gray-300 hover:bg-zinc-800"
+            >
+              {getTranslatedText("Skip for Now")}
+            </motion.button>
+          </div>
         </motion.form>
 
         {/* Success Toast */}

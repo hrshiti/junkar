@@ -99,8 +99,8 @@ const KYCStatusPage = () => {
               }
             }
 
-            if (kyc.status === 'verified') {
-              if (isActive) {
+            if (kyc.status === 'verified' || kyc.status === 'skipped') {
+              if (kyc.status === 'skipped' || isActive) {
                 navigate('/scrapper/dashboard', { replace: true });
               } else {
                 navigate('/scrapper/subscription', { replace: true });

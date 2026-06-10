@@ -553,8 +553,8 @@ const ScrapperDashboard = () => {
           }
         }
 
-        // If KYC not verified, redirect to status page
-        if (backendKycStatus !== 'verified') {
+        // If KYC not verified or skipped, redirect to status page
+        if (backendKycStatus !== 'verified' && backendKycStatus !== 'skipped') {
           navigate('/scrapper/kyc-status', { replace: true });
           return;
         }
@@ -1800,7 +1800,7 @@ const ScrapperDashboard = () => {
                       <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">📷 Photos</h3>
                       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                         {o.images.map((img, idx) => (
-                          <div key={idx} className="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                          <div key={idx} className="flex-shrink-0 w-32 h-32 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
                             <img
                               src={img.url}
                               alt={`Scrap photo ${idx + 1}`}
