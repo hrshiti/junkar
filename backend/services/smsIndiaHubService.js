@@ -65,7 +65,7 @@ class SMSIndiaHubService {
     try {
       // Load credentials dynamically
       const apiKey = this.apiKey || process.env.SMSINDIAHUB_API_KEY;
-      const senderId = this.senderId || process.env.SMSINDIAHUB_SENDER_ID;
+      const senderId = this.senderId || process.env.SMSINDIAHUB_SENDER_ID || 'BGADEC';
 
       if (!apiKey || !senderId) {
         throw new Error('SMSIndia Hub not configured. Please check your environment variables.');
@@ -78,10 +78,11 @@ class SMSIndiaHubService {
         throw new Error(`Invalid phone number format: ${phone}. Expected 10-digit Indian mobile number.`);
       }
 
-      // Use the exact template that works with SMSIndiaHub
-      const message = `Welcome to the Junkar powered by SMSINDIAHUB. Your OTP for registration is ${otp}`;
+      // Use the exact DLT approved template that works with SMSIndiaHub
+      // Template: Welcome to the ##var## powered by Appzeto.Your OTP for registration is ##var##.BGADEC
+      const message = `Welcome to the Junkar powered by Appzeto.Your OTP for registration is ${otp}.BGADEC`;
 
-      // Build the API URL with query parameters
+      // Build the API URL with query parameters including DLT identifiers
       const params = new URLSearchParams({
         APIKey: apiKey,
         msisdn: normalizedPhone,
@@ -89,7 +90,9 @@ class SMSIndiaHubService {
         msg: message,
         fl: '0', // Flash message flag (0 = normal SMS)
         dc: '0', // Delivery confirmation (0 = no confirmation)
-        gwid: '2' // Gateway ID (2 = transactional)
+        gwid: '2', // Gateway ID (2 = transactional)
+        entityid: '1001164203633432409', // DLT Principal Entity ID
+        templateid: '1007282516644508833' // DLT Template ID
       });
 
       const apiUrl = `${this.baseUrl}?${params.toString()}`;
